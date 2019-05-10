@@ -1,0 +1,3614 @@
+ /*
+ * Quentin IDL definition file
+ * Copyright Quantel Ltd 2001-2004
+ */
+
+/*
+Licensing and distribution information
+
+Quantel retains ownership of the intellectual property contained within
+this document. However, Quantel grants permission for this document
+to be freely copied, distributed, and compiled with or without charge
+provided that either a) it is distributed unchanged or b) the modified
+version retains this claim of ownership and also clearly identifies the
+fact that it has been modified and by whom.
+
+No warranty of accuracy, completeness or suitability for any purpose
+whatsoever is implied by the simple distribution of this document.
+Where this document is referenced by a contract between Quantel and any
+other parties, all warranties and liabilities will be as described by such a
+contract. Aside from such contractual references, Quantel disclaims all
+liability for damages resulting from the use of this document, either as
+an information source or as a machine-readable document, and whether such
+damages are direct or consequential.
+*/
+
+/** @file Quentin.idl Quentin IDL definition file
+ */
+
+/*
+ * The embedded documentation in this file is designed to be extracted by the
+ * Open Source tool doxygen, available from http://www.doxygen.org.
+ *
+ * Further doxygen formatted information will be found in the file Documentation.idl
+ * which should be parsed along with this file by doxygen.
+ *
+ */
+
+module Quentin
+  {
+
+  //{{{  Forward definitions
+  interface DirectoryViewer ;
+  interface Server ;
+  interface ZonePortal ;
+  //}}}
+  //{{{  Constants and enums
+  //{{{  Constants and Enums etc. used when numbering clips
+  /** @name Constants etc. for use when numbering clips.*/
+  /** @{ */
+  const long maxNumber       = 9999 ;       /**< @brief Numbers available, from zero.*/
+  const long noNumber        = -1 ;         /**< @brief In fact, any out of range number denumbers.*/
+  //{{{
+  /** @brief Method to be used to resolve conflicts when numbering clips.
+   * Used only for backwards compatibility - deprecated.
+   * @see numberClip()
+   */
+  enum ConflictMode {
+          findNumber,                   /**<@brief Find a free number, starting from requested number; returns the number found.*/
+          renumber,                     /**<@brief Push any conflicting clip to another number; returns that number.*/
+          denumber,                     /**<@brief Denumber any conflicting clip; return 1 if did so, 0 if not.*/
+          fail                          /**<@brief Fail the denumber, returning 0, if conflict; otherwise return 1.*/
+          } ;
+  //}}}
+  //{{{
+  /** @brief Mode to be used for searching clip numbers.
+   * Used only for backwards compatibility - deprecated.
+   * @see scanNumbers()
+   */
+  enum FindMode {
+      findExact,                         /**< Get data on exact number only */
+      findForwards,                      /**< Get data on first numbered clip at or after number*/
+      findBackwards                      /**< Get data in first numbered clip at or before number*/
+      } ;
+  //}}}
+  /** @} */
+  //}}}
+
+  //{{{  Default ticket numbers
+  /** @name Constants associated with ticketing copies*/
+  /** @{ */
+  const long noTicket         = 0 ;             /**< @brief Ticket number to use if no ticket required.*/
+  /** @} */
+  //}}}
+  //{{{  Aspect ratio control
+  /** @{ */
+  /** @brief Mode for fitting video to output port.
+   *
+   * It is possible to play out video which does not "fit" the format in which it is being displayed
+   * e.g. 4x3 Standard Definition video being played on a 16x9 High Definition port. This defines how
+   * the problem is to be solved. The solution is defined in three places, in increasing precedence:
+   * <ol>
+   * <li> The server has a default format</li>
+   * <li> The server default can be overridden by the Port::setViewMode() function.</li>
+   * <li> The server or port default can be overridden by the flags in the ServerVideoFragment</li?
+   * </ol>
+   */
+
+    /* play aspect */
+  const long defaultAspect = 0 ;
+  const long aspect16x9 = 1 ;
+  const long aspect4x3 = 2 ;
+
+    /* play mode */
+  const long defaultPlayMode = 0 ;                         /**< Use underlying mode */
+  const long box = 1 ;                                 /**< Display all available video undistorted, adding black at edges where necessary*/
+  const long cut = 2 ;                                /**< Fill the picture with undistorted video, cropping excess lines or pixels*/
+  const long anamorphic = 3 ;                          /**< Display all available video, stretching if necessary to fill space*/
+  const long play14x9 = 4 ;
+  /** @} */
+  //}}}
+  //{{{  Constants defining fields in flags in the flagsFragment
+  /** @name Constants for use in ServerEssenceFragment::contentFlags
+    * Flags which modify the way in which the audio and video tracks are displayed.
+    * They will normally be defined before recording, but if set wrongly, can be corrected later.
+    * Flags do not need to be present if the default of all zeroes will suffice.
+    * Further flags may be defined, using bits from the bottom up. If users want
+    * to add their own flags, they should work from the top down (start
+    * at 0x80000000).
+    *
+    * PlayModeShift defines a two-bit field in which a ViewMode value can be inserted to
+    * override the port's view mode.
+    */
+  /** @{ */
+  const long frameVideo         = 0x1 ; /**<@brief Video does not have inter-field movement.*/
+  const long playModeOverride   = 0x8 ; /**<@brief Set if playmode has been overridden by automation.*/
+  const long playModeShift      = 4 ;   /**<@brief Number of places to shift the playMode to insert it into the flags*/
+  const long aspectShift        = 12 ;  /**<@brief Number of places to shift the aspect to insert it into the flags*/
+  /** @} */
+  //}}}
+  //{{{  Standard tag names, used in the tagtype field of the RushTag struct
+  const wstring TagOriginator = L"Q_Originator" ;  /**< @brief The name of the source (e.g.tape ID) from which the rush was recorded: set by Port.setOriginator()*/
+  const wstring TagRecordServer = L"Q_RecordServer" ; /**< @brief The server on which the rush was recorded: set by server*/
+  const wstring TagRecordChannel = L"Q_RecordChannel" ; /**< @brief The channel on which the rush was recorded: set by server*/
+  const wstring TagRecordTime = L"Q_RecordTime" ; /**< @brief The time at which recording of this rush was initialised, set by server*/
+  const wstring TagSceneChange = L"Q_SceneChange" ; /**< @brief A marker for scene changes inserted by the server at record time*/
+  const wstring TagPixelAspect = L"Q_PixelAspect"; /**< @brief A rational number describing the aspect of the pixels*/
+  const wstring TagCropRectangle = L"Q_CropRectangle"; /**< @brief Four comma-separated rationals describing active image area x,y,width, height */
+  const wstring TagMatch = L"Q_Match" ; /**< @brief The IDs of any rushes recorded simultaneously */
+  const wstring TagValidVideo = L"Q_ValidVideo" ; /**< @brief The frame which recording reached when the rush was terminated*/
+  const wstring TagFreezeMode = L"Q_FreezeMode"; /**< @brief The mode used for the rush when freeze - either field or frame */
+  const wstring TagRecordRate = L"Q_RecordRate"; /**< @brief Indicates the record rate, e.g. x1, x2, x3 */
+  const wstring TagStereo3D = L"Q_Stereo3D"; /**< @brief Indicates identity of rush in context of 3D recording, format is %d:%s where %d = camera rig # and %s is "Left" or "Right" */
+  //}}}
+
+  //}}}
+  //{{{  Typedefs, structs and classes
+  /** @defgroup misc Typedefs, structs and classes, structs and classes used by the main Objects.
+   * @{ */
+  //{{{  Typedefs
+  typedef short FormatCode ;
+    /**< Identifies the format of Essence data in Essence fragments*/
+  typedef sequence <FormatCode> FormatCodes ;
+    /**< @brief array of format codes */
+  typedef sequence <octet> RawData ;
+    /**< @brief Used for containing unspecified data.*/
+  typedef sequence <long> Longs ;
+    /**< @brief Simple array of integers*/
+  typedef sequence <wstring> WStrings ;
+    /**< @brief Simple array of WStrings*/
+  //{{{
+  typedef long Timecode ;
+    /**< @brief Timecode stored in a 32-bit integer.
+     *
+     * The timecode is stored as Binary Code Decimal, with each timecode digit occupying four bits
+     * @verbatim
+     * Bit 3 2         1         0
+     * .   10987654321098765432109876543210
+     * .   0dHHhhhh0MMMmmmm0SSSssss0FFFffff
+     * @endverbatim
+     * @li 0 - A mandatory zero bit (though certain functions may pack in extra control bits)
+     * @li d - Drop frame flag. Valid only in NTSC
+     * @li HH - Tens of hours
+     * @li hhhh - Units of hours
+     * @li MMM - Tens of minutes
+     * @li mmmm - Units of minutes
+     * @li SSS - Tens of seconds
+     * @li ssss - Units of seconds
+     * @li FFF - Tens of frames
+     * @li ffff - Units of frames
+     * A negative timecode (anything with the MS bit set) is invalid.
+     */
+  //}}}
+  //}}}
+  //{{{  Structs
+  //{{{
+  /** A unique ID generated for each separate record session*/
+  struct RushIdent
+    {
+    long long first ;           /**< @brief First half of Rush Ident */
+    long long second ;          /**< @brief Second half of Rush Ident */
+    } ;
+  //}}}
+  //{{{
+  /**@brief A Name/value pair used for specifying clip Metadata.*/
+  struct ClipProperty
+    {
+    wstring name ;      /**<@brief The "key" by which the property is referenced.*/
+    wstring value ;     /**<@brief The current value of the property.*/
+    } ;
+  //}}}
+  /**@brief  An array of name/value pairs.*/
+  typedef sequence <ClipProperty> ClipPropertyList ;
+  /**@brief An array of ClipProperty's */
+  //{{{
+  enum SortDirection
+    {
+    ascending,
+    descending
+    };
+  /**@brief A Name/direction pair used for specifying sort orders.*/
+  struct SortOrder
+    {
+    wstring name ;           /**<@brief The "key" to order sort by.*/
+    SortDirection direction ;     /**<@brief Direction of the sort.*/
+    } ;
+  //}}}
+  /**@brief  An array of name/value pairs.*/
+  typedef sequence <SortOrder> SortOrderList ;
+
+  /**@brief enum used for clip protection */
+  enum ProtectMode
+    {
+      protectReadWrite,         /**<@brief clip is unprotected */
+      protectReadOnly,          /**<@brief clip is fully protected */
+      protectDelete             /**<@brief clip is protected against deletion only */
+    };
+
+  //{{{
+  /**@brief Unvarying data about a Server.*/
+  struct ServerInfo
+    {
+    long ident ;        /**<@brief This server's identity.*/
+    boolean down ;      /**<@brief If set, this server is unavailable.*/
+    long numChannels ;  /**<@brief Number of channels fitted to this server.*/
+    Longs pools ;       /**<@brief The pools currently attached to the port.*/
+    wstring name ;       /**<@brief Logical name allocated to this server*/
+    } ;
+  //}}}
+  //{{{
+  /**@brief Unvarying information about a Pool.*/
+  struct PoolInfo
+    {
+    boolean down ;              /**<@brief If set, the pool is unavailable (not all raids attached to the same working server and ready).*/
+    long ident ;                /**<@brief This pool's identity.*/
+    long long capacity ;        /**<@brief This pool's capacity in protons.*/
+    wstring name ;              /**<@brief Name allocated to this pool.*/
+    } ;
+  //}}}
+  //{{{
+  /**@brief  Unvarying information about a port.*/
+  struct PortInfo
+    {
+    Server portServer ; /**<@brief The Server Object for the port.*/
+    long serverIdent ;  /**<@brief The number of the server for the port.*/
+    wstring name ;       /**<@brief The port name assigned by getPort.*/
+    long number ;       /**<@brief The port number assigned by getPort.*/
+    Longs numTracks ;   /**<@brief Number of tracks, indexed by track type.*/
+    } ;
+  //}}}
+  //{{{
+  /**@brief Info sent to inform a supervisor of changes to directory or configuration.
+   */
+  enum StateChangeType { //Information about machine state changes
+      clipCreated,      /**<@brief A clip has been created.*/
+      clipModified,     /**<@brief A clip has been modified.*/
+      clipHidden,       /**<@brief A clip has started the delete process.*/
+      clipDeleted,      /**<@brief A clip has finished the delete process.*/
+      serverUp,         /**<@brief A server has become available.*/
+      serverDown,       /**<@brief A server has disappeared.*/
+      serverChanged,    /**<@brief The allocation of channels on the server has changed.*/
+      poolUp,           /**<@brief A pool has become available.*/
+      poolDown,         /**<@brief A pool has disappeared.*/
+      listenerGone,     /**<@brief A port has reported that it's Listener has unexpectedly stopped listening; this may indicate that the client software has crashed.*/
+      copyComplete,     /**<@brief A copy has completed successfully.*/
+      copyFailed,       /**<@brief A copy has failed or been aborted.*/
+      zoneUp,           /**<@brief A remote zone has come up*/
+      zoneDown,         /**<@brief A remote zone has gone down*/
+      zoneFailover,     /**<@brief A remote zone has failed over, but is still accessible; references to it may need refreshing*/
+      aafUpdated        /**<@brief An AAF file has been updated*/
+      } ;
+  //}}}
+
+  //{{{
+  /**@brief The structure sent to a StateChangeListener to inform it of events within Quentin.*/
+  struct StateChangeInfo
+    {
+    StateChangeType type ;      /**<@brief The nature of the state change which has just occurred.*/
+    long ident ;                /**<@brief The identity of the thing that has changed (clip, port, server, pool...).*/
+    long changeNum ;            /**<@brief A simple counter so every State Change is unique.*/
+    } ;
+  //}}}
+  typedef sequence <StateChangeInfo> StateChangeList ; /**<@brief An array of StateChanegeInfo.*/
+  //{{{
+  /**@brief Structure defining the progress of a clip copy between servers.*/
+  struct CopyProgress
+    {
+    long clipID ;       /**<@brief ID of clip being copied to.*/
+    long totalProtons ;  /**<@brief Total number of protons that need copying.*/
+    long protonsLeft ;   /**<@brief Number of protons remaining to copy.*/
+    long secsLeft ;     /**<Estimated seconds to completion.*/
+    long priority ;     /**<Priority at which copy is being done*/
+    boolean ticketed ;  /**< True if copy has a ticket*/
+    } ;
+  //}}}
+  typedef sequence <CopyProgress> CopyProgressList ; /**<@brief An array of CopyProgress records.*/
+  //{{{
+  /** @brief A element in the CopyMap.
+   *
+   * The Copy Map is used to give a detailed report on the progress of a copy
+   */
+  struct CopyMapElement
+    {
+    long flags ;                /**< @brief Flags defining whether the copy is started, ticketed etc.
+                                 * @see ZonePortal::copyNotDone, ZonePortal::copyHasTicket,
+                                 *      ZonePortal::copySourceDown, ZonePortal::copyDestDown, ZonePortal::copyFailed*/
+    long protons ;              /**< @brief The number of protons this fragment represents*/
+    long frames ;               /**< @brief The number of frames this fragment represents*/
+    } ;
+  //}}}
+  typedef sequence <CopyMapElement> CopyMapList ; /**< An array of CopyMapElements*/
+  //{{{
+  /** @brief A tag which has been placed on a source rush.
+   *
+   * It is sometimes useful to put a marker on source material which remains attached to that material
+   * even when it is edited.
+   */
+  struct RushTag
+    {
+    RushIdent rushID ;          /**<@brief RushID being tagged*/
+    long start ;                /**<@brief Start of tagged section within rush*/
+    long finish ;               /**<@brief End of tagged section: must be start+1 or greater*/
+    wstring tagtype ;           /**<@brief A string describing the tag type such as "Goal", "Copyright Megacorp", or "Obscenity"*/
+    wstring info ;              /**<@brief An informational string expanding on the tag type*/
+    } ;
+  //}}}
+  typedef sequence <RushTag> RushTagList ; /**< An array of tag data records*/
+  //{{{
+  /** @brief A block of timecode data associated with a rush.
+    *
+   * RushTimecode blocks are
+   * recorded by the Server as the rush is first captured. The RushTimecode's for
+   * a rush can be retrieved by getTimecodes()
+   */
+  struct RushTimecode
+    {
+    long start ;                /**< The frame within the rush at which this timecode block starts*/
+    long finish ;               /**< The frame within the rush at which this timecode block starts; values <= start imply the block lasts to the end of the rush*/
+    Timecode portTimecode ;     /**< The Port timecode of the first frame of the block*/
+    long userBits ;             /**< The user bits of the first timecode of the block */
+    Timecode refTimecode ;          /**< The reference timecode of the first frame of the block*/
+    } ;
+  //}}}
+  typedef sequence <RushTimecode> RushTimecodeList ; /**< An array of RushTimecode records*/
+  //{{{
+  /**@brief Description of a database column.
+   *
+   * Controlling software may need to enquire what database columns are available and what it
+   * can do with them. This structure is intended to answer those questions.
+   */
+  struct ColumnDesc
+    {
+    wstring columnName ;      /**<@brief Column Name.*/
+    wstring columnType ;      /**<@brief Column Type.*/
+    wstring _alias ;          /**<@brief An alias on the column name for display purposes only*/
+    boolean alterable ;       /**<@brief If true, column can be altered after clip creation.*/
+    boolean creatable ;       /**<@brief If true, column can be defined at clip creation time.*/
+    boolean searchable ;      /**<@brief If true, column can be used for searching.*/
+    boolean clones ;          /**<@brief If true, the column will be copied to clones if not overridden*/
+    } ;
+  //}}}
+  typedef sequence <ColumnDesc> ColumnDescList ; /**< An array of ColumnDescription records*/
+  //{{{
+  /** @brief The description of a configuration to which a port can be set.
+   *
+   * Video, audio and auxiliary data are configured independently, for both
+   * play and record. This data structure is returned by getConfigurations()
+   * to allow selection of appropriate values for the configure() command
+   */
+  struct ConfigDescription
+    {
+    wstring description ;     /**< A free text description of the format, suitable for making user selections*/
+    long configNumber ;       /**< The identifying number for this configuration*/
+    float protonsPerFrame ;   /**< Approximate number, for space allocation purposes, of protons per frame*/
+    } ;
+  //}}}
+  typedef sequence <ConfigDescription> ConfigDescriptionList ; /**<@brief A list of configuration descriptions*/
+  //{{{
+  /** @brief The full Clip ID, including zone*/
+  struct FullClipID
+    {
+    long zone ;                 /**< The Zone in which the clip exists */
+    long clipID ;               /**< The clipID within the Zone */
+    } ;
+  //}}}
+  typedef sequence <FullClipID> FullClipIDList ; /**<@brief A list of Full Clip IDs*/
+  //{{{
+  /** @brief Data about a single placeholder
+   */
+   struct PlaceholderData
+    {
+    long clipID ;       /**< The clip ID of this placeholder */
+    long poolID ;       /**< The pool it is on */
+    long zoneID ;       /**< The Zone that pool is in */
+    wstring extData ;   /**< The extended data supplied to createExtPlaceholder */
+    } ;
+  //}}}
+  typedef sequence <PlaceholderData> PlaceholderDataList ; /**<@brief a list of placeholders*/
+  //}}}
+  //{{{  The Fragment and the sub-classes which make it up
+  /** @{ */
+  //{{{
+  /**@brief The possible different fragment types.*/
+  enum FragmentType {
+     videoFragment,     /**<@brief A number of frames of Video.*/
+     audioFragment,     /**<@brief A number of frames of audio.*/
+     auxFragment,       /**<@brief Auxiliary data, such as closed Caption data, for a number of frames*/
+     spare3,            /**<@brief The "spare" types are reserved for possible future tracks containing "Essence".*/
+     spare4,            /**<@brief The "spare" types are reserved for possible future tracks containing "Essence".*/
+     spare5,            /**<@brief The "spare" types are reserved for possible future tracks containing "Essence".*/
+     spare6,            /**<@brief The "spare" types are reserved for possible future tracks containing "Essence".*/
+     spare7,            /**<@brief The "spare" types are reserved for possible future tracks containing "Essence".*/
+     flagsFragment,     /**<@brief Modifiers for the content of the audio and video tracks (e.g. frame/field flag).*/
+     timecodeFragment,  /**<@brief A number of frames of contiguous timecode.*/
+     aspectFragment,    /**<@brief A block of video of non-standard aspect ratio.*/
+     cropFragment,      /**<@brief A block of video requiring cropping, usually to remove black.*/
+     panZoomFragment,   /**<@brief Pan and zoom information.*/
+     speedFragment,
+     multiCamFragment,  /**<@brief Selects which stream in multi-cam clip is displayed.*/
+     ccFragment,        /**<@brief Closed caption data. */
+     noteFragment,      /**<@brief An annotation to the clip, which may be reported as an event.*/
+     effectFragment,    /**<@brief A trigger command for an effects processor.*/
+     numFragmentTypes   /**<@brief Provides a numeric value for the number of elements in this enum.*/
+     } ;
+  //}}}
+  const long lastEssenceTrack   = 7 ;   /**<spare7: Essence tracks describe essence data held on the raids.*/
+  const long lastLinearTrack    = 14 ;  /**<spare15: "Linear" tracks are modifiers tot the essence tracks.*/
+
+  //{{{
+  /** @brief Structure defining a contiguous burst of data on the server Raids.
+   *
+   * This structure contains all the information necessary to identify and locate
+   * a burst of data on disk. There may be other fields which modify the way in which
+   * that data is processed on disk.
+   */
+  struct PositionData
+    {
+    FormatCode format ; /**< The format in which the data is stored*/
+    long poolID ;       /**< The ID number of the pool on which the data is stored*/
+    long long poolFrame ;    /**< The frame number, counting from the start of the pool, from which the data is stored.*/
+    short skew ;        /**< The skew value of the atoms from the "zero position", in protons*/
+    RushIdent rushID ;  /**< The RushId of the session when the data was recorded */
+    long rushFrame ;    /**< The frame number, counting from the start of the rush, at which the rush was recorded*/
+    } ;
+  //}}}
+  //{{{
+  /** @brief Modifiers which can alter the way essence data is interpreted*/
+  struct ServerFlagsFragment
+    {
+    long flags ;         /**<A flags word which can modify the interpretation of the Essence.*/
+    } ;
+  //}}}
+  //{{{
+  /**@brief A burst of contiguous timecode.*/
+  struct ServerTimecodeFragment
+    {
+    Timecode startTimecode ;    /**<@brief The timecode of the first frame of the fragment.*/
+    long userBits ;             /**<@brief The User Bits associated with the fragment.*/
+    } ;
+  //}}}
+  //{{{
+  /** @brief A rational describing the pixel aspect ratio for a block of video.
+   *
+   * Used to describe blocks of video whose pixel aspect ratio is not standard for its format.
+   * The magnitude of the two fields is not important: it is simply their ratio
+   * that matters.
+   */
+  struct ServerAspectFragment
+    {
+    long width ;        /**< the width of a pixel, in arbitrary units*/
+    long height ;       /**< The height of a pixel, in the same arbitrary units*/
+    } ;
+  //}}}
+  //{{{
+  /** @brief Describes a block of video which needs to be cropped.
+   *
+   * Video sometimes needs cropping because it has black on it (letterbox/pillarbox)
+   */
+   struct ServerCropFragment
+    {
+    long x ;                    /**< Rectangle describing area of valid video on input*/
+    long y ;                    /**< Rectangle describing area of valid video on input*/
+    long width ;                /**< Rectangle describing area of valid video on input*/
+    long height ;               /**< Rectangle describing area of valid video on input*/
+    } ;
+  //}}}
+  //{{{
+  /** @brief Describes a block of video which needs to be cropped.
+   *
+   * Video sometimes needs cropping because it has black on it (letterbox/pillarbox)
+   */
+   struct ServerPanZoomFragment
+    {
+    long x;                    /**< X position of top-left of picture*/
+    long y;                    /**< Y position of top-left of picture*/
+    long hZoom;                /**< Horizontal picture zoom */
+    long vZoom;                /**< Vertical picture zoom */
+    } ;
+  //}}}
+  //{{{
+  /** @brief Describes a block of video which needs to be cropped.
+   *
+   * Video sometimes needs cropping because it has black on it (letterbox/pillarbox)
+   */
+   struct ServerSpeedFragment
+    {
+    long speed;                    /**< Speed of clip*/
+    long profile;                  /**< Profile to use*/
+    } ;
+  //}}}
+  //{{{
+  /** @brief Describes lWhich multiCam stream to display
+   *
+   *
+   */
+   struct ServerMultiCamFragment
+    {
+    long stream;                    /**< Multi-cam stream to display*/
+    } ;
+  //}}}
+  //{{{
+  /**@brief A "Note" which may be appended to a clip.
+   *
+   * The note has no effect on the playing of the clip. There are two basic uses
+   * for note fragments: to annotate tracks so that the controller can read back what it
+   * has loaded in a functional sense, and to provide signals via the PortListener
+   * interface as a track is played to allow the controlling software to keep track of where the
+   * player has reached.
+   */
+  struct ServerNoteFragment
+    {
+    long noteID ;       /**<@brief A number, supplied by the client, to identify which note this is.*/
+    long aux ;          /**<@brief A modifier, meaning dependant upon client.*/
+    long mask ;         /**<@brief A mask, used in conjunction with the noteMask parameter of reportStatus, to control reporting of notes */
+    wstring note ;       /**<@brief A string used to identify the note - may be null.*/
+    //RawData data ;    This field has been withdrawn
+    } ;
+  //}}}
+  //{{{
+  /**@brief A Effect which may be attached to a clip to perform output processing on the server.
+   */
+  struct ServerEffectFragment
+    {
+    long effectID ;             /**<@brief An ID for the effect.*/
+    RawData effectData ;        /**<@brief The parameters for the effect as "dark" data.*/
+    } ;
+
+  /**@brief Constant effectID definitions to define the content of effect fragments
+   */
+  const long extFragSpeed = 0 ;        /**<@brief Speed profile */
+  const long extFragPanZoom = 1 ;      /**<@brief Pan and zoom profile */
+  const long extFragMultiCam = 32 ;    /**<@brief Multicam angle selection */
+  const long extFragCEA608 = 0x100 ;   /**<@brief 608 closed caption data */
+  //}}}
+  //{{{
+  /**@brief A Closed caption which may be attached to a clip
+   */
+  struct ServerCCFragment
+    {
+    RushIdent ccID ;            /**<@brief An ID for the CC data.*/
+    long ccType ;               /**<@brief Type of CC data. 608, OP-46 etc.*/
+    RawData ccData ;            /**<@brief Closed Caption data.*/
+    } ;
+  //}}}
+  //{{{
+  /**@brief The varying data for the various different fragment types.
+   */
+  union ServerFragmentData switch (FragmentType)
+    {
+    case videoFragment:
+      PositionData videoFragmentData ;                  /**<@brief Video data.*/
+    case audioFragment:
+      PositionData audioFragmentData ;                  /**<@brief Audio data.*/
+    case auxFragment:
+      PositionData auxFragmentData ;                    /**<@brief Auxiliary data*/
+    case flagsFragment:
+      ServerFlagsFragment flagsFragmentData ;           /**<@brief Modifier flags*/
+    case timecodeFragment:
+      ServerTimecodeFragment timecodeFragmentData ;     /**<@brief Timecode start.*/
+    case aspectFragment:
+      ServerAspectFragment aspectFragmentData ;         /**<@brief Pixel aspect ratio. */
+    case cropFragment:
+      ServerCropFragment cropFragmentData ;             /**<@brief Crop rectangle. */
+    case noteFragment:
+      ServerNoteFragment noteFragmentData ;             /**<@brief Note contents.*/
+    case effectFragment:
+        ServerEffectFragment effectFragmentData ;       /**<@brief "Dark" effect data.*/
+    case panZoomFragment:
+        ServerPanZoomFragment panZoomFragmentData ;     /**<@brief Pan & zoom data.*/
+    case speedFragment:
+          ServerSpeedFragment speedFragmentData ;       /**<@brief Speed data.*/
+    case multiCamFragment:
+        ServerMultiCamFragment multiCamFragmentData ;   /**<@brief Multicam data.*/
+    case ccFragment:
+        ServerCCFragment ccFragmentData ;               /**<@brief Closed caption data.*/
+    } ;
+  //}}}
+  //{{{
+  /**@brief A single fragment of clip data.
+    */
+  struct ServerFragment
+    {
+    long trackNum  ;                    /**<@brief The track within the class of tracks to which the fragment applies.*/
+    long start ;                        /**<@brief The start frame of the fragment.*/
+    long finish ;                       /**<@brief The finish frame of the fragment. This is the frame <em>after</em> the fragment finishes,
+                                            so that the length of the fragment is (finish - start).*/
+    ServerFragmentData fragmentData ;   /**<@brief The variable data describing the fragment.*/
+    } ;
+  //}}}
+  /**@brief An array of ServerFragment.*/
+  typedef sequence <ServerFragment> ServerFragments ;
+  //}}}
+  //{{{
+  /** @brief Data describing a recording format.
+   The servers are capable of recording the different essence types (video, audio, aux) in several
+   different formats.
+   */
+  struct FormatInfo
+    {
+    FormatCode formatNumber ;           /**< The unique format number of this format*/
+    FragmentType essenceType ;          /**< The essence type of this format (Video/audio/aux) */
+    long frameRate ;                    /**< Frame rate: usually 25/30 for interlaced, 50/60 for progressive*/
+    long height ;                       /**< Height of picture, in lines: video only*/
+    long width ;                        /**< Width of picture, in pixels: video only*/
+    long samples ;                      /**< Samples per second: audio only*/
+    long compressionFamily ;            /**< The compression family, e.g DV, MPeg-2*/
+    long protonsPerAtom ;               /**< The number of contiguous protons which form an atom in this format.*/
+    long framesPerAtom ;                /**< The number of frames to packed into an atom. O identifies variabnle width formats such as browse*/
+    long quark ;                        /**< Quark format code */
+    wstring formatName ;                /**< A human friendly explanation of the formatNumber*/
+    wstring layoutName ;                /**< A human friendly explanation of the layout*/
+    wstring compressionName ;           /**< A human friendly explanation of the compressionName*/
+    } ;
+  //}}}
+  //{{{  Other base interfaces
+  /** @defgroup others Other base interfaces
+   * @{
+   */
+  //{{{
+  /**@brief A package of name/value pairs.
+   *
+   * This interface exists so that other, more complicated, interfaces may be
+   * derived from it.
+   *
+   * There are usually a number of facts which a controller wishes to know about an
+   * object which it is controlling. These are usually constant for a particular
+   * configuration or change slowly. Examples are Machine Serial Number and
+   * Software version. New properties may need to be added at a later date.
+   * Rather than provide an indefinite number of queries, these are handled by
+   * giving each property a name string, and returning a property string. If the
+   * property is numeric, it will be returned as a string in the form of a decimal
+   * number.
+   */
+  interface Properties
+    {
+    wstring getProperty (in wstring propertyName) ;
+      /**<@brief  Request a Property.
+       *
+       * @param propertyName The name of the requested property. The name must be an exact match
+       * so case and white space are significant.
+       * @return: The property string, or the empty string if the property is undefined or unknown.
+       */
+    WStrings getPropertyList () ;
+      /**<@brief Request a list of all known properties.
+       *
+       * @return An array of WStrings containing the property names, in arbitrary order.
+       */
+    //{{{  Property Strings
+    /**@name Predefined names of properties.
+     * These WStrings provide names of properties common to several different
+     * interfaces. Not all interfaces will support these properties - just that,
+     * if they do, they will support these WStrings. */
+    /** @{ */
+    const wstring idlImplementation = L"IdlImplementation" ;      /**<@brief All implementers should return the ZoneManager::idlVersion string with which they were compiled.*/
+    const wstring softwareVersion = L"SoftwareVersion" ;          /**<@brief Software version string.*/
+    const wstring serialNumber = L"SerialNumber" ;                /**<@brief Hard-wired serial number, as a decimal string.*/
+    const wstring name = L"Name" ;                                /**<@brief A human-friendly name for this equipment.*/
+    const wstring location = L"EngineeringName" ;                 /**<@brief A description of where this equipment is located.*/
+    const wstring frameRate = L"FrameRate";                       /**<@brief Video frame rate: normally "25" or "30"*/
+    const wstring redAlert = L"RedAlert" ;                        /**<@brief Description of any outstanding "Red" alert.*/
+    const wstring amberAlert = L"AmberAlert" ;                    /**<@brief Description of any outstanding "Amber" alert.*/
+    const wstring consoleURI = L"ConsoleURI" ;                    /**<@brief The URI, usually the form "http://MyMachine:1234/index.html", upon which this machine offers an HTTP control console */
+    const wstring isDummyServer = L"IsDummyServer" ;              /**<@brief "Yes" if the interface is a dummyserver, "" otherwise */
+    const wstring searchPath = L"SearchPath" ;                    /**<@brief URL of search service */
+    /** @{ */
+    } ;
+    //}}}
+  //}}}
+  //{{{
+  /**@brief Basic interface for Effects controllers.
+   *
+   * There will in future be one or more effects controllers fitted to the system.
+   * This interface provides a subclass from which all such controllers will be
+   * derived. The effect controllers can be obtained from the Port, and must be
+   * up-cast to the appropriate derived class.
+
+   * It is, of course, difficult to generalise about the wide variety of possible
+   * Effect Controllers. However, there is a general structure. Each Controller
+   * will have a number of live controls used to configure it in real time. These
+   * controls update an internal state. Generally, but not always, each controller
+   * is capable of changing cleanly from its existing state to a new one by means
+   * of an effects move. This internal state may be requested buy getState() in order
+   * either to create EffectFragments or to restore the controller to its current state
+   * by calling setState().
+   */
+  interface EffectController
+    {
+    wstring getName () ;
+      /**<@brief Get name of controller.
+       *
+       * Each effect controller will have a unique name. This call can be used to confirm
+       * the name of this particular controller, and should be called to check before upcasting.
+       * @return  String identifying effect controller type
+       */
+    long getVersion () ;
+      /**<@brief Get controller major and minor version numbers.
+       *
+       * Effects controllers will inevitably develop with time. This method allow a check
+       * of which version of the controller is running. It is divided into two halves:
+       * a major version in the MS 16 bits and a minor version in the LS 16. Higher
+       * minor versions of the same major version should be upward compatible; different
+       * major versions may well be incompatible.
+       * @return Major version in bits 16-31, minor version in bits 0-15
+       */
+    void reset () ;
+       /**<@brief Reset controller.*/
+    RawData getState () ;
+      /**<@brief Get current state of controller.
+       *
+       * This routine returns an object describing the current state of the controller
+       * which may be used either to create Effect Fragments or as a parameter to setState()
+       * @return Raw data object encapsulating current server state.
+       */
+    void setState (in RawData state) ;
+      /**<@brief Return Controller to a previously saved state.
+       *
+       * Note: the transition from the current state is not necessarily clean. In
+       * order to do a smooth state change (if the Controller is capable of it), the
+       * raw data must be converted into an Effect Fragment, which must be inserted
+       * into the Port Timeline and executed.
+       * @param state Raw data object obtained from getState()
+       */
+    } ;
+  //}}}
+  /** @} */
+  //}}}
+
+
+  /** @brief ChannelType identifies the Channel duplex characteristics
+   */
+  enum ChannelType {
+      halfDuplex,
+      fullDuplex,
+      simplexRecord,
+      simplexPlayback
+      } ;
+
+  /** @brief ChannelCapabilities describe sQ server channel capabilities.  See getChannelCapabilities()
+     */
+  struct ChannelCapabilities
+    {
+    long chanNumber ;      /**<@brief The channel number.*/
+    ChannelType type;      /**<@brief The channel type, e.g. half-duplex, etc..*/
+    long inputCount;       /**<@brief The number of physical inputs*/
+    long outputCount;      /**<@brief The number of physical outputs*/
+    long long generalFeatures;  /**<@brief General features bit field, see GENCAP_xxx flags */
+    long long recordFeatures;   /**<@brief Record features bit field, see RECCAP_xxx flags*/
+    long long playFeatures;     /**<@brief Play features bit field, see PLYCAP_xxx flags*/
+    } ;
+
+  /** @name Flags associated with the generalFeatures field of ChannelCapabilities
+   */
+  const long long CHANCAP_GEN_OVERLAY      = 0x1 ; /**<@brief The channel provides an overlay (dirty) output.*/
+
+  /** @name Flags associated with the recordFeatures field of ChannelCapabilities
+   */
+  const long long CHANCAP_REC_AUTOSIZE     = 0x1 ; /**<@brief The channel provides auto size on input capability */
+  const long long CHANCAP_REC_AIR          = 0x2 ; /**<@brief The channel supports always in record functionality */
+
+  /** @name Flags associated with the playFeatures field of ChannelCapabilities
+   */
+  const long long CHANCAP_PLAY_SUBFRAME_JOG  = 0x1 ; /**<@brief If set, the channel supports subframe jog capability*/
+  const long long CHANCAP_PLAY_LIVE_CLAMP    = 0x2 ; /**<@brief If set, the channel supports clamping of play position to record head */
+  const long long CHANCAP_PLAY_AUDIO_16CH    = 0x100 ; /**<@brief If set, the channel supports 16 channel audio*/
+  const long long CHANCAP_PLAY_AUDIO_32CH    = 0x200 ; /**<@brief If set, the channel supports 32 channel audio on 3G SDI */
+
+
+  typedef sequence<ChannelCapabilities> ChannelCapabilitiesList ;
+
+  /** @brief Describes the features supported by a server*/
+  struct ServerCapabilities
+    {
+    long productID ;      /**<@brief The server identifier.*/
+    long long features;   /**<@brief Features of the server.*/
+    ChannelCapabilitiesList channelCapabilities ; /**<@brief A list of capabilities for all channels.*/
+    };
+
+  /** @name Flags associated with the ServerCapabilities::features field
+   */
+  const long long SVRCAP_REMOTE_PRELOAD_SQ    = 0x1 ; /**<@brief The server supports remote essence preload from other sQ systems.*/
+  const long long SVRCAP_REMOTE_PRELOAD_REVQ  = 0x2 ; /**<@brief The server supports remote essence preload from revQ systems.*/
+
+
+  /** @brief Audio patch structure for single channel specification*/
+  struct AudioPatchInfo
+  {
+    long  dst;   /**<@brief Destination/output channel, range 0..15 */
+    long  src;   /**<@brief The source channel, range 0..15, if -1 then patch in silence  */
+    float level; /**<@brief The audio level in dB, i.e. 0.0 = 0dB FS, -6.0 = -6dB FS (i.e. half amplitude). Levels above FS (0.0dB) are not permited  */
+  };
+  typedef sequence <AudioPatchInfo> AudioPatchInfoList ;
+
+
+
+  /** @} */
+  //}}}
+
+  //{{{  Exceptions
+  /** @defgroup Exceptions Exceptions thrown by Quentin
+   * @{
+   */
+  //{{{
+  /**@brief The fragments intended to create a clip are not understood.*/
+  exception InvalidFragments
+    {
+    ServerFragments invalids ; /**<@brief The fragments which were not understood.*/
+    } ;
+  //}}}
+  //{{{
+  /**@brief An error reported by the underlying database.*/
+  exception DatabaseError
+    {
+    wstring error ; /**<@brief The error message returned by the underlying database.*/
+    } ;
+  //}}}
+  //{{{
+  //{{{
+  /**@brief The various reasons a BadIdent exception can be returned.*/
+  enum BadIdentReason {
+    internalError,              /**<@brief The Quentin Manager has generated some kind of internal fault.*/
+    poolNotKnown,               /**<@brief An unknown pool has been referenced.*/
+    poolNotOnThisServer,        /**<@brief The specified pool is not on this server.*/
+    poolNotAvailable,           /**<@brief The specified pool is not available (perhaps one of its raids is down).*/
+    serverNotKnown,             /**<@brief An unknown server has been referenced.*/
+    clipNotKnown,               /**<@brief An unknown clip has been referenced.*/
+    channelNotKnown,            /**<@brief An unknown channel has been referenced.*/
+    formatNotKnown,             /**<@brief An unknown compression format has been referenced.*/
+    rowNotKnown,                /**<@brief The row does not form part of the current search result.*/
+    serverIsDown,               /**<@brief The specified server is down.*/
+    badFragment,                /**<@brief One or more fragments are not valid.*/
+    triggerNotKnown,            /**<@brief An invalid trigger has been specified.*/
+    invalidMode,                /**<@brief A record/play mode has been specified which the port cannot perform.*/
+    badTicket,                  /**<@brief An invalid ticket number has been specified */
+    configNotKnown,             /**<@brief The channel does not support the configuration ID*/
+    zoneNotKnown,               /**<@brief This zone is not known*/
+    notPlaceholder,             /**<@brief This clip is not a placeholder*/
+    badLoggingRole,             /**<@brief The specified logging role does not exist.*/
+    operationNotSupported       /**<@brief The operation requested is not supported, e.g. not supported by hardware, etc.*/
+    } ;
+  //}}}
+  /**@brief A numeric identifier (pool id, server id etc.) is not valid.*/
+   exception BadIdent
+    {
+    BadIdentReason reason ;     /**<@brief The type of identifier which was not valid.*/
+    long ident ;                /**<@brief The invalid identifier.*/
+    } ;
+
+  //}}}
+  //{{{
+  /**@brief A column name or column contents cannot be understood.*/
+  exception BadColumnData
+    {
+    wstring colName ; /**<@brief The name of the column.*/
+    wstring badData ; /**<@brief The invalid data if the column name is valid, or null if the column name is invalid.*/
+    } ;
+  //}}}
+  //{{{
+  /**@brief There is not enough free space in the pool to fulfil the request.*/
+  exception NoSpace
+    {
+    } ;
+  //}}}
+  //{{{
+  /**@brief An attempt has been made to put a port into an invalid mode, or to do an operation not valid in the current mode.
+   */
+  exception WrongMode
+    {
+    } ;
+  //}}}
+  /**@brief The zone is known to the system but currently inaccessible.*/
+  exception ZoneInaccessable
+    {
+    } ;
+  /** @} */
+  //}}}
+  //{{{  Listeners
+  /** @defgroup Listeners The Listener Interfaces: Asynchronous feedback to clients
+   * @{
+   * These interfaces will be provided by controlling software. They provide a
+   * "callback" mechanism for the Quentin Manger to tell managing computers about
+   * events which have occurred or changes which have been made to the system.
+   * While it is also possible to monitor the Quentin status by continuous
+   * polling, it is STRONGLY recommended that these interfaces are used instead
+   * in order to minimise network and system load. As well as reporting when
+   * statuses have changed or events have occurred, most of the Listener
+   * interfaces have a time interval after which they will repeat an unchanged
+   * status or report a null change in order to act as a "heartbeat" to
+   * reassure that the system is still functioning.
+   */
+  //{{{
+  /**@brief Client interface for receiving thumbnails sent to the server.
+  */
+  interface ThumbnailListener
+    {
+    void newThumbnail (in long ident, in long offset, in long width, in long height, in Longs data) ;
+      /**<@brief  Send a thumbnail to the listener.
+       *
+       * @param ident   Ident param given by requestThumbnails
+       * @param offset  Offset on a timeline from which thumbnail was derived
+       * @param width   Width of thumbnail in pixels
+       * @param height  Height of thumbnail in pixels
+       * @param data    The thumbnail data - currently RGB packed into 32 bit values
+       */
+
+    /**@brief Reasons why a thumbnail could not be sent. */
+    enum NoThumbnailReason {
+        unknown,        /**<@brief Generic if other reasons not appropriate.*/
+        unrecorded,     /**<@brief The frame is on the record track, but has not yet been recorded.*/
+        unbuilt,        /**<@brief The frame is due to be rebuilt by a background rebuild, by has not yet been processed.*/
+        busy,           /**<@brief The server is too busy to respond.*/
+        badFormat,      /**<@brief The video is not in an appropriate format.*/
+        hardwareError   /**<@brief A hardware failure made it impossible to send the thumbnail.*/
+        } ;
+    void noThumbnail (in NoThumbnailReason reason, in long ident, in long offset, in boolean tryAgainLater, in wstring reasonStr) ;
+      /**<@brief Tell Listener a thumbnail cannot be sent.
+       *
+       * @param reason  The reason the Thumbnail could not be sent
+       * @param ident   Ident param given by requestThumbnails
+       * @param offset  Offset on timeline from which thumbnail could not be sent
+       * @param tryAgainLater   If true, the thumbnail may be available later
+       * @param reasonStr       Explanation for error
+       */
+    void finished (in long ident) ;
+      /**<@brief Terminates sequence of thumbnails.
+       *
+       * This routine is called when a sequence of thumbnails has been sent, to inform the
+       * Listener that no further thumbnails will be sent.
+       * @param ident   Ident param given by requestThumbnails
+       */
+    } ;
+  //}}}
+  //{{{
+  /**@brief Client interface for reporting the status of a Port.
+   */
+  interface PortListener
+    {
+
+    /** @name consts for flags in all status variants.*/
+    const long listenerPresent = 0x8000 ;   /**<@brief A PortListener has been defined.*/
+
+    /**@brief Status record sent to PlayPortListener, or read from Play Port.*/
+    struct PlayPortStatus
+      {
+      long portNumber ;         /**<@brief The number of this port.*/
+      unsigned long flags ;     /**<@brief Flags showing port status.*/
+      Timecode refTime ;        /**<@brief "Wallclock" or station reference time derived from server reference feed.*/
+      Timecode portTime ;       /**<@brief Time on input port,  if any.*/
+      long framesUnused ;       /**<@brief Number of frames since the Port was last given a valid command or transferred a frame*/
+      long offset ;             /**<@brief Current position in timeline.*/
+      long endOfData ;          /**<@brief Offset+1 of frame at which data ends.*/
+      float speed ;             /**<@brief Speed at which is playing. 0.0 means stopped, 1.0 means normal speed.*/
+      Timecode outputTime ;     /**<@brief Timecode being generated on output.*/
+      } ;
+
+    /** @name consts for flags in PlayPortStatus.*/
+    /** @{ */
+    const long readyToPlay = 1;         /**<@brief Ready to play - all pre-loads completed.*/
+    const long playing = 2 ;            /**<@brief Now playing.*/
+    const long jumpReady = 4 ;          /**<@brief Ready to jump - jump pre-load completed.*/
+    const long fading = 8 ;             /**<@brief Now cross fading.*/
+
+    const long opAudioFlagsMask = 0xF00 ;/* Bitmask for OP audio status.*/
+    const long opAudioGrp1 = 0x100 ;     /* Bit indicating audio chans 0-3 active data.*/
+    const long opAudioGrp2 = 0x200 ;     /* Bit indicating audio chans 4-7 active data.*/
+
+    const long opStdFlagsMask = 0xF00000 ; /**<@brief Bitmask for OPStd bitfield.*/
+    const long opStdSD = 0x000000 ;        /**<@brief Output is SD.*/
+    const long opStdSD4_3 = 0x100000 ;     /**<@brief Output is SD 4:3.*/
+    const long opStdSD16_9 = 0x200000 ;    /**<@brief Output is SD 16:9.*/
+    const long opStdHD720p = 0x300000 ;    /**<@brief Output is HD 720p.*/
+    const long opStdHD1080i = 0x400000 ;   /**<@brief Output is HD 1080i.*/
+    const long opStdHD1080p = 0x500000 ;   /**<@brief Output is HD 1080p.*/
+
+    const long fieldMode = 0x10000 ;    /**<@brief Affects freeze and variable speed interpolation.*/
+    const long fieldAuto = 0x20000;     /**<@brief Dominant after jump, non-dominant after halt; overrides fieldNonDom .*/
+    const long fieldNonDom = 0x40000 ;  /**<@brief Display non-dominant field when halted .*/
+    /** @} */
+
+    /**@brief Status record sent from, or read from, a port in Record mode.*/
+    struct RecordPortStatus
+      {
+      long portNumber ;         /**<@brief The number of this port.*/
+      unsigned long flags ;     /**<@brief Flags showing port status.*/
+      Timecode refTime ;        /**<@brief "Wallclock" or station reference time derived from server reference feed.*/
+      Timecode portTime ;       /**<@brief Time on input port,  if any.*/
+      long offset ;             /**<@brief Current position in timeline.*/
+      long framesUnused ;       /**<@brief Number of frames since the Port was last given a valid command or transferred a frame*/
+      long start ;              /**<@brief Offset of start of available space on timeline - first recorded frame.*/
+      long finish ;             /**<@brief Offset of end of available space on timeline - first "nonexistent" frame.*/
+      long recordableFrames ;   /**<@brief Total number of frames available for recording, at or after offset.*/
+      } ;
+    /** @name consts for flags in all RecordPortStatus.*/
+    /** @{ */
+    const long readyToRecord = 1 ;      /**<@brief Ready to record (space is available).*/
+    const long recording = 2 ;          /**<@brief We are actually recording.*/
+    const long overWriting = 8 ;        /**<@brief In non-stop mode, we are overwriting old data.*/
+    const long inputInvalid = 0x10 ;    /**<@brief Input video/audio does not look valid.*/
+    const long nonStop = 0x10000 ;      /**<@brief Non-stop mode: when space exhausted, overwrite oldest.*/
+
+    const long ipAudioFlagsMask = 0xF00 ;  /* Bitmask for IP audio status.*/
+    const long ipAudioGrp1 = 0x100 ;       /* Bit indicating audio chans 0-3 present.*/
+    const long ipAudioGrp2 = 0x200 ;       /* Bit indicating audio chans 4-7 present.*/
+
+    const long ipStdMask = 0xF00000 ;      /* Bitmask for IPStd bitfield.*/
+    const long ipStdSD = 0x000000 ;        /* Input is SD.*/
+    const long ipStdSD4_3 = 0x100000 ;     /* Input is SD 4:3.*/
+    const long ipStdSD16_9 = 0x200000 ;    /* Input is SD 16:9.*/
+    const long ipStdHD720p = 0x300000 ;    /* Input is HD 720p.*/
+    const long ipStdHD1080i = 0x400000 ;   /* Input is HD 1080i.*/
+    const long ipStdHD1080p = 0x500000 ;   /* Input is HD 1080p.*/
+
+    /** @} */
+
+    /**@brief Status record sent from, or read from, a port in Idle mode.*/
+    struct IdlePortStatus
+      {
+      long portNumber ;         /**<@brief The number of this port.*/
+      unsigned long flags ;     /**<@brief Flags showing port status.*/
+      Timecode refTime ;        /**<@brief "Wallclock" or station reference time derived from server reference feed.*/
+      Timecode portTime ;       /**<@brief Time on input port,  if any.*/
+      long framesUnused ;       /**<@brief Number of frames since the Port was last given a valid command or transfered a frame*/
+      } ;
+
+    const long idleAudioFlagsMask = 0xF00 ;  /**<@brief Bitmask for IP audio status.*/
+    const long idleAudioGrp1 = 0x100 ;       /**<@brief Bit indicating audio chans 0-3 present.*/
+    const long idleAudioGrp2 = 0x200 ;       /**<@brief Bit indicating audio chans 4-7 present.*/
+
+    const long idleStdMask = 0xF00000 ;      /**<@brief Bitmask for idleStd bitfield.*/
+    const long idleStdSD = 0x000000 ;        /**<@brief Input is SD.*/
+    const long idleStdSD4_3 = 0x100000 ;     /**<@brief Input is SD 4:3.*/
+    const long idleStdSD16_9 = 0x200000 ;    /**<@brief Input is SD 16:9.*/
+    const long idleStdHD720p = 0x300000 ;    /**<@brief Input is HD 720p.*/
+    const long idleStdHD1080i = 0x400000 ;   /**<@brief Input is HD 1080i.*/
+    const long idleStdHD1080p = 0x500000 ;   /**<@brief Input is HD 1080p.*/
+
+
+    //{{{
+    /**@brief The structure used for the "note" track on the Ports.
+     *
+     * When playing, if a Note is found on an Note Track,
+     * this record will be sent to the PortNoteListenr if
+     * the mask enabled it.
+     */
+    struct NoteEvent
+      {
+      long portNumber ;         /**<@brief The port reporting the note.*/
+      long trackNum ;           /**<@brief The track upon which the note was present.*/
+      long offset ;             /**<@brief Timeline offset at which event occurred.*/
+      long noteTime ;           /**<@brief Reference time at which not occurred.*/
+      long eventID ;            /**<@brief From the ServerNoteFragment triggering this event.*/
+      long aux ;                /**<@brief From the ServerNoteFragment triggering this event.*/
+      wstring note ;             /**<@brief From the ServerNoteFragment triggering this event.*/
+      } ;
+    //}}}
+    void newPlayStatus (in PlayPortStatus status) ;
+      /**<@brief New status in play mode.
+       *
+       * This routine is called at regular intervals as a "keepalive" indication, plus
+       * whenever it becomes "unpredictable" - usually when the play or record state changes
+       * @param status New port status
+       */
+    void newRecordStatus (in RecordPortStatus status) ;
+      /**<@brief New status in record mode.
+       *
+       * This routine is called at regular intervals as a "keepalive" indication, plus
+       * whenever it becomes "unpredictable" - usually when the play or record state changes
+       * @param status New port status
+       */
+    void newIdleStatus (in IdlePortStatus status) ;
+      /**<@brief New status in idle mode.
+       *
+       * This routine is called at regular intervals as a "keepalive" indication, plus
+       * whenever it becomes "unpredictable" - usually when the play or record state changes
+       * @param status New port status
+       */
+    void reportNote (in NoteEvent note) ;
+      /**<@brief Called to report that a Note has passes the play head.
+       *
+       * Notes are only reported for channels selected by the noteMask in reportStatus()
+       * Notes can be used to trigger the controlling software into action
+       * @param note The note which has passed the play head
+       */
+
+    } ;
+  //}}}
+  //{{{
+  /**@brief Client interface for reporting appearance and disappearance of clips, ports etc.
+   */
+  interface StateChangeListener
+    {
+    //{{{  consts for flags in addStateChangeListener
+    /**@name Groups of state changes.
+     * StateChangeListeners may not wish to be informed of all possible state changes.
+     * These flags group the state changes into families of related changes, and the
+     * listener can request to be informed of only a subset of the changes.
+     */
+    /** @{ */
+    const long clipChanges              = 1 ;   /**<@brief ClipCreated to ClipDeleted.*/
+    const long serverChanges            = 2 ;   /**<@brief ServerUp to ServerChanged.*/
+    const long poolChanges              = 4 ;   /**<@brief PoolUp and PoolDown.*/
+    const long listenerChanges          = 8 ;   /**<@brief listenerChanged.*/
+    const long copyCompletions          = 16 ;  /**<@brief copyComplete to copyFailed.*/
+    const long zoneChanges              = 32 ;  /**<@brief zoneUp and zoneDown
+    /* }@ */
+    //}}}
+    void newChanges (in StateChangeList list) ;
+      /**<@brief  Called to report significant events by the Manager.
+       *
+       * Called as described under addStateChangeListener()
+       * @param list A list of state changes which have taken place since the last call (or first registration)
+       */
+    } ;
+  //}}}
+
+  /** @} */
+  //}}}
+
+  //{{{
+  /**@brief The main interface for controlling video ports on the server.
+   *
+   * The model is of a port as a multi-track timeline running from zero to
+   * (32 bit) infinity. All ports have at least one video track, but some ports may have
+   * more (e.g. separate picture and key tracks). If there is editable audio,
+   * ports will have one or more audio tracks (video-embedded audio does not
+   * have a separate track). There are also timecode tracks, effect tracks
+   * (for ports which have embedded DVE etc.) and note tracks. (Note tracks
+   * are used to communicate to outside systems, e.g. to log what is played
+   * for copyright purposes).
+
+   * Play timelines are initially "blank" and can be patched with playable fragments;
+   * Record timelines are initially empty and can be patched with recordable space.
+   */
+  interface _Port: Properties
+    {
+
+    //{{{  consts
+    const long LowPriority             = 0 ;           /**<@brief Lowest copy priority.*/
+    const long StandardPriority        = 8 ;           /**<@brief Intermediate copy priority.*/
+    const long HighPriority            = 15 ;          /**<@brief Highest copy priority.*/
+    const long invalidTimecode =        -1 ;            /**<@brief Value to use for invalid timecode.*/
+    const long dropFrameFlag =          0x40000000 ;    /**<@brief Mask for bit in timecode which identifies Drop Frame.*/
+    const long crashFlag =              0x80 ;          /**<@brief Trigger on or after timecode, rather than on exact timecode only. If clear, trigger only on exact match; if set, trigger if shortly after match. @see setTrigger(). */
+    const long numTriggers =            32 ;            /**<@brief The number of available triggers.*/
+    //}}}
+
+    //{{{
+    /**@brief The different ways a trigger can be fired.*/
+    enum TriggerMode
+      {
+      trModeNever,              /**<@brief Never fire trigger, this is the reset state.*/
+      trModeNow,                /**<@brief Fire trigger at once - at start of the frame after the trigger is received.*/
+      trModeOffset,             /**<@brief Fire trigger when the current position on the timeline reaches the specified offset.*/
+      trModeRefTimecode,        /**<@brief Fire trigger when the wallclock timecode on the reference input reaches a value.*/
+      trModePortTimecode,       /**<@brief Fire trigger when the input port timecode reached a value.*/
+      trNumModes                /**<@brief The number of TriggerModes.*/
+      } ;
+    //}}}
+    //{{{
+    /**@brief The different actions that can be taken when a trigger fires.*/
+    enum TriggerAction
+      {
+      trActNothing,             /**<@brief Do nothing when trigger fires; this is the reset state, and the state to which the trigger is returned after firing.*/
+      trActStart,               /**<@brief Start recording/playing when trigger fires.*/
+      trActStop,                /**<@brief Stop recording/playing when trigger fires.*/
+      trActJump,                /**<@brief Jump when trigger fires. Only valid for play ports after a jump has been set. @see Port::setJump().*/
+      trActTransition,          /**<@brief Transition when trigger fires. Only valid for play ports after a transition has been set. @see Port::setTransition().*/
+      trNumActions              /**<@brief The number of TriggerActions.*/
+      } ;
+    //}}}
+    //{{{
+    /**@brief The possible modes the Port can be in.*/
+    enum PortMode
+      {
+      idle,             /**<@brief Neither recording nor playing - initial state.*/
+      recording,        /**<@brief Record mode.*/
+      playing           /**<@brief Play mode.*/
+      } ;
+    //}}}
+    //{{{
+    /**@brief A general port status record which can by used to interrogate the status of a port.
+     * @ingroup misc
+     */
+    union GeneralPortStatus switch (PortMode)
+      {
+      case idle:
+        PortListener::IdlePortStatus idleStatus ;       /**<@brief Status when idle.*/
+      case recording:
+        PortListener::RecordPortStatus recStatus ;      /**<@brief Status when recording.*/
+      case playing:
+        PortListener::PlayPortStatus playStatus ;       /**<@brief Status when recording.*/
+      } ;
+    //}}}
+
+    //{{{
+    /**@brief The state of a Trigger.
+     *
+     * A Trigger is in two parts: When it should happened (defined by mode and param)
+     * and what should happen when it does (defined by action). When a trigger occurs,
+     * the mode is set back to the default of trModeNever, but the action is unchanged,
+     * allowing it to be reused.
+     *
+     * Triggers are executed in ascending order, so higher numbered triggers outrank lower ones.
+     */
+    struct TriggerState
+      {
+      TriggerAction action ;    /**<@brief Action to be taken when trigger fires.*/
+      TriggerMode mode ;        /**<@brief What fires trigger.*/
+      long param ;              /**<@brief Modifier (e.g. timecode) for firing trigger.*/
+      } ;
+    //}}}
+    //{{{
+    /**@brief An array of Triggerstates.*/
+    typedef sequence <TriggerState> TriggerStates ;
+    //}}}
+
+    //{{{
+    void changeFlags (in long mask, in long newFlags) ;
+      /**<@brief Change the port flags.
+       *
+       * Both Record and Play ports contain flags words - 32 bit words which are
+       * reported back via their respective Port Status records. The bits are
+       * different for the two ports, and are defined by constants under the
+       * different port definitions. Many are intended to convey data from the
+       * port to the controller (e.g. recording, playing). Others, however, are for
+       * the controller to drive the port (usually those with values from 0x10000
+       * upward). This routine allows these to be controlled.
+       * @param mask Mask of bits of newFlags which are to be used. If set, the matching bit is overwritten by newFlags.
+       * @param newFlags The new state of the flags. Only flags corresponding to bits set in mask are relevant
+       */
+    //}}}
+
+    //{{{
+    boolean setMode (in PortMode newMode) ;
+      /**<@brief Change the ports operating mode.
+       *
+       * If already in this mode then just returns true
+       * Otherwise performs a full reset() and enters the new mode. If the new mode is
+       * Idle, any configuration previously defined by configure() is cleared and the
+       * port returns to its default configuration. Otherwise, the channels enter
+       * the modes described by any previously uncancelled call to configure()
+       * @param newMode The mode the port is to enter.
+       * @return        True if the port can operate in the requested mode, false if not, in which case the port is unaffected.
+       */
+    //}}}
+    //{{{
+    void reset () ;
+      /**<@brief Reset the whole virtual machine, clearing triggers etc.*/
+    //}}}
+    //{{{
+    void resetTriggers () ;
+      /**<@brief Reset all the triggers.*/
+    //}}}
+    //{{{
+    void resetTracks () ;
+      /**<@brief Reset the virtual tracks without clearing the triggers.*/
+    //}}}
+
+    //{{{
+      void setTrackLimits (in long startFrame, in long endFrame) ;
+      /**<@brief Set the limits of travel on a port
+       *
+       * This sets the range of frames a port can play over. It is primarily
+       * used to limit the travel when using jump and speed to do jog and shuttle
+       * @param startFrame The first frame to play
+       * @param endFrame   One more than the last frame to play
+       */
+    //}}}
+    //{{{
+    GeneralPortStatus getStatus () ;
+      /**<@brief Request the current port status.
+       *
+       * Used to interrogate the status of a port when it is not precisely known.
+       * This routine is intended only for occasional, low frequency use, for example
+       * by a background monitor which is checking that ports are still working,
+       * For regular use, use reportStatus() instead.
+       */
+    //}}}
+    //{{{
+    void reportStatus (in PortListener listener, in long interval, in long noteMask) ;
+      /**<@brief Define a listener to receive regular and updated port status.
+       *
+       * Define a Listener which will be sent the play port status at regular intervals
+       * AND whenever the status changes "unexpectedly". The status contains a number of
+       * fields which will increment or decrement every frame while playing. These
+       * changes are "expected" and will not be reported. However, if any other fields
+       * changes, or of these fields change in an unexpected way (e.g. the port timecode
+       * goes discontinuous), a report will be made.
+       * @param listener   The Listener object to which status will be sent
+       * @param interval   The interval, in frames, at which routine status reports will be sent.
+       *        Zero disables routine sending. Recommended not to be less than ten frames.
+       * @param noteMask        A mask of which note tracks are to generate reportNote() calls,
+       *        Bit 0 = track 0
+       */
+    //}}}
+
+    //{{{
+    boolean setTrigger (in long trigger, in TriggerMode mode, in long param) ;
+      /**<@brief Define when a trigger is to fire.
+       *
+       * @param trigger The number of the trigger to be set
+       * @param mode    The mode in which triggering is to be set
+       * @param param   A parameter whose meaning depends upon the mode. For offset mode,
+       *        it is the offset at which the trigger occurs. For timecode modes, it is the
+       *        timecode at which the trigger occurs, with the "crashLock" flag embedded.
+       * @return        False if @p trigger is out of range
+       */
+    //}}}
+
+    //{{{
+    boolean actionAtTrigger (in long trigger, in TriggerAction action) ;
+      /**<@brief Define the action to be taken when a trigger fires.
+       *
+       * @param trigger The number of the trigger to be defined
+       * @param action  The action to be taken when this trigger occurs
+       * @return        False if @p trigger is out of range
+       */
+    //}}}
+    //{{{
+    TriggerState getTrigger (in long trigger) raises (BadIdent) ;
+      /**<@brief  Read the state of a single trigger.
+       *
+       * @param trigger The number of the trigger to be read
+       * @return        The current state of the trigger
+       * @exception BadIdent    If @p trigger is out of range
+       */
+    //}}}
+    //{{{
+    TriggerStates getTriggers () ;
+      /**<@brief Read the state all triggers.
+       *
+       * @return the state of all triggers
+       */
+    //}}}
+
+    //{{{
+    ServerFragments getPortFragments (in long start, in long finish) ;
+      /**<@brief Get fragments from the timeline for all tracks.
+       *
+       * Reads the fragment for all tracks from the timeline the specified times.
+       * The fragments will be re-positioned to start at zero. Thus, for example,
+       * the fragments could be used with createClip() to create a clip which is a
+       * copy of the specified section of the timeline. Can be used on both record
+       * ports for newly recorded material and play ports for retrieving
+       * loaded material.
+       * @param start   Offset on timeline of first frame to be loaded
+       * @param finish  Offset on timeline @e after last frame to be loaded
+       * @return        An array of fragments describing the specified contents of the timeline
+       */
+    //}}}
+    //{{{
+    ServerFragments getPortTypeFragments (in long start, in long finish, in long fragType) ;
+      /**<@brief Get fragments from the timeline for one track class.
+       *
+       * As getPortFragments(), but returns only one class
+       * @param start   Offset on timeline of first frame to be loaded
+       * @param finish  Offset on timeline @e after last frame to be loaded
+       * @param fragType    Class of fragments to be returned
+       * @return        An array of fragments describing the specified contents of the timeline
+       */
+    //}}}
+    //{{{
+    ServerFragments getPortTrackFragments (in long start, in long finish, in long fragType, in long trackNum) ;
+      /**<@brief Get fragments from the timeline for a single track.
+       *
+       * As getPortFragments(), but returns only one track
+       * @param start   Offset on timeline of first frame to be loaded
+       * @param finish  Offset on timeline @e after last frame to be loaded
+       * @param fragType Class of fragments to be returned
+       * @param trackNum The track to be returned
+       * @return        An array of fragments describing the specified contents of the timeline
+       */
+    //}}}
+
+    //{{{
+    void getThumbnailSize (in long mode, out long width, out long height) raises (BadIdent) ;
+      /**<@brief Get Preferred thumbnail dimensions.
+       *
+       * Returns the dimensions at which a thumbnail will normally be returned,
+       * for example to allow a GUI to lay itself out before fetching the first frame
+       * @param mode    Identifies the mode in which the thumbnail will be requested. Currently only mode 0 is supported
+       * @retval width   Width of default thumbnail, in pixels
+       * @retval height  Height of default thumbnail, in lines
+       * @exception BadIdent    If @p mode is out of range
+       */
+    //}}}
+    //{{{
+    void setThumbnailListener (in long mode, in long chanNum, in long ident, in ThumbnailListener listener, in long minInterval) raises (BadIdent) ;
+      /**<@brief Define a thumbnail Listener.
+       *
+       * This associates a thumbnail listener with one of the channels assigned to
+       * the port The channel will send a thumbnail at the defined interval, or slower.
+       * The thumbnail is a compressed version of what is currently in the channel's
+       * input/output framestore.
+       * Barring delays, it should be what actually is on the input/output of the
+       * channel, not what the software thinks it might be.
+       * The thumbnail system does not use the main video path, so cannot provide
+       * thumbnails in real time. The minInterval should never be set very small
+       * lest it overload the channel (which has the option of returning thumbnails
+       * slower than requested if it wishes).
+       * It is intended as a confidence feature, so that controlling software can
+       * give visual feedback that it is actually connected to the right port.
+       * There can be only one Thumbnail Listener at a time, so successive calls
+       * will replace previous listeners. To remove a Listener, set it to null.
+       *
+       * @param mode    Identifies the mode in which the thumbnail will be requested. Currently only mode 0 is supported
+       * @param chanNum The hardware number of the channel the listener is associated with
+       * @param ident   An arbitrary user-supplied identifier which is returned when the thumbnail is sent
+       * @param listener The listener object to which thumbnails will be sent
+       * @param minInterval The minimum interval, in  frames, between successive thumbnails.
+       *        If the channel cannot, for any reason, match this rate, it will slow down.
+       * @exception BadIdent    If @p mode or @p chanNum is out of range
+       */
+    //}}}
+    //{{{
+    long requestThumbnails (in long mode, in long chanNum, in long offset, in long stride, in long count, in long ident, in ThumbnailListener listener) raises (BadIdent) ;
+      /**<@brief Request thumbnails from the timeline.
+       *
+       * Request the sending of a number of thumbnails from the timeline, allowing
+       * the visual display of the timeline. There are no timing guarantees as to
+       * the speed with which thumbnails will be sent.
+       * @param mode    Identifies the mode in which the thumbnail will be requested. Currently only mode 0 is supported
+       * @param chanNum   The number of the video channel from which the thumbnail is to be returned
+
+       * @param offset  The position on the timeline from which the first thumbnail is to be read
+       * @param stride  The number of frames to be stepped between consecutive thumbnails
+       * @param count   The total number of thumbnails to be sent
+       * @param ident   An arbitrary user-supplied identifier which is returned when they thumbnail is sent
+       * @param listener The listener object to which thumbnails will be sent
+       * @return  An Ident which can passed to abortThumbnails() to abort the request
+       * @exception BadIdent    If @p mode or @p chanNum is out of range
+       */
+    //}}}
+    //{{{
+    void abortThumbnails (in long abortID) ;
+      /**<@brief Abort sending thumbnails as requested by requestThumbnails.
+       *
+       * Sending will be aborted as soon as possible. However, the user should not assume
+       * that sending of thumbnails has stopped until ThumbnailListener::finished()
+       * has been called.
+       * @param abortID         ident returned from requestThumbnails
+       */
+    //}}}
+
+    //{{{
+    WStrings controllerNames () ;
+      /**<@brief Enquire the names of all available Effect Controllers.
+       *
+       * There is one effect controller associated with each Effect Track
+       * @return  Array of WStrings representing all the available effect controllers
+       */
+    //}}}
+    //{{{
+    EffectController getController (in long trackNum) raises (BadIdent) ;
+      /**<@brief Get the effect controller associated with a particular track.
+       *
+       * @param trackNum         The track number whose effect controller is needed
+       * @return                 A generic EffectController object which can be upcast to
+       *                the appropriate Controller Type for the track
+       * @exception BadIdent    If @p trackNum is out of range
+       */
+    //}}}
+
+    //{{{
+    PortInfo getPortInfo () ;
+      /**<@brief Retrieve information about the port.*/
+    //}}}
+    //{{{
+    DirectoryViewer getDirViewer (in long timeoutSecs, in wstring viewerName) raises (DatabaseError) ;
+      /**<@brief Get a directory viewer
+       *
+       * The directory viewer returned will be subsetted to the preferred pool for this
+       * server.
+       * @param timeoutSecs     The number of seconds after which the DirectoryViewer will be
+       *                        deactivated if it is not used
+       * @param viewerName      An identifying string for logging purposes
+       * @return  A Directory Viewer for the preferred pool
+       */
+    //}}}
+    //{{{
+    DirectoryViewer getPoolDirViewer (in long poolID, in long timeoutSecs, in wstring viewerName) raises (DatabaseError, BadIdent) ;
+      /**<@brief Get a Directory Viewer for the pool.
+       *
+       * The pool need not be on this server
+       * @param poolID  The pool for which the viewer is needed
+       * @param timeoutSecs     The number of seconds after which the DirectoryViewer will be
+       *                        deactivated if it is not used
+       * @param viewerName      An identifying string for logging purposes
+       * @return  A Directory Viewer for the preferred pool
+       */
+    //}}}
+
+    //{{{
+    ConfigDescriptionList getConfigurations (in long channel, in FragmentType type, in boolean forPlay) raises (BadIdent) ;
+      /**< @brief Get the list of available configurations.
+       * @param         channel The channel (within the port) for which the configurations are wanted
+       * @param         type The fragment type for which configurations are wanted
+       * @param         forPlay Selects play or record configurations
+       * @return        A list of all the valid configurations specified by the parameters.
+       * Configurations numbers are unique across all combinations of type and forPlay.
+       * Configuration numbers will always be the same for a particular server and software release, so
+       * applications remember them. They will be the same for the same version of server software on
+       * the same hardware. They will generally, but not necessarily, remain the same between software releases.
+       * They will @e not be the same between different models of server, so applications
+       * should not hard code them.
+       */
+    //}}}
+    //{{{
+    Longs getDefaultConfigurations (in long channel) raises (BadIdent) ;
+      /**< @brief Get a list of the configurations the port will use of not otherwise instructed. */
+    //}}}
+    //{{{
+    Longs getCurrentConfigurations (in long channel) raises (BadIdent) ;
+      /**< @brief Get the configurations currently in use by the port*/
+    //}}}
+    //{{{
+    void configure (in long channel, in Longs configurations) raises (BadIdent) ;
+      /**< @brief Configure one of the port channels.
+       * @param channel The channel to be configured
+       * @param configurations A list of up to 6 different configurations, each representing a different
+       * fragment type/forPlay combination. Values not defined will use defaults.
+       */
+    //}}}
+
+    //{{{  Const for flags in both play and record port status
+    /** @name flags used in both PortListener::RecordPortStatus::flags and PortListener::PlayPortStatus::flags.*/
+    /* @{ */
+    const unsigned long userFlagsMask = 0x7FFF0000 ;  /**<@brief Flags which can be set/cleared by user; remainder are read only.*/
+    const long alertRed = 0x8000 ;                    /**<@brief Serious failure which may prevent port functioning.*/
+    const long alertAmber = 0x4000 ;                  /**<@brief Lesser failure - often of redundant component - which needs attention.*/
+    /** @} */
+    //}}}
+
+    //{{{
+    boolean assignChannel (in long chanNum, in long flags) raises (BadIdent) ;
+      /**<@brief Assign a channel to the current port.
+       *
+       * The action of assigning a channel to a port puts the port in idle mode
+       * and resets all the tracks.
+       * @param chanNum         The hardware channel on the server to be assigned
+       * @param flags           A set of flags which define features of the channel
+       * @return                False if the channel was already in use
+       * @exception BadIdent    If @p chanNum is out of range
+       */
+    //}}}
+    //{{{
+    void assignTransitionPort (in _Port transitionPort) raises (BadIdent) ;
+      /**<@brief Sets transition channel and master channel for transition effects.
+       *
+       * The action of assigning a transition port to a port puts the port in idle mode
+       * and resets all the tracks.
+       * Reasons for failure:
+       *  Mismatch on channels per port
+       *  Hardware doesn't support transitions
+       * @param transitionPort      The port that will be transitioned onto this port
+       * @return                    False if there is no main channel assigned
+       * @exception BadIdent        If @p port cannot be assigned
+       */
+    //}}}
+    //{{{
+    _Port getTransitionPort () ;
+      /**<@brief Get a Transition Port Object.
+       *
+       *
+       * @return A Port Object.
+       */
+    //}}}
+
+    //{{{  Const for flags in channel assignment
+    /** @name flags used to set features of a channel when assigning it to a port.*/
+    /* {@ */
+    const long audioOnly = 1 ;  /**<@brief If set the channel will record only audio.*/
+    /* @} */
+    //}}}
+    //{{{
+    Longs getChannels () ;
+      /**<@brief Get the numbers of the channels assigned to this port.*/
+    //}}}
+    //{{{
+    void release () ;
+      /**<@brief Release the port.
+       *
+       * This deletes the Port Object, which cannot be used again, and frees all the
+       * channels assigned to it. This is the normal method of closing down a Port.
+       * The channel hardware will normally be returned to a reset idle state.
+       */
+    //}}}
+
+    /**@name Functions valid only in play mode.*/
+    /* @{ */
+    //{{{
+    void load (in long offset, in ServerFragments fragments) raises (InvalidFragments, WrongMode) ;
+      /**<@brief Load fragments onto the timeline.
+       *
+       * Load fragments onto the timeline at the specified offset. The fragments are assumed
+       * to be positioned relative to zero . Thus the specified offset will be added to each fragment
+       * before it is inserted. Any pre-existing fragments will be replaced on a frame by frame
+       * basis i.e. if a fragment being loaded partially overlaps an existing fragment,
+       * only the overlapped section will be replaced. If you do not want to overwrite
+       * existing fragments then insertBlank should be used to create a blank area
+       * to load the new fragments.
+       * Valid only when the port is in Play mode - throws exception otherwise
+       * @param offset          The position in the timeline that fragments with start of zero should be inserted
+       * @param fragments       The fragments
+       * @exception InvalidFragments Thrown if any invalid fragment sent. Valid fragments are still loaded
+       * @exception WrongMode   Thrown if the port is not in Play mode
+       */
+    //}}}
+    //{{{
+    void insertBlank (in long start, in long frames) ;
+      /**<@brief Insert blank space into timeline.
+       *
+       * This moves all the fragments from position "start" on the timeline by "frames" frames,
+       * splitting fragments if necessary. This opens up a gap in the timeline into which further
+       * fragments may be inserted by load().
+       * If start is behind the play position, then the play position will be moved too.
+       * Valid only when the port is in Play mode - does nothing otherwise.
+       * @param start   Position in timeline at which blank is to be inserted.
+       * @param frames  Number of frames to be inserted
+       */
+    //}}}
+    //{{{
+    boolean remove (in long start, in long frames) ;
+      /**<@brief Remove data from timeline.
+       *
+       * Remove a section of timeline, forgetting the fragments contained thereon
+       * The hole left will then be closed up so the length of the timline will shrink
+       * Valid only when the port is in Play mode - does nothing and returns false otherwise
+       * It is not valid to remove the current position in the timeline: if
+       * this is attempted, the command will be ignored, returning false.
+       * It will also return false if it results in nothing being removed.
+       * @param start First frame to be removed
+       * @param frames Number of frames to be removed
+       * @result true if it works, false if fails because not in play mode, attempt to remove current position or nothing removed.
+       */
+    //}}}
+    //{{{
+    boolean wipe (in long start, in long frames) ;
+      /**<@brief Wipe a section of timeline.
+       *
+       * Remove all fragments from a section of timeline, leaving it blank.
+       * The length of the timeline will not change unless it is wiped to the end.
+       * Valid only when the port is in Play mode - does nothing and returns false otherwise
+       * It is good practise to call this routine to wipe "Historic" sections
+       * of the timeline i.e. from 0 to the oldest frame which might be needed
+       * again. This releases locks on used material.
+       * @param start   First frame to be wiped
+       * @param frames  Number of frames to be wiped
+       * @result true if it works, false if fails because not in play mode or attempt to wipe current position.
+       */
+    //}}}
+
+    //{{{
+    void jump (in long offset, in boolean disablePreload) ;
+      /**<@brief Jump to specified point in timeline.
+       *
+       * This routine is not instantaneous - time is required to fetch the frames
+       * at the the jump destination. For instantaneous jumps use setJump().
+       * Valid only when the port is in Play mode - does nothing otherwise
+       * @param offset  Position on timeline to jump to.
+       * @param disablePreload  Currently no implemented - set false.
+       *
+       * If the port was playing when this command is issued, it will be stopped.
+       */
+    //}}}
+
+    //{{{
+    void jumpRelative (in long offset) ;
+      /**<@brief Jump to specified point in timeline relative to the current position.
+       *
+       * This routine jumps to a position relative to the current frame being played.
+       * The distance it will jump is limited to avoid jumping outside the preload
+       * @param offset  The relative distance to jump, limited to +- 10 frames.
+       *
+       * If the port was playing when this command is issued, it will be stopped.
+       */
+    //}}}
+
+    //{{{
+    void setJump (in long offset) ;
+       /**<@brief Set a jump point.
+       *
+       * Sets the "Jump point. While continuing to play normally, the port will preload
+       * frames at the jump point. When a trigger whose action is "jump" is fired,
+       * the port will cut seamlessly to the jump point.
+       * @param offset  The destination for the jump
+       */
+    //}}}
+
+    enum TransitionType { crossFadeWithAudioMix } ;
+
+    //{{{
+    void setTransition (in TransitionType type, in long frames, in boolean autoPlay) ;
+       /**<@brief Set a transition
+       *
+       * Sets the number of frames a transition will take
+       * @param type      The transition type
+       * @param frames    The number of frames for the transition
+       * @param autoPlay  Specifies whether main transition channel plays automatically
+       *                  at end of transition
+       */
+    //}}}
+
+    //{{{
+    void setSpeed (in float newSpeed) ;
+      /**<@brief Request the port to operate at a nonstandard speed.
+       *
+       * @param newSpeed        0.0 is stopped, 1.0 is normal speed
+       * The port will attempt to perform the closest approximation it can to the
+       * requested speed. No guarantee is made as to what that is or whether the
+       * approximation is smooth or jerky, not how long it will take to speed up
+       * or slow down.
+       * Does not start the port. Therefore, if the speed is set to 0.5, the port will
+       * stay stopped until a start trigger is fired, at which point it will play
+       * at half speed.
+       * Valid only when the port is in Play mode - does nothing otherwise
+       */
+    //}}}
+
+    //{{{
+    long jogAudio (in long frames) ;
+      /**<@brief Play a short burst of audio.
+       *
+       * Valid only when stopped.
+       * Plays a short burst of audio, either starting or finishing with the current frame.
+       * Valid only when the port is in Play mode - does nothing otherwise
+       * @param frames: If positive, play that many frames starting from current frame. If negative
+       *        play (-frames) finishing with the current frame.
+       */
+    //}}}
+
+    //{{{
+    void jogSubFrames (in long subFrameTicks) ;
+    /**<@brief Jog in sub frame resolution.
+     *
+     * Valid only when in playmode
+     * Moves the player by the given number of subframe ticks.  A tick is 1/10th of a notional 30Hz or 25Hz frame.
+     */
+    //}}}
+
+
+
+    /**<@brief Apply audio patch to server input.  If preview is 'true' then only the EE output is changed so
+       any recording in progress will not be affected.  If preview is 'false' then both EE and recorded
+       data will have audio patch applied.*/
+    void setInputAudioPatch (in AudioPatchInfoList patches, in boolean preview) ;
+
+    /**<@brief Apply audio patch to server output if current position is between specified start and end frames. */
+    void setOutputAudioPatch (in long startFrame, in long endFrame, in AudioPatchInfoList patches);
+
+
+    /* @} */
+
+    /**@name Functions valid only in record mode.*/
+    /* @{ */
+    //{{{
+    long extendSpace (in long poolID, in long totalFrames) raises (DatabaseError, WrongMode, BadIdent) ;
+      /**<@brief  Get recordable free space.
+       *
+       * Obtain more recordable space
+       * @param poolID          The poolID from which further frames are to be obtained.
+       *                        A value of zero means the default pool if not space has been allocated already,
+       *                        or the same pool as before if space has been allocated.
+       * @param totalFrames    The number of frames to be available after extension
+       * @return        The actual number of frames after extension. This may be less than
+       *        requested if space is not available, or slightly more than requested because
+       *        of internal rounding errors.
+       * @exception WrongMode    If port is not in Record mode
+       */
+    //}}}
+    //{{{
+    long forget (in long offset) ;
+      /**<@brief Forget recorded frames.
+       *
+       * While the record port "remembers" recorded frames, they are locked and cannot be re-used.
+       * When frames of interested have been made into a clip, they are locked by the library
+       * "Frame Magic" mechanism, so that they can be freed from the port - along with any
+       * unwanted heads and tails.
+       * Unrecorded data after the record point cannot be forgotten.
+       * Valid only when the port is in Record mode
+       * @param offset  The offset to forget before i.e. the first frame which must be kept
+       * @return The "low water mark" after forgetting - the lowest numbered frame which
+       * still remains
+       */
+    //}}}
+    //{{{
+    void setFlags (in long track, in long newFlags) ;
+      /**< @brief Set new values for the flags accompanying the video.
+       * Default (no flags) is zero
+       */
+
+    //}}}
+    //{{{
+    void setCrop (in long track, in long cropLeft, in long cropTop, in long cropWidth, in long cropHeight) ;
+      /**< @brief Define the crop on video being recorded.
+       * Set to all zeroes to restore defaults.
+       */
+    //}}}
+    //{{{
+    void setAspect (in long track, in long width, in long height) ;
+      /**< @brief Define the pixel aspect ratio of video being recorded.
+      * Set to all zeroes to restore defaults
+      */
+    //}}}
+    //{{{
+    void setOriginator (in wstring originator) ;
+      /**< @brief Set the "Originator" tag for data recorded on this port*/
+    //}}}
+    //{{{
+    void setRecordTimecodes (in RushTimecodeList timecodes) ;
+      /**< @brief Override input timecodes on record.
+       *
+       * This routine is used when re-recording material which has been archived.
+       * It is desirable that the material should have the same timecodes as those
+       * with which it was first recorded, not the vitc timecodes of the tape
+       * to which it was archived, not the reference timecodes with which it was re-ingested.
+       * This routine allows the controller to provide a set of alternative timecodes
+       * which will be used instead of the physical timecodes as data is recorded.
+       * If the archived material is a clip, the timecode list returned for that clip by
+       * getTimecodes() can be sent to this routine to reconstitute the archived
+       * clip.
+       * @param timecodes      The timecodes to be assigned to the recording.
+       * The individual records must be in order, form a complete set, and non-overlapping.
+       * It is not defined what rushtimecode will be laid down if any of these
+       * critereia is broken.
+      */
+    //}}}
+    //{{{
+    RushIdent getRushRecording (in FragmentType type, in long track) raises (BadIdent);
+      /**< Get the RushIdent for the current port.
+       @param type      The track type for which the RushIdent is required
+       @param track     The track number for which the RushIdent is required
+       */
+    //}}}
+
+    enum OverlayTextColour
+    {
+      olColourWhite,
+      olColourBlack,
+      olColourRed,
+      olColourGreen,
+      olColourBlue,
+      olColourCyan,
+      olColourYellow,
+      olColourMagenta
+    } ;
+
+    //{{{
+    void setOverlayClipTitle (in wstring clipname, in OverlayTextColour colour);
+    /**< Set the overlay clip title information panel text
+     @param clipname      Name of clip to be displayed
+     @param colour        Text colour
+     */
+    //}}}
+
+    const wstring OI_Tally = L"ActiveTally"; /**< @brief Channel Tally ID */
+    //{{{
+    void setOverlayIndicator  (in wstring indicator, in boolean active);
+    /**< Sets the overlay element of type indicator
+     @param indicator      Name of indicator
+     @param active         If true, indicator is displayed or active
+     */
+    //}}}
+    //{{{
+    void setOverlayTallyID  (in long id, in boolean numeric);
+    /**< Sets the overlay channel tally id
+     @param id             Tally ID
+     @param numeric        If true, channel id is displayed as number, other as alpha, 0=A, 1=B, etc.
+     */
+    //}}}
+
+    } ;
+  //}}}
+  //{{{
+  /**@brief A VideoServer.
+   *
+   * A server has video storage, organised into pools, and a number of video Channels
+   * (which may be zero). One or more channels can be assigned to a Port.
+   */
+  interface Server: Properties
+    {
+
+    //{{{
+    ServerInfo getServerInfo () ;
+      /**<@brief Ask server for information about itself.*/
+    //}}}
+
+    //{{{
+    _Port getPort (in wstring ident, in long number) ;
+      /**<@brief Get a Port Object.
+       *
+       * Initially the Port has no channels and is in an undefined mode.
+       * Channels must be assigned to it by calling Port::assignChannel().
+       * The mode (record, play or idle) is defined by a call to Port::setMode().
+       *
+       * @param ident A string used to identify this port. If the string
+       *        is identical to one already in use, that port will be
+       *        returned instead of a new port being created.
+       * @param number A number used to identify the port when sending status
+       *        to status listeners. This number is assigned to the port by the
+       *        call that creates the port, and will not be changed by subsequent
+       *        calls which re-get the same port.
+       * @return A Port Object. Initially, this will have no channels assigned to it.
+       *        The Server has a limited number of Port Objects (equal to the number of channels).
+       *        If it has no more Port Objects, (which will only happen when all Channels are in use)
+       *        it will return a null pointer. This should be checked for.
+       */
+    //}}}
+    //{{{
+    WStrings getPortNames () ;
+       /**<@brief Get the names of all the currently active ports.*/
+    //}}}
+    //{{{
+    WStrings getChanPorts () ;
+       /**<@brief Get the names of the ports controlling all the channels.
+        *
+        * If the channel is not currently under control, an empty string
+        * will be returned. The length of the array is obviously equal to
+        * the number of channels on the server.
+        */
+    //}}}
+    //{{{
+    long long getFreeProtons (in long poolIdent) raises (BadIdent) ;
+      /**<@brief Get the number of protons of free space on a pool attached to this server.
+       *
+       * @param poolIdent       The pool for which space is to be returned.
+       * @exception BadIdent    If @p mode is out of range or @p poolIdent is not attached to this server.
+       */
+    //}}}
+    //{{{
+    Longs getPools () ;
+      /**<@brief Get list of pools directly attached to this port.*/
+    //}}}
+    //{{{
+    Timecode getRefTime () ;
+      /**< @brief Get the current timecode on the Reference input to the Server.
+       *  If an invalid (negative) value is returned, the reference timecode is not present. This should be
+       *  treated as an error condition.
+       */
+    //}}}
+
+    //{{{
+    ConfigDescriptionList getConfigurations (in long channel, in FragmentType type, in boolean forPlay) raises (BadIdent) ;
+      /**< @brief Get the list of available configurations.
+       * @param         channel The channel (within the server) for which the configurations are wanted
+       * @param         type The fragment type for which configurations are wanted
+       * @param         forPlay Selects play or record configurations
+       * @return        A list of all the valid configurations specified by the parameters.
+       * @see Port::getConfigurations()
+       */
+    //}}}
+    //{{{
+    Longs getDefaultConfigurations (in long channel) raises (BadIdent) ;
+      /**< @brief Get a list of the configurations the port will use of not otherwise instructed.
+       * @see Port::getDefaultConfigurations ()
+       */
+    //}}}
+    //{{{
+    Longs getCurrentConfigurations (in long channel) raises (BadIdent) ;
+      /**< @brief Get the configurations currently in use by the port.
+       * @see Port::getCurrentConfigurations()
+       */
+    //}}}
+    //{{{
+    ServerCapabilities getServerCapabilities ();
+      /**< @brief Get the capabilities provided by the specified channel.
+       */
+    //}}}
+
+
+    } ;
+  //}}}
+  //{{{
+  /** @defgroup DirectoryViewer The Directory Viewer Object: The tool for reading and updating the clip directory.
+  * @{
+  */
+  /** @brief A tool for scanning the Quentin Directory: now deprecated DO NOT USE.
+   *
+   * @deprecated The DirectoryViewer is now (as of V3 of this IDL) deprecated,
+   * and all functions which were offered by the DirectoryViewer are now offered by the
+   * ZonePortal. The DirectoryViewer still exists for compatibility, but should
+   * not be used.
+   *
+   * This used to be the primary tool for scanning Quentin's Directory.
+   */
+  interface DirectoryViewer: Properties
+    {
+
+    //{{{
+    ColumnDescList getColumnDescriptions () ;
+      /**<@brief Enquire database structure.
+       * @return        List of column descriptions of all columns in the database
+       */
+    //}}}
+
+    //{{{
+    void setDatabase (in long databaseNum) raises (BadColumnData) ;
+      /**<@brief  Set database number for Register operation.
+       *
+       * This operation is intended only for backward-compatibility purposes with the
+       * RCP Translator program. It sets the database number for use by this controller
+       * in the IREG, IKNOWN, INEW etc. operations. It is strongly recommended that
+       * outside users do NOT use this function.
+       * @param databaseNum The database number for subsequent operations
+       */
+    //}}}
+
+    //{{{
+    long createClip (in ClipPropertyList props, in ServerFragments frags) raises (BadIdent, BadColumnData, DatabaseError, InvalidFragments) ;
+      /**<@brief Create a clip from pre-existing fragments.
+       *
+       * Creates a clip, using the supplied properties to set the clip metadata,
+       * out of the supplied fragments.
+       * No data is copied round the system, so that if the fragments are not on
+       * pools on the same server, the clip will not be playable, though it will be
+       * editable and browseable.
+       * @param props   Arrays of name/value pairs to define clip metadata. The name must
+       *        match one of the creatable columns in the column descriptions, and the value
+       *        must be a valid value for that table.
+       * @param frags   The fragments which are to constitute the clip.
+       * Parameters are checked before the clip is created, so if any exception other
+       * that database error is thrown, the clip will not be created.
+       */
+    //}}}
+    //{{{
+    long createPlacedClip (in ClipPropertyList props, in ServerFragments frags, in long poolIdent, in long ticket, in long priority) raises (BadIdent, BadColumnData, DatabaseError, InvalidFragments, NoSpace, ZoneInaccessable) ;
+      /**<@brief Create a clip on a particular pool, cloning fragments not already there.
+       *
+       * Similar to createClip(), with the additional feature that if any fragments are not already on the desired server,
+       * they are cloned there.
+       * @param props           See createClip()
+       * @param frags           See createClip()
+       * @param poolIdent       The pool on which the clip is to be created
+       * @param ticket          If ticket is > 0 then the system will try to ticket the clone. This may not succeed
+       * @param priority        Priority at which to do copy if not ticketed.
+       * @return                Clip ID/Copy ID of created clip
+       * @see createClip() ;
+       */
+    //}}}
+    //{{{
+    Longs findFragsOnPools (in ServerFragments frags, in Longs pools) raises (BadIdent, DatabaseError, InvalidFragments) ;
+      /**<@brief Find pools upon which copies of frags already exist
+       * It may be possible to chose one of a number of destination pools to copy
+       * a given clip. If so, it is obviously optimal to use a pool upon which some
+       * part of the data is already present. This routine calculates how many atoms
+       * of data are already present on the specified pools and hence will @e not
+       * have to be copied.
+       *
+       * @param frags   The source fragments which it is desired to identify on the target pool
+       * @param pools   The numbers of the pools upon which the fragments are to be found
+       * @return An array (the same length as pools) containing the number of atoms of data already
+       * on the corresponding target pool
+       */
+    //}}}
+    //{{{
+    Longs findClipOnPools (in long clipID, in Longs pools) raises (BadIdent, DatabaseError, InvalidFragments) ;
+       /**< As findFragsOnPools(), but the fragments are those of a known clip.
+       * @param clipID  The clip ID which is to be copied
+       * @param pools   The numbers of the pools upon which the fragments are to be found
+       * @return An array (the same length as pools) containing the number of atoms of data already
+       * on the corresponding target pool
+       * @see findFragsOnPools()
+       */
+    //}}}
+    //{{{
+    ServerFragments getAllFragments (in long clipID) raises (BadIdent, DatabaseError) ;
+      /**<@brief Get all the fragments in a clip.
+       *
+       * This is the most commonly used routine for obtaining the Essence of a clip
+       * @param clipID  The clip whose fragments are needed
+       * @return        The fragments which constitute the clip
+       */
+    //}}}
+    //{{{
+    ServerFragments getFragments (in long clipID, in long start, in long finish) raises (BadIdent, DatabaseError) ;
+      /**<@brief    Get the fragments for part of a clip.
+       *
+       * Similar to getAllFragments(), but allows head and tail of clip to be trimmed.
+       * @param clipID  The clip whose fragments are needed
+       * @param start   The first frame to be returned
+       * @param finish  The frame after the last frame to be returned.
+       * @return  The fragments which constitute the clip
+       */
+    //}}}
+    //{{{
+    ServerFragments getFragmentsWithMode (in long clipID, in long start,
+                                          in long finish, in long playMode) raises (BadIdent, DatabaseError) ;
+      /**<@brief    Get the fragments for part of a clip.
+       *
+       * Similar to getAllFragments(), but allows head and tail of clip to be trimmed.
+       * @param clipID  The clip whose fragments are needed
+       * @param start   The first frame to be returned
+       * @param finish  The frame after the last frame to be returned.
+       * @param playMode The playout mode defaultPlayMode, box, cut, anamorphic or play14x9
+       * @return  The fragments which constitute the clip
+       */
+    //}}}
+    //{{{
+    ServerFragments getTypeFragments (in long clipID, in long trackType) raises (BadIdent, DatabaseError) ;
+      /**<@brief Get all the fragments of a single type in a clip.
+       *
+       * @param clipID  The clip whose fragments are needed
+       * @param trackType       The type of fragments requested
+       * @return        The fragments which constitute the clip
+       */
+    //}}}
+    //{{{
+    ServerFragments getSubTypeFragments (in long clipID, in long trackType, in long start, in long finish) raises (BadIdent, DatabaseError) ;
+      /**<@brief Get all the fragments of a single type in a clip.
+       *
+       * @param clipID  The clip whose fragments are needed
+       * @param trackType       The type of fragments requested
+       * @param start           The first frame for which data is needed.
+       * @param finish          The frame from which data is not needed.
+       * @return        The fragments which constitute the clip
+       */
+    //}}}
+    //{{{
+    ServerFragments getTrackFragments (in long clipID, in long trackType, in long trackNum) raises (BadIdent, DatabaseError) ;
+      /**<@brief Get all the fragments of a single track single type in a clip.
+       *
+       * @param clipID  The clip whose fragments are needed
+       * @param trackType       The type of fragments requested
+       * @param trackNum        The number of the track whose fragments are requested
+       * @return        The fragments which constitute the clip
+       */
+    //}}}
+    //{{{
+    ServerFragments getSubTrackFragments (in long clipID, in long trackType, in long trackNum, in long start, in long finish) raises (BadIdent, DatabaseError) ;
+      /**<@brief Get the fragments of a single track single type in a clip for a subset of the clip.
+       *
+       * @param clipID  The clip whose fragments are needed
+       * @param trackType       The type of fragments requested
+       * @param trackNum        The number of the track whose fragments are requested
+       * @param start           The first frame for which data is needed.
+       * @param finish          The frame from which data is not needed, or 0 for end of clip.
+       * @return        The fragments which constitute the clip
+       */
+    //}}}
+     //{{{
+     ServerFragments getSourceTimecode (in long clipID, in long start, in long finish) raises (DatabaseError) ;
+       /**<@brief Get the source port timecodes with which the video was originally recorded.
+        * The timecodes returned are those with which the video of track 0 was originally recorded.
+        * @param clipID         The clip whose timecodes are to be returned
+        * @param start          The frame within clip from which timecodes are to be returned
+        * @param finish         The frame from which data is not needed, or 0 for end of clip.
+        * @return        The timecode fragments for the clip
+        */
+     //}}}
+    //{{{
+    WStrings getClipData (in long clipID, in WStrings colsWanted) raises (BadColumnData, BadIdent, DatabaseError) ;
+      /**<@brief Get a subset of the clip metadata
+       *
+       * @param clipID          The clip whose metadata is to be read
+       * @param colsWanted      The columns for which metadata is to be returned. The column names
+       *        must match the columns specified by getColumnData() ;
+       * @return        The Metadata in string format
+       */
+    //}}}
+    //{{{
+    void updateClip (in long clipID, in ClipPropertyList newColumns) raises (BadIdent, BadColumnData, DatabaseError) ;
+      /**<@brief Update clip metadata.
+       *
+       * @param clipID          The clip whose metadata is to be updates
+       * @param newColumns      The new metadata in column/value pairs.
+       */
+    //}}}
+    //{{{
+    boolean deleteClip (in long clipID) raises (BadIdent, DatabaseError) ;
+      /**<@brief Delete a clip.
+       *
+       * @param clipID  Clip to be deleted
+       * @return        True if the clip existed and was deleted.
+       */
+    //}}}
+    //{{{
+    long trimUnrecorded (in long clipID) raises (BadIdent, DatabaseError) ;
+      /**<@brief Trim unrecorded data off the end of a record clip.
+       * When recording a feature of unknown length, such as a live event,
+       * a generous amount of space must be allocated to allow for the possibility
+       * of the event overrunning. In order to edit or playout while record is
+       * in progress, a clip can be created with all of this space assigned to it.
+       * If the event does not overrun, the trailing part of this clip will never
+       * have media recorded onto it. Since the clip is the master reference for
+       * the recorded media, it cannot be deleted, which means that the excess
+       * "safety" space will never be freed - without this routine. This routine
+       * trims the unrecorded material from a clip.
+       *
+       * For this routine to do anything (a) video track 0 of the clip must
+       * consist of a single record session, and (b) that record session must
+       * no longer be in progress. If that is the case, the system will check
+       * how far that session reached, and cut off the unrecorded frames. Frame
+       * Magic will then allow the space to be recycled.
+       *
+       * @param clipID  The clip to be trimmed.
+       * @return        The length of the clip after trimming, or -1 if the criteria were not met
+       */
+    //}}}
+    //{{{
+    long numberClip (in long clipID, in long number, in ConflictMode confMode) raises (BadIdent, DatabaseError) ;
+      /**<@brief Number a clip.
+       *
+       * The clip numbering system is intended only for RCP compatibility mode and is use is not recommended
+       * for other users.
+       * @param clipID  The clip to be renumbered
+       * @param number  The number to be assigned to the clip
+       * @param confMode    Manner in which system is to resolve the conflict if the number is already in use.
+       * @return        The number allocated to the clip, of -1 if the renumber fails
+       */
+    //}}}
+    //{{{
+    long scanNumbers (in long poolID, in long number, in FindMode mode) raises (DatabaseError, BadIdent) ;
+      /**<@brief Scan Number table for valid clip.
+       *
+       * The clip numbering system is intended only for RCP compatibility mode and is use is not recommended
+       * for other users.
+       * @param poolID  Pool ID to look for clip
+       * @param number  The clip number to start the search
+       * @param mode    The mode in which the search is to be done
+       * @return  The clip ID of the clip found, or -1 if no clip is found
+       */
+    //}}}
+    //{{{
+    long cloneClip (in long clipID, in long poolIdent, in long ticket, in long priority) raises (DatabaseError, BadIdent, NoSpace, InvalidFragments) ;
+      /**<@brief Clone a clip, usually to another pool.
+       *
+       * A new clip is created with identical metadata to the cloned clip. Essence will be
+       *        clones to the requested pool if it is not already there.
+       * @param clipID          The clip to be cloned
+       * @param poolIdent       The pool on which the clone is to be created.
+       * @param ticket          If ticket is > 0 the system will try to ticket the clone
+       * @param priority        Copy priority if no ticket supplied
+       * @return ClipID of the cloned clip
+       */
+    //}}}
+    //{{{
+    long cloneIfNeeded (in long clipID, in long poolIdent, in long ticket, in long priority, in long expirySecs, out boolean copyCreated) raises (DatabaseError, BadIdent, NoSpace, InvalidFragments) ;
+      /**<@brief Clone a clip unless a suitable clone already exists.
+       *
+       * A check is made to see if there is, on the specified pool, already a clone of the specified
+       * clip. If so, the ID of this clip is returned. Otherwise, the clip is cloned to the
+       * specified pool and the clipID of the clone returned. If the clip is already on the pool,
+       * it will be returned anyway.
+       * If expirySecs is positive, the expiry of the created clip, or of the existing clip (if it
+       * has an expiry) will be raised to at least that number of seconds from now.
+       * @param clipID          The clip to be cloned, if necessary
+       * @param poolIdent       The pool on which the clone is to be created.
+       * @param ticket          If ticket is > 0 the system will try to ticket the clone
+       * @param priority        Copy priority if no ticket supplied
+       * @param expirySecs      If not positive, ignored. If a clip exists and has no expiry, ignored.
+       *                        Otherwise, expiry of clip raised to at least this number of seconds from now.
+       * @param copyCreated     Set true if a clone was created, even if the clone entailed no copying
+       * @return                The clip ID of a suitable clip
+       */
+    //}}}
+    //{{{
+    void replaceContent (in long clipID, in long contentType, in ServerFragments frags) raises (BadIdent, DatabaseError, InvalidFragments) ;
+       /**<@brief Replace the "lightweight" content of a clip
+        *
+        * The essence data may be divided into two sections: the heavyweight audio/video data,
+        * which is held on the server disks, and the lightweight data, currently timecode, notes,
+        * and (for future enhancement) effects.
+        *
+        * Only one content type can be replaced at a time, fragments not of the specified type
+        * being silently dropped. Content which extends beyond the currently defined length
+        * of the clip will also be silently dropped.
+        *
+        * @param clipID The clip whose content is to be replaced
+        * @param contentType The particular type of the content to be replaced
+        * @param frags The new content for the clip
+        */
+    //}}}
+
+    //{{{
+    long getNumberedClip (in long number) raises (DatabaseError) ;
+       /**<@brief Get clipID of a numbered clip.
+       *
+       * The clip numbering system is intended only for RCP compatibility mode and is use is not recommended
+       * for other users.
+       * @param number The clip number to be searched for
+       * @return  the clipID of the requested clip, or -1 if none found
+       */
+    //}}}
+    //{{{
+    void setColumnSelection (in WStrings colsWanted) raises (BadIdent ) ;
+      /**<@brief Set the columns which will be returned from searches.
+       *
+       * Normally, searching software will always want the same set of columns from every search -
+       * at least on a single directory viewer. This defines the columns, and their order, which will
+       * be returned by getSearchResults().
+       * @param colsWanted      The names of the columns to be returned.
+       */
+    //}}}
+    //{{{
+    WStrings getColumnSelection () raises (BadIdent) ;
+      /**<@brief Return the current column selection.
+       *
+       * @return  Values set by setColumnSelection()
+       */
+    //}}}
+    //{{{
+    long maxSearchHits (in long newMax) ;
+      /**<@brief Set the maximum number of hits to be returned by search().
+       *
+       * It is normally useful to limit the size of a search so that if the user mistakenly
+       * requests all clips, resources are not squandered in a useless search. The system
+       * also has its own internal limit to which it will clip the number of hits.
+       * @param newMax   The desired maximum number of hits.
+       * @return  The actual number of hits set i.e. the lesser of newMax and the systems internal limit
+       */
+    //}}}
+    //{{{
+    long search (in ClipPropertyList props, in long max) raises (BadColumnData, DatabaseError) ;
+      /**<@brief Search for clips with a given set of properties.
+       *
+       * The database is searched and the resultant metadata array is held by the
+       * Directory Viewer, and can be read by calling getSearchResults() ;
+       * @param props    A set of column name/property pairs defining the clips to be searched for.
+       * @param max      The maximum number of hits that can be accepted.
+       * @return         The actual number of clips hit
+       */
+    //}}}
+    //{{{
+    WStrings getSearchResults (in long numRows) ;
+      /**<@brief Get the results of a search().
+       *
+       * Get results from a search. For each row, the columns will be returned in separate WStrings.
+       * The number of such WStrings is therefore the number of WStrings in the current columns
+       * multiplied by the numRows.
+       * @param numRows  The maximum number of rows allowed
+       * @return  The clip Metadata in separate WStrings.
+       */
+    //}}}
+    //{{{
+    long moveSearch (in long newPos) ;
+      /**<@brief Move to a different position in search results
+       *
+       * Jump to a different row in the search results: can be used for paging up/down search results
+       * @param newPos  The desired new position: 0 is the first search result
+       * @return        The number of search results available from the current position (i.e. available for more searches
+       */
+    //}}}
+    //{{{
+     long getSearchPos () ;
+       /**<@brief Get current search position, suitable for use with moveSearch
+        *
+        * @return       The current row within the search results
+        */
+    //}}}
+
+    //{{{
+    void closeSearch () ;
+      /**<@brief Release resources tied up by search().
+       *
+       * Storing the results from search() may consume significant resources. These
+       * are released when a new search is initiated. However, if it is not anticipated
+       * that a new search will be done soon, it is good practise to call this routine
+       * to release those resources.
+       */
+    //}}}
+
+    //{{{
+    Longs getTaggedClips (in wstring tag, in wstring keys) raises (DatabaseError) ;
+      /**< Get a list of tags containing the specified tags.
+       * @param tag     The tag "flavour" desired - or null/empty id no tag is needed
+       * @param keys    MySQL-style search keys for the tag
+       * @return        An array of clip IDs which match the tag
+       */
+    //}}}
+
+    //{{{
+    void getThumbnailSize (in long mode, out long width, out long height) raises (BadIdent) ;
+      /**<@brief Request preferred thumbnail size.
+       *
+       * This routine is usually used for layout purposes by a GUI.
+       * @param mode     The mode in which the thumbnail will be supplied. Only 0 currently supported
+       * @retval width    The width of the thumbnail in pixels
+       * @retval height   The height of the thumbnail in pixels
+       */
+    //}}}
+    //{{{
+    long requestThumbnails (in long mode, in Quentin::PositionData fragment, in long offset, in long stride, in long count, in long ident, in Quentin::ThumbnailListener listener) raises (Quentin::BadIdent) ;
+      /**<@brief Request thumbnails from the disk.
+       *
+       * Request the sending of a number of thumbnails from the timeline, allowing
+       * the visual display of the timeline. There are no timing guarantees as to
+       * the speed with which thumbnails will be sent.
+       * @param mode    Identifies the mode in which the thumbnail will be requested. Currently only mode 0 is supported
+       * @param fragment The video fragment from which the thumbnails are to be read
+       * @param offset  The position on the timeline from which the first thumbnail is to be read
+       * @param stride  The number of frames to be stepped between consecutive thumbnails
+       * @param count   The total number of thumbnails to be sent
+       * @param ident   An arbitrary user-supplied identifier which is returned when they thumbnail is sent
+       * @param listener The listener object to which thumbnails will be sent
+       * @return  An Ident which can passed to abortThumbnails() to abort the request
+       */
+    //}}}
+    //{{{
+    void abortThumbnails (in long abortID) ;
+      /**<@brief Abort sending thumbnails as requested by requestThumbnails.
+       *
+       * Sending will be aborted as soon as possible. However, the user should not assume
+       * that sending of thumbnails has stopped until ThumbnailListener::finished()
+       * has been called.
+       * @param abortID         ident returned from requestThumbnails
+       */
+    //}}}
+
+    //{{{
+    long getTicket () ;
+      /**<@brief Get a ticket to perform a copy in real time.
+       *
+       * Deprecated - always returns 1
+       * @return 1
+       * @see tryToTicketCopy
+       */
+    //}}}
+    //{{{
+    void freeTicket (in long ticket) ;
+      /**< @brief Release an unused ticket.
+       *
+       * Depricated - does nothing
+       * @param ticket   The ticket that is no longer wanted
+       * @see tryToTicketCopy
+       */
+    //}}}
+    //{{{
+    long getFreeTickets () ;
+      /**<@brief Get number of free tickets.
+       * Deprecated - always returns 1 for compatibility
+       *
+       * @return  1
+       * @see tryToTicketCopy
+       */
+    //}}}
+
+    //{{{
+    oneway void release () ;
+      /**<@brief Release the Directory Viewer.
+       *
+       * Release all resources used by the Directory Viewer. Effectively destroys the CORBA object.
+       * A Directory viewer will self-destroy if not used for a certain time (many minutes)
+       * to conserver resources.
+       */
+    //}}}
+
+    //{{{
+    WStrings directQuery (in wstring command) raises (DatabaseError) ;
+      /**<@brief Direct query of database.
+       *
+       * This routine provides a direct access to the JDBC query() command.
+       * It is only intended for internal use but included for completeness.
+       * @param command  SQL command to submit to database
+       * @return  Results in the form of an array of WStrings
+       */
+    //}}}
+
+    //{{{
+    wstring getServerTime () raises (DatabaseError) ;
+      /**<@brief Return current value of database server time.
+       *
+       * The created and modified fields in the clip metadata are initialised from
+       * the database servers clock. Rather than have complicated mechanisms for
+       * synchronising times on several machines, this allows that item to be read,
+       * to assist external databases in synchronising to that of Quentin.
+       * @return  Current time on database server
+       */
+    //}}}
+
+    //{{{
+    long queryFreed (in long poolID, in Longs clips) raises (BadIdent, DatabaseError) ;
+      /**< @brief Query how much space would be freed by deleting certain clips
+       *
+       * Because of the operation of FrameMagic&tm , deleting a clip will not
+       * necessarily free the space the clip occupies, because other clips
+       * may share the storage allocated to a clip. This routine allows the
+       * user to query how much space would be freed if a particular group of
+       * clips were deleted.
+       *
+       * @param poolID  The pool upon which the space is needed
+       * @param clips   A list of clip IDs which are candidates for deletion
+       * @return        The amount of space, in protons, which would be freed
+       *                by deleting the clips.
+       */
+    //}}}
+    //{{{
+    Longs getPools (in long clipID) raises (BadIdent, DatabaseError) ;
+      /**< @brief Get a list of pools which contain one or more fragments of a clip.
+       * Clips are not necessarily confined to a single pool. If the are so confined,
+       * the pool upon which they are stored can be obtained from the clip data.
+       * However, if a clip is split across pools, it is often useful to
+       * know which ones. This routine returns the list of pools which
+       * contain parts of a specified clip.
+       * @param clipID The clip whose fragments are to be searched for
+       * @return An array of pool IDs.
+       */
+    //}}}
+    //{{{
+    long long getFreeProtons (in long poolIdent) raises (BadIdent) ;
+     /**<@brief Get number of protons free on a given pool
+      *
+      * @param poolIdent       The pool for which space is to be returned.
+      * @exception BadIdent    If @p poolIdent does not exist
+      */
+    //}}}
+
+    } ;
+  /** @} */
+  //}}}
+  //{{{
+  /**@brief The main entry point to the system.
+   *
+   * The "Front door" to the system from which all else is found. This forms the
+   * start point from which all other objects can be obtained. The IOR for the
+   * the Zone portal can be obtained by HTTP request from the QuentinManager,
+   * or from a file placed in a well known place, or registered with
+   * the CORBA Naming Service.
+   */
+  interface ZonePortal: Properties
+    {
+    //{{{
+    //{{{
+    const wstring idlVersion = L"3-04-00" ; /**< @brief IDL version number */
+    //}}}
+      /**<@brief Version number of this release of the IDL.
+       *
+       * Any object within the system which implements the Properties interface should
+       * supply this value for the Properties::idlVersion property
+       * The format of this string should remain fixed as {major version}-{minor version}.
+       * Generally, different major versions are likely to be incompatible while
+       * minor versions will be in the majority of cases upward compatible.
+       */
+    //}}}
+
+    //{{{  Flags used in return from getCopyMap()
+    /** @defgroup Flags used in the return from getCopyMap()
+     * @{ */
+    const long copyNotDone       = 0x40000000 ;
+      /**< These data have not yet been copied */
+    const long copyHasTicket     = 0x20000000 ;
+      /**< These data are being copied with a ticket */
+    const long copySourceDown    = 0x10000000 ;
+      /**< Copying has been paused because the Source pool is unavailable */
+    const long copyDestDown      = 0x8000000 ;
+      /**< Copyin has been paused because the Destination pool is unavailable */
+    const long copyFailed        = 0x4000000 ;
+      /**< An error occurred copyin these data, which will therefore not be copied */
+    /* @} */
+    //}}}
+
+    //{{{
+    long majorIDLVersion () ;
+      /**<@brief Return the major IDL version (3 in this case).
+       * Generally major IDL versions will be incompatible, while minor IDL
+       * versions will be upwards compatible. This provides a simple test to
+       * see if it is worth going further.
+       */
+    //}}}
+
+    //{{{
+    Longs getServers (in boolean negateIfDown) ;
+      /**<@brief Get a list of all the servers in the system.
+         *
+       * @param  negateIfDown   If a server is not available, negate its ID
+       * @return        List of server IDs
+       */
+    //}}}
+    //{{{
+    Server getServer (in long serverID) raises (BadIdent) ;
+      /**<@brief Request a Server Object.
+       * @param serverID        The desired server
+       * @return                The Server Object
+       */
+    //}}}
+    //{{{
+    Longs getPools () ;
+      /**<@brief  Get list of all pools.
+       *
+       * @return  Array of poolIDs
+       */
+    //}}}
+    //{{{
+    long long getPoolSpace (in long mode, in long poolID) raises (BadIdent) ;
+      /**<@brief  Request free space in a pool.
+       *
+       * @param mode     The recording mode for which free space is required
+       * @param poolID   The pool whose space is to be returned.
+       * @return  The number of frames of free space available on that pool
+       */
+    //}}}
+    //{{{
+    Server getPoolServer (in long poolID) raises (BadIdent) ;
+      /**<@brief  Get the server upon which a pool is mounted.
+       *
+       * @param poolID The desired pool
+       * @return The Server in which the pool is mounted, or null if it is not mountad at this time.
+       *
+       */
+    //}}}
+    //{{{
+    long long getServerSpace (in long mode, in long serverID) raises (BadIdent) ;
+      /**<@brief Get amount of free space on the preferred pool of a server.
+       *
+       * This routine is only intended for compatibility, when it is expected servers will have only a single pool.
+       * This section will shortly change, and is therefore not fully annotated.
+       * @param mode     The recording mode for which free space is required
+       * @param serverID The server whose space is to be returned.
+       * @return  The number of frames of free space available on that pool
+       */
+    //}}}
+    //{{{
+    PoolInfo getPoolInfo (in long poolID) raises (BadIdent) ;
+      /**<@brief Get static information about pool.
+       *
+       * @param poolID   The server whose space is to be returned.
+       * @return  Information about the pool
+       */
+    //}}}
+    //{{{
+    DirectoryViewer getDirViewer (in long timeoutSecs, in wstring viewerName) raises (DatabaseError) ;
+      /**<@brief Get a directory viewer
+       *
+       * The directory viewer returned will be subsetted to the preferred pool for this
+       * server.
+       * @param timeoutSecs     The number of seconds after which the DirectoryViewer will be
+       *                        deactivated if it is not used
+       * @param viewerName      An identifying string for logging purposes
+       * @return  A Directory Viewer for the whole system
+       */
+    //}}}
+    //{{{
+    DirectoryViewer getPoolDirViewer (in long poolID, in long timeoutSecs, in wstring viewerName) raises (DatabaseError) ;
+      /**<@brief Get a directory viewer
+       *
+       * The directory viewer returned will be subsetted to the preferred pool for this
+       * server.
+       * @param poolID          The pool whose clips this Viewer scans
+       * @param timeoutSecs     The number of seconds after which the DirectoryViewer will be
+       *                        deactivated if it is not used
+       * @param viewerName      An identifying string for logging purposes
+       * @return  A Directory Viewer restricted to the given pool - unless the pool is 0
+       */
+    //}}}
+    //{{{
+    boolean addStateChangeListener (in StateChangeListener listener, in long flags) ;
+      /**<@brief  Add a StateChangeListener to the system.
+       * *** DEPRECATED: Please use addNamedStateChangeListener
+       *
+       * @param listener The listener to be added
+       * @param flags    A set of flags (see StateChangeListener) defining state changes to be listened for
+       * @return  true if the listener was freshly added, false if it was already there,
+       *        in which case the flags are updated.
+       */
+    //}}}
+    //{{{
+    boolean addNamedStateChangeListener (in wstring listenerName, in StateChangeListener listener, in long flags, in long interval) ;
+      /**<@brief  Add a StateChangeListener to the system.
+       *
+       * @param listenerName    A name to identify the Listener if problems occur in communicating with it
+       * @param listener The listener to be added
+       * @param flags    A set of flags (see StateChangeListener) defining state changes to be listened for
+       * @param interval An interval, in seconds, after a change is sent, after which an empty list will be sent
+       *                even if there are no changes. Can be used as a confidence check.
+       * @return  true if the listener was freshly added, false if it was already there,
+       *        in which case the flags are updated.
+       */
+    //}}}
+    //{{{
+    boolean removeStateChangeListener (in StateChangeListener listener) ;
+      /**<@brief Remove a state listener.
+       * @return  true if the Listener was there to be removed
+       *
+       */
+    //}}}
+      //{{{
+      StateChangeList getStateChanges (in long changeNum) ;
+      /**<@brief Get all state changes that have happened since changeNum
+       *
+       * Note: state changes are only store for a limited time. So you may not get as many changes as expected
+       * @param changeNum returns all state changes after this change number
+       * @return returns a list of state changes
+       */
+      //}}}
+    //{{{
+    CopyProgress getCopyRemaining (in long clipID) raises (BadIdent) ;
+      /**<@brief Get information about how a particular copy is progressing.
+       *
+       * @param clipID   The clip ID of the clip created by the copy
+       * @return  Information about the copy
+       */
+    //}}}
+    //{{{
+    CopyProgressList getCopiesRemaining () ;
+      /**<@brief  Get information about how all copies are progressing.
+       *
+       * @return  Information about all undeleted copies, whether finished or not
+       */
+    //}}}
+    //{{{
+    CopyMapList getCopyMap (in long clipID, in FragmentType type, in long track) raises (BadIdent) ;
+      /**< Get a "map" of copy progress.
+       * @param clipID  The id of the copy for which information is requested
+       * @param type (audio or video) for which the copymap is requested
+       * @param track   The track number for which the map is requested
+       * @return A list, in order, of CopyMapElement. describing the progress of
+       * the copy.
+       */
+    //}}}
+    //{{{
+    boolean deleteCopy (in long clipID) raises (DatabaseError, BadIdent) ;
+      /**<@brief Delete a copy, before or after completion.
+       * If the copy has completed successfully, the clip will be ready to be used.
+       * If the clip has \e not completed <b>the copied clip will be deleted</b>. This is
+       * because otherwise a clip with uncopied data would remain.  This will happen for both
+       * copies and appends.
+       *
+       * @param clipID   The clipID of the clip being copied to.
+       * @return  true if copy had completed, false if the copy failed or was aborted and
+       * the clip has therefore been deleted.
+       */
+    //}}}
+    //{{{
+    boolean ticketCopy (in long clipID, in long ticket) raises (BadIdent) ;
+      /**< @brief Add a ticket to a copy in progress
+       *
+       * Deprecated - this method calls tryToTicketCopy
+       *
+       * @param clipID  The clipID of the clip being copied to
+       * @param ticket  The ticket to be given to the copy
+       * @return        True if the copy was not ticketed, was not complete, and is now ticketed
+       * Whatever the result, the ticket is "consumed" and either assigned to the copy
+       * or (because the copy was already ticketed or has completed) freed
+       * @see noTicket, remotePool
+       */
+    //}}}
+    //{{{
+    boolean tryToTicketCopy (in long clipID) raises (BadIdent) ;
+      /**< @brief Request a ticket, and if available, apply it to the copy.
+       *
+       * A ticket guarantees that a copy, initiated by routines such as cloneClip() will
+       * proceed in real time or better.
+       * Tickets are allocated based on the bandwidth requirements of the copy and
+       * the bandwith available on the servers involved in the copy. So it is impossible
+       * to know if a copy can be ticketed prior to the clone being created.
+       * This method will calculate the bandwidth requirements for a clone
+       * and if they are available a ticket will be issued.
+       *
+       * Other methods like cloneClip, which take a ticket number, use this number as
+       * a boolean to decide whether to call this method. If the ticket is > 0 then
+       * tryToTicketCopy will be called. The status of the copy can then be used to
+       * determine if a ticket was available.
+       *
+       * This will work for inter-zone copies also. The remote zone will be asked
+       * for a bandwidth allocation and if available the ticket will be applied
+       * @param clipID  The clip whose copy is to be ticketed
+       */
+    //}}}
+    //{{{
+    void unticketCopy (in long clipID) raises (BadIdent) ;
+      /**< @brief Remove the ticket from a copy, if it has one
+       * @param clipID  The clipID of the clip being copied to
+       */
+    //}}}
+
+    //{{{
+    void addTag (in RushTag tagToAdd) raises (BadIdent, DatabaseError) ;
+      /**< @brief Add a single rush tag.
+       *
+       * @param tagToAdd        The tag to be added
+       * If the tag overlaps an existing tag with the same rushID and tagType, even by a single frame, the
+       * preceding tag is deleted.
+       */
+    //}}}
+    //{{{
+     void removeTag (in RushTag tagToRemove) raises (BadIdent, DatabaseError) ;
+      /**< @brief Remove a rush tag.
+       * Any tag for the same rush and tagType that overlaps this tag is removed
+       */
+    //}}}
+    //{{{
+    RushTagList getTags (in RushIdent rushID, in WStrings tagsWanted, in long start, in long finish) raises (BadIdent, DatabaseError) ;
+      /**< @brief Request the tags for a particular rush
+       *
+       * @param rushID         The RushID to be tagged
+       * @param tagsWanted     A list of the tagtypes to be fetchd. A null or an empty array specifies all tagtypes.
+       * @param start          The first frame for which tags are wanted.
+       * @param finish         Frame after last for which tags are wanted. A value less than ore equal to start means the whole rush
+       * @return        A list of all the tags which overlap the specified ranges.
+       */
+    //}}}
+    //{{{
+    RushTimecodeList getTimecodes (in RushIdent rushID, in long start, in long finish) raises (DatabaseError) ;
+      /**< @brief Request the timecode data for a particular rush
+       *
+       * @param rushID         The RushID for which data is wanted
+       * @param start          The first frame for which timecode is wanted.
+       * @param finish         Frame after last for which timecode is wanted. A value less than ore equal to start means the whole rush
+       * @return        A list of the timecode blocks within the specified range
+       */
+    //}}}
+
+    //{{{
+     void refresh (in long mode, in long param) ;
+      /**<@brief Cause Quentin Manager internal refresh
+       *
+       * The Zone Manager is largely configured by the database. Additionally,
+       * it can occasionally be useful to update the database manually. This
+       * function causes the Manager to reload certain sections of stored
+       * data to synchronise with a (possibly updated) database.
+       *
+       * @warning Updating the database manually should only be done with the
+       * greatest of care.
+       *
+       * @param mode    Number identifying the update to be performed
+       *                1 = Refresh config from database
+       * @param param   Modifier whose meaning is mode dependent
+       */
+    //}}}
+
+    //{{{
+    ColumnDescList getColumnDescriptions () ;
+      /**<@brief Enquire database structure.
+       * @return        List of column descriptions of all columns in the database
+       */
+    //}}}
+
+    //{{{
+    long createClip (in ClipPropertyList props, in ServerFragments frags) raises (BadIdent, BadColumnData, DatabaseError, InvalidFragments) ;
+      /**<@brief Create a clip from pre-existing fragments.
+       *
+       * Creates a clip, using the supplied properties to set the clip metadata,
+       * out of the supplied fragments.
+       * No data is copied round the system, so that if the fragments are not on
+       * pools on the same server, the clip will not be playable, though it will be
+       * editable and browseable.
+       * @param props   Arrays of name/value pairs to define clip metadata. The name must
+       *        match one of the creatable columns in the column descriptions, and the value
+       *        must be a valid value for that table.
+       * @param frags   The fragments which are to constitute the clip.
+       * Parameters are checked before the clip is created, so if any exception other
+       * that database error is thrown, the clip will not be created.
+       */
+    //}}}
+    //{{{
+    long createPlacedClip (in ClipPropertyList props, in ServerFragments frags, in long poolIdent, in long ticket, in long priority) raises (BadIdent, BadColumnData, DatabaseError, InvalidFragments, NoSpace) ;
+      /**<@brief Create a clip on a particular pool, cloning fragments not already there.
+       *
+       * Similar to createClip(), with the additional feature that if any fragments are not already on the desired server,
+       * they are cloned there.
+       * @param props           See createClip()
+       * @param frags           See createClip()
+       * @param poolIdent       The pool on which the clip is to be created
+       * @param ticket          If ticket is > 0 the system will try to ticket the clone
+       * @param priority        Priority at which to do copy if not ticketed.
+       * @return                Clip ID/Copy ID of created clip
+       * @see createClip(), noTicket
+       */
+    //}}}
+    //{{{
+    Longs findFragsOnPools (in ServerFragments frags, in Longs pools) raises (BadIdent, DatabaseError, InvalidFragments) ;
+      /**<@brief Find pools upon which copies of frags already exist
+       * It may be possible to choose one of a number of destination pools for a copy
+       * of a given clip. If so, it is obviously optimal to use a pool upon which some
+       * part of the data is already present. This routine calculates how many atoms
+       * of data are already present on the specified pools and hence will @e not
+       * have to be copied.
+       *
+       * @param frags   The source fragments which it is desired to identify on the target pool
+       * @param pools   The numbers of the pools upon which the fragments are to be found
+       * @return An array (the same length as pools) containing the number of atoms of data already
+       * on the corresponding target pool
+       */
+    //}}}
+    //{{{
+    Longs findClipOnPools (in long clipID, in Longs pools) raises (BadIdent, DatabaseError, InvalidFragments) ;
+       /**< As findFragsOnPools(), but the fragments are those of a known clip.
+       * @param clipID  The clip ID which is to be copied
+       * @param pools   The numbers of the pools upon which the fragments are to be found
+       * @return An array (the same length as pools) containing the number of atoms of data already
+       * on the corresponding target pool
+       * @see findFragsOnPools()
+       */
+    //}}}
+    //{{{
+    ServerFragments getAllFragments (in long clipID) raises (BadIdent, DatabaseError) ;
+      /**<@brief Get all the fragments in a clip.
+       *
+       * This is the most commonly used routine for obtaining the Essence of a clip
+       * @param clipID  The clip whose fragments are needed
+       * @return        The fragments which constitute the clip
+       */
+    //}}}
+    //{{{
+    ServerFragments getFragments (in long clipID, in long start, in long finish) raises (BadIdent, DatabaseError) ;
+      /**<@brief    Get the fragments for part of a clip.
+       *
+       * Similar to getAllFragments(), but allows head and tail of clip to be trimmed.
+       * @param clipID  The clip whose fragments are needed
+       * @param start   The first frame to be returned
+       * @param finish  The frame after the last frame to be returned.
+       * @return  The fragments which constitute the clip
+       */
+    //}}}
+    //{{{
+    ServerFragments getFragmentsWithMode (in long clipID, in long start,
+                                          in long finish, in long playMode) raises (BadIdent, DatabaseError) ;
+      /**<@brief    Get the fragments for part of a clip.
+       *
+       * Similar to getAllFragments(), but allows head and tail of clip to be trimmed.
+       * @param clipID  The clip whose fragments are needed
+       * @param start   The first frame to be returned
+       * @param finish  The frame after the last frame to be returned.
+       * @param playMode The playout mode defaultPlayMode, box, cut, anamorphic or play14x9
+       * @return  The fragments which constitute the clip
+       */
+    //}}}
+    //{{{
+    ServerFragments getTypeFragments (in long clipID, in long trackType) raises (BadIdent, DatabaseError) ;
+      /**<@brief Get all the fragments of a single type in a clip.
+       *
+       * @param clipID  The clip whose fragments are needed
+       * @param trackType       The type of fragments requested
+       * @return        The fragments which constitute the clip
+       */
+    //}}}
+    //{{{
+    ServerFragments getSubTypeFragments (in long clipID, in long trackType, in long start, in long finish) raises (BadIdent, DatabaseError) ;
+      /**<@brief Get all the fragments of a single type in a clip.
+       *
+       * @param clipID  The clip whose fragments are needed
+       * @param trackType       The type of fragments requested
+       * @param start           The first frame for which data is needed.
+       * @param finish          The frame from which data is not needed.
+       * @return        The fragments which constitute the clip
+       */
+    //}}}
+    //{{{
+    ServerFragments getTrackFragments (in long clipID, in long trackType, in long trackNum) raises (BadIdent, DatabaseError) ;
+      /**<@brief Get all the fragments of a single track single type in a clip.
+       *
+       * @param clipID  The clip whose fragments are needed
+       * @param trackType       The type of fragments requested
+       * @param trackNum        The number of the track whose fragments are requested
+       * @return        The fragments which constitute the clip
+       */
+    //}}}
+    //{{{
+    ServerFragments getSubTrackFragments (in long clipID, in long trackType, in long trackNum, in long start, in long finish) raises (BadIdent, DatabaseError) ;
+      /**<@brief Get the fragments of a single track single type in a clip for a subset of the clip.
+       *
+       * @param clipID  The clip whose fragments are needed
+       * @param trackType       The type of fragments requested
+       * @param trackNum        The number of the track whose fragments are requested
+       * @param start           The first frame for which data is needed.
+       * @param finish          The frame from which data is not needed.
+       * @return        The fragments which constitute the clip
+       */
+    //}}}
+    //{{{
+    ServerFragments getSourceTimecode (in long clipID, in long start, in long finish) raises (DatabaseError) ;
+      /**<@brief Get the source port timecodes with which the video was originally recorded.
+       * The timecodes returned are those with which the video of track 0 was originally recorded.
+       * @param clipID         The clip whose timecodes are to be returned
+       * @param start          The frame within clip from which timecodes are to be returned
+       * @param finish         The frame from which data is not needed, or 0 for end of clip.
+       * @return        The timecode fragments for the clip
+       */
+    //}}}
+    //{{{
+    ServerFragments getRefTimecode (in long clipID, in long start, in long finish) raises (DatabaseError) ;
+      /**<@brief Get the reference timecodes with which the video was originally recorded.
+       * The timecodes returned are those with which the video of track 0 was originally recorded.
+       * @param clipID         The clip whose timecodes are to be returned
+       * @param start          The frame within clip from which timecodes are to be returned
+       * @param finish         The frame from which data is not needed, or 0 for end of clip.
+       * @return        The timecode fragments for the clip
+       */
+    //}}}
+
+    //{{{
+    WStrings getClipData (in long clipID, in WStrings colsWanted) raises (BadColumnData, BadIdent, DatabaseError) ;
+      /**<@brief Get a subset of the clip metadata
+       *
+       * @param clipID          The clip whose metadata is to be read
+       * @param colsWanted      The columns for which metadata is to be returned. The column names
+       *        must match the columns specified by getColumnData() ;
+       * @return        The Metadata in string format
+       */
+    //}}}
+    //{{{
+    void updateClip (in long clipID, in ClipPropertyList newColumns) raises (BadIdent, BadColumnData, DatabaseError) ;
+      /**<@brief Update clip metadata.
+       *
+       * @param clipID          The clip whose metadata is to be updates
+       * @param newColumns      The new metadata in column/value pairs.
+       */
+    //}}}
+    void setClipProtection (in long clipID, in wstring userID, in ProtectMode mode) raises (BadIdent, DatabaseError) ;
+      /**<@brief Change the protection of a clip
+       *
+       * @param clipID          The clip whose protection is to be changed
+       * @param userID          A string identifying who made the change
+       * @param mode            The mode to set the protection to
+       */
+    //{{{
+    boolean deleteClip (in long clipID) raises (BadIdent, DatabaseError) ;
+      /**<@brief Delete a clip.
+       *
+       * @param clipID  Clip to be deleted
+       * @return        True if the clip existed and was deleted.
+       */
+    //}}}
+    //{{{
+    long trimUnrecorded (in long clipID) raises (BadIdent, DatabaseError) ;
+      /**<@brief Trim unrecorded data off the end of a record clip.
+       * When recording a feature of unknown length, such as a live event,
+       * a generous amount of space must be allocated to allow for the possibility
+       * of the event overrunning. In order to edit or playout while record is
+       * in progress, a clip can be created with all of this space assigned to it.
+       * If the event does not overrun, the trailing part of this clip will never
+       * have media recorded onto it. Since the clip is the master reference for
+       * the recorded media, it cannot be deleted, which means that the excess
+       * "safety" space will never be freed - without this routine. This routine
+       * trims the unrecorded material from a clip.
+       *
+       * For this routine to do anything (a) video track 0 of the clip must
+       * consist of a single record session, and (b) that record session must
+       * no longer be in progress. If that is the case, the system will check
+       * how far that session reached, and cut off the unrecorded frames. Frame
+       * Magic will then allow the space to be recycled.
+       *
+       * @param clipID  The clip to be trimmed.
+       * @return        The length of the clip after trimming, or -1 if the criteria were not met
+       */
+    //}}}
+    //{{{
+    long numberClip (in long clipID, in long number, in ConflictMode confMode) raises (BadIdent, DatabaseError) ;
+      /**<@brief Number a clip.
+       *
+       * The clip numbering system is intended only for RCP compatibility mode and is use is not recommended
+       * for other users.
+       * @param clipID  The clip to be renumbered
+       * @param number  The number to be assigned to the clip
+       * @param confMode    Manner in which system is to resolve the conflict if the number is already in use.
+       * @return        The number allocated to the clip, of -1 if the renumber fails
+       */
+    //}}}
+    //{{{
+    long scanNumbers (in long poolID, in long number, in FindMode mode) raises (DatabaseError, BadIdent) ;
+      /**<@brief Scan Number table for valid clip.
+       *
+       * The clip numbering system is intended only for RCP compatibility mode and is use is not recommended
+       * for other users.
+       * @param poolID  Pool ID to look for clip
+       * @param number  The clip number to start the search
+       * @param mode    The mode in which the search is to be done
+       * @return  The clip ID of the clip found, or -1 if no clip is found
+       */
+    //}}}
+    //{{{
+    long cloneClip (in long clipID, in long poolIdent, in long ticket, in long priority) raises (DatabaseError, BadIdent, NoSpace, InvalidFragments) ;
+      /**<@brief Clone a clip, usually to another pool.
+       *
+       * A new clip is created with identical metadata to the cloned clip. Essence will be
+       *        clones to the requested pool if it is not already there.
+       * @param clipID          The clip to be cloned
+       * @param poolIdent       The pool on which the clone is to be created.
+       * @param ticket          If ticket is > 0 the system will try to ticket the clone
+       * @param priority        Copy priority if no ticket supplied
+       * @return ClipID of the cloned clip
+       * @see noTicket
+       */
+    //}}}
+    //{{{
+    long cloneClipInterZone (in long zoneID, in long clipID, in long poolID, in long priority) raises (BadIdent, DatabaseError, NoSpace, InvalidFragments, ZoneInaccessable) ;
+    /**< Clone a clip in a remote zone to a pool in this zone.
+     * @param zoneID            The Zone in which the clip to be cloned is held
+     * @param clipID            The clip within that zone which is to be cloned
+     * @param poolID            The pool to which the clip is to be cloned (which must be in this zone)
+     * @param priority          The priority with which the copy is to occur
+     * @return The clip id (within this zone) of the cloned clip. This clip ID is also the copy ID
+     * which can be used to monitor the progress of the clone operation or to delete it.
+     */
+    //}}}
+    //{{{
+    long cloneClipInterZoneWithoutHistory (in long zoneID, in long clipID, in long poolID, in long priority) raises (BadIdent, DatabaseError, NoSpace, InvalidFragments, ZoneInaccessable) ;
+    /**< Clone a clip in a remote zone to a pool in this zone without copying history.
+     * @param zoneID            The Zone in which the clip to be cloned is held
+     * @param clipID            The clip within that zone which is to be cloned
+     * @param poolID            The pool to which the clip is to be cloned (which must be in this zone)
+     * @param priority          The priority with which the copy is to occur
+     * @return The clip id (within this zone) of the cloned clip. This clip ID is also the copy ID
+     * which can be used to monitor the progress of the clone operation or to delete it.
+     */
+    //}}}
+    //{{{
+    long cloneIfNeeded (in long clipID, in long poolIdent, in long ticket, in long priority, in long expirySecs, out boolean copyCreated) raises (DatabaseError, BadIdent, NoSpace, InvalidFragments) ;
+      /**<@brief Clone a clip unless a suitable clone already exists.
+       *
+       * A check is made to see if there is, on the specified pool, already a clone of the specified
+       * clip. If so, the ID of this clip is returned. Otherwise, the clip is cloned to the
+       * specified pool and the clipID of the clone returned. If the clip is already on the pool,
+       * it will be returned anyway.
+       * If expirySecs is positive, the expiry of the created clip, or of the existing clip (if it
+       * has an expiry) will be raised to at least that number of seconds from now.
+       * @param clipID          The clip to be cloned, if necessary
+       * @param poolIdent       The pool on which the clone is to be created.
+       * @param ticket          If ticket is > 0 the system will try to ticket the clone
+       * @param priority        Copy priority if no ticket supplied
+       * @param expirySecs      If not positive, ignored. If a clip exists and has no expiry, ignored.
+       *                        Otherwise, expiry of clip raised to at least this number of seconds from now.
+       * @param copyCreated     Set true if a clone was created, even if the clone entailed no copying
+       * @return                The clip ID of a suitable clip
+       * @see noTicket
+       */
+    //}}}
+    //{{{
+    void replaceContent (in long clipID, in long contentType, in ServerFragments frags) raises (BadIdent, DatabaseError, InvalidFragments) ;
+       /**<@brief Replace the "lightweight" content of a clip
+        *
+        * The essence data may be divided into two sections: the heavyweight audio/video data,
+        * which is held on the server disks, and the lightweight data, currently timecode, notes,
+        * and (for future enhancement) effects.
+        *
+        * Only one content type can be replaced at a time, fragments not of the specified type
+        * being silently dropped. Content which extends beyond the currently defined length
+        * of the clip will also be silently dropped.
+        *
+        * @param clipID The clip whose content is to be replaced
+        * @param contentType The particular type of the content to be replaced
+        * @param frags The new content for the clip
+        */
+    //}}}
+    //{{{
+    FullClipIDList createPlaceholder (in ClipPropertyList props, in Longs pools) raises (BadColumnData, DatabaseError, BadIdent, ZoneInaccessable) ;
+      /**< @brief Create a Placeholder - a clip without essence data.
+       * A placeholder is a marker of a clip that is to be created at some later time.
+       * It has all the metadata of a clip, but no essence data. It cannot be
+       * cloned, but it can be retitled etc. Later, it can have essence data supplied by
+       * fillPlaceholder(), at which point it becomes an ordinary clip in all ways.
+       * @param props   The metadata for the newly created placeholder.
+       * @param pools   The list of pools upon which the placeholder is to be created
+       * @return        The Full clip IDs of the created placeholders.
+       */
+    //}}}
+
+    //{{{
+    FullClipIDList clonePlaceholder (in long clipID, in Longs pools) raises (BadColumnData, DatabaseError, BadIdent, ZoneInaccessable) ;
+      /**< @brief Clone a Placeholder - a clip without essence data.
+       * A placeholder is a marker of a clip that is to be created at some later time.
+       * It has all the metadata of a clip, but no essence data. It cannot be
+       * cloned, but it can be retitled etc. Later, it can have essence data supplied by
+       * fillPlaceholder(), at which point it becomes an ordinary clip in all ways.
+       * @param clipID  The clipID of the placeholder to be cloned
+       * @param pools   The list of pools to clone the placeholder to
+       * @return        The Full clip IDs of the created placeholders.
+       */
+    //}}}
+
+    //{{{
+    FullClipIDList createExtPlaceholder (in ClipPropertyList props, in Longs pools, in WStrings extData) raises (BadColumnData, DatabaseError, BadIdent, ZoneInaccessable) ;
+    /**< @brief An extended version of createPlaceholder with a string associated with each placeholder
+     * @param props   The metadata for the newly created placeholder.
+     * @param pools   The list of pools upon which the placeholder is to be created
+     * @param extData A string with extended data for the placeholder - correlates with pools.
+     * @return        The Full clip IDs of the created placeholders.
+     */
+    //}}}
+    //{{{
+    Longs getPlaceholderPools (in long clipID) raises (BadIdent, ZoneInaccessable, DatabaseError) ;
+      /**< @brief Get the pools which were passed in when the placeholder was created.
+       * @param clipID    A placeholder clip (not necessarily the master)
+       */
+    //}}}
+    //{{{
+    PlaceholderDataList getPlaceholderData (in long clipID) raises (BadIdent, ZoneInaccessable, DatabaseError) ;
+    /**< @brief Get extended data for all o a set of correlated placeholders.
+     * @param clipID    The ID of the clip for which the placeholder is required
+     * @return          Tada about all the placeholders which share with this clip
+     *
+     */
+    //}}}
+    //{{{
+    FullClipIDList fillPlaceholder (in long clipID, in ServerFragments frags, in ClipPropertyList props, in long priority) raises (BadIdent, BadColumnData, DatabaseError, InvalidFragments, NoSpace, ZoneInaccessable) ;
+      /**< @brief Fill in a placeholder, converting it into a full clip.
+       * @param clipID The clipID, which must be of a placeholder returned from createPlaceholder()
+       * @param frags           The fragments which are to become the body of the clip.
+       * @param props           A list of properties which are to update those already in the placeholder.
+       * @param priority        The priority for any copies to be performed
+       * @return                The full clip IDs of the placeholders which have been filled
+       */
+    //}}}
+    //{{{
+    void fillSinglePlaceholder (in PlaceholderData data, in ServerFragments frags, in ClipPropertyList props, in long priority) raises (BadIdent, BadColumnData, DatabaseError, InvalidFragments, NoSpace, ZoneInaccessable) ;
+      /**< @brief fill a single placeholder, converting it to a full clip.
+       * @param data            Place holder data
+       * @param frags           The fragments which are to become the body of the clip.
+       * @param props           A list of properties which are to update those already in the placeholder.
+       * @param priority        The priority for any copies to be performed
+       */
+
+    //}}}
+
+    //{{{
+    long rushHighWater (in Quentin::RushIdent rushID) raises (Quentin::BadIdent, Quentin::DatabaseError) ;
+      /**< @brief Returns finish of last recorded block of browse for the given rush.
+       * i.e. first frame for which browse unavailable. If recording still in progress, rushRecording flag is set.
+       * If rush not heard of, returns -1
+       */
+    const long rushRecording = 0x40000000 ;     /**< @brief Flag set in reply from rushHighWater if rush is still being recorded*/
+    //}}}
+
+    //{{{
+    long createDeltaFromClips (in long originalClipID, in long laterClipID, in ClipPropertyList props) raises (BadColumnData, DatabaseError, BadIdent, InvalidFragments) ;
+      /**< @brief Create clip for delta archiving.
+       *
+       * Imagine a long master clip has been recorded into the Server system,
+       * and has then been archived. An edited version of this clip is created.
+       * Most of the material in the edited version is the same as in the
+       * master clip, but material has been removed and there are small
+       * sections of new material created by the editing process. It is
+       * desired to archive only the frames of the edited clip which do NOT
+       * form part of the original clip. This routine returns a clip (probably
+       * not sensibly playable) which represents that data.
+       *
+       * @param originalClipID  The clip id of the master clip, material which is assumed to be already archived
+       * @param laterClipID     The later clip, consisting mostly of Original Clip, whose extra material is to be archived
+       * @param props           Clip properties to be assigned to the created clip
+       * @return                The clipID of the clip created
+       *
+       */
+    //}}}
+    //{{{
+    long createDeltaFromFragments (in ServerFragments originalFragments, in ServerFragments laterFragments, in ClipPropertyList props) raises (BadColumnData, DatabaseError, InvalidFragments) ;
+      /**< @brief Create clip for delta archiving.
+       *
+       * Similar to createDeltaFromClips(), but the original material is in fragments, not clips
+       * @see createDeltaFromClip()
+       *
+       * @param originalFragments  The fragments of the master clip, material which is assumed to be already archived
+       * @param laterFragments     The later fragments, consisting mostly of original fragments, whose extra material is to be archived
+       * @param props              Clip properties to be assigned to the created clip
+       * @return                   The clipID of the clip created
+       *
+       */
+    //}}}
+
+    //{{{
+    long getPoolNumberedClip (in long number, in long pool) raises (DatabaseError) ;
+       /**<@brief Get clipID of a numbered clip.
+       *
+       * The clip numbering system is intended only for RCP compatibility mode and is use is not recommended
+       * for other users.
+       * @param number  The clip number to be searched for
+       * @param pool    The pool on which to search
+       * @return  the clipID of the requested clip, or -1 if none found
+       */
+    //}}}
+
+    //{{{
+    WStrings searchClips (in ClipPropertyList props, in WStrings columns, in long max) raises (BadColumnData, DatabaseError) ;
+      /**<@brief Search for clips with a given set of properties.
+       *
+       * The database is searched and the resultant metadata returned
+       * @param props    A set of column name/property pairs defining the clips to be searched for.
+       * @param columns  The set of columns to be returned.
+       * @param max      The maximum number of hits that can be accepted.
+       * @return         The metadata for the clips found: will always be a multiple of the number of columns supplied
+       */
+    //}}}
+    //{{{
+    long countClips (in ClipPropertyList props) raises (BadColumnData, DatabaseError) ;
+      /**<@brief Count the number of clips with a given set of properties.
+       *
+       * The database is searched and the number of clips counted
+       * @param props    A set of column name/property pairs defining the clips to be searched for.
+       * @return         The number of clips that match the search criteria
+       */
+    //}}}
+    //{{{
+    WStrings searchClipsWithOffset (in ClipPropertyList props, in WStrings columns, in long offset, in long max) raises (BadColumnData, DatabaseError) ;
+      /**<@brief Search for clips with a given set of properties from an offset.
+       *
+       * The database is searched and the resultant metadata array is returned
+       * @param props    A set of column name/property pairs defining the clips to be searched for.
+       * @param columns  The set of columns to be returned.
+       * @param offset   The offset to start searching from.
+       * @param max      The maximum number of rows to be returned.
+       * @return         The metadata for the clips found: will always be a multiple of the number of columns supplied
+       */
+    //}}}
+    //{{{
+    WStrings orderedSearchClips (in ClipPropertyList props, in WStrings columns, in SortOrderList order, in long offset, in long max) raises (BadColumnData, DatabaseError) ;
+      /**<@brief Search for clips with a given set of properties from an offset.
+       *
+       * The database is searched and the resultant metadata array is returned
+       * @param props    A set of column name/property pairs defining the clips to be searched for.
+       * @param columns  The set of columns to be returned.
+       * @param order    Column names defining the sort order of the clips returned
+       * @param offset   The offset to start searching from.
+       * @param max      The maximum number of rows to be returned.
+       * @return         The metadata for the clips found: will always be a multiple of the number of columns supplied
+       */
+    //}}}
+    //{{{
+    Longs getTaggedClips (in wstring tag, in wstring keys) raises (DatabaseError) ;
+        /**< @brief Get a list of clips containing the specified tags.
+         * @param tag     The tag "flavour" desired - or null/empty id no tag is needed
+         * @param keys    MySQL-style search keys for the tag
+         * @return        An array of clip IDs which match the tag
+         */
+    //}}}
+
+    //{{{
+    FormatInfo getFormatInfo (in FormatCode format) raises (BadIdent) ;
+      /**< @brief Get the information for a particular format*/
+    //}}}
+
+    //{{{
+    void getThumbnailSize (in long mode, out long width, out long height) raises (BadIdent) ;
+      /**<@brief Request preferred thumbnail size.
+       *
+       * This routine is usually used for layout purposes by a GUI.
+       * @param mode     The mode in which the thumbnail will be supplied. Only 0 currently supported
+       * @retval width    The width of the thumbnail in pixels
+       * @retval height   The height of the thumbnail in pixels
+       */
+    //}}}
+    //{{{
+    long requestThumbnails (in long mode, in Quentin::PositionData fragment, in long offset, in long stride, in long count, in long ident, in Quentin::ThumbnailListener listener) raises (Quentin::BadIdent) ;
+      /**<@brief Request thumbnails from the disk.
+       *
+       * Request the sending of a number of thumbnails from the timeline, allowing
+       * the visual display of the timeline. There are no timing guarantees as to
+       * the speed with which thumbnails will be sent.
+       * @param mode    Identifies the mode in which the thumbnail will be requested. Currently only mode 0 is supported
+       * @param fragment The video fragment from which the thumbnails are to be read
+       * @param offset  The position on the timeline from which the first thumbnail is to be read
+       * @param stride  The number of frames to be stepped between consecutive thumbnails
+       * @param count   The total number of thumbnails to be sent
+       * @param ident   An arbitrary user-supplied identifier which is returned when they thumbnail is sent
+       * @param listener The listener object to which thumbnails will be sent
+       * @return  An Ident which can passed to abortThumbnails() to abort the request
+       */
+    //}}}
+    //{{{
+    void abortThumbnails (in long abortID) ;
+      /**<@brief Abort sending thumbnails as requested by requestThumbnails.
+       *
+       * Sending will be aborted as soon as possible. However, the user should not assume
+       * that sending of thumbnails has stopped until ThumbnailListener::finished()
+       * has been called.
+       * @param abortID         ident returned from requestThumbnails
+       */
+    //}}}
+
+    //{{{
+    long getTicket () ;
+      /**<@brief Get a ticket to perform a copy in real time.
+       *
+       * Deprecated - always returns 1
+       * @return 1
+       * @see tryToTicketCopy
+       */
+    //}}}
+    //{{{
+    void freeTicket (in long ticket) ;
+      /**< @brief Release an unused ticket.
+       *
+       * Deprecated - does nothing
+       * @param ticket   The ticket that is no longer wanted
+       * @see tryToTicketCopy
+       */
+    //}}}
+    //{{{
+    long getFreeTickets () ;
+      /**<@brief Get number of free tickets.
+       *
+       * Deprecated - always returns 1
+       * @return 1
+       * @see tryToTicketCopy
+       */
+    //}}}
+
+    //{{{
+    WStrings directQuery (in wstring command) raises (DatabaseError) ;
+      /**<@brief Direct query of database.
+       *
+       * This routine provides a direct access to the JDBC query() command.
+       * It is only intended for internal use but included for completeness.
+       * @param command  SQL command to submit to database
+       * @return  Results in the form of an array of WStrings
+       */
+    //}}}
+    //{{{
+    void unregisterAll (in long database, in long poolID) raises (BadColumnData, DatabaseError) ;
+      /**<@brief Direct implementation of RCP translator UNREG ALL command.
+       * DO NOT USE!!!!
+       */
+    //}}}
+
+    //{{{
+    wstring getServerTime () raises (DatabaseError) ;
+      /**<@brief Return current value of database server time.
+       *
+       * The created and modified fields in the clip metadata are initialised from
+       * the database servers clock. Rather than have complicated mechanisms for
+       * synchronising times on several machines, this allows that item to be read,
+       * to assist external databases in synchronising to that of Quentin.
+       * @return  Current time on database server
+       */
+    //}}}
+
+    //{{{
+    wstring getSequence (in wstring prefix) raises (BadIdent) ;
+      /**< @brief Get a unique sequence number.
+       * The Manager can be used to create unique sequence numbers in order
+       * to identify clips unambiguously. Several different sequences can be
+       * supported, identified by a prefix string.
+       * @param prefix  Prefix string (e.g. "Air") ;
+       * @return The generated sequence, as a string (e.g. "Air3192") ;
+       */
+    //}}}
+
+    //{{{  "Area" routines
+    /** "Areas" are provided to support multi-pool publishing and searching from Edit
+    seats. An Area will usually define a list of pools top be published to or searches,
+    and optionally some extra metadata to modify the search or publication. This is
+    more fully documented elsewhere.
+    Search and publish areas are different. For example, the publish set may change
+    from time to time, and the search seat wants to cover all publish areas used
+    at ay time.
+    */
+    WStrings getAreaNames (in boolean search, in wstring propWanted) raises (DatabaseError) ;
+      /**< Get the list of area names
+       * @param search if true, search areas, otherwise publish areas.
+       * @param propWanted A property the area must have to be included - empty string disables.
+       * (e.g. if area must have Pools defined, set this to "Pools").
+       * @return A list, in alphabetic order, of area names in the appropriate mode
+       */
+    ClipPropertyList getAreaPropertyList (in wstring areaName, in boolean search) raises (DatabaseError) ;
+      /**< Get the properties of the specified area.
+       * @param areaName The name of the area to be fetched.
+       * @param search if true, search areas, otherwise publish areas
+       * @return The properties associated with the Areas - empty if area unknown
+       */
+    void setAreaProperties (in string areaName, in boolean search, in ClipPropertyList properties) raises (DatabaseError) ;
+      /**< Set the properties of the specified area.
+       * Removes any pre-existing properties. An empty list will remove the area.
+       * @param areaName The name of the area to be fetched.
+       * @param search if true, search areas, otherwise publish areas
+       * @param properties The replacement properties
+       */
+    //}}}
+
+    //{{{
+    long queryFreed (in long poolID, in Longs clips) raises (BadIdent, DatabaseError) ;
+      /**< @brief Query how much space would be freed by deleting certain clips
+       *
+       * Because of the operation of FrameMagic&tm , deleting a clip will not
+       * necessarily free the space the clip occupies, because other clips
+       * may share the storage allocated to a clip. This routine allows the
+       * user to query how much space would be freed if a particular group of
+       * clips were deleted.
+       *
+       * @param poolID  The pool upon which the space is needed
+       * @param clips   A list of clip IDs which are candidates for deletion
+       * @return        The amount of space, in protons, which would be freed
+       *                by deleting the clips.
+       */
+    //}}}
+    //{{{
+    long long getFreeProtons (in long poolIdent) raises (BadIdent) ;
+     /**<@brief Get number of protons free on a given pool
+      *
+      * @param poolIdent       The pool for which space is to be returned.
+      * @exception BadIdent    If @p poolIdent does not exist
+      */
+    //}}}
+    //{{{
+      long getFreeFrames (in long poolIdent, in FormatCodes formats) raises (BadIdent) ;
+     /**<@brief Get number of frames free on a given pool for a given set of formats
+      *
+      * To convert from the underlying protons to frames, the system needs to know
+      * what format is going to be used. So you must pass in a format for each
+      * track to be recorded. If there is a video format and no browse format is
+      * specified, then the configured default browse format will be used.
+      * If there is more than one video or audio track, they must be the same format.
+      *
+      * @param poolIdent       The pool for which space is to be returned.
+      * @param formats         A list of format codes
+      * @exception BadIdent    If @p poolIdent does not exist
+      */
+    //}}}
+
+    //{{{
+    long getZoneNumber () ;
+      /**< @brief Get the Zone Number of this zone*/
+    //}}}
+    //{{{
+    Longs getZones (in boolean upOnly) ;
+      /**< @brief Get the Zone IDs of all zones within this system (not including this one).
+       * @param upOnly        If true, only those zones currently believed to be accessible are listed
+       */
+    //}}}
+    //{{{
+    ZonePortal getZonePortal (in long zoneID) raises (BadIdent, ZoneInaccessable) ;
+      /**< @brief Get the ZonePortal object for a remote zone (which must be up)
+       * @param zoneID        The ID of the remote zone
+      */
+    //}}}
+    //{{{
+    wstring getZoneName (in long zoneID) raises (BadIdent) ;
+      /**< Get the name of a remote Zone
+       * @param zoneID        The ID of the remote zone
+      */
+    //}}}
+    //{{{
+    boolean zoneIsRemote (in long zoneID) raises (BadIdent) ;
+      /**< Report whether Zone si remote i.e. in a different cluster.
+      * @param zoneID        The ID of the remote zone
+      */
+    //}}}
+
+    //{{{
+    long maxAAFRecord () ;
+      /**< Get the maximum number of octets allowed in an AAF record*/
+    //}}}
+    //{{{
+    void putAAF (in long clipID, in long record, in RawData data) raises (BadIdent, DatabaseError) ;
+      /**< Write a record of AAF data.
+       * Clip must exist before record is written. Records are deleted when the
+       * matching clip is deleted.
+       * @param clipID  ClipID for which the record is written.
+       * @param record  Arbitrary record number. Previous contents of record will be deleted.
+       * @param data    The data to be written
+       * @throws Badident  if the record does not exist.
+       */
+    //}}}
+    //{{{
+    long aafRecordLength (in long clipId) raises (DatabaseError) ;
+      /**< Get the number of AAF records there are */
+    //}}}
+    //{{{
+    void getAAF (in long clipID, in long record, out RawData data) raises (BadIdent, DatabaseError) ;
+      /**< Read a record of AAF data.
+       * A zero-length block will be returned if the record does not exist
+       */
+    //}}}
+
+    //{{{
+    /**
+     * Role operations
+     * These are used by the seat to put keyboard mapping on to the keyboard
+     */
+    WStrings getLoggingRoles () ;
+      /**< Returns a list of Logging Rols
+       * @return a list of roles or an empty list if non exist
+       */
+    WStrings getLoggingRoleNames (in wstring role) raises (BadIdent) ;
+    /**< Returns an ordered list of logging names to be assigned to the keyboard when
+     * <i>role</i> is selected.
+     * Ordering is as specified on the server
+     * @param role   Role name to look for
+     * @return List of logging names for the given logging role.
+     * @throws BadIdent.badLoggingRole is thrown for non-existent roles.
+     */
+    //}}}
+
+    //
+    // Deprecated methods
+    //
+
+    /* @Deprecated use aafRecordLength */
+    long lastAAFRecord (in long clipID) raises (DatabaseError) ;
+      /**< Get the highest AAF record number for a particular clipID*/
+
+    //
+    // Deprecated above
+    //
+
+    } ;
+  //}}}
+
+  } ;
+
