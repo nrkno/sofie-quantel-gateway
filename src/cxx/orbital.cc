@@ -1,9 +1,12 @@
-#include "node_api.h"
 #include <Quentin.hh>
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <cwchar>
+#include <string>
+#include <codecvt>
+#include <locale>
+#include "node_api.h"
 
 #define DECLARE_NAPI_METHOD(name, func) { name, 0, func, 0, 0, 0, napi_default, 0 }
 #define CHECK_STATUS if (checkStatus(env, status, __FILE__, __LINE__ - 1) != napi_ok) return nullptr
@@ -93,13 +96,48 @@ napi_value testConnection(napi_env env, napi_callback_info info) {
   return result;
 }
 
+napi_value getZoneInfo(napi_env env, napi_callback_info info) {
+  napi_status status;
+  napi_value result, prop;
+  CORBA::ORB_var orb;
+  Quentin::ZonePortal::_ptr_type zp;
+  CORBA::WChar* zoneName;
+
+  status = retrieveZonePortal(env, info, &orb, &zp);
+  CHECK_STATUS;
+
+  long zoneNumber = zp->getZoneNumber();
+  zoneName = zp->getZoneName(zoneNumber);
+
+  status = napi_create_object(env, &result);
+  CHECK_STATUS;
+
+  status = napi_create_int32(env, zoneNumber, &prop);
+  CHECK_STATUS;
+  status = napi_set_named_property(env, result, "zoneNumber", prop);
+  CHECK_STATUS;
+
+  std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+  std::string zoneNameStr = utf8_conv.to_bytes(zoneName);
+
+  status = napi_create_string_utf8(env, zoneNameStr.c_str(), NAPI_AUTO_LENGTH, &prop);
+  CHECK_STATUS;
+  status = napi_set_named_property(env, result, "zoneName", prop);
+  CHECK_STATUS;
+
+  orb->destroy();
+
+  return result;
+}
+
 napi_value Init(napi_env env, napi_value exports) {
   napi_status status;
 
   napi_property_descriptor desc[] = {
-    DECLARE_NAPI_METHOD("testConnection", testConnection)
+    DECLARE_NAPI_METHOD("testConnection", testConnection),
+    DECLARE_NAPI_METHOD("getZoneInfo", getZoneInfo)
   };
-  status = napi_define_properties(env, exports, 28, desc);
+  status = napi_define_properties(env, exports, 2, desc);
 
   return exports;
 }

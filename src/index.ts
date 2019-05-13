@@ -6,6 +6,10 @@ export namespace Quantel {
 
 	let isaIOR: Promise<string>
 
+	export interface ZoneInfo {
+		zoneNumber: number
+	}
+
 	export async function getISAReference (ref?: string): Promise<string> {
 		isaIOR = new Promise((resolve, reject) => {
 			// TODO better port resolution
@@ -24,8 +28,11 @@ export namespace Quantel {
 		return isaIOR
 	}
 
-	export async function testConnection () {
-		console.log(await isaIOR)
+	export async function testConnection (): Promise<boolean> {
 		return quantel.testConnection(await isaIOR)
+	}
+
+	export async function getZoneInfo (): Promise<ZoneInfo> {
+		return quantel.getZoneInfo(await isaIOR)
 	}
 }
