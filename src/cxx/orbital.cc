@@ -112,6 +112,11 @@ napi_value getZoneInfo(napi_env env, napi_callback_info info) {
   status = napi_create_object(env, &result);
   CHECK_STATUS;
 
+  status = napi_create_string_utf8(env, "ZonePortal", NAPI_AUTO_LENGTH, &prop);
+  CHECK_STATUS;
+  status = napi_set_named_property(env, result, "type", prop);
+  CHECK_STATUS;
+
   status = napi_create_int32(env, zoneNumber, &prop);
   CHECK_STATUS;
   status = napi_set_named_property(env, result, "zoneNumber", prop);
@@ -130,14 +135,89 @@ napi_value getZoneInfo(napi_env env, napi_callback_info info) {
   return result;
 }
 
+napi_value getServers(napi_env env, napi_callback_info info) {
+  napi_status status;
+  napi_value result, prop, subprop, item;
+  CORBA::ORB_var orb;
+  Quentin::ZonePortal::_ptr_type zp;
+
+  status = retrieveZonePortal(env, info, &orb, &zp);
+  CHECK_STATUS;
+
+  status = napi_create_array(env, &result);
+  CHECK_STATUS;
+
+  Quentin::Longs_var serverIDs = zp->getServers(true);
+  for ( int x = 0 ; x < serverIDs->length() ; x++ ) {
+    status = napi_create_object(env, &item);
+    CHECK_STATUS;
+
+    status = napi_create_string_utf8(env, "Server", NAPI_AUTO_LENGTH, &prop);
+    CHECK_STATUS;
+    status = napi_set_named_property(env, item, "type", prop);
+    CHECK_STATUS;
+
+    status = napi_create_int64(env, serverIDs[x] > 0 ? serverIDs[x] : -serverIDs[x], &prop);
+    CHECK_STATUS;
+    status = napi_set_named_property(env, item, "ident", prop);
+    CHECK_STATUS;
+
+    if (serverIDs[x] > 0) { // server is o
+      Quentin::ServerInfo* serverInfo = zp->getServer(serverIDs[x])->getServerInfo();
+
+      status = napi_get_boolean(env, serverInfo->down, &prop);
+      CHECK_STATUS;
+      status = napi_set_named_property(env, item, "down", prop);
+      CHECK_STATUS;
+
+      std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+      std::string serverNameStr = utf8_conv.to_bytes(serverInfo->name);
+
+      status = napi_create_string_utf8(env, serverNameStr.c_str(), NAPI_AUTO_LENGTH, &prop);
+      CHECK_STATUS;
+      status = napi_set_named_property(env, item, "name", prop);
+      CHECK_STATUS;
+
+      status = napi_create_int32(env, serverInfo->numChannels, &prop);
+      CHECK_STATUS;
+      status = napi_set_named_property(env, item, "numChannels", prop);
+      CHECK_STATUS;
+
+      status = napi_create_array(env, &prop);
+      CHECK_STATUS;
+      for ( int y = 0 ; y < serverInfo->pools.length() ; y++ ) {
+        status = napi_create_int32(env, serverInfo->pools[y], &subprop);
+        CHECK_STATUS;
+        status = napi_set_element(env, prop, y, subprop);
+        CHECK_STATUS;
+      }
+      status = napi_set_named_property(env, item, "pools", prop);
+      CHECK_STATUS;
+
+    } else {
+      status = napi_get_boolean(env, true, &prop);
+      CHECK_STATUS;
+      status = napi_set_named_property(env, item, "down", prop);
+      CHECK_STATUS;
+    }
+
+    status = napi_set_element(env, result, x, item);
+    CHECK_STATUS;
+  }
+
+  orb->destroy();
+  return result;
+}
+
 napi_value Init(napi_env env, napi_value exports) {
   napi_status status;
 
   napi_property_descriptor desc[] = {
     DECLARE_NAPI_METHOD("testConnection", testConnection),
-    DECLARE_NAPI_METHOD("getZoneInfo", getZoneInfo)
+    DECLARE_NAPI_METHOD("getZoneInfo", getZoneInfo),
+    DECLARE_NAPI_METHOD("getServers", getServers)
   };
-  status = napi_define_properties(env, exports, 2, desc);
+  status = napi_define_properties(env, exports, 3, desc);
 
   return exports;
 }

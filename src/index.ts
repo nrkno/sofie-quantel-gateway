@@ -7,7 +7,14 @@ export namespace Quantel {
 	let isaIOR: Promise<string>
 
 	export interface ZoneInfo {
-		zoneNumber: number
+		type: string,
+		zoneNumber: number,
+		zoneName: string
+	}
+
+	export interface ServerInfo {
+		type: string,
+		ident: number
 	}
 
 	export async function getISAReference (ref?: string): Promise<string> {
@@ -33,6 +40,12 @@ export namespace Quantel {
 	}
 
 	export async function getZoneInfo (): Promise<ZoneInfo> {
+		if (!isaIOR) await getISAReference()
 		return quantel.getZoneInfo(await isaIOR)
+	}
+
+	export async function getServers (): Promise<Array<ServerInfo>> {
+		if (!isaIOR) await getISAReference()
+		return quantel.getServers(await isaIOR)
 	}
 }
