@@ -163,7 +163,8 @@ napi_value getServers(napi_env env, napi_callback_info info) {
     CHECK_STATUS;
 
     if (serverIDs[x] > 0) { // server is o
-      Quentin::ServerInfo* serverInfo = zp->getServer(serverIDs[x])->getServerInfo();
+      Quentin::Server server = zp->getServer(serverIDs[x]);
+      Quentin::ServerInfo* serverInfo = server->getServerInfo();
 
       status = napi_get_boolean(env, serverInfo->down, &prop);
       CHECK_STATUS;
@@ -194,6 +195,20 @@ napi_value getServers(napi_env env, napi_callback_info info) {
       status = napi_set_named_property(env, item, "pools", prop);
       CHECK_STATUS;
 
+      Quentin::WString_var portNames = server->getPortNames();
+      status = napi_create_array(env, &prop);
+      CHECK_STATUS;
+      for ( int y = 0 ; y < portNames.length(); y++ ) {
+        std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+        std::string portName = utf8_conv.to_bytes(portNames[y]);
+
+        status = napi_create_string_utf8(env, portName.c_str(), NAPI_AUTO_LENGTH, &subprop);
+        CHECK_STATUS;
+        status = napi_set_element(env, prop, y, subprop);
+        CHECK_STATUS;
+      }
+      status = napi_set_named_property(env, item, "portNames", prop);
+      CHECK_STATUS;
     } else {
       status = napi_get_boolean(env, true, &prop);
       CHECK_STATUS;

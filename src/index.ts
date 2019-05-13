@@ -14,7 +14,11 @@ export namespace Quantel {
 
 	export interface ServerInfo {
 		type: string,
-		ident: number
+		ident: number,
+		down: boolean,
+		name?: string,
+		numChannels?: number,
+		pools?: Array<number>
 	}
 
 	export async function getISAReference (ref?: string): Promise<string> {
