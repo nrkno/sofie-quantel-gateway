@@ -479,7 +479,7 @@ napi_value getPlayPortStatus(napi_env env, napi_callback_info info) {
     portNames = server->getPortNames();
     bool foundPort = false;
     for ( int x = 0 ; x < portNames->length() ; x++ ) {
-      if (wcscmp(wportName.data(), (const wchar_t *) portNames[x])) {
+      if (wcscmp(wportName.data(), (const wchar_t *) portNames[x]) == 0) {
         foundPort = true;
         break;
       }
@@ -564,6 +564,7 @@ napi_value releasePort(napi_env env, napi_callback_info info) {
   int32_t serverID;
   char* portName;
   size_t portNameLen;
+  Quentin::WStrings_var portNames;
 
   try {
     status = retrieveZonePortal(env, info, &orb, &zp);
@@ -602,6 +603,23 @@ napi_value releasePort(napi_env env, napi_callback_info info) {
     Quentin::Server_ptr server = zp->getServer(serverID);
 
     std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+    std::wstring wportName = utf8_conv.from_bytes(portName);
+
+    // Prevent accidental creation of extra port
+    portNames = server->getPortNames();
+    bool foundPort = false;
+    for ( int x = 0 ; x < portNames->length() ; x++ ) {
+      if (wcscmp(wportName.data(), (const wchar_t *) portNames[x]) == 0) {
+        foundPort = true;
+        break;
+      }
+    }
+    free(portName);
+    printf("Found port is %i\n", foundPort);
+    if (!foundPort) {
+      NAPI_THROW_ORB_DESTROY("Cannot release a port with an unknown port name.");
+    }
+
     Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(portName).data(), 0);
 
     port->reset();
