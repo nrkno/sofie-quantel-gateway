@@ -13,7 +13,7 @@
             }
           }
         },
-        "defines": [ "__x86__", "__WIN32__" ],
+        "defines": [ "__x86__", "__WIN32__", "OMNI_UNLOADABLE_STUBS" ],
         "include_dirs" : [
           "include/omniORB",
           "include/quantel"

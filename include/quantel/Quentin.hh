@@ -2,6 +2,8 @@
 #ifndef __Quentin_hh__
 #define __Quentin_hh__
 
+#include <stdio.h>
+
 #ifndef __CORBA_H_EXTERNAL_GUARD__
 #include <omniORB4/CORBA.h>
 #endif
@@ -64,7 +66,7 @@ _CORBA_MODULE_BEG
   class DirectoryViewer;
   class _objref_DirectoryViewer;
   class _impl_DirectoryViewer;
-  
+
   typedef _objref_DirectoryViewer* DirectoryViewer_ptr;
   typedef DirectoryViewer_ptr DirectoryViewerRef;
 
@@ -91,7 +93,7 @@ _CORBA_MODULE_BEG
   class Server;
   class _objref_Server;
   class _impl_Server;
-  
+
   typedef _objref_Server* Server_ptr;
   typedef Server_ptr ServerRef;
 
@@ -118,7 +120,7 @@ _CORBA_MODULE_BEG
   class ZonePortal;
   class _objref_ZonePortal;
   class _impl_ZonePortal;
-  
+
   typedef _objref_ZonePortal* ZonePortal_ptr;
   typedef ZonePortal_ptr ZonePortalRef;
 
@@ -216,7 +218,7 @@ _CORBA_MODULE_BEG
     inline FormatCodes(_CORBA_ULong _max, _CORBA_ULong _len, FormatCode* _val, _CORBA_Boolean _rel=0)
       : _CORBA_Unbounded_Sequence_w_FixSizeElement< FormatCode, 2, 2 > (_max, _len, _val, _rel) {}
 
-  
+
 
     inline FormatCodes& operator = (const FormatCodes& _s) {
       _CORBA_Unbounded_Sequence_w_FixSizeElement< FormatCode, 2, 2 > ::operator=(_s);
@@ -235,7 +237,7 @@ _CORBA_MODULE_BEG
       else              _pd_seq = 0;
     }
     inline ~FormatCodes_var() { if( _pd_seq )  delete _pd_seq; }
-      
+
     inline FormatCodes_var& operator = (FormatCodes* _s) {
       if( _pd_seq )  delete _pd_seq;
       _pd_seq = _s;
@@ -255,7 +257,7 @@ _CORBA_MODULE_BEG
       return (*_pd_seq)[_s];
     }
 
-  
+
 
     inline FormatCodes* operator -> () { return _pd_seq; }
     inline const FormatCodes* operator -> () const { return _pd_seq; }
@@ -265,7 +267,7 @@ _CORBA_MODULE_BEG
     inline operator const FormatCodes& () const { return *_pd_seq; }
     inline operator FormatCodes& () { return *_pd_seq; }
 #endif
-      
+
     inline const FormatCodes& in() const { return *_pd_seq; }
     inline FormatCodes&       inout()    { return *_pd_seq; }
     inline FormatCodes*&      out() {
@@ -273,9 +275,9 @@ _CORBA_MODULE_BEG
       return _pd_seq;
     }
     inline FormatCodes* _retn() { FormatCodes* tmp = _pd_seq; _pd_seq = 0; return tmp; }
-      
+
     friend class FormatCodes_out;
-    
+
   private:
     FormatCodes* _pd_seq;
   };
@@ -302,7 +304,7 @@ _CORBA_MODULE_BEG
       return (*_data)[_i];
     }
 
-  
+
 
     FormatCodes*& _data;
 
@@ -325,7 +327,7 @@ _CORBA_MODULE_BEG
     inline RawData(_CORBA_ULong _max, _CORBA_ULong _len, ::CORBA::Octet* _val, _CORBA_Boolean _rel=0)
       : _CORBA_Unbounded_Sequence_Octet(_max, _len, _val, _rel) {}
 
-  
+
 
     inline RawData& operator = (const RawData& _s) {
       _CORBA_Unbounded_Sequence_Octet::operator=(_s);
@@ -344,7 +346,7 @@ _CORBA_MODULE_BEG
       else              _pd_seq = 0;
     }
     inline ~RawData_var() { if( _pd_seq )  delete _pd_seq; }
-      
+
     inline RawData_var& operator = (RawData* _s) {
       if( _pd_seq )  delete _pd_seq;
       _pd_seq = _s;
@@ -364,7 +366,7 @@ _CORBA_MODULE_BEG
       return (*_pd_seq)[_s];
     }
 
-  
+
 
     inline RawData* operator -> () { return _pd_seq; }
     inline const RawData* operator -> () const { return _pd_seq; }
@@ -374,7 +376,7 @@ _CORBA_MODULE_BEG
     inline operator const RawData& () const { return *_pd_seq; }
     inline operator RawData& () { return *_pd_seq; }
 #endif
-      
+
     inline const RawData& in() const { return *_pd_seq; }
     inline RawData&       inout()    { return *_pd_seq; }
     inline RawData*&      out() {
@@ -382,9 +384,9 @@ _CORBA_MODULE_BEG
       return _pd_seq;
     }
     inline RawData* _retn() { RawData* tmp = _pd_seq; _pd_seq = 0; return tmp; }
-      
+
     friend class RawData_out;
-    
+
   private:
     RawData* _pd_seq;
   };
@@ -411,7 +413,7 @@ _CORBA_MODULE_BEG
       return (*_data)[_i];
     }
 
-  
+
 
     RawData*& _data;
 
@@ -434,7 +436,7 @@ _CORBA_MODULE_BEG
     inline Longs(_CORBA_ULong _max, _CORBA_ULong _len, ::CORBA::Long* _val, _CORBA_Boolean _rel=0)
       : _CORBA_Unbounded_Sequence_w_FixSizeElement< ::CORBA::Long, 4, 4 > (_max, _len, _val, _rel) {}
 
-  
+
 
     inline Longs& operator = (const Longs& _s) {
       _CORBA_Unbounded_Sequence_w_FixSizeElement< ::CORBA::Long, 4, 4 > ::operator=(_s);
@@ -453,7 +455,7 @@ _CORBA_MODULE_BEG
       else              _pd_seq = 0;
     }
     inline ~Longs_var() { if( _pd_seq )  delete _pd_seq; }
-      
+
     inline Longs_var& operator = (Longs* _s) {
       if( _pd_seq )  delete _pd_seq;
       _pd_seq = _s;
@@ -473,7 +475,7 @@ _CORBA_MODULE_BEG
       return (*_pd_seq)[_s];
     }
 
-  
+
 
     inline Longs* operator -> () { return _pd_seq; }
     inline const Longs* operator -> () const { return _pd_seq; }
@@ -483,7 +485,7 @@ _CORBA_MODULE_BEG
     inline operator const Longs& () const { return *_pd_seq; }
     inline operator Longs& () { return *_pd_seq; }
 #endif
-      
+
     inline const Longs& in() const { return *_pd_seq; }
     inline Longs&       inout()    { return *_pd_seq; }
     inline Longs*&      out() {
@@ -491,9 +493,9 @@ _CORBA_MODULE_BEG
       return _pd_seq;
     }
     inline Longs* _retn() { Longs* tmp = _pd_seq; _pd_seq = 0; return tmp; }
-      
+
     friend class Longs_out;
-    
+
   private:
     Longs* _pd_seq;
   };
@@ -520,7 +522,7 @@ _CORBA_MODULE_BEG
       return (*_data)[_i];
     }
 
-  
+
 
     Longs*& _data;
 
@@ -543,7 +545,7 @@ _CORBA_MODULE_BEG
     inline WStrings(_CORBA_ULong _max, _CORBA_ULong _len, ::CORBA::WChar** _val, _CORBA_Boolean _rel=0)
       : _CORBA_Unbounded_Sequence_WString(_max, _len, _val, _rel) {}
 
-  
+
 
     inline WStrings& operator = (const WStrings& _s) {
       _CORBA_Unbounded_Sequence_WString::operator=(_s);
@@ -561,8 +563,8 @@ _CORBA_MODULE_BEG
       if( _s._pd_seq )  _pd_seq = new WStrings(*_s._pd_seq);
       else              _pd_seq = 0;
     }
-    inline ~WStrings_var() { if( _pd_seq )  delete _pd_seq; }
-      
+    inline ~WStrings_var() { printf("_pd_seq is %p\n", _pd_seq); if( _pd_seq )  delete _pd_seq;  }
+
     inline WStrings_var& operator = (WStrings* _s) {
       if( _pd_seq )  delete _pd_seq;
       _pd_seq = _s;
@@ -582,7 +584,7 @@ _CORBA_MODULE_BEG
       return (*_pd_seq)[_s];
     }
 
-  
+
 
     inline WStrings* operator -> () { return _pd_seq; }
     inline const WStrings* operator -> () const { return _pd_seq; }
@@ -592,7 +594,7 @@ _CORBA_MODULE_BEG
     inline operator const WStrings& () const { return *_pd_seq; }
     inline operator WStrings& () { return *_pd_seq; }
 #endif
-      
+
     inline const WStrings& in() const { return *_pd_seq; }
     inline WStrings&       inout()    { return *_pd_seq; }
     inline WStrings*&      out() {
@@ -600,9 +602,9 @@ _CORBA_MODULE_BEG
       return _pd_seq;
     }
     inline WStrings* _retn() { WStrings* tmp = _pd_seq; _pd_seq = 0; return tmp; }
-      
+
     friend class WStrings_out;
-    
+
   private:
     WStrings* _pd_seq;
   };
@@ -629,7 +631,7 @@ _CORBA_MODULE_BEG
       return (*_data)[_i];
     }
 
-  
+
 
     WStrings*& _data;
 
@@ -644,12 +646,12 @@ _CORBA_MODULE_BEG
   struct RushIdent {
     typedef _CORBA_ConstrType_Fix_Var<RushIdent> _var_type;
 
-    
+
     ::CORBA::LongLong first;
 
     ::CORBA::LongLong second;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -662,12 +664,12 @@ _CORBA_MODULE_BEG
   struct ClipProperty {
     typedef _CORBA_ConstrType_Variable_Var<ClipProperty> _var_type;
 
-    
+
     ::CORBA::WString_member name;
 
     ::CORBA::WString_member value;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -691,7 +693,7 @@ _CORBA_MODULE_BEG
     inline ClipPropertyList(_CORBA_ULong _max, _CORBA_ULong _len, ClipProperty* _val, _CORBA_Boolean _rel=0)
       : _CORBA_Unbounded_Sequence< ClipProperty > (_max, _len, _val, _rel) {}
 
-  
+
 
     inline ClipPropertyList& operator = (const ClipPropertyList& _s) {
       _CORBA_Unbounded_Sequence< ClipProperty > ::operator=(_s);
@@ -710,7 +712,7 @@ _CORBA_MODULE_BEG
       else              _pd_seq = 0;
     }
     inline ~ClipPropertyList_var() { if( _pd_seq )  delete _pd_seq; }
-      
+
     inline ClipPropertyList_var& operator = (ClipPropertyList* _s) {
       if( _pd_seq )  delete _pd_seq;
       _pd_seq = _s;
@@ -730,7 +732,7 @@ _CORBA_MODULE_BEG
       return (*_pd_seq)[_s];
     }
 
-  
+
 
     inline ClipPropertyList* operator -> () { return _pd_seq; }
     inline const ClipPropertyList* operator -> () const { return _pd_seq; }
@@ -740,7 +742,7 @@ _CORBA_MODULE_BEG
     inline operator const ClipPropertyList& () const { return *_pd_seq; }
     inline operator ClipPropertyList& () { return *_pd_seq; }
 #endif
-      
+
     inline const ClipPropertyList& in() const { return *_pd_seq; }
     inline ClipPropertyList&       inout()    { return *_pd_seq; }
     inline ClipPropertyList*&      out() {
@@ -748,9 +750,9 @@ _CORBA_MODULE_BEG
       return _pd_seq;
     }
     inline ClipPropertyList* _retn() { ClipPropertyList* tmp = _pd_seq; _pd_seq = 0; return tmp; }
-      
+
     friend class ClipPropertyList_out;
-    
+
   private:
     ClipPropertyList* _pd_seq;
   };
@@ -777,7 +779,7 @@ _CORBA_MODULE_BEG
       return (*_data)[_i];
     }
 
-  
+
 
     ClipPropertyList*& _data;
 
@@ -792,12 +794,12 @@ _CORBA_MODULE_BEG
   struct SortOrder {
     typedef _CORBA_ConstrType_Variable_Var<SortOrder> _var_type;
 
-    
+
     ::CORBA::WString_member name;
 
     SortDirection direction;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -821,7 +823,7 @@ _CORBA_MODULE_BEG
     inline SortOrderList(_CORBA_ULong _max, _CORBA_ULong _len, SortOrder* _val, _CORBA_Boolean _rel=0)
       : _CORBA_Unbounded_Sequence< SortOrder > (_max, _len, _val, _rel) {}
 
-  
+
 
     inline SortOrderList& operator = (const SortOrderList& _s) {
       _CORBA_Unbounded_Sequence< SortOrder > ::operator=(_s);
@@ -840,7 +842,7 @@ _CORBA_MODULE_BEG
       else              _pd_seq = 0;
     }
     inline ~SortOrderList_var() { if( _pd_seq )  delete _pd_seq; }
-      
+
     inline SortOrderList_var& operator = (SortOrderList* _s) {
       if( _pd_seq )  delete _pd_seq;
       _pd_seq = _s;
@@ -860,7 +862,7 @@ _CORBA_MODULE_BEG
       return (*_pd_seq)[_s];
     }
 
-  
+
 
     inline SortOrderList* operator -> () { return _pd_seq; }
     inline const SortOrderList* operator -> () const { return _pd_seq; }
@@ -870,7 +872,7 @@ _CORBA_MODULE_BEG
     inline operator const SortOrderList& () const { return *_pd_seq; }
     inline operator SortOrderList& () { return *_pd_seq; }
 #endif
-      
+
     inline const SortOrderList& in() const { return *_pd_seq; }
     inline SortOrderList&       inout()    { return *_pd_seq; }
     inline SortOrderList*&      out() {
@@ -878,9 +880,9 @@ _CORBA_MODULE_BEG
       return _pd_seq;
     }
     inline SortOrderList* _retn() { SortOrderList* tmp = _pd_seq; _pd_seq = 0; return tmp; }
-      
+
     friend class SortOrderList_out;
-    
+
   private:
     SortOrderList* _pd_seq;
   };
@@ -907,7 +909,7 @@ _CORBA_MODULE_BEG
       return (*_data)[_i];
     }
 
-  
+
 
     SortOrderList*& _data;
 
@@ -922,7 +924,7 @@ _CORBA_MODULE_BEG
   struct ServerInfo {
     typedef _CORBA_ConstrType_Variable_Var<ServerInfo> _var_type;
 
-    
+
     ::CORBA::Long ident;
 
     ::CORBA::Boolean down;
@@ -933,7 +935,7 @@ _CORBA_MODULE_BEG
 
     ::CORBA::WString_member name;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -946,7 +948,7 @@ _CORBA_MODULE_BEG
   struct PoolInfo {
     typedef _CORBA_ConstrType_Variable_Var<PoolInfo> _var_type;
 
-    
+
     ::CORBA::Boolean down;
 
     ::CORBA::Long ident;
@@ -955,7 +957,7 @@ _CORBA_MODULE_BEG
 
     ::CORBA::WString_member name;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -968,7 +970,7 @@ _CORBA_MODULE_BEG
   struct PortInfo {
     typedef _CORBA_ConstrType_Variable_Var<PortInfo> _var_type;
 
-    
+
     _CORBA_ObjRef_Member< _objref_Server, Server_Helper>  portServer;
 
     ::CORBA::Long serverIdent;
@@ -979,7 +981,7 @@ _CORBA_MODULE_BEG
 
     Longs numTracks;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -995,14 +997,14 @@ _CORBA_MODULE_BEG
   struct StateChangeInfo {
     typedef _CORBA_ConstrType_Fix_Var<StateChangeInfo> _var_type;
 
-    
+
     StateChangeType type;
 
     ::CORBA::Long ident;
 
     ::CORBA::Long changeNum;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -1026,7 +1028,7 @@ _CORBA_MODULE_BEG
     inline StateChangeList(_CORBA_ULong _max, _CORBA_ULong _len, StateChangeInfo* _val, _CORBA_Boolean _rel=0)
       : _CORBA_Unbounded_Sequence< StateChangeInfo > (_max, _len, _val, _rel) {}
 
-  
+
 
     inline StateChangeList& operator = (const StateChangeList& _s) {
       _CORBA_Unbounded_Sequence< StateChangeInfo > ::operator=(_s);
@@ -1045,7 +1047,7 @@ _CORBA_MODULE_BEG
       else              _pd_seq = 0;
     }
     inline ~StateChangeList_var() { if( _pd_seq )  delete _pd_seq; }
-      
+
     inline StateChangeList_var& operator = (StateChangeList* _s) {
       if( _pd_seq )  delete _pd_seq;
       _pd_seq = _s;
@@ -1065,7 +1067,7 @@ _CORBA_MODULE_BEG
       return (*_pd_seq)[_s];
     }
 
-  
+
 
     inline StateChangeList* operator -> () { return _pd_seq; }
     inline const StateChangeList* operator -> () const { return _pd_seq; }
@@ -1075,7 +1077,7 @@ _CORBA_MODULE_BEG
     inline operator const StateChangeList& () const { return *_pd_seq; }
     inline operator StateChangeList& () { return *_pd_seq; }
 #endif
-      
+
     inline const StateChangeList& in() const { return *_pd_seq; }
     inline StateChangeList&       inout()    { return *_pd_seq; }
     inline StateChangeList*&      out() {
@@ -1083,9 +1085,9 @@ _CORBA_MODULE_BEG
       return _pd_seq;
     }
     inline StateChangeList* _retn() { StateChangeList* tmp = _pd_seq; _pd_seq = 0; return tmp; }
-      
+
     friend class StateChangeList_out;
-    
+
   private:
     StateChangeList* _pd_seq;
   };
@@ -1112,7 +1114,7 @@ _CORBA_MODULE_BEG
       return (*_data)[_i];
     }
 
-  
+
 
     StateChangeList*& _data;
 
@@ -1124,7 +1126,7 @@ _CORBA_MODULE_BEG
   struct CopyProgress {
     typedef _CORBA_ConstrType_Fix_Var<CopyProgress> _var_type;
 
-    
+
     ::CORBA::Long clipID;
 
     ::CORBA::Long totalProtons;
@@ -1137,7 +1139,7 @@ _CORBA_MODULE_BEG
 
     ::CORBA::Boolean ticketed;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -1161,7 +1163,7 @@ _CORBA_MODULE_BEG
     inline CopyProgressList(_CORBA_ULong _max, _CORBA_ULong _len, CopyProgress* _val, _CORBA_Boolean _rel=0)
       : _CORBA_Unbounded_Sequence< CopyProgress > (_max, _len, _val, _rel) {}
 
-  
+
 
     inline CopyProgressList& operator = (const CopyProgressList& _s) {
       _CORBA_Unbounded_Sequence< CopyProgress > ::operator=(_s);
@@ -1180,7 +1182,7 @@ _CORBA_MODULE_BEG
       else              _pd_seq = 0;
     }
     inline ~CopyProgressList_var() { if( _pd_seq )  delete _pd_seq; }
-      
+
     inline CopyProgressList_var& operator = (CopyProgressList* _s) {
       if( _pd_seq )  delete _pd_seq;
       _pd_seq = _s;
@@ -1200,7 +1202,7 @@ _CORBA_MODULE_BEG
       return (*_pd_seq)[_s];
     }
 
-  
+
 
     inline CopyProgressList* operator -> () { return _pd_seq; }
     inline const CopyProgressList* operator -> () const { return _pd_seq; }
@@ -1210,7 +1212,7 @@ _CORBA_MODULE_BEG
     inline operator const CopyProgressList& () const { return *_pd_seq; }
     inline operator CopyProgressList& () { return *_pd_seq; }
 #endif
-      
+
     inline const CopyProgressList& in() const { return *_pd_seq; }
     inline CopyProgressList&       inout()    { return *_pd_seq; }
     inline CopyProgressList*&      out() {
@@ -1218,9 +1220,9 @@ _CORBA_MODULE_BEG
       return _pd_seq;
     }
     inline CopyProgressList* _retn() { CopyProgressList* tmp = _pd_seq; _pd_seq = 0; return tmp; }
-      
+
     friend class CopyProgressList_out;
-    
+
   private:
     CopyProgressList* _pd_seq;
   };
@@ -1247,7 +1249,7 @@ _CORBA_MODULE_BEG
       return (*_data)[_i];
     }
 
-  
+
 
     CopyProgressList*& _data;
 
@@ -1259,14 +1261,14 @@ _CORBA_MODULE_BEG
   struct CopyMapElement {
     typedef _CORBA_ConstrType_Fix_Var<CopyMapElement> _var_type;
 
-    
+
     ::CORBA::Long flags;
 
     ::CORBA::Long protons;
 
     ::CORBA::Long frames;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -1290,7 +1292,7 @@ _CORBA_MODULE_BEG
     inline CopyMapList(_CORBA_ULong _max, _CORBA_ULong _len, CopyMapElement* _val, _CORBA_Boolean _rel=0)
       : _CORBA_Unbounded_Sequence< CopyMapElement > (_max, _len, _val, _rel) {}
 
-  
+
 
     inline CopyMapList& operator = (const CopyMapList& _s) {
       _CORBA_Unbounded_Sequence< CopyMapElement > ::operator=(_s);
@@ -1309,7 +1311,7 @@ _CORBA_MODULE_BEG
       else              _pd_seq = 0;
     }
     inline ~CopyMapList_var() { if( _pd_seq )  delete _pd_seq; }
-      
+
     inline CopyMapList_var& operator = (CopyMapList* _s) {
       if( _pd_seq )  delete _pd_seq;
       _pd_seq = _s;
@@ -1329,7 +1331,7 @@ _CORBA_MODULE_BEG
       return (*_pd_seq)[_s];
     }
 
-  
+
 
     inline CopyMapList* operator -> () { return _pd_seq; }
     inline const CopyMapList* operator -> () const { return _pd_seq; }
@@ -1339,7 +1341,7 @@ _CORBA_MODULE_BEG
     inline operator const CopyMapList& () const { return *_pd_seq; }
     inline operator CopyMapList& () { return *_pd_seq; }
 #endif
-      
+
     inline const CopyMapList& in() const { return *_pd_seq; }
     inline CopyMapList&       inout()    { return *_pd_seq; }
     inline CopyMapList*&      out() {
@@ -1347,9 +1349,9 @@ _CORBA_MODULE_BEG
       return _pd_seq;
     }
     inline CopyMapList* _retn() { CopyMapList* tmp = _pd_seq; _pd_seq = 0; return tmp; }
-      
+
     friend class CopyMapList_out;
-    
+
   private:
     CopyMapList* _pd_seq;
   };
@@ -1376,7 +1378,7 @@ _CORBA_MODULE_BEG
       return (*_data)[_i];
     }
 
-  
+
 
     CopyMapList*& _data;
 
@@ -1388,7 +1390,7 @@ _CORBA_MODULE_BEG
   struct RushTag {
     typedef _CORBA_ConstrType_Variable_Var<RushTag> _var_type;
 
-    
+
     RushIdent rushID;
 
     ::CORBA::Long start;
@@ -1399,7 +1401,7 @@ _CORBA_MODULE_BEG
 
     ::CORBA::WString_member info;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -1423,7 +1425,7 @@ _CORBA_MODULE_BEG
     inline RushTagList(_CORBA_ULong _max, _CORBA_ULong _len, RushTag* _val, _CORBA_Boolean _rel=0)
       : _CORBA_Unbounded_Sequence< RushTag > (_max, _len, _val, _rel) {}
 
-  
+
 
     inline RushTagList& operator = (const RushTagList& _s) {
       _CORBA_Unbounded_Sequence< RushTag > ::operator=(_s);
@@ -1442,7 +1444,7 @@ _CORBA_MODULE_BEG
       else              _pd_seq = 0;
     }
     inline ~RushTagList_var() { if( _pd_seq )  delete _pd_seq; }
-      
+
     inline RushTagList_var& operator = (RushTagList* _s) {
       if( _pd_seq )  delete _pd_seq;
       _pd_seq = _s;
@@ -1462,7 +1464,7 @@ _CORBA_MODULE_BEG
       return (*_pd_seq)[_s];
     }
 
-  
+
 
     inline RushTagList* operator -> () { return _pd_seq; }
     inline const RushTagList* operator -> () const { return _pd_seq; }
@@ -1472,7 +1474,7 @@ _CORBA_MODULE_BEG
     inline operator const RushTagList& () const { return *_pd_seq; }
     inline operator RushTagList& () { return *_pd_seq; }
 #endif
-      
+
     inline const RushTagList& in() const { return *_pd_seq; }
     inline RushTagList&       inout()    { return *_pd_seq; }
     inline RushTagList*&      out() {
@@ -1480,9 +1482,9 @@ _CORBA_MODULE_BEG
       return _pd_seq;
     }
     inline RushTagList* _retn() { RushTagList* tmp = _pd_seq; _pd_seq = 0; return tmp; }
-      
+
     friend class RushTagList_out;
-    
+
   private:
     RushTagList* _pd_seq;
   };
@@ -1509,7 +1511,7 @@ _CORBA_MODULE_BEG
       return (*_data)[_i];
     }
 
-  
+
 
     RushTagList*& _data;
 
@@ -1521,7 +1523,7 @@ _CORBA_MODULE_BEG
   struct RushTimecode {
     typedef _CORBA_ConstrType_Fix_Var<RushTimecode> _var_type;
 
-    
+
     ::CORBA::Long start;
 
     ::CORBA::Long finish;
@@ -1532,7 +1534,7 @@ _CORBA_MODULE_BEG
 
     Timecode refTimecode;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -1556,7 +1558,7 @@ _CORBA_MODULE_BEG
     inline RushTimecodeList(_CORBA_ULong _max, _CORBA_ULong _len, RushTimecode* _val, _CORBA_Boolean _rel=0)
       : _CORBA_Unbounded_Sequence< RushTimecode > (_max, _len, _val, _rel) {}
 
-  
+
 
     inline RushTimecodeList& operator = (const RushTimecodeList& _s) {
       _CORBA_Unbounded_Sequence< RushTimecode > ::operator=(_s);
@@ -1575,7 +1577,7 @@ _CORBA_MODULE_BEG
       else              _pd_seq = 0;
     }
     inline ~RushTimecodeList_var() { if( _pd_seq )  delete _pd_seq; }
-      
+
     inline RushTimecodeList_var& operator = (RushTimecodeList* _s) {
       if( _pd_seq )  delete _pd_seq;
       _pd_seq = _s;
@@ -1595,7 +1597,7 @@ _CORBA_MODULE_BEG
       return (*_pd_seq)[_s];
     }
 
-  
+
 
     inline RushTimecodeList* operator -> () { return _pd_seq; }
     inline const RushTimecodeList* operator -> () const { return _pd_seq; }
@@ -1605,7 +1607,7 @@ _CORBA_MODULE_BEG
     inline operator const RushTimecodeList& () const { return *_pd_seq; }
     inline operator RushTimecodeList& () { return *_pd_seq; }
 #endif
-      
+
     inline const RushTimecodeList& in() const { return *_pd_seq; }
     inline RushTimecodeList&       inout()    { return *_pd_seq; }
     inline RushTimecodeList*&      out() {
@@ -1613,9 +1615,9 @@ _CORBA_MODULE_BEG
       return _pd_seq;
     }
     inline RushTimecodeList* _retn() { RushTimecodeList* tmp = _pd_seq; _pd_seq = 0; return tmp; }
-      
+
     friend class RushTimecodeList_out;
-    
+
   private:
     RushTimecodeList* _pd_seq;
   };
@@ -1642,7 +1644,7 @@ _CORBA_MODULE_BEG
       return (*_data)[_i];
     }
 
-  
+
 
     RushTimecodeList*& _data;
 
@@ -1654,7 +1656,7 @@ _CORBA_MODULE_BEG
   struct ColumnDesc {
     typedef _CORBA_ConstrType_Variable_Var<ColumnDesc> _var_type;
 
-    
+
     ::CORBA::WString_member columnName;
 
     ::CORBA::WString_member columnType;
@@ -1669,7 +1671,7 @@ _CORBA_MODULE_BEG
 
     ::CORBA::Boolean clones;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -1693,7 +1695,7 @@ _CORBA_MODULE_BEG
     inline ColumnDescList(_CORBA_ULong _max, _CORBA_ULong _len, ColumnDesc* _val, _CORBA_Boolean _rel=0)
       : _CORBA_Unbounded_Sequence< ColumnDesc > (_max, _len, _val, _rel) {}
 
-  
+
 
     inline ColumnDescList& operator = (const ColumnDescList& _s) {
       _CORBA_Unbounded_Sequence< ColumnDesc > ::operator=(_s);
@@ -1712,7 +1714,7 @@ _CORBA_MODULE_BEG
       else              _pd_seq = 0;
     }
     inline ~ColumnDescList_var() { if( _pd_seq )  delete _pd_seq; }
-      
+
     inline ColumnDescList_var& operator = (ColumnDescList* _s) {
       if( _pd_seq )  delete _pd_seq;
       _pd_seq = _s;
@@ -1732,7 +1734,7 @@ _CORBA_MODULE_BEG
       return (*_pd_seq)[_s];
     }
 
-  
+
 
     inline ColumnDescList* operator -> () { return _pd_seq; }
     inline const ColumnDescList* operator -> () const { return _pd_seq; }
@@ -1742,7 +1744,7 @@ _CORBA_MODULE_BEG
     inline operator const ColumnDescList& () const { return *_pd_seq; }
     inline operator ColumnDescList& () { return *_pd_seq; }
 #endif
-      
+
     inline const ColumnDescList& in() const { return *_pd_seq; }
     inline ColumnDescList&       inout()    { return *_pd_seq; }
     inline ColumnDescList*&      out() {
@@ -1750,9 +1752,9 @@ _CORBA_MODULE_BEG
       return _pd_seq;
     }
     inline ColumnDescList* _retn() { ColumnDescList* tmp = _pd_seq; _pd_seq = 0; return tmp; }
-      
+
     friend class ColumnDescList_out;
-    
+
   private:
     ColumnDescList* _pd_seq;
   };
@@ -1779,7 +1781,7 @@ _CORBA_MODULE_BEG
       return (*_data)[_i];
     }
 
-  
+
 
     ColumnDescList*& _data;
 
@@ -1791,14 +1793,14 @@ _CORBA_MODULE_BEG
   struct ConfigDescription {
     typedef _CORBA_ConstrType_Variable_Var<ConfigDescription> _var_type;
 
-    
+
     ::CORBA::WString_member description;
 
     ::CORBA::Long configNumber;
 
     ::CORBA::Float protonsPerFrame;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -1822,7 +1824,7 @@ _CORBA_MODULE_BEG
     inline ConfigDescriptionList(_CORBA_ULong _max, _CORBA_ULong _len, ConfigDescription* _val, _CORBA_Boolean _rel=0)
       : _CORBA_Unbounded_Sequence< ConfigDescription > (_max, _len, _val, _rel) {}
 
-  
+
 
     inline ConfigDescriptionList& operator = (const ConfigDescriptionList& _s) {
       _CORBA_Unbounded_Sequence< ConfigDescription > ::operator=(_s);
@@ -1841,7 +1843,7 @@ _CORBA_MODULE_BEG
       else              _pd_seq = 0;
     }
     inline ~ConfigDescriptionList_var() { if( _pd_seq )  delete _pd_seq; }
-      
+
     inline ConfigDescriptionList_var& operator = (ConfigDescriptionList* _s) {
       if( _pd_seq )  delete _pd_seq;
       _pd_seq = _s;
@@ -1861,7 +1863,7 @@ _CORBA_MODULE_BEG
       return (*_pd_seq)[_s];
     }
 
-  
+
 
     inline ConfigDescriptionList* operator -> () { return _pd_seq; }
     inline const ConfigDescriptionList* operator -> () const { return _pd_seq; }
@@ -1871,7 +1873,7 @@ _CORBA_MODULE_BEG
     inline operator const ConfigDescriptionList& () const { return *_pd_seq; }
     inline operator ConfigDescriptionList& () { return *_pd_seq; }
 #endif
-      
+
     inline const ConfigDescriptionList& in() const { return *_pd_seq; }
     inline ConfigDescriptionList&       inout()    { return *_pd_seq; }
     inline ConfigDescriptionList*&      out() {
@@ -1879,9 +1881,9 @@ _CORBA_MODULE_BEG
       return _pd_seq;
     }
     inline ConfigDescriptionList* _retn() { ConfigDescriptionList* tmp = _pd_seq; _pd_seq = 0; return tmp; }
-      
+
     friend class ConfigDescriptionList_out;
-    
+
   private:
     ConfigDescriptionList* _pd_seq;
   };
@@ -1908,7 +1910,7 @@ _CORBA_MODULE_BEG
       return (*_data)[_i];
     }
 
-  
+
 
     ConfigDescriptionList*& _data;
 
@@ -1920,12 +1922,12 @@ _CORBA_MODULE_BEG
   struct FullClipID {
     typedef _CORBA_ConstrType_Fix_Var<FullClipID> _var_type;
 
-    
+
     ::CORBA::Long zone;
 
     ::CORBA::Long clipID;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -1949,7 +1951,7 @@ _CORBA_MODULE_BEG
     inline FullClipIDList(_CORBA_ULong _max, _CORBA_ULong _len, FullClipID* _val, _CORBA_Boolean _rel=0)
       : _CORBA_Unbounded_Sequence< FullClipID > (_max, _len, _val, _rel) {}
 
-  
+
 
     inline FullClipIDList& operator = (const FullClipIDList& _s) {
       _CORBA_Unbounded_Sequence< FullClipID > ::operator=(_s);
@@ -1968,7 +1970,7 @@ _CORBA_MODULE_BEG
       else              _pd_seq = 0;
     }
     inline ~FullClipIDList_var() { if( _pd_seq )  delete _pd_seq; }
-      
+
     inline FullClipIDList_var& operator = (FullClipIDList* _s) {
       if( _pd_seq )  delete _pd_seq;
       _pd_seq = _s;
@@ -1988,7 +1990,7 @@ _CORBA_MODULE_BEG
       return (*_pd_seq)[_s];
     }
 
-  
+
 
     inline FullClipIDList* operator -> () { return _pd_seq; }
     inline const FullClipIDList* operator -> () const { return _pd_seq; }
@@ -1998,7 +2000,7 @@ _CORBA_MODULE_BEG
     inline operator const FullClipIDList& () const { return *_pd_seq; }
     inline operator FullClipIDList& () { return *_pd_seq; }
 #endif
-      
+
     inline const FullClipIDList& in() const { return *_pd_seq; }
     inline FullClipIDList&       inout()    { return *_pd_seq; }
     inline FullClipIDList*&      out() {
@@ -2006,9 +2008,9 @@ _CORBA_MODULE_BEG
       return _pd_seq;
     }
     inline FullClipIDList* _retn() { FullClipIDList* tmp = _pd_seq; _pd_seq = 0; return tmp; }
-      
+
     friend class FullClipIDList_out;
-    
+
   private:
     FullClipIDList* _pd_seq;
   };
@@ -2035,7 +2037,7 @@ _CORBA_MODULE_BEG
       return (*_data)[_i];
     }
 
-  
+
 
     FullClipIDList*& _data;
 
@@ -2047,7 +2049,7 @@ _CORBA_MODULE_BEG
   struct PlaceholderData {
     typedef _CORBA_ConstrType_Variable_Var<PlaceholderData> _var_type;
 
-    
+
     ::CORBA::Long clipID;
 
     ::CORBA::Long poolID;
@@ -2056,7 +2058,7 @@ _CORBA_MODULE_BEG
 
     ::CORBA::WString_member extData;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -2080,7 +2082,7 @@ _CORBA_MODULE_BEG
     inline PlaceholderDataList(_CORBA_ULong _max, _CORBA_ULong _len, PlaceholderData* _val, _CORBA_Boolean _rel=0)
       : _CORBA_Unbounded_Sequence< PlaceholderData > (_max, _len, _val, _rel) {}
 
-  
+
 
     inline PlaceholderDataList& operator = (const PlaceholderDataList& _s) {
       _CORBA_Unbounded_Sequence< PlaceholderData > ::operator=(_s);
@@ -2099,7 +2101,7 @@ _CORBA_MODULE_BEG
       else              _pd_seq = 0;
     }
     inline ~PlaceholderDataList_var() { if( _pd_seq )  delete _pd_seq; }
-      
+
     inline PlaceholderDataList_var& operator = (PlaceholderDataList* _s) {
       if( _pd_seq )  delete _pd_seq;
       _pd_seq = _s;
@@ -2119,7 +2121,7 @@ _CORBA_MODULE_BEG
       return (*_pd_seq)[_s];
     }
 
-  
+
 
     inline PlaceholderDataList* operator -> () { return _pd_seq; }
     inline const PlaceholderDataList* operator -> () const { return _pd_seq; }
@@ -2129,7 +2131,7 @@ _CORBA_MODULE_BEG
     inline operator const PlaceholderDataList& () const { return *_pd_seq; }
     inline operator PlaceholderDataList& () { return *_pd_seq; }
 #endif
-      
+
     inline const PlaceholderDataList& in() const { return *_pd_seq; }
     inline PlaceholderDataList&       inout()    { return *_pd_seq; }
     inline PlaceholderDataList*&      out() {
@@ -2137,9 +2139,9 @@ _CORBA_MODULE_BEG
       return _pd_seq;
     }
     inline PlaceholderDataList* _retn() { PlaceholderDataList* tmp = _pd_seq; _pd_seq = 0; return tmp; }
-      
+
     friend class PlaceholderDataList_out;
-    
+
   private:
     PlaceholderDataList* _pd_seq;
   };
@@ -2166,7 +2168,7 @@ _CORBA_MODULE_BEG
       return (*_data)[_i];
     }
 
-  
+
 
     PlaceholderDataList*& _data;
 
@@ -2185,7 +2187,7 @@ _CORBA_MODULE_BEG
   struct PositionData {
     typedef _CORBA_ConstrType_Fix_Var<PositionData> _var_type;
 
-    
+
     FormatCode format;
 
     ::CORBA::Long poolID;
@@ -2198,7 +2200,7 @@ _CORBA_MODULE_BEG
 
     ::CORBA::Long rushFrame;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -2211,10 +2213,10 @@ _CORBA_MODULE_BEG
   struct ServerFlagsFragment {
     typedef _CORBA_ConstrType_Fix_Var<ServerFlagsFragment> _var_type;
 
-    
+
     ::CORBA::Long flags;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -2227,12 +2229,12 @@ _CORBA_MODULE_BEG
   struct ServerTimecodeFragment {
     typedef _CORBA_ConstrType_Fix_Var<ServerTimecodeFragment> _var_type;
 
-    
+
     Timecode startTimecode;
 
     ::CORBA::Long userBits;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -2245,12 +2247,12 @@ _CORBA_MODULE_BEG
   struct ServerAspectFragment {
     typedef _CORBA_ConstrType_Fix_Var<ServerAspectFragment> _var_type;
 
-    
+
     ::CORBA::Long width;
 
     ::CORBA::Long height;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -2263,7 +2265,7 @@ _CORBA_MODULE_BEG
   struct ServerCropFragment {
     typedef _CORBA_ConstrType_Fix_Var<ServerCropFragment> _var_type;
 
-    
+
     ::CORBA::Long x;
 
     ::CORBA::Long y;
@@ -2272,7 +2274,7 @@ _CORBA_MODULE_BEG
 
     ::CORBA::Long height;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -2285,7 +2287,7 @@ _CORBA_MODULE_BEG
   struct ServerPanZoomFragment {
     typedef _CORBA_ConstrType_Fix_Var<ServerPanZoomFragment> _var_type;
 
-    
+
     ::CORBA::Long x;
 
     ::CORBA::Long y;
@@ -2294,7 +2296,7 @@ _CORBA_MODULE_BEG
 
     ::CORBA::Long vZoom;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -2307,12 +2309,12 @@ _CORBA_MODULE_BEG
   struct ServerSpeedFragment {
     typedef _CORBA_ConstrType_Fix_Var<ServerSpeedFragment> _var_type;
 
-    
+
     ::CORBA::Long speed;
 
     ::CORBA::Long profile;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -2325,10 +2327,10 @@ _CORBA_MODULE_BEG
   struct ServerMultiCamFragment {
     typedef _CORBA_ConstrType_Fix_Var<ServerMultiCamFragment> _var_type;
 
-    
+
     ::CORBA::Long stream;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -2341,7 +2343,7 @@ _CORBA_MODULE_BEG
   struct ServerNoteFragment {
     typedef _CORBA_ConstrType_Variable_Var<ServerNoteFragment> _var_type;
 
-    
+
     ::CORBA::Long noteID;
 
     ::CORBA::Long aux;
@@ -2350,7 +2352,7 @@ _CORBA_MODULE_BEG
 
     ::CORBA::WString_member note;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -2363,12 +2365,12 @@ _CORBA_MODULE_BEG
   struct ServerEffectFragment {
     typedef _CORBA_ConstrType_Variable_Var<ServerEffectFragment> _var_type;
 
-    
+
     ::CORBA::Long effectID;
 
     RawData effectData;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -2389,14 +2391,14 @@ _CORBA_MODULE_BEG
   struct ServerCCFragment {
     typedef _CORBA_ConstrType_Variable_Var<ServerCCFragment> _var_type;
 
-    
+
     RushIdent ccID;
 
     ::CORBA::Long ccType;
 
     RawData ccData;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -2411,18 +2413,18 @@ _CORBA_MODULE_BEG
 
     typedef _CORBA_ConstrType_Variable_Var<ServerFragmentData> _var_type;
 
-    
+
 
     ServerFragmentData(): _pd__initialised(0) {
       _default();
 
-  
+
     }
-    
+
     ServerFragmentData(const ServerFragmentData& _value) {
       _pd__initialised = _value._pd__initialised;
       if ((_pd__default = _value._pd__default)) {
-        
+
       }
       else {
         switch(_value._pd__d) {
@@ -2454,12 +2456,12 @@ _CORBA_MODULE_BEG
 
             default: break;
 
-      
+
         }
       }
       _pd__d = _value._pd__d;
 
-  
+
     }
 
     ~ServerFragmentData() {}
@@ -2467,7 +2469,7 @@ _CORBA_MODULE_BEG
     ServerFragmentData& operator=(const ServerFragmentData& _value) {
       _pd__initialised = _value._pd__initialised;
       if ((_pd__default = _value._pd__default)) {
-        
+
       }
       else {
         switch(_value._pd__d) {
@@ -2499,12 +2501,12 @@ _CORBA_MODULE_BEG
 
             default: break;
 
-      
+
         }
       }
       _pd__d = _value._pd__d;
 
-  
+
       return *this;
     }
 
@@ -2549,13 +2551,13 @@ _CORBA_MODULE_BEG
         }
 
       };
-      
+
 
       fail:
       OMNIORB_THROW(BAD_PARAM,_OMNI_NS(BAD_PARAM_InvalidUnionDiscValue),::CORBA::COMPLETED_NO);
 
 
-  
+
     }
 
     void _default()
@@ -2565,7 +2567,7 @@ _CORBA_MODULE_BEG
       _pd__default = 1;
     }
 
-  
+
 
     const PositionData &videoFragmentData () const { return _pd_videoFragmentData; }
     PositionData &videoFragmentData () { return _pd_videoFragmentData; }
@@ -2684,8 +2686,8 @@ _CORBA_MODULE_BEG
       _pd_ccFragmentData = _value;
     }
 
-  
-    
+
+
     void operator>>= (cdrStream&) const;
     void operator<<= (cdrStream&);
 
@@ -2694,7 +2696,7 @@ _CORBA_MODULE_BEG
     _CORBA_Boolean _pd__default;
     _CORBA_Boolean _pd__initialised;
 
-    
+
     PositionData _pd_videoFragmentData;
 
     PositionData _pd_audioFragmentData;
@@ -2721,7 +2723,7 @@ _CORBA_MODULE_BEG
 
     ServerCCFragment _pd_ccFragmentData;
 
-  
+
   };
 
   typedef ServerFragmentData::_var_type ServerFragmentData_var;
@@ -2731,7 +2733,7 @@ _CORBA_MODULE_BEG
   struct ServerFragment {
     typedef _CORBA_ConstrType_Variable_Var<ServerFragment> _var_type;
 
-    
+
     ::CORBA::Long trackNum;
 
     ::CORBA::Long start;
@@ -2740,7 +2742,7 @@ _CORBA_MODULE_BEG
 
     ServerFragmentData fragmentData;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -2764,7 +2766,7 @@ _CORBA_MODULE_BEG
     inline ServerFragments(_CORBA_ULong _max, _CORBA_ULong _len, ServerFragment* _val, _CORBA_Boolean _rel=0)
       : _CORBA_Unbounded_Sequence< ServerFragment > (_max, _len, _val, _rel) {}
 
-  
+
 
     inline ServerFragments& operator = (const ServerFragments& _s) {
       _CORBA_Unbounded_Sequence< ServerFragment > ::operator=(_s);
@@ -2783,7 +2785,7 @@ _CORBA_MODULE_BEG
       else              _pd_seq = 0;
     }
     inline ~ServerFragments_var() { if( _pd_seq )  delete _pd_seq; }
-      
+
     inline ServerFragments_var& operator = (ServerFragments* _s) {
       if( _pd_seq )  delete _pd_seq;
       _pd_seq = _s;
@@ -2803,7 +2805,7 @@ _CORBA_MODULE_BEG
       return (*_pd_seq)[_s];
     }
 
-  
+
 
     inline ServerFragments* operator -> () { return _pd_seq; }
     inline const ServerFragments* operator -> () const { return _pd_seq; }
@@ -2813,7 +2815,7 @@ _CORBA_MODULE_BEG
     inline operator const ServerFragments& () const { return *_pd_seq; }
     inline operator ServerFragments& () { return *_pd_seq; }
 #endif
-      
+
     inline const ServerFragments& in() const { return *_pd_seq; }
     inline ServerFragments&       inout()    { return *_pd_seq; }
     inline ServerFragments*&      out() {
@@ -2821,9 +2823,9 @@ _CORBA_MODULE_BEG
       return _pd_seq;
     }
     inline ServerFragments* _retn() { ServerFragments* tmp = _pd_seq; _pd_seq = 0; return tmp; }
-      
+
     friend class ServerFragments_out;
-    
+
   private:
     ServerFragments* _pd_seq;
   };
@@ -2850,7 +2852,7 @@ _CORBA_MODULE_BEG
       return (*_data)[_i];
     }
 
-  
+
 
     ServerFragments*& _data;
 
@@ -2862,7 +2864,7 @@ _CORBA_MODULE_BEG
   struct FormatInfo {
     typedef _CORBA_ConstrType_Variable_Var<FormatInfo> _var_type;
 
-    
+
     FormatCode formatNumber;
 
     FragmentType essenceType;
@@ -2889,7 +2891,7 @@ _CORBA_MODULE_BEG
 
     ::CORBA::WString_member compressionName;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -2905,7 +2907,7 @@ _CORBA_MODULE_BEG
   class Properties;
   class _objref_Properties;
   class _impl_Properties;
-  
+
   typedef _objref_Properties* Properties_ptr;
   typedef Properties_ptr PropertiesRef;
 
@@ -2936,7 +2938,7 @@ _CORBA_MODULE_BEG
     static _ptr_type _duplicate(_ptr_type);
     static _ptr_type _narrow(::CORBA::Object_ptr);
     static _ptr_type _unchecked_narrow(::CORBA::Object_ptr);
-    
+
     static _ptr_type _nil();
 
     static inline void _marshalObjRef(_ptr_type, cdrStream&);
@@ -2974,7 +2976,7 @@ _CORBA_MODULE_BEG
 
     static _core_attr const ::CORBA::WChar * searchPath;
 
-  
+
   };
 
   class _objref_Properties :
@@ -2991,7 +2993,7 @@ _CORBA_MODULE_BEG
   protected:
     virtual ~_objref_Properties();
 
-    
+
   private:
     virtual void* _ptrToObjRef(const char*);
 
@@ -3019,14 +3021,14 @@ _CORBA_MODULE_BEG
 
     virtual ::CORBA::WChar* getProperty(const ::CORBA::WChar* propertyName) = 0;
     virtual WStrings* getPropertyList() = 0;
-    
+
   public:  // Really protected, workaround for xlC
     virtual _CORBA_Boolean _dispatch(omniCallHandle&);
 
   private:
     virtual void* _ptrToInterface(const char*);
     virtual const char* _mostDerivedRepoId();
-    
+
   };
 
 
@@ -3036,7 +3038,7 @@ _CORBA_MODULE_BEG
   class EffectController;
   class _objref_EffectController;
   class _impl_EffectController;
-  
+
   typedef _objref_EffectController* EffectController_ptr;
   typedef EffectController_ptr EffectControllerRef;
 
@@ -3067,7 +3069,7 @@ _CORBA_MODULE_BEG
     static _ptr_type _duplicate(_ptr_type);
     static _ptr_type _narrow(::CORBA::Object_ptr);
     static _ptr_type _unchecked_narrow(::CORBA::Object_ptr);
-    
+
     static _ptr_type _nil();
 
     static inline void _marshalObjRef(_ptr_type, cdrStream&);
@@ -3083,7 +3085,7 @@ _CORBA_MODULE_BEG
     static _core_attr const char* _PD_repoId;
 
     // Other IDL defined within this scope.
-    
+
   };
 
   class _objref_EffectController :
@@ -3103,7 +3105,7 @@ _CORBA_MODULE_BEG
   protected:
     virtual ~_objref_EffectController();
 
-    
+
   private:
     virtual void* _ptrToObjRef(const char*);
 
@@ -3134,14 +3136,14 @@ _CORBA_MODULE_BEG
     virtual void reset() = 0;
     virtual RawData* getState() = 0;
     virtual void setState(const ::Quentin::RawData& state) = 0;
-    
+
   public:  // Really protected, workaround for xlC
     virtual _CORBA_Boolean _dispatch(omniCallHandle&);
 
   private:
     virtual void* _ptrToInterface(const char*);
     virtual const char* _mostDerivedRepoId();
-    
+
   };
 
 
@@ -3151,7 +3153,7 @@ _CORBA_MODULE_BEG
   struct ChannelCapabilities {
     typedef _CORBA_ConstrType_Fix_Var<ChannelCapabilities> _var_type;
 
-    
+
     ::CORBA::Long chanNumber;
 
     ChannelType type;
@@ -3166,7 +3168,7 @@ _CORBA_MODULE_BEG
 
     ::CORBA::LongLong playFeatures;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -3204,7 +3206,7 @@ _CORBA_MODULE_BEG
     inline ChannelCapabilitiesList(_CORBA_ULong _max, _CORBA_ULong _len, ChannelCapabilities* _val, _CORBA_Boolean _rel=0)
       : _CORBA_Unbounded_Sequence< ChannelCapabilities > (_max, _len, _val, _rel) {}
 
-  
+
 
     inline ChannelCapabilitiesList& operator = (const ChannelCapabilitiesList& _s) {
       _CORBA_Unbounded_Sequence< ChannelCapabilities > ::operator=(_s);
@@ -3223,7 +3225,7 @@ _CORBA_MODULE_BEG
       else              _pd_seq = 0;
     }
     inline ~ChannelCapabilitiesList_var() { if( _pd_seq )  delete _pd_seq; }
-      
+
     inline ChannelCapabilitiesList_var& operator = (ChannelCapabilitiesList* _s) {
       if( _pd_seq )  delete _pd_seq;
       _pd_seq = _s;
@@ -3243,7 +3245,7 @@ _CORBA_MODULE_BEG
       return (*_pd_seq)[_s];
     }
 
-  
+
 
     inline ChannelCapabilitiesList* operator -> () { return _pd_seq; }
     inline const ChannelCapabilitiesList* operator -> () const { return _pd_seq; }
@@ -3253,7 +3255,7 @@ _CORBA_MODULE_BEG
     inline operator const ChannelCapabilitiesList& () const { return *_pd_seq; }
     inline operator ChannelCapabilitiesList& () { return *_pd_seq; }
 #endif
-      
+
     inline const ChannelCapabilitiesList& in() const { return *_pd_seq; }
     inline ChannelCapabilitiesList&       inout()    { return *_pd_seq; }
     inline ChannelCapabilitiesList*&      out() {
@@ -3261,9 +3263,9 @@ _CORBA_MODULE_BEG
       return _pd_seq;
     }
     inline ChannelCapabilitiesList* _retn() { ChannelCapabilitiesList* tmp = _pd_seq; _pd_seq = 0; return tmp; }
-      
+
     friend class ChannelCapabilitiesList_out;
-    
+
   private:
     ChannelCapabilitiesList* _pd_seq;
   };
@@ -3290,7 +3292,7 @@ _CORBA_MODULE_BEG
       return (*_data)[_i];
     }
 
-  
+
 
     ChannelCapabilitiesList*& _data;
 
@@ -3302,14 +3304,14 @@ _CORBA_MODULE_BEG
   struct ServerCapabilities {
     typedef _CORBA_ConstrType_Variable_Var<ServerCapabilities> _var_type;
 
-    
+
     ::CORBA::Long productID;
 
     ::CORBA::LongLong features;
 
     ChannelCapabilitiesList channelCapabilities;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -3326,14 +3328,14 @@ _CORBA_MODULE_BEG
   struct AudioPatchInfo {
     typedef _CORBA_ConstrType_Fix_Var<AudioPatchInfo> _var_type;
 
-    
+
     ::CORBA::Long dst;
 
     ::CORBA::Long src;
 
     ::CORBA::Float level;
 
-  
+
 
     void operator>>= (cdrStream &) const;
     void operator<<= (cdrStream &);
@@ -3357,7 +3359,7 @@ _CORBA_MODULE_BEG
     inline AudioPatchInfoList(_CORBA_ULong _max, _CORBA_ULong _len, AudioPatchInfo* _val, _CORBA_Boolean _rel=0)
       : _CORBA_Unbounded_Sequence< AudioPatchInfo > (_max, _len, _val, _rel) {}
 
-  
+
 
     inline AudioPatchInfoList& operator = (const AudioPatchInfoList& _s) {
       _CORBA_Unbounded_Sequence< AudioPatchInfo > ::operator=(_s);
@@ -3376,7 +3378,7 @@ _CORBA_MODULE_BEG
       else              _pd_seq = 0;
     }
     inline ~AudioPatchInfoList_var() { if( _pd_seq )  delete _pd_seq; }
-      
+
     inline AudioPatchInfoList_var& operator = (AudioPatchInfoList* _s) {
       if( _pd_seq )  delete _pd_seq;
       _pd_seq = _s;
@@ -3396,7 +3398,7 @@ _CORBA_MODULE_BEG
       return (*_pd_seq)[_s];
     }
 
-  
+
 
     inline AudioPatchInfoList* operator -> () { return _pd_seq; }
     inline const AudioPatchInfoList* operator -> () const { return _pd_seq; }
@@ -3406,7 +3408,7 @@ _CORBA_MODULE_BEG
     inline operator const AudioPatchInfoList& () const { return *_pd_seq; }
     inline operator AudioPatchInfoList& () { return *_pd_seq; }
 #endif
-      
+
     inline const AudioPatchInfoList& in() const { return *_pd_seq; }
     inline AudioPatchInfoList&       inout()    { return *_pd_seq; }
     inline AudioPatchInfoList*&      out() {
@@ -3414,9 +3416,9 @@ _CORBA_MODULE_BEG
       return _pd_seq;
     }
     inline AudioPatchInfoList* _retn() { AudioPatchInfoList* tmp = _pd_seq; _pd_seq = 0; return tmp; }
-      
+
     friend class AudioPatchInfoList_out;
-    
+
   private:
     AudioPatchInfoList* _pd_seq;
   };
@@ -3443,7 +3445,7 @@ _CORBA_MODULE_BEG
       return (*_data)[_i];
     }
 
-  
+
 
     AudioPatchInfoList*& _data;
 
@@ -3454,10 +3456,10 @@ _CORBA_MODULE_BEG
 
   class InvalidFragments : public ::CORBA::UserException {
   public:
-    
+
     ServerFragments invalids;
 
-  
+
 
     inline InvalidFragments() {
       pd_insertToAnyFn    = insertToAnyFn;
@@ -3473,7 +3475,7 @@ _CORBA_MODULE_BEG
     static inline InvalidFragments* _narrow(::CORBA::Exception* _e) {
       return _downcast(_e);
     }
-    
+
     void operator>>=(cdrStream&) const ;
     void operator<<=(cdrStream&) ;
 
@@ -3493,10 +3495,10 @@ _CORBA_MODULE_BEG
 
   class DatabaseError : public ::CORBA::UserException {
   public:
-    
+
     ::CORBA::WString_member error;
 
-  
+
 
     inline DatabaseError() {
       pd_insertToAnyFn    = insertToAnyFn;
@@ -3512,7 +3514,7 @@ _CORBA_MODULE_BEG
     static inline DatabaseError* _narrow(::CORBA::Exception* _e) {
       return _downcast(_e);
     }
-    
+
     void operator>>=(cdrStream&) const ;
     void operator<<=(cdrStream&) ;
 
@@ -3535,12 +3537,12 @@ _CORBA_MODULE_BEG
 
   class BadIdent : public ::CORBA::UserException {
   public:
-    
+
     BadIdentReason reason;
 
     ::CORBA::Long ident;
 
-  
+
 
     inline BadIdent() {
       pd_insertToAnyFn    = insertToAnyFn;
@@ -3556,7 +3558,7 @@ _CORBA_MODULE_BEG
     static inline BadIdent* _narrow(::CORBA::Exception* _e) {
       return _downcast(_e);
     }
-    
+
     void operator>>=(cdrStream&) const ;
     void operator<<=(cdrStream&) ;
 
@@ -3576,12 +3578,12 @@ _CORBA_MODULE_BEG
 
   class BadColumnData : public ::CORBA::UserException {
   public:
-    
+
     ::CORBA::WString_member colName;
 
     ::CORBA::WString_member badData;
 
-  
+
 
     inline BadColumnData() {
       pd_insertToAnyFn    = insertToAnyFn;
@@ -3597,7 +3599,7 @@ _CORBA_MODULE_BEG
     static inline BadColumnData* _narrow(::CORBA::Exception* _e) {
       return _downcast(_e);
     }
-    
+
     void operator>>=(cdrStream&) const ;
     void operator<<=(cdrStream&) ;
 
@@ -3617,15 +3619,15 @@ _CORBA_MODULE_BEG
 
   class NoSpace : public ::CORBA::UserException {
   public:
-    
-    
+
+
 
     inline NoSpace() {
       pd_insertToAnyFn    = insertToAnyFn;
       pd_insertToAnyFnNCP = insertToAnyFnNCP;
     }
     NoSpace(const NoSpace&);
-    
+
     NoSpace& operator=(const NoSpace&);
     virtual ~NoSpace();
     virtual void _raise() const;
@@ -3634,7 +3636,7 @@ _CORBA_MODULE_BEG
     static inline NoSpace* _narrow(::CORBA::Exception* _e) {
       return _downcast(_e);
     }
-    
+
     inline void operator>>=(cdrStream&) const { }
     inline void operator<<=(cdrStream&) { }
 
@@ -3654,15 +3656,15 @@ _CORBA_MODULE_BEG
 
   class WrongMode : public ::CORBA::UserException {
   public:
-    
-    
+
+
 
     inline WrongMode() {
       pd_insertToAnyFn    = insertToAnyFn;
       pd_insertToAnyFnNCP = insertToAnyFnNCP;
     }
     WrongMode(const WrongMode&);
-    
+
     WrongMode& operator=(const WrongMode&);
     virtual ~WrongMode();
     virtual void _raise() const;
@@ -3671,7 +3673,7 @@ _CORBA_MODULE_BEG
     static inline WrongMode* _narrow(::CORBA::Exception* _e) {
       return _downcast(_e);
     }
-    
+
     inline void operator>>=(cdrStream&) const { }
     inline void operator<<=(cdrStream&) { }
 
@@ -3691,15 +3693,15 @@ _CORBA_MODULE_BEG
 
   class ZoneInaccessable : public ::CORBA::UserException {
   public:
-    
-    
+
+
 
     inline ZoneInaccessable() {
       pd_insertToAnyFn    = insertToAnyFn;
       pd_insertToAnyFnNCP = insertToAnyFnNCP;
     }
     ZoneInaccessable(const ZoneInaccessable&);
-    
+
     ZoneInaccessable& operator=(const ZoneInaccessable&);
     virtual ~ZoneInaccessable();
     virtual void _raise() const;
@@ -3708,7 +3710,7 @@ _CORBA_MODULE_BEG
     static inline ZoneInaccessable* _narrow(::CORBA::Exception* _e) {
       return _downcast(_e);
     }
-    
+
     inline void operator>>=(cdrStream&) const { }
     inline void operator<<=(cdrStream&) { }
 
@@ -3732,7 +3734,7 @@ _CORBA_MODULE_BEG
   class ThumbnailListener;
   class _objref_ThumbnailListener;
   class _impl_ThumbnailListener;
-  
+
   typedef _objref_ThumbnailListener* ThumbnailListener_ptr;
   typedef ThumbnailListener_ptr ThumbnailListenerRef;
 
@@ -3763,7 +3765,7 @@ _CORBA_MODULE_BEG
     static _ptr_type _duplicate(_ptr_type);
     static _ptr_type _narrow(::CORBA::Object_ptr);
     static _ptr_type _unchecked_narrow(::CORBA::Object_ptr);
-    
+
     static _ptr_type _nil();
 
     static inline void _marshalObjRef(_ptr_type, cdrStream&);
@@ -3782,7 +3784,7 @@ _CORBA_MODULE_BEG
     enum NoThumbnailReason { unknown, unrecorded, unbuilt, busy, badFormat, hardwareError /*, __max_NoThumbnailReason=0xffffffff */ };
     typedef NoThumbnailReason& NoThumbnailReason_out;
 
-  
+
   };
 
   class _objref_ThumbnailListener :
@@ -3800,7 +3802,7 @@ _CORBA_MODULE_BEG
   protected:
     virtual ~_objref_ThumbnailListener();
 
-    
+
   private:
     virtual void* _ptrToObjRef(const char*);
 
@@ -3829,14 +3831,14 @@ _CORBA_MODULE_BEG
     virtual void newThumbnail(::CORBA::Long ident, ::CORBA::Long offset, ::CORBA::Long width, ::CORBA::Long height, const ::Quentin::Longs& data) = 0;
     virtual void noThumbnail(::Quentin::ThumbnailListener::NoThumbnailReason reason, ::CORBA::Long ident, ::CORBA::Long offset, ::CORBA::Boolean tryAgainLater, const ::CORBA::WChar* reasonStr) = 0;
     virtual void finished(::CORBA::Long ident) = 0;
-    
+
   public:  // Really protected, workaround for xlC
     virtual _CORBA_Boolean _dispatch(omniCallHandle&);
 
   private:
     virtual void* _ptrToInterface(const char*);
     virtual const char* _mostDerivedRepoId();
-    
+
   };
 
 
@@ -3846,7 +3848,7 @@ _CORBA_MODULE_BEG
   class PortListener;
   class _objref_PortListener;
   class _impl_PortListener;
-  
+
   typedef _objref_PortListener* PortListener_ptr;
   typedef PortListener_ptr PortListenerRef;
 
@@ -3877,7 +3879,7 @@ _CORBA_MODULE_BEG
     static _ptr_type _duplicate(_ptr_type);
     static _ptr_type _narrow(::CORBA::Object_ptr);
     static _ptr_type _unchecked_narrow(::CORBA::Object_ptr);
-    
+
     static _ptr_type _nil();
 
     static inline void _marshalObjRef(_ptr_type, cdrStream&);
@@ -3898,7 +3900,7 @@ _CORBA_MODULE_BEG
     struct PlayPortStatus {
       typedef _CORBA_ConstrType_Fix_Var<PlayPortStatus> _var_type;
 
-      
+
       ::CORBA::Long portNumber;
 
       ::CORBA::ULong flags;
@@ -3917,7 +3919,7 @@ _CORBA_MODULE_BEG
 
       Timecode outputTime;
 
-    
+
 
       void operator>>= (cdrStream &) const;
       void operator<<= (cdrStream &);
@@ -3964,7 +3966,7 @@ _CORBA_MODULE_BEG
     struct RecordPortStatus {
       typedef _CORBA_ConstrType_Fix_Var<RecordPortStatus> _var_type;
 
-      
+
       ::CORBA::Long portNumber;
 
       ::CORBA::ULong flags;
@@ -3983,7 +3985,7 @@ _CORBA_MODULE_BEG
 
       ::CORBA::Long recordableFrames;
 
-    
+
 
       void operator>>= (cdrStream &) const;
       void operator<<= (cdrStream &);
@@ -4026,7 +4028,7 @@ _CORBA_MODULE_BEG
     struct IdlePortStatus {
       typedef _CORBA_ConstrType_Fix_Var<IdlePortStatus> _var_type;
 
-      
+
       ::CORBA::Long portNumber;
 
       ::CORBA::ULong flags;
@@ -4037,7 +4039,7 @@ _CORBA_MODULE_BEG
 
       ::CORBA::Long framesUnused;
 
-    
+
 
       void operator>>= (cdrStream &) const;
       void operator<<= (cdrStream &);
@@ -4070,7 +4072,7 @@ _CORBA_MODULE_BEG
     struct NoteEvent {
       typedef _CORBA_ConstrType_Variable_Var<NoteEvent> _var_type;
 
-      
+
       ::CORBA::Long portNumber;
 
       ::CORBA::Long trackNum;
@@ -4085,7 +4087,7 @@ _CORBA_MODULE_BEG
 
       ::CORBA::WString_member note;
 
-    
+
 
       void operator>>= (cdrStream &) const;
       void operator<<= (cdrStream &);
@@ -4095,7 +4097,7 @@ _CORBA_MODULE_BEG
 
     typedef _CORBA_ConstrType_Variable_OUT_arg< NoteEvent,NoteEvent_var > NoteEvent_out;
 
-  
+
   };
 
   class _objref_PortListener :
@@ -4114,7 +4116,7 @@ _CORBA_MODULE_BEG
   protected:
     virtual ~_objref_PortListener();
 
-    
+
   private:
     virtual void* _ptrToObjRef(const char*);
 
@@ -4144,14 +4146,14 @@ _CORBA_MODULE_BEG
     virtual void newRecordStatus(const ::Quentin::PortListener::RecordPortStatus& status) = 0;
     virtual void newIdleStatus(const ::Quentin::PortListener::IdlePortStatus& status) = 0;
     virtual void reportNote(const ::Quentin::PortListener::NoteEvent& note) = 0;
-    
+
   public:  // Really protected, workaround for xlC
     virtual _CORBA_Boolean _dispatch(omniCallHandle&);
 
   private:
     virtual void* _ptrToInterface(const char*);
     virtual const char* _mostDerivedRepoId();
-    
+
   };
 
 
@@ -4161,7 +4163,7 @@ _CORBA_MODULE_BEG
   class StateChangeListener;
   class _objref_StateChangeListener;
   class _impl_StateChangeListener;
-  
+
   typedef _objref_StateChangeListener* StateChangeListener_ptr;
   typedef StateChangeListener_ptr StateChangeListenerRef;
 
@@ -4192,7 +4194,7 @@ _CORBA_MODULE_BEG
     static _ptr_type _duplicate(_ptr_type);
     static _ptr_type _narrow(::CORBA::Object_ptr);
     static _ptr_type _unchecked_narrow(::CORBA::Object_ptr);
-    
+
     static _ptr_type _nil();
 
     static inline void _marshalObjRef(_ptr_type, cdrStream&);
@@ -4220,7 +4222,7 @@ _CORBA_MODULE_BEG
 
     static _core_attr const ::CORBA::Long zoneChanges _init_in_cldecl_( = 32 );
 
-  
+
   };
 
   class _objref_StateChangeListener :
@@ -4236,7 +4238,7 @@ _CORBA_MODULE_BEG
   protected:
     virtual ~_objref_StateChangeListener();
 
-    
+
   private:
     virtual void* _ptrToObjRef(const char*);
 
@@ -4263,14 +4265,14 @@ _CORBA_MODULE_BEG
     virtual ~_impl_StateChangeListener();
 
     virtual void newChanges(const ::Quentin::StateChangeList& list) = 0;
-    
+
   public:  // Really protected, workaround for xlC
     virtual _CORBA_Boolean _dispatch(omniCallHandle&);
 
   private:
     virtual void* _ptrToInterface(const char*);
     virtual const char* _mostDerivedRepoId();
-    
+
   };
 
 
@@ -4280,7 +4282,7 @@ _CORBA_MODULE_BEG
   class Port;
   class _objref_Port;
   class _impl_Port;
-  
+
   typedef _objref_Port* Port_ptr;
   typedef Port_ptr PortRef;
 
@@ -4311,7 +4313,7 @@ _CORBA_MODULE_BEG
     static _ptr_type _duplicate(_ptr_type);
     static _ptr_type _narrow(::CORBA::Object_ptr);
     static _ptr_type _unchecked_narrow(::CORBA::Object_ptr);
-    
+
     static _ptr_type _nil();
 
     static inline void _marshalObjRef(_ptr_type, cdrStream&);
@@ -4355,12 +4357,12 @@ _CORBA_MODULE_BEG
 
       typedef _CORBA_ConstrType_Fix_Var<GeneralPortStatus> _var_type;
 
-      
+
 
       GeneralPortStatus(): _pd__initialised(0) {
-        
+
       }
-      
+
       GeneralPortStatus(const GeneralPortStatus& _value) {
         _pd__initialised = _value._pd__initialised;
         switch(_value._pd__d) {
@@ -4372,10 +4374,10 @@ _CORBA_MODULE_BEG
 
             default: break;
 
-        
+
         }
         _pd__d = _value._pd__d;
-    
+
       }
 
       ~GeneralPortStatus() {}
@@ -4391,10 +4393,10 @@ _CORBA_MODULE_BEG
 
             default: break;
 
-        
+
         }
         _pd__d = _value._pd__d;
-    
+
         return *this;
       }
 
@@ -4413,16 +4415,16 @@ _CORBA_MODULE_BEG
           default: goto fail;
 
         };
-        
+
 
         fail:
         OMNIORB_THROW(BAD_PARAM,_OMNI_NS(BAD_PARAM_InvalidUnionDiscValue),::CORBA::COMPLETED_NO);
 
 
-    
+
       }
 
-      
+
 
       const PortListener::IdlePortStatus &idleStatus () const { return _pd_idleStatus; }
       PortListener::IdlePortStatus &idleStatus () { return _pd_idleStatus; }
@@ -4451,8 +4453,8 @@ _CORBA_MODULE_BEG
         _pd_playStatus = _value;
       }
 
-    
-      
+
+
       void operator>>= (cdrStream&) const;
       void operator<<= (cdrStream&);
 
@@ -4461,14 +4463,14 @@ _CORBA_MODULE_BEG
       _CORBA_Boolean _pd__default;
       _CORBA_Boolean _pd__initialised;
 
-      
+
       PortListener::IdlePortStatus _pd_idleStatus;
 
       PortListener::RecordPortStatus _pd_recStatus;
 
       PortListener::PlayPortStatus _pd_playStatus;
 
-    
+
     };
 
     typedef GeneralPortStatus::_var_type GeneralPortStatus_var;
@@ -4478,14 +4480,14 @@ _CORBA_MODULE_BEG
     struct TriggerState {
       typedef _CORBA_ConstrType_Fix_Var<TriggerState> _var_type;
 
-      
+
       TriggerAction action;
 
       TriggerMode mode;
 
       ::CORBA::Long param;
 
-    
+
 
       void operator>>= (cdrStream &) const;
       void operator<<= (cdrStream &);
@@ -4509,7 +4511,7 @@ _CORBA_MODULE_BEG
       inline TriggerStates(_CORBA_ULong _max, _CORBA_ULong _len, TriggerState* _val, _CORBA_Boolean _rel=0)
         : _CORBA_Unbounded_Sequence< TriggerState > (_max, _len, _val, _rel) {}
 
-    
+
 
       inline TriggerStates& operator = (const TriggerStates& _s) {
         _CORBA_Unbounded_Sequence< TriggerState > ::operator=(_s);
@@ -4528,7 +4530,7 @@ _CORBA_MODULE_BEG
         else              _pd_seq = 0;
       }
       inline ~TriggerStates_var() { if( _pd_seq )  delete _pd_seq; }
-        
+
       inline TriggerStates_var& operator = (TriggerStates* _s) {
         if( _pd_seq )  delete _pd_seq;
         _pd_seq = _s;
@@ -4548,7 +4550,7 @@ _CORBA_MODULE_BEG
         return (*_pd_seq)[_s];
       }
 
-    
+
 
       inline TriggerStates* operator -> () { return _pd_seq; }
       inline const TriggerStates* operator -> () const { return _pd_seq; }
@@ -4558,7 +4560,7 @@ _CORBA_MODULE_BEG
       inline operator const TriggerStates& () const { return *_pd_seq; }
       inline operator TriggerStates& () { return *_pd_seq; }
 #endif
-        
+
       inline const TriggerStates& in() const { return *_pd_seq; }
       inline TriggerStates&       inout()    { return *_pd_seq; }
       inline TriggerStates*&      out() {
@@ -4566,9 +4568,9 @@ _CORBA_MODULE_BEG
         return _pd_seq;
       }
       inline TriggerStates* _retn() { TriggerStates* tmp = _pd_seq; _pd_seq = 0; return tmp; }
-        
+
       friend class TriggerStates_out;
-      
+
     private:
       TriggerStates* _pd_seq;
     };
@@ -4595,7 +4597,7 @@ _CORBA_MODULE_BEG
         return (*_data)[_i];
       }
 
-    
+
 
       TriggerStates*& _data;
 
@@ -4620,7 +4622,7 @@ _CORBA_MODULE_BEG
 
     static _core_attr const ::CORBA::WChar * OI_Tally;
 
-  
+
   };
 
   class _objref_Port :
@@ -4691,7 +4693,7 @@ _CORBA_MODULE_BEG
   protected:
     virtual ~_objref_Port();
 
-    
+
   private:
     virtual void* _ptrToObjRef(const char*);
 
@@ -4774,14 +4776,14 @@ _CORBA_MODULE_BEG
     virtual void setOverlayClipTitle(const ::CORBA::WChar* clipname, ::Quentin::Port::OverlayTextColour colour) = 0;
     virtual void setOverlayIndicator(const ::CORBA::WChar* indicator, ::CORBA::Boolean active) = 0;
     virtual void setOverlayTallyID(::CORBA::Long id, ::CORBA::Boolean numeric) = 0;
-    
+
   public:  // Really protected, workaround for xlC
     virtual _CORBA_Boolean _dispatch(omniCallHandle&);
 
   private:
     virtual void* _ptrToInterface(const char*);
     virtual const char* _mostDerivedRepoId();
-    
+
   };
 
 
@@ -4791,7 +4793,7 @@ _CORBA_MODULE_BEG
   class Server;
   class _objref_Server;
   class _impl_Server;
-  
+
   typedef _objref_Server* Server_ptr;
   typedef Server_ptr ServerRef;
 
@@ -4822,7 +4824,7 @@ _CORBA_MODULE_BEG
     static _ptr_type _duplicate(_ptr_type);
     static _ptr_type _narrow(::CORBA::Object_ptr);
     static _ptr_type _unchecked_narrow(::CORBA::Object_ptr);
-    
+
     static _ptr_type _nil();
 
     static inline void _marshalObjRef(_ptr_type, cdrStream&);
@@ -4838,7 +4840,7 @@ _CORBA_MODULE_BEG
     static _core_attr const char* _PD_repoId;
 
     // Other IDL defined within this scope.
-    
+
   };
 
   class _objref_Server :
@@ -4863,7 +4865,7 @@ _CORBA_MODULE_BEG
   protected:
     virtual ~_objref_Server();
 
-    
+
   private:
     virtual void* _ptrToObjRef(const char*);
 
@@ -4900,14 +4902,14 @@ _CORBA_MODULE_BEG
     virtual Longs* getDefaultConfigurations(::CORBA::Long channel) = 0;
     virtual Longs* getCurrentConfigurations(::CORBA::Long channel) = 0;
     virtual ServerCapabilities* getServerCapabilities() = 0;
-    
+
   public:  // Really protected, workaround for xlC
     virtual _CORBA_Boolean _dispatch(omniCallHandle&);
 
   private:
     virtual void* _ptrToInterface(const char*);
     virtual const char* _mostDerivedRepoId();
-    
+
   };
 
 
@@ -4917,7 +4919,7 @@ _CORBA_MODULE_BEG
   class DirectoryViewer;
   class _objref_DirectoryViewer;
   class _impl_DirectoryViewer;
-  
+
   typedef _objref_DirectoryViewer* DirectoryViewer_ptr;
   typedef DirectoryViewer_ptr DirectoryViewerRef;
 
@@ -4948,7 +4950,7 @@ _CORBA_MODULE_BEG
     static _ptr_type _duplicate(_ptr_type);
     static _ptr_type _narrow(::CORBA::Object_ptr);
     static _ptr_type _unchecked_narrow(::CORBA::Object_ptr);
-    
+
     static _ptr_type _nil();
 
     static inline void _marshalObjRef(_ptr_type, cdrStream&);
@@ -4964,7 +4966,7 @@ _CORBA_MODULE_BEG
     static _core_attr const char* _PD_repoId;
 
     // Other IDL defined within this scope.
-    
+
   };
 
   class _objref_DirectoryViewer :
@@ -5023,7 +5025,7 @@ _CORBA_MODULE_BEG
   protected:
     virtual ~_objref_DirectoryViewer();
 
-    
+
   private:
     virtual void* _ptrToObjRef(const char*);
 
@@ -5094,14 +5096,14 @@ _CORBA_MODULE_BEG
     virtual ::CORBA::Long queryFreed(::CORBA::Long poolID, const ::Quentin::Longs& clips) = 0;
     virtual Longs* getPools(::CORBA::Long clipID) = 0;
     virtual ::CORBA::LongLong getFreeProtons(::CORBA::Long poolIdent) = 0;
-    
+
   public:  // Really protected, workaround for xlC
     virtual _CORBA_Boolean _dispatch(omniCallHandle&);
 
   private:
     virtual void* _ptrToInterface(const char*);
     virtual const char* _mostDerivedRepoId();
-    
+
   };
 
 
@@ -5111,7 +5113,7 @@ _CORBA_MODULE_BEG
   class ZonePortal;
   class _objref_ZonePortal;
   class _impl_ZonePortal;
-  
+
   typedef _objref_ZonePortal* ZonePortal_ptr;
   typedef ZonePortal_ptr ZonePortalRef;
 
@@ -5142,7 +5144,7 @@ _CORBA_MODULE_BEG
     static _ptr_type _duplicate(_ptr_type);
     static _ptr_type _narrow(::CORBA::Object_ptr);
     static _ptr_type _unchecked_narrow(::CORBA::Object_ptr);
-    
+
     static _ptr_type _nil();
 
     static inline void _marshalObjRef(_ptr_type, cdrStream&);
@@ -5172,7 +5174,7 @@ _CORBA_MODULE_BEG
 
     static _core_attr const ::CORBA::Long rushRecording _init_in_cldecl_( = 1073741824 );
 
-  
+
   };
 
   class _objref_ZonePortal :
@@ -5283,7 +5285,7 @@ _CORBA_MODULE_BEG
   protected:
     virtual ~_objref_ZonePortal();
 
-    
+
   private:
     virtual void* _ptrToObjRef(const char*);
 
@@ -5406,14 +5408,14 @@ _CORBA_MODULE_BEG
     virtual WStrings* getLoggingRoles() = 0;
     virtual WStrings* getLoggingRoleNames(const ::CORBA::WChar* role) = 0;
     virtual ::CORBA::Long lastAAFRecord(::CORBA::Long clipID) = 0;
-    
+
   public:  // Really protected, workaround for xlC
     virtual _CORBA_Boolean _dispatch(omniCallHandle&);
 
   private:
     virtual void* _ptrToInterface(const char*);
     virtual const char* _mostDerivedRepoId();
-    
+
   };
 
 
@@ -5844,4 +5846,3 @@ Quentin::ZonePortal::_marshalObjRef(::Quentin::ZonePortal_ptr obj, cdrStream& s)
 #endif
 
 #endif  // __Quentin_hh__
-

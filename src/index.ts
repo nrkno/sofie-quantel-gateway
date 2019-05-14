@@ -1,6 +1,8 @@
 import * as request from 'request'
+import * as SegfaultHandler from 'segfault-handler'
 
 const quantel = require('../build/Release/quantel_gateway')
+SegfaultHandler.registerHandler('crash.log')
 
 export namespace Quantel {
 
@@ -18,7 +20,31 @@ export namespace Quantel {
 		down: boolean,
 		name?: string,
 		numChannels?: number,
-		pools?: Array<number>
+		pools?: Array<number>,
+		portNames?: Array<string>,
+	}
+
+	export interface PortRef {
+		serverID: number,
+		portName: string,
+	}
+
+	export interface PortInfo extends PortRef {
+		type?: string,
+		channelNo: number,
+		portID?: number,
+		audioOnly?: boolean,
+		assigned?: boolean,
+	}
+
+	export interface PortStatus extends PortRef {
+		type: string,
+		portID: number,
+		speed: number,
+		offset: number,
+		flags: number,
+		endOfData: number,
+		framesUnused: number,
 	}
 
 	export async function getISAReference (ref?: string): Promise<string> {
@@ -51,5 +77,20 @@ export namespace Quantel {
 	export async function getServers (): Promise<Array<ServerInfo>> {
 		if (!isaIOR) await getISAReference()
 		return quantel.getServers(await isaIOR)
+	}
+
+	export async function createPlayPort (options: PortInfo): Promise<PortInfo> {
+		if (!isaIOR) await getISAReference()
+		return quantel.createPlayPort(await isaIOR, options)
+	}
+
+	export async function getPlayPortStatus (options: PortRef): Promise<any> {
+		if (!isaIOR) await getISAReference()
+		return quantel.getPlayPortStatus(await isaIOR, options)
+	}
+
+	export async function releasePort (options: PortRef): Promise<boolean> {
+		if (!isaIOR) await getISAReference()
+		return quantel.releasePort(await isaIOR, options)
 	}
 }

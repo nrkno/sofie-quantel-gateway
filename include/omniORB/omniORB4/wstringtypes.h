@@ -97,8 +97,9 @@ static inline _CORBA_WChar* alloc(int len_)
 // don't initialise to empty string.  <len> does not include nul
 // terminator.
 
-static inline void free(_CORBA_WChar* s) { 
-  if (s && s != empty_wstring) delete[] s; 
+static inline void free(_CORBA_WChar* s) {
+  printf("I'm free %p %p\n", s, empty_wstring);
+  // if (s && s != empty_wstring) delete[] s;
 }
 // As CORBA::wstring_free().
 
@@ -113,7 +114,7 @@ static inline void cpy(_CORBA_WChar* t, const _CORBA_WChar* f) {
   *t = 0;
 }
 
-static inline _CORBA_WChar* dup(const _CORBA_WChar* s) { 
+static inline _CORBA_WChar* dup(const _CORBA_WChar* s) {
   _CORBA_WChar* r = alloc(len(s));
   if (r) {
     cpy(r, s);
@@ -239,7 +240,7 @@ public:
   inline _CORBA_WString_member()
     : _ptr(OMNI_CONST_CAST(_CORBA_WChar*, _CORBA_WString_helper::empty_wstring)) {}
 
-  inline _CORBA_WString_member(const _CORBA_WString_member& s)  
+  inline _CORBA_WString_member(const _CORBA_WString_member& s)
     : _ptr(OMNI_CONST_CAST(_CORBA_WChar*, _CORBA_WString_helper::empty_wstring)) {
     if (s._ptr && s._ptr != _CORBA_WString_helper::empty_wstring)
       _ptr = _CORBA_WString_helper::dup(s._ptr);
@@ -345,10 +346,10 @@ class _CORBA_WString_element {
 
 public:
 
-  inline _CORBA_WString_element(_CORBA_WChar*& p, _CORBA_Boolean rel) 
+  inline _CORBA_WString_element(_CORBA_WChar*& p, _CORBA_Boolean rel)
     : pd_rel(rel), pd_data(p) {}
 
-  inline _CORBA_WString_element(const _CORBA_WString_element& s) 
+  inline _CORBA_WString_element(const _CORBA_WString_element& s)
     : pd_rel(s.pd_rel), pd_data(s.pd_data) {}
 
   inline ~_CORBA_WString_element() {
@@ -356,7 +357,7 @@ public:
   }
 
   inline _CORBA_WString_element& operator=(_CORBA_WChar* s) {
-    if (pd_rel) 
+    if (pd_rel)
       _CORBA_WString_helper::free(pd_data);
     pd_data = s;
     return *this;
@@ -489,7 +490,7 @@ inline _CORBA_WString_var&
 _CORBA_WString_var::operator= (const _CORBA_WString_member& s)
 {
   _CORBA_WString_helper::free(_data);
-  if ((const _CORBA_WChar*)s) 
+  if ((const _CORBA_WChar*)s)
     _data = _CORBA_WString_helper::dup(s);
   else
     _data = 0;
@@ -507,7 +508,7 @@ _CORBA_WString_var::operator= (const _CORBA_WString_element& s)
   return *this;
 }
 
-inline _CORBA_WString_member& 
+inline _CORBA_WString_member&
 _CORBA_WString_member::operator=(const _CORBA_WString_element& s) {
   _CORBA_WString_helper::free(_ptr);
   if( (const _CORBA_WChar*)s )
@@ -564,7 +565,7 @@ public:
   inline _CORBA_WString_out& operator=(const _CORBA_WString_out& p) {
     _data = p._data; return *this;
   }
-  inline _CORBA_WString_out& operator=(_CORBA_WChar* p) { 
+  inline _CORBA_WString_out& operator=(_CORBA_WChar* p) {
     _data = p; return *this;
   }
   inline _CORBA_WString_out& operator=(const _CORBA_WChar* p) {
@@ -607,7 +608,7 @@ public:
     }
 
     if (len) {
-      // Allocate buffer on-demand. Either pd_data == 0 
+      // Allocate buffer on-demand. Either pd_data == 0
       //                            or pd_data = buffer for pd_max elements
       if (!pd_data || len > pd_max) {
 	copybuffer(((len > pd_max) ? len : pd_max));
@@ -690,21 +691,23 @@ public:
     }
   }
 
-  inline const _CORBA_WChar* const* get_buffer() const { 
+  inline const _CORBA_WChar* const* get_buffer() const {
     if (pd_max && !pd_data) {
       _CORBA_Sequence_WString* s = OMNI_CONST_CAST(_CORBA_Sequence_WString*, this);
       s->copybuffer(pd_max);
     }
 #if !defined(__DECCXX) || (__DECCXX_VER > 60000000)
-    return pd_data; 
+    return pd_data;
 #else
-    return (char const* const*)pd_data; 
+    return (char const* const*)pd_data;
 #endif
   }
 
 
-  inline ~_CORBA_Sequence_WString() { 
-    if (pd_rel && pd_data) freebuf(pd_data);
+  inline ~_CORBA_Sequence_WString() {
+    printf("pd_rel %p && pd_data %p\n", pd_rel, pd_data);
+    // FIXME work out why this causes seg faults
+    // if (pd_rel && pd_data) freebuf(pd_data);
     pd_data = 0;
   }
 
@@ -727,7 +730,7 @@ protected:
 				 _CORBA_Boolean release_ = 0,
 				 _CORBA_Boolean bounded = 0)
      : pd_max(max), pd_len(len), pd_rel(release_),
-       pd_bounded(bounded), pd_data(value)  { 
+       pd_bounded(bounded), pd_data(value)  {
     if (len > max || (len && !value)) {
       _CORBA_bound_check_error();
       // never reach here
@@ -738,13 +741,13 @@ protected:
     : pd_max(s.pd_max), pd_len(0), pd_rel(1),
       pd_bounded(s.pd_bounded), pd_data(0) {
     length(s.pd_len);
-    for( _CORBA_ULong i = 0; i < pd_len; i++ )  
+    for( _CORBA_ULong i = 0; i < pd_len; i++ )
       operator[](i) = s[i];
   }
 
   inline SeqT& operator = (const SeqT& s) {
     length(s.pd_len);
-    for( _CORBA_ULong i = 0; i < pd_len; i++ )  
+    for( _CORBA_ULong i = 0; i < pd_len; i++ )
       operator[](i) = s[i];
     return *this;
   }
@@ -783,7 +786,7 @@ private:
 	pd_data[i] = 0;
       }
       else {
-	newdata[i] = ((pd_data[i]) ? 
+	newdata[i] = ((pd_data[i]) ?
 		      _CORBA_WString_helper::dup(pd_data[i]) : 0);
       }
     }
