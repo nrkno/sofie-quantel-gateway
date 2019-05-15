@@ -272,8 +272,8 @@ napi_value getServers(napi_env env, napi_callback_info info) {
   return result;
 }
 
-#define START 42
-#define STOP 43
+#define START 0
+#define STOP 1
 
 int32_t portCounter = 1;
 
@@ -556,7 +556,7 @@ napi_value getPlayPortStatus(napi_env env, napi_callback_info info) {
 
 napi_value releasePort(napi_env env, napi_callback_info info) {
   napi_status status;
-  napi_value result, prop, options;
+  napi_value prop, options;
   napi_valuetype type;
   bool isArray;
   CORBA::ORB_var orb;
@@ -641,6 +641,405 @@ napi_value releasePort(napi_env env, napi_callback_info info) {
   return prop;
 }
 
+napi_value getAllFragments(napi_env env, napi_callback_info info) {
+  napi_status status;
+  napi_value result, prop, options, frag, fragprop;
+  napi_valuetype type;
+  bool isArray;
+  CORBA::ORB_var orb;
+  Quentin::ZonePortal::_ptr_type zp;
+  int32_t clipID;
+  char rushID[33];
+
+  try {
+    status = retrieveZonePortal(env, info, &orb, &zp);
+    CHECK_STATUS;
+
+    size_t argc = 2;
+    napi_value argv[2];
+    status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    CHECK_STATUS;
+
+    if (argc < 2) {
+      NAPI_THROW_ORB_DESTROY("Options object with clip ID must be provided.");
+    }
+    status = napi_typeof(env, argv[1], &type);
+    CHECK_STATUS;
+    status = napi_is_array(env, argv[1], &isArray);
+    CHECK_STATUS;
+    if (isArray || type != napi_object) {
+      NAPI_THROW_ORB_DESTROY("Argument must be an options object with a clip ID.");
+    }
+
+    status = napi_create_object(env, &result);
+    CHECK_STATUS;
+    status = napi_create_string_utf8(env, "ServerFramgments", NAPI_AUTO_LENGTH, &prop);
+    CHECK_STATUS;
+    status = napi_set_named_property(env, result, "type", prop);
+    CHECK_STATUS;
+
+    options = argv[1];
+    status = napi_get_named_property(env, options, "clipID", &prop);
+    CHECK_STATUS;
+    status = napi_get_value_int32(env, prop, &clipID);
+    CHECK_STATUS;
+    status = napi_set_named_property(env, result, "clipID", prop);
+    CHECK_STATUS;
+
+    Quentin::ServerFragments_var fragments = zp->getAllFragments(clipID);
+
+    status = napi_create_array(env, &prop);
+    CHECK_STATUS;
+
+    for ( int x = 0 ; x < fragments->length() ; x++ ) {
+      status = napi_create_object(env, &frag);
+      CHECK_STATUS;
+
+      switch (fragments[x].fragmentData._d()) {
+      case Quentin::FragmentType::videoFragment:
+        status = napi_create_string_utf8(env, "VideoFragment", NAPI_AUTO_LENGTH, &fragprop);
+        CHECK_STATUS;
+        break;
+      case Quentin::FragmentType::audioFragment:
+        status = napi_create_string_utf8(env, "AudioFragment", NAPI_AUTO_LENGTH, &fragprop);
+        CHECK_STATUS;
+        break;
+      case Quentin::FragmentType::auxFragment:
+        status = napi_create_string_utf8(env, "AUXFragment", NAPI_AUTO_LENGTH, &fragprop);
+        CHECK_STATUS;
+        break;
+      case Quentin::FragmentType::flagsFragment:
+        status = napi_create_string_utf8(env, "FlagsFragment", NAPI_AUTO_LENGTH, &fragprop);
+        CHECK_STATUS;
+        break;
+      case Quentin::FragmentType::timecodeFragment:
+        status = napi_create_string_utf8(env, "TimecodeFragment", NAPI_AUTO_LENGTH, &fragprop);
+        CHECK_STATUS;
+        break;
+      case Quentin::FragmentType::cropFragment:
+        status = napi_create_string_utf8(env, "CropFragment", NAPI_AUTO_LENGTH, &fragprop);
+        CHECK_STATUS;
+        break;
+      case Quentin::FragmentType::panZoomFragment:
+        status = napi_create_string_utf8(env, "PanZoomFragment", NAPI_AUTO_LENGTH, &fragprop);
+        CHECK_STATUS;
+        break;
+      case Quentin::FragmentType::speedFragment:
+        status = napi_create_string_utf8(env, "SpeedFragment", NAPI_AUTO_LENGTH, &fragprop);
+        CHECK_STATUS;
+        break;
+      case Quentin::FragmentType::multiCamFragment:
+        status = napi_create_string_utf8(env, "MultiCamFragment", NAPI_AUTO_LENGTH, &fragprop);
+        CHECK_STATUS;
+        break;
+      case Quentin::FragmentType::ccFragment:
+        status = napi_create_string_utf8(env, "CCFragment", NAPI_AUTO_LENGTH, &fragprop);
+        CHECK_STATUS;
+        break;
+      case Quentin::FragmentType::effectFragment:
+        status = napi_create_string_utf8(env, "EffectFragment", NAPI_AUTO_LENGTH, &fragprop);
+        CHECK_STATUS;
+        break;
+      default:
+        status = napi_create_string_utf8(env, "ServerFragment", NAPI_AUTO_LENGTH, &fragprop);
+        CHECK_STATUS;
+        break;
+      }
+      status = napi_set_named_property(env, frag, "type", fragprop);
+      CHECK_STATUS;
+
+      status = napi_create_int32(env, fragments[x].trackNum, &fragprop);
+      CHECK_STATUS;
+      status = napi_set_named_property(env, frag, "trackNum", fragprop);
+      CHECK_STATUS;
+
+      status = napi_create_int32(env, fragments[x].start, &fragprop);
+      CHECK_STATUS;
+      status = napi_set_named_property(env, frag, "start", fragprop);
+      CHECK_STATUS;
+
+      status = napi_create_int32(env, fragments[x].finish, &fragprop);
+      CHECK_STATUS;
+      status = napi_set_named_property(env, frag, "finish", fragprop);
+      CHECK_STATUS;
+
+      switch (fragments[x].fragmentData._d()) {
+      case Quentin::FragmentType::videoFragment:
+        sprintf(rushID, "%016llx%016llx",
+          fragments[x].fragmentData.videoFragmentData().rushID.first,
+          fragments[x].fragmentData.videoFragmentData().rushID.second);
+        status = napi_create_string_utf8(env, rushID, 32, &fragprop);
+        CHECK_STATUS;
+        status = napi_set_named_property(env, frag, "rushID", fragprop);
+        CHECK_STATUS;
+
+        status = napi_create_int32(env, fragments[x].fragmentData.videoFragmentData().format, &fragprop);
+        CHECK_STATUS;
+        status = napi_set_named_property(env, frag, "format", fragprop);
+        CHECK_STATUS;
+
+        status = napi_create_int32(env, fragments[x].fragmentData.videoFragmentData().poolID, &fragprop);
+        CHECK_STATUS;
+        status = napi_set_named_property(env, frag, "poolID", fragprop);
+        CHECK_STATUS;
+
+        status = napi_create_int64(env, fragments[x].fragmentData.videoFragmentData().poolFrame, &fragprop);
+        CHECK_STATUS;
+        status = napi_set_named_property(env, frag, "poolFrame", fragprop);
+        CHECK_STATUS;
+
+        status = napi_create_int32(env, fragments[x].fragmentData.videoFragmentData().skew, &fragprop);
+        CHECK_STATUS;
+        status = napi_set_named_property(env, frag, "poolFrame", fragprop);
+        CHECK_STATUS;
+
+        status = napi_create_int32(env, fragments[x].fragmentData.videoFragmentData().rushFrame, &fragprop);
+        CHECK_STATUS;
+        status = napi_set_named_property(env, frag, "rushFrame", fragprop);
+        CHECK_STATUS;
+        break;
+      case Quentin::FragmentType::audioFragment:
+        sprintf(rushID, "%016llx%016llx",
+          fragments[x].fragmentData.audioFragmentData().rushID.first,
+          fragments[x].fragmentData.audioFragmentData().rushID.second);
+        status = napi_create_string_utf8(env, rushID, 32, &fragprop);
+        CHECK_STATUS;
+        status = napi_set_named_property(env, frag, "rushID", fragprop);
+        CHECK_STATUS;
+
+        status = napi_create_int32(env, fragments[x].fragmentData.audioFragmentData().format, &fragprop);
+        CHECK_STATUS;
+        status = napi_set_named_property(env, frag, "format", fragprop);
+        CHECK_STATUS;
+
+        status = napi_create_int32(env, fragments[x].fragmentData.audioFragmentData().poolID, &fragprop);
+        CHECK_STATUS;
+        status = napi_set_named_property(env, frag, "poolID", fragprop);
+        CHECK_STATUS;
+
+        status = napi_create_int64(env, fragments[x].fragmentData.audioFragmentData().poolFrame, &fragprop);
+        CHECK_STATUS;
+        status = napi_set_named_property(env, frag, "poolFrame", fragprop);
+        CHECK_STATUS;
+
+        status = napi_create_int32(env, fragments[x].fragmentData.audioFragmentData().skew, &fragprop);
+        CHECK_STATUS;
+        status = napi_set_named_property(env, frag, "poolFrame", fragprop);
+        CHECK_STATUS;
+
+        status = napi_create_int32(env, fragments[x].fragmentData.audioFragmentData().rushFrame, &fragprop);
+        CHECK_STATUS;
+        status = napi_set_named_property(env, frag, "rushFrame", fragprop);
+        CHECK_STATUS;
+        break;
+      case Quentin::FragmentType::auxFragment:
+        sprintf(rushID, "%016llx%016llx",
+          fragments[x].fragmentData.auxFragmentData().rushID.first,
+          fragments[x].fragmentData.auxFragmentData().rushID.second);
+        status = napi_create_string_utf8(env, rushID, 32, &fragprop);
+        CHECK_STATUS;
+        status = napi_set_named_property(env, frag, "rushID", fragprop);
+        CHECK_STATUS;
+
+        status = napi_create_int32(env, fragments[x].fragmentData.auxFragmentData().format, &fragprop);
+        CHECK_STATUS;
+        status = napi_set_named_property(env, frag, "format", fragprop);
+        CHECK_STATUS;
+
+        status = napi_create_int32(env, fragments[x].fragmentData.auxFragmentData().poolID, &fragprop);
+        CHECK_STATUS;
+        status = napi_set_named_property(env, frag, "poolID", fragprop);
+        CHECK_STATUS;
+
+        status = napi_create_int64(env, fragments[x].fragmentData.auxFragmentData().poolFrame, &fragprop);
+        CHECK_STATUS;
+        status = napi_set_named_property(env, frag, "poolFrame", fragprop);
+        CHECK_STATUS;
+
+        status = napi_create_int32(env, fragments[x].fragmentData.auxFragmentData().skew, &fragprop);
+        CHECK_STATUS;
+        status = napi_set_named_property(env, frag, "poolFrame", fragprop);
+        CHECK_STATUS;
+
+        status = napi_create_int32(env, fragments[x].fragmentData.auxFragmentData().rushFrame, &fragprop);
+        CHECK_STATUS;
+        status = napi_set_named_property(env, frag, "rushFrame", fragprop);
+        CHECK_STATUS;
+        break;
+      case Quentin::FragmentType::flagsFragment:
+        // TODO
+        break;
+      case Quentin::FragmentType::timecodeFragment:
+        // TODO
+        break;
+      case Quentin::FragmentType::cropFragment:
+        // TODO
+        break;
+      case Quentin::FragmentType::panZoomFragment:
+        // TODO
+        break;
+      case Quentin::FragmentType::speedFragment:
+        // TODO
+        break;
+      case Quentin::FragmentType::multiCamFragment:
+        // TODO
+        break;
+      case Quentin::FragmentType::ccFragment:
+        sprintf(rushID, "%016llx%016llx",
+          fragments[x].fragmentData.ccFragmentData().ccID.first,
+          fragments[x].fragmentData.ccFragmentData().ccID.second);
+        status = napi_create_string_utf8(env, rushID, 32, &fragprop);
+        CHECK_STATUS;
+        status = napi_set_named_property(env, frag, "ccID", fragprop);
+        CHECK_STATUS;
+
+        status = napi_create_int32(env, fragments[x].fragmentData.ccFragmentData().ccType, &fragprop);
+        CHECK_STATUS;
+        status = napi_set_named_property(env, frag, "ccType", fragprop);
+        CHECK_STATUS;
+        break;
+      case Quentin::FragmentType::effectFragment:
+        status = napi_create_int32(env, fragments[x].fragmentData.effectFragmentData().effectID, &fragprop);
+        CHECK_STATUS;
+        status = napi_set_named_property(env, frag, "effectID", fragprop);
+        CHECK_STATUS;
+        break;
+      default:
+        break;
+      }
+
+      status = napi_set_element(env, prop, x, frag);
+      CHECK_STATUS;
+    }
+    status = napi_set_named_property(env, result, "fragments", prop);
+    CHECK_STATUS;
+
+    // FIXME create a finalizer
+    status = napi_create_external(env, &fragments, nullptr, nullptr, &prop);
+    CHECK_STATUS;
+    status = napi_set_named_property(env, result, "_fragments", prop);
+    CHECK_STATUS;
+
+    printf("Fragments leaving here %p %i\n", &fragments, fragments->length());
+
+    Quentin::Server_ptr server = zp->getServer(1100);
+    Quentin::Port_ptr port = server->getPort(L"solitary", 0);
+
+    fragments[1] = fragments[3];
+    fragments->length(2);
+    port->load(0, fragments);
+
+    printf("Action at trigger result START %i\n", port->actionAtTrigger(START, Quentin::Port::trActStart));
+    port->actionAtTrigger(STOP, Quentin::Port::trActStop);
+
+    printf("Trying to start now %i\n", port->setTrigger(START, Quentin::Port::trModeNow, 1));
+    port->setTrigger(STOP, Quentin::Port::trModeOffset, 300);
+  }
+  catch(CORBA::SystemException& ex) {
+    NAPI_THROW_CORBA_EXCEPTION(ex);
+  }
+  catch(CORBA::Exception& ex) {
+    NAPI_THROW_CORBA_EXCEPTION(ex);
+  }
+  catch(omniORB::fatalException& fe) {
+    NAPI_THROW_FATAL_EXCEPTION(fe);
+  }
+
+  orb->destroy();
+  return result;
+}
+
+napi_value loadPlayPort(napi_env env, napi_callback_info info) {
+  napi_status status;
+  napi_value prop, options, extprop;
+  napi_valuetype type;
+  bool isArray;
+  CORBA::ORB_var orb;
+  Quentin::ZonePortal::_ptr_type zp;
+  int32_t serverID;
+  char* portName;
+  size_t portNameLen;
+  Quentin::WStrings_var portNames;
+  Quentin::ServerFragments_var fragments;
+
+  try {
+    status = retrieveZonePortal(env, info, &orb, &zp);
+    CHECK_STATUS;
+
+    size_t argc = 2;
+    napi_value argv[2];
+    status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    CHECK_STATUS;
+
+    if (argc < 2) {
+      NAPI_THROW_ORB_DESTROY("Options object with server ID, port name and channel must be provided.");
+    }
+    status = napi_typeof(env, argv[1], &type);
+    CHECK_STATUS;
+    status = napi_is_array(env, argv[1], &isArray);
+    CHECK_STATUS;
+    if (isArray || type != napi_object) {
+      NAPI_THROW_ORB_DESTROY("Argument must be an options object with server ID, port name and channel.");
+    }
+
+    options = argv[1];
+    status = napi_get_named_property(env, options, "serverID", &prop);
+    CHECK_STATUS;
+    status = napi_get_value_int32(env, prop, &serverID);
+    CHECK_STATUS;
+
+    status = napi_get_named_property(env, options, "portName", &prop);
+    CHECK_STATUS;
+    status = napi_get_value_string_utf8(env, prop, nullptr, 0, &portNameLen);
+    CHECK_STATUS;
+    portName = (char*) malloc((portNameLen + 1) * sizeof(char));
+    status = napi_get_value_string_utf8(env, prop, portName, portNameLen + 1, &portNameLen);
+    CHECK_STATUS;
+
+    status = napi_get_named_property(env, options, "fragments", &prop);
+    CHECK_STATUS;
+    status = napi_get_named_property(env, prop, "_fragments", &extprop);
+    CHECK_STATUS;
+    status = napi_get_value_external(env, extprop, (void**) &fragments);
+    CHECK_STATUS;
+
+    Quentin::Server_ptr server = zp->getServer(serverID);
+
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+    std::wstring wportName = utf8_conv.from_bytes(portName);
+
+    // Prevent accidental creation of extra port
+    portNames = server->getPortNames();
+    bool foundPort = false;
+    for ( int x = 0 ; x < portNames->length() ; x++ ) {
+      if (wcscmp(wportName.data(), (const wchar_t *) portNames[x]) == 0) {
+        foundPort = true;
+        break;
+      }
+    }
+    free(portName);
+    printf("Found port is %i\n", foundPort);
+    if (!foundPort) {
+      NAPI_THROW_ORB_DESTROY("Cannot load a port with an unknown port name.");
+    }
+
+    Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(portName).data(), 0);
+
+    printf("Fragments roundtripped: %p %i\n", fragments, fragments->length());
+  }
+  catch(CORBA::SystemException& ex) {
+    NAPI_THROW_CORBA_EXCEPTION(ex);
+  }
+  catch(CORBA::Exception& ex) {
+    NAPI_THROW_CORBA_EXCEPTION(ex);
+  }
+  catch(omniORB::fatalException& fe) {
+    NAPI_THROW_FATAL_EXCEPTION(fe);
+  }
+
+  orb->destroy();
+  return nullptr;
+}
 
 napi_value Init(napi_env env, napi_value exports) {
   napi_status status;
@@ -651,9 +1050,11 @@ napi_value Init(napi_env env, napi_value exports) {
     DECLARE_NAPI_METHOD("getServers", getServers),
     DECLARE_NAPI_METHOD("createPlayPort", createPlayPort),
     DECLARE_NAPI_METHOD("getPlayPortStatus", getPlayPortStatus),
-    DECLARE_NAPI_METHOD("releasePort", releasePort)
+    DECLARE_NAPI_METHOD("releasePort", releasePort),
+    DECLARE_NAPI_METHOD("getAllFragments", getAllFragments),
+    DECLARE_NAPI_METHOD("loadPlayPort", loadPlayPort)
   };
-  status = napi_define_properties(env, exports, 6, desc);
+  status = napi_define_properties(env, exports, 8, desc);
 
   return exports;
 }

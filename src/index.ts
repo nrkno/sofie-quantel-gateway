@@ -47,6 +47,18 @@ export namespace Quantel {
 		framesUnused: number,
 	}
 
+	export interface ClipRef {
+		clipID: number,
+	}
+
+	// TODO extend with the different types
+	export interface ServerFragments extends ClipRef {
+		fragmentNo: number,
+		trackNum: number,
+		start: number,
+		finish: number
+	}
+
 	export async function getISAReference (ref?: string): Promise<string> {
 		isaIOR = new Promise((resolve, reject) => {
 			// TODO better port resolution
@@ -92,5 +104,15 @@ export namespace Quantel {
 	export async function releasePort (options: PortRef): Promise<boolean> {
 		if (!isaIOR) await getISAReference()
 		return quantel.releasePort(await isaIOR, options)
+	}
+
+	export async function getAllFragments (options: ClipRef): Promise<ServerFragments> {
+		if (!isaIOR) await getISAReference()
+		return quantel.getAllFragments(await isaIOR, options)
+	}
+
+	export async function loadPlayPort (options: any): Promise<any> {
+		if (!isaIOR) await getISAReference()
+		return quantel.loadPlayPort(await isaIOR, options)
 	}
 }
