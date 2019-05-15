@@ -835,7 +835,7 @@ napi_value getAllFragments(napi_env env, napi_callback_info info) {
 
         status = napi_create_int32(env, fragments[x].fragmentData.audioFragmentData().skew, &fragprop);
         CHECK_STATUS;
-        status = napi_set_named_property(env, frag, "poolFrame", fragprop);
+        status = napi_set_named_property(env, frag, "skew", fragprop);
         CHECK_STATUS;
 
         status = napi_create_int32(env, fragments[x].fragmentData.audioFragmentData().rushFrame, &fragprop);
@@ -869,7 +869,7 @@ napi_value getAllFragments(napi_env env, napi_callback_info info) {
 
         status = napi_create_int32(env, fragments[x].fragmentData.auxFragmentData().skew, &fragprop);
         CHECK_STATUS;
-        status = napi_set_named_property(env, frag, "poolFrame", fragprop);
+        status = napi_set_named_property(env, frag, "skew", fragprop);
         CHECK_STATUS;
 
         status = napi_create_int32(env, fragments[x].fragmentData.auxFragmentData().rushFrame, &fragprop);

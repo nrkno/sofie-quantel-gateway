@@ -51,12 +51,39 @@ export namespace Quantel {
 		clipID: number,
 	}
 
-	// TODO extend with the different types
-	export interface ServerFragments extends ClipRef {
-		fragmentNo: number,
+	export interface ServerFragment {
+		type: string,
 		trackNum: number,
 		start: number,
-		finish: number
+		end: number,
+	}
+
+	export interface VideoFragment extends ServerFragment {
+		rushID: string,
+		format: number,
+		poolID: number,
+		poolFrame: number,
+		skew: number,
+		rushFrame: number,
+	}
+
+	export interface AudioFragment extends VideoFragment { }
+	export interface AUXFragment extends VideoFragment { }
+
+	export interface CCFragment extends ServerFragment {
+		ccID: string,
+		ccType: number,
+		effectID: number,
+	}
+
+	// TODO extend with the different types
+	export interface ServerFragments extends ClipRef {
+		type: string,
+		fragments: Array<ServerFragment>
+	}
+
+	export interface PortLoadInfo extends PortRef {
+		fragments: Array<ServerFragment>
 	}
 
 	export enum Trigger {
@@ -68,6 +95,11 @@ export namespace Quantel {
 
 	export interface TriggerInfo extends PortRef {
 		trigger: Trigger,
+		offset?: number
+	}
+
+	export interface JumpInfo extends PortRef {
+		offset: number
 	}
 
 	export async function getISAReference (ref?: string): Promise<string> {
@@ -122,17 +154,17 @@ export namespace Quantel {
 		return quantel.getAllFragments(await isaIOR, options)
 	}
 
-	export async function loadPlayPort (options: any): Promise<any> {
+	export async function loadPlayPort (options: PortLoadInfo): Promise<any> {
 		if (!isaIOR) await getISAReference()
 		return quantel.loadPlayPort(await isaIOR, options)
 	}
 
-	export async function trigger (options: any): Promise<boolean> {
+	export async function trigger (options: TriggerInfo): Promise<boolean> {
 		if (!isaIOR) await getISAReference()
 		return quantel.trigger(await isaIOR, options)
 	}
 
-	export async function setJump (options: any): Promise<boolean> {
+	export async function setJump (options: JumpInfo): Promise<boolean> {
 		if (!isaIOR) await getISAReference()
 		return quantel.setJump(await isaIOR, options)
 	}
