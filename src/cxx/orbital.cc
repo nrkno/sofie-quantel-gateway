@@ -384,20 +384,6 @@ napi_value createPlayPort(napi_env env, napi_callback_info info) {
     if (!playing) {
       NAPI_THROW_ORB_DESTROY("Failed to set playing mode for port.");
     }
-
-    // Quentin::ServerFragments_var fragments = zp->getAllFragments(2);
-    // port->load(0, fragments);
-    // port->actionAtTrigger(START, Quentin::Port::trActStart);
-    // port->actionAtTrigger(STOP, Quentin::Port::trActStop);
-
-    // port->setTrigger(START, Quentin::Port::trModeNow, 0);
-    // port->setTrigger(STOP, Quentin::Port::trModeOffset, 300);
-
-    // Quentin::PortListener::PlayPortStatus * gps = &port->getStatus().playStatus();
-    //
-    // printf("Playing at speed %f\n", gps->speed);
-    //
-    // port->release();
   }
   catch(CORBA::SystemException& ex) {
     NAPI_THROW_CORBA_EXCEPTION(ex);
@@ -510,19 +496,28 @@ napi_value getPlayPortStatus(napi_env env, napi_callback_info info) {
     status = napi_set_named_property(env, result, "offset", prop);
     CHECK_STATUS;
 
+    printf("Flags %i\n", gps->flags);
     switch (gps->flags & 0x0f) {
       case 1:
         status = napi_create_string_utf8(env, "readyToPlay", NAPI_AUTO_LENGTH, &prop);
         CHECK_STATUS;
+        break;
       case 2:
+      case 3:
         status = napi_create_string_utf8(env, "playing", NAPI_AUTO_LENGTH, &prop);
         CHECK_STATUS;
+        break;
       case 4:
+      case 5:
+      case 6:
+      case 7:
         status = napi_create_string_utf8(env, "jumpReady", NAPI_AUTO_LENGTH, &prop);
         CHECK_STATUS;
+        break;
       case 8:
         status = napi_create_string_utf8(env, "fading", NAPI_AUTO_LENGTH, &prop);
         CHECK_STATUS;
+        break;
       default:
         status = napi_create_string_utf8(env, "unknown", NAPI_AUTO_LENGTH, &prop);
         CHECK_STATUS;
