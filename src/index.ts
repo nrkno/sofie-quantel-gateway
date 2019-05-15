@@ -59,6 +59,17 @@ export namespace Quantel {
 		finish: number
 	}
 
+	export enum Trigger {
+		START = quantel.START,
+		STOP = quantel.STOP,
+		JUMP = quantel.JUMP,
+		TRANSITION = quantel.TRANSITION
+	}
+
+	export interface TriggerInfo extends PortRef {
+		trigger: Trigger,
+	}
+
 	export async function getISAReference (ref?: string): Promise<string> {
 		isaIOR = new Promise((resolve, reject) => {
 			// TODO better port resolution
@@ -114,5 +125,15 @@ export namespace Quantel {
 	export async function loadPlayPort (options: any): Promise<any> {
 		if (!isaIOR) await getISAReference()
 		return quantel.loadPlayPort(await isaIOR, options)
+	}
+
+	export async function trigger (options: any): Promise<boolean> {
+		if (!isaIOR) await getISAReference()
+		return quantel.trigger(await isaIOR, options)
+	}
+
+	export async function setJump (options: any): Promise<boolean> {
+		if (!isaIOR) await getISAReference()
+		return quantel.setJump(await isaIOR, options)
 	}
 }

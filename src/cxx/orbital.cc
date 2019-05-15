@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <cwchar>
 #include <string>
+#include <cstring>
 #include <codecvt>
 #include <locale>
 #include "node_api.h"
@@ -44,6 +45,11 @@
   napi_throw_error(env, nullptr, errorMsg); \
   return nullptr; \
 }
+
+#define START 0
+#define STOP 1
+#define JUMP 2
+#define TRANSITION 3
 
 napi_status checkStatus(napi_env env, napi_status status,
   const char* file, uint32_t line) {
@@ -94,7 +100,7 @@ napi_status retrieveZonePortal(napi_env env, napi_callback_info info, CORBA::ORB
   status = napi_get_value_string_utf8(env, argv[0], isaIOR, iorLen + 1, &iorLen);
   PASS_STATUS;
 
-  const char* options[][2] = { { "traceLevel", "10" }, { 0, 0 } };
+  const char* options[][2] = { { "traceLevel", "1" }, { 0, 0 } };
   int orbc = 0;
   CORBA::ORB_var local_orb = CORBA::ORB_init(orbc, nullptr, "omniORB4", options);
 
@@ -272,9 +278,6 @@ napi_value getServers(napi_env env, napi_callback_info info) {
   return result;
 }
 
-#define START 0
-#define STOP 1
-
 int32_t portCounter = 1;
 
 napi_value createPlayPort(napi_env env, napi_callback_info info) {
@@ -384,6 +387,20 @@ napi_value createPlayPort(napi_env env, napi_callback_info info) {
     if (!playing) {
       NAPI_THROW_ORB_DESTROY("Failed to set playing mode for port.");
     }
+
+    if (!port->actionAtTrigger(START, Quentin::Port::trActStart)) {
+      NAPI_THROW_ORB_DESTROY("Failed to enable start trigger on port.");
+    }
+    if (!port->actionAtTrigger(STOP, Quentin::Port::trActStop)) {
+      NAPI_THROW_ORB_DESTROY("Failed to enable stop trigger on port.");
+    }
+    /* TODO enable when needed
+    if (!port->actionAtTrigger(JUMP, Quentin::Port::trActJump)) {
+      NAPI_THROW_ORB_DESTROY("Failed to enable jump trigger on port.");
+    };
+    if (!port->actionAtTrigger(TRANSITION, Quentin::Port::trActTransition)) {
+      NAPI_THROW_ORB_DESTROY("Failed to enable transition trigger on port.");
+    }; */
   }
   catch(CORBA::SystemException& ex) {
     NAPI_THROW_CORBA_EXCEPTION(ex);
@@ -610,7 +627,6 @@ napi_value releasePort(napi_env env, napi_callback_info info) {
       }
     }
     free(portName);
-    printf("Found port is %i\n", foundPort);
     if (!foundPort) {
       NAPI_THROW_ORB_DESTROY("Cannot release a port with an unknown port name.");
     }
@@ -785,7 +801,7 @@ napi_value getAllFragments(napi_env env, napi_callback_info info) {
 
         status = napi_create_int32(env, fragments[x].fragmentData.videoFragmentData().skew, &fragprop);
         CHECK_STATUS;
-        status = napi_set_named_property(env, frag, "poolFrame", fragprop);
+        status = napi_set_named_property(env, frag, "skew", fragprop);
         CHECK_STATUS;
 
         status = napi_create_int32(env, fragments[x].fragmentData.videoFragmentData().rushFrame, &fragprop);
@@ -909,15 +925,7 @@ napi_value getAllFragments(napi_env env, napi_callback_info info) {
     status = napi_set_named_property(env, result, "fragments", prop);
     CHECK_STATUS;
 
-    // FIXME create a finalizer
-    status = napi_create_external(env, &fragments, nullptr, nullptr, &prop);
-    CHECK_STATUS;
-    status = napi_set_named_property(env, result, "_fragments", prop);
-    CHECK_STATUS;
-
-    printf("Fragments leaving here %p %i\n", &fragments, fragments->length());
-
-    Quentin::Server_ptr server = zp->getServer(1100);
+    /* Quentin::Server_ptr server = zp->getServer(1100);
     Quentin::Port_ptr port = server->getPort(L"solitary", 0);
 
     fragments[1] = fragments[3];
@@ -928,7 +936,7 @@ napi_value getAllFragments(napi_env env, napi_callback_info info) {
     port->actionAtTrigger(STOP, Quentin::Port::trActStop);
 
     printf("Trying to start now %i\n", port->setTrigger(START, Quentin::Port::trModeNow, 1));
-    port->setTrigger(STOP, Quentin::Port::trModeOffset, 300);
+    port->setTrigger(STOP, Quentin::Port::trModeOffset, 300); */
   }
   catch(CORBA::SystemException& ex) {
     NAPI_THROW_CORBA_EXCEPTION(ex);
@@ -946,16 +954,18 @@ napi_value getAllFragments(napi_env env, napi_callback_info info) {
 
 napi_value loadPlayPort(napi_env env, napi_callback_info info) {
   napi_status status;
-  napi_value prop, options, extprop;
+  napi_value prop, subprop, options, fragprop;
   napi_valuetype type;
   bool isArray;
   CORBA::ORB_var orb;
   Quentin::ZonePortal::_ptr_type zp;
   int32_t serverID;
+  int32_t offset = 0;
   char* portName;
   size_t portNameLen;
   Quentin::WStrings_var portNames;
-  Quentin::ServerFragments_var fragments;
+  Quentin::ServerFragments* fragments;
+  char rushID[33];
 
   try {
     status = retrieveZonePortal(env, info, &orb, &zp);
@@ -991,12 +1001,89 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
     status = napi_get_value_string_utf8(env, prop, portName, portNameLen + 1, &portNameLen);
     CHECK_STATUS;
 
+    status = napi_get_named_property(env, options, "offset", &prop);
+    CHECK_STATUS;
+    status = napi_typeof(env, prop, &type);
+    CHECK_STATUS;
+    if (type == napi_number) {
+      status = napi_get_value_int32(env, prop, &offset);
+      CHECK_STATUS;
+    }
+
     status = napi_get_named_property(env, options, "fragments", &prop);
     CHECK_STATUS;
-    status = napi_get_named_property(env, prop, "_fragments", &extprop);
+    status = napi_get_named_property(env, prop, "fragments", &fragprop);
     CHECK_STATUS;
-    status = napi_get_value_external(env, extprop, (void**) &fragments);
+
+    Quentin::ServerFragments fragments;
+    fragments.length(1);
+    status = napi_get_element(env, fragprop, 0, &prop);
     CHECK_STATUS;
+
+    // FIXME support more than just the video fragment
+
+    Quentin::PositionData vfd = {};
+
+    status = napi_get_named_property(env, prop, "format", &subprop);
+    CHECK_STATUS;
+    status = napi_get_value_int32(env, subprop, (int32_t *) &vfd.format);
+    CHECK_STATUS;
+
+    status = napi_get_named_property(env, prop, "poolID", &subprop);
+    CHECK_STATUS;
+    status = napi_get_value_int32(env, subprop, (int32_t *) &vfd.poolID);
+    CHECK_STATUS;
+
+    status = napi_get_named_property(env, prop, "poolFrame", &subprop);
+    CHECK_STATUS;
+    status = napi_get_value_int32(env, subprop, (int32_t *) &vfd.poolFrame);
+    CHECK_STATUS;
+
+    status = napi_get_named_property(env, prop, "skew", &subprop);
+    CHECK_STATUS;
+    status = napi_get_value_int32(env, subprop, (int32_t *) &vfd.skew);
+    CHECK_STATUS;
+
+    status = napi_get_named_property(env, prop, "rushFrame", &subprop);
+    CHECK_STATUS;
+    status = napi_get_value_int64(env, subprop, (int64_t *) &vfd.rushFrame);
+    CHECK_STATUS;
+
+    status = napi_get_named_property(env, prop, "rushID", &subprop);
+    CHECK_STATUS;
+    status = napi_get_value_string_utf8(env, subprop, rushID, 33, nullptr);
+    CHECK_STATUS;
+    std::string rushIDStr(rushID);
+    printf("Left %s and right %s\n", rushIDStr.substr(0, 16).c_str(), rushIDStr.substr(16, 32).c_str());
+    vfd.rushID = {
+      (CORBA::LongLong) strtoull(rushIDStr.substr(0, 16).c_str(), nullptr, 16),
+      (CORBA::LongLong) strtoull(rushIDStr.substr(16, 32).c_str(), nullptr, 16) };
+    vfd.rushFrame = 0;
+
+    printf("Checking poolFrame = %i rushFrame = %i skew = %i\n", vfd.poolFrame, vfd.rushFrame, vfd.skew);
+
+    Quentin::ServerFragmentData sfd;
+    sfd.videoFragmentData(vfd);
+    Quentin::ServerFragment sf = {};
+    sf.fragmentData = sfd;
+
+    status = napi_get_named_property(env, prop, "trackNum", &subprop);
+    CHECK_STATUS;
+    status = napi_get_value_int32(env, subprop, (int32_t *) &sf.trackNum);
+    CHECK_STATUS;
+
+    status = napi_get_named_property(env, prop, "start", &subprop);
+    CHECK_STATUS;
+    status = napi_get_value_int32(env, subprop, (int32_t *) &sf.start);
+    CHECK_STATUS;
+
+    status = napi_get_named_property(env, prop, "finish", &subprop);
+    CHECK_STATUS;
+    status = napi_get_value_int32(env, subprop, (int32_t *) &sf.finish);
+    CHECK_STATUS;
+
+    printf("trackNum = %i start = %i end = %i\n", sf.trackNum, sf.start, sf.finish);
+    fragments[0] = sf;
 
     Quentin::Server_ptr server = zp->getServer(serverID);
 
@@ -1013,14 +1100,12 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
       }
     }
     free(portName);
-    printf("Found port is %i\n", foundPort);
     if (!foundPort) {
       NAPI_THROW_ORB_DESTROY("Cannot load a port with an unknown port name.");
     }
 
     Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(portName).data(), 0);
-
-    printf("Fragments roundtripped: %p %i\n", fragments, fragments->length());
+    port->load(offset, fragments);
   }
   catch(CORBA::SystemException& ex) {
     NAPI_THROW_CORBA_EXCEPTION(ex);
@@ -1036,8 +1121,216 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
   return nullptr;
 }
 
+napi_value trigger(napi_env env, napi_callback_info info) {
+  napi_status status;
+  napi_value prop, options;
+  napi_valuetype type;
+  bool isArray;
+  CORBA::ORB_var orb;
+  Quentin::ZonePortal::_ptr_type zp;
+  int32_t serverID, trigger;
+  int32_t offset = -1;
+  char* portName;
+  size_t portNameLen;
+  Quentin::WStrings_var portNames;
+
+  try {
+    status = retrieveZonePortal(env, info, &orb, &zp);
+    CHECK_STATUS;
+
+    size_t argc = 2;
+    napi_value argv[2];
+    status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    CHECK_STATUS;
+
+    if (argc < 2) {
+      NAPI_THROW_ORB_DESTROY("Options object with server ID, port name and action must be provided.");
+    }
+    status = napi_typeof(env, argv[1], &type);
+    CHECK_STATUS;
+    status = napi_is_array(env, argv[1], &isArray);
+    CHECK_STATUS;
+    if (isArray || type != napi_object) {
+      NAPI_THROW_ORB_DESTROY("Argument must be an options object with server ID, port name and action.");
+    }
+
+    options = argv[1];
+    status = napi_get_named_property(env, options, "serverID", &prop);
+    CHECK_STATUS;
+    status = napi_get_value_int32(env, prop, &serverID);
+    CHECK_STATUS;
+
+    status = napi_get_named_property(env, options, "portName", &prop);
+    CHECK_STATUS;
+    status = napi_get_value_string_utf8(env, prop, nullptr, 0, &portNameLen);
+    CHECK_STATUS;
+    portName = (char*) malloc((portNameLen + 1) * sizeof(char));
+    status = napi_get_value_string_utf8(env, prop, portName, portNameLen + 1, &portNameLen);
+    CHECK_STATUS;
+
+    status = napi_get_named_property(env, options, "trigger", &prop);
+    CHECK_STATUS;
+    status = napi_get_value_int32(env, prop, &trigger);
+    CHECK_STATUS;
+
+    status = napi_get_named_property(env, options, "offset", &prop);
+    CHECK_STATUS;
+    status = napi_typeof(env, prop, &type);
+    CHECK_STATUS;
+    if (type == napi_number) {
+      status = napi_get_value_int32(env, prop, &offset);
+      CHECK_STATUS;
+    }
+
+    Quentin::Server_ptr server = zp->getServer(serverID);
+
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+    std::wstring wportName = utf8_conv.from_bytes(portName);
+
+    // Prevent accidental creation of extra port
+    portNames = server->getPortNames();
+    bool foundPort = false;
+    for ( int x = 0 ; x < portNames->length() ; x++ ) {
+      if (wcscmp(wportName.data(), (const wchar_t *) portNames[x]) == 0) {
+        foundPort = true;
+        break;
+      }
+    }
+    free(portName);
+    if (!foundPort) {
+      NAPI_THROW_ORB_DESTROY("Cannot trigger action on a port with an unknown port name.");
+    }
+
+    Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(portName).data(), 0);
+
+    if (!port->setTrigger(trigger,
+      offset >= 0 ? Quentin::Port::trModeOffset : Quentin::Port::trModeNow,
+      offset >= 0 ? offset : 0) ) {
+      if (offset >= 0) {
+        NAPI_THROW_ORB_DESTROY("Failed to trigger action at offset.");
+      } else {
+        NAPI_THROW_ORB_DESTROY("Failed to trigger action immediately.");
+      }
+    };
+  }
+  catch(CORBA::SystemException& ex) {
+    NAPI_THROW_CORBA_EXCEPTION(ex);
+  }
+  catch(CORBA::Exception& ex) {
+    NAPI_THROW_CORBA_EXCEPTION(ex);
+  }
+  catch(omniORB::fatalException& fe) {
+    NAPI_THROW_FATAL_EXCEPTION(fe);
+  }
+
+  orb->destroy();
+  status = napi_get_boolean(env, true, &prop);
+  CHECK_STATUS;
+  return prop;
+}
+
+napi_value setJump(napi_env env, napi_callback_info info) {
+  napi_status status;
+  napi_value prop, options;
+  napi_valuetype type;
+  bool isArray;
+  CORBA::ORB_var orb;
+  Quentin::ZonePortal::_ptr_type zp;
+  int32_t serverID;
+  int32_t offset = 0;
+  char* portName;
+  size_t portNameLen;
+  Quentin::WStrings_var portNames;
+
+  try {
+    status = retrieveZonePortal(env, info, &orb, &zp);
+    CHECK_STATUS;
+
+    size_t argc = 2;
+    napi_value argv[2];
+    status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    CHECK_STATUS;
+
+    if (argc < 2) {
+      NAPI_THROW_ORB_DESTROY("Options object with server ID, port name and action must be provided.");
+    }
+    status = napi_typeof(env, argv[1], &type);
+    CHECK_STATUS;
+    status = napi_is_array(env, argv[1], &isArray);
+    CHECK_STATUS;
+    if (isArray || type != napi_object) {
+      NAPI_THROW_ORB_DESTROY("Argument must be an options object with server ID, port name and action.");
+    }
+
+    options = argv[1];
+    status = napi_get_named_property(env, options, "serverID", &prop);
+    CHECK_STATUS;
+    status = napi_get_value_int32(env, prop, &serverID);
+    CHECK_STATUS;
+
+    status = napi_get_named_property(env, options, "portName", &prop);
+    CHECK_STATUS;
+    status = napi_get_value_string_utf8(env, prop, nullptr, 0, &portNameLen);
+    CHECK_STATUS;
+    portName = (char*) malloc((portNameLen + 1) * sizeof(char));
+    status = napi_get_value_string_utf8(env, prop, portName, portNameLen + 1, &portNameLen);
+    CHECK_STATUS;
+
+    status = napi_get_named_property(env, options, "offset", &prop);
+    CHECK_STATUS;
+    status = napi_typeof(env, prop, &type);
+    CHECK_STATUS;
+    if (type == napi_number) {
+      status = napi_get_value_int32(env, prop, &offset);
+      CHECK_STATUS;
+    }
+
+    Quentin::Server_ptr server = zp->getServer(serverID);
+
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+    std::wstring wportName = utf8_conv.from_bytes(portName);
+
+    // Prevent accidental creation of extra port
+    portNames = server->getPortNames();
+    bool foundPort = false;
+    for ( int x = 0 ; x < portNames->length() ; x++ ) {
+      if (wcscmp(wportName.data(), (const wchar_t *) portNames[x]) == 0) {
+        foundPort = true;
+        break;
+      }
+    }
+    free(portName);
+    if (!foundPort) {
+      NAPI_THROW_ORB_DESTROY("Cannot set jump point on a port with an unknown port name.");
+    }
+
+    Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(portName).data(), 0);
+
+    port->jump(offset, true);
+  }
+  catch(CORBA::SystemException& ex) {
+    NAPI_THROW_CORBA_EXCEPTION(ex);
+  }
+  catch(CORBA::Exception& ex) {
+    NAPI_THROW_CORBA_EXCEPTION(ex);
+  }
+  catch(omniORB::fatalException& fe) {
+    NAPI_THROW_FATAL_EXCEPTION(fe);
+  }
+
+  orb->destroy();
+  status = napi_get_boolean(env, true, &prop);
+  CHECK_STATUS;
+  return prop;
+}
+
 napi_value Init(napi_env env, napi_value exports) {
   napi_status status;
+  napi_value start, stop, jump, transition;
+  status = napi_create_int32(env, START, &start);
+  status = napi_create_int32(env, STOP, &stop);
+  status = napi_create_int32(env, JUMP, &jump);
+  status = napi_create_int32(env, TRANSITION, &transition);
 
   napi_property_descriptor desc[] = {
     DECLARE_NAPI_METHOD("testConnection", testConnection),
@@ -1047,9 +1340,15 @@ napi_value Init(napi_env env, napi_value exports) {
     DECLARE_NAPI_METHOD("getPlayPortStatus", getPlayPortStatus),
     DECLARE_NAPI_METHOD("releasePort", releasePort),
     DECLARE_NAPI_METHOD("getAllFragments", getAllFragments),
-    DECLARE_NAPI_METHOD("loadPlayPort", loadPlayPort)
+    DECLARE_NAPI_METHOD("loadPlayPort", loadPlayPort),
+    DECLARE_NAPI_METHOD("trigger", trigger),
+    DECLARE_NAPI_METHOD("setJump", setJump),
+    { "START", nullptr, nullptr, nullptr, nullptr, start, napi_enumerable, nullptr },
+    { "STOP", nullptr, nullptr, nullptr, nullptr, stop, napi_enumerable, nullptr },
+    { "JUMP", nullptr, nullptr, nullptr, nullptr, jump, napi_enumerable, nullptr },
+    { "TRANSITION", nullptr, nullptr, nullptr, nullptr, transition, napi_enumerable, nullptr },
   };
-  status = napi_define_properties(env, exports, 8, desc);
+  status = napi_define_properties(env, exports, 14, desc);
 
   return exports;
 }
