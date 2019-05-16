@@ -341,6 +341,9 @@ napi_value createPlayPort(napi_env env, napi_callback_info info) {
       CHECK_STATUS;
       status = napi_get_value_bool(env, prop, &audioOnly);
       CHECK_STATUS;
+    } else {
+      status = napi_get_value_bool(env, false, &prop);
+      CHECK_STATUS;
     }
     status = napi_set_named_property(env, result, "audioOnly", prop);
     CHECK_STATUS;
@@ -520,15 +523,27 @@ napi_value getPlayPortStatus(napi_env env, napi_callback_info info) {
         CHECK_STATUS;
         break;
       case 2:
-      case 3:
         status = napi_create_string_utf8(env, "playing", NAPI_AUTO_LENGTH, &prop);
         CHECK_STATUS;
         break;
+      case 3:
+        status = napi_create_string_utf8(env, "playing&readyToPlay", NAPI_AUTO_LENGTH, &prop);
+        CHECK_STATUS;
+        break;
       case 4:
-      case 5:
-      case 6:
-      case 7:
         status = napi_create_string_utf8(env, "jumpReady", NAPI_AUTO_LENGTH, &prop);
+        CHECK_STATUS;
+        break;
+      case 5:
+        status = napi_create_string_utf8(env, "jumpReady&readyToPlay", NAPI_AUTO_LENGTH, &prop);
+        CHECK_STATUS;
+        break;
+      case 6:
+        status = napi_create_string_utf8(env, "jumpReady&playing", NAPI_AUTO_LENGTH, &prop);
+        CHECK_STATUS;
+        break;
+      case 7:
+        status = napi_create_string_utf8(env, "jumpReady&readyToPlay&playing", NAPI_AUTO_LENGTH, &prop);
         CHECK_STATUS;
         break;
       case 8:
@@ -924,19 +939,6 @@ napi_value getAllFragments(napi_env env, napi_callback_info info) {
     }
     status = napi_set_named_property(env, result, "fragments", prop);
     CHECK_STATUS;
-
-    /* Quentin::Server_ptr server = zp->getServer(1100);
-    Quentin::Port_ptr port = server->getPort(L"solitary", 0);
-
-    fragments[1] = fragments[3];
-    fragments->length(2);
-    port->load(0, fragments);
-
-    printf("Action at trigger result START %i\n", port->actionAtTrigger(START, Quentin::Port::trActStart));
-    port->actionAtTrigger(STOP, Quentin::Port::trActStop);
-
-    printf("Trying to start now %i\n", port->setTrigger(START, Quentin::Port::trModeNow, 1));
-    port->setTrigger(STOP, Quentin::Port::trModeOffset, 300); */
   }
   catch(CORBA::SystemException& ex) {
     NAPI_THROW_CORBA_EXCEPTION(ex);
@@ -966,6 +968,9 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
   Quentin::WStrings_var portNames;
   Quentin::ServerFragments* fragments;
   char rushID[33];
+  char typeName[32];
+  uint32_t fragmentNo;
+  uint32_t fragmentCount = 0;
 
   try {
     status = retrieveZonePortal(env, info, &orb, &zp);
@@ -1016,74 +1021,95 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
     CHECK_STATUS;
 
     Quentin::ServerFragments fragments;
-    fragments.length(1);
-    status = napi_get_element(env, fragprop, 0, &prop);
+    status = napi_get_array_length(env, fragprop, &fragmentNo);
     CHECK_STATUS;
+    fragments.length(fragmentNo);
 
-    // FIXME support more than just the video fragment
+    for ( int i = 0 ; i < fragmentNo ; i++ ) {
+      status = napi_get_element(env, fragprop, i, &prop);
+      CHECK_STATUS;
 
-    Quentin::PositionData vfd = {};
+      Quentin::ServerFragment sf = {};
+      Quentin::PositionData vfd = {};
+      Quentin::ServerFragmentData sfd;
+      std::string rushIDStr;
 
-    status = napi_get_named_property(env, prop, "format", &subprop);
-    CHECK_STATUS;
-    status = napi_get_value_int32(env, subprop, (int32_t *) &vfd.format);
-    CHECK_STATUS;
+      status = napi_get_named_property(env, prop, "trackNum", &subprop);
+      CHECK_STATUS;
+      status = napi_get_value_int32(env, subprop, (int32_t *) &sf.trackNum);
+      CHECK_STATUS;
 
-    status = napi_get_named_property(env, prop, "poolID", &subprop);
-    CHECK_STATUS;
-    status = napi_get_value_int32(env, subprop, (int32_t *) &vfd.poolID);
-    CHECK_STATUS;
+      status = napi_get_named_property(env, prop, "start", &subprop);
+      CHECK_STATUS;
+      status = napi_get_value_int32(env, subprop, (int32_t *) &sf.start);
+      CHECK_STATUS;
 
-    status = napi_get_named_property(env, prop, "poolFrame", &subprop);
-    CHECK_STATUS;
-    status = napi_get_value_int32(env, subprop, (int32_t *) &vfd.poolFrame);
-    CHECK_STATUS;
+      status = napi_get_named_property(env, prop, "finish", &subprop);
+      CHECK_STATUS;
+      status = napi_get_value_int32(env, subprop, (int32_t *) &sf.finish);
+      CHECK_STATUS;
 
-    status = napi_get_named_property(env, prop, "skew", &subprop);
-    CHECK_STATUS;
-    status = napi_get_value_int32(env, subprop, (int32_t *) &vfd.skew);
-    CHECK_STATUS;
+      status = napi_get_named_property(env, prop, "type", &subprop);
+      CHECK_STATUS;
+      status = napi_get_value_string_utf8(env, subprop, typeName, 32, nullptr);
+      CHECK_STATUS;
 
-    status = napi_get_named_property(env, prop, "rushFrame", &subprop);
-    CHECK_STATUS;
-    status = napi_get_value_int64(env, subprop, (int64_t *) &vfd.rushFrame);
-    CHECK_STATUS;
+      printf("Processing fragment of type: %s\n", typeName);
 
-    status = napi_get_named_property(env, prop, "rushID", &subprop);
-    CHECK_STATUS;
-    status = napi_get_value_string_utf8(env, subprop, rushID, 33, nullptr);
-    CHECK_STATUS;
-    std::string rushIDStr(rushID);
-    printf("Left %s and right %s\n", rushIDStr.substr(0, 16).c_str(), rushIDStr.substr(16, 32).c_str());
-    vfd.rushID = {
-      (CORBA::LongLong) strtoull(rushIDStr.substr(0, 16).c_str(), nullptr, 16),
-      (CORBA::LongLong) strtoull(rushIDStr.substr(16, 32).c_str(), nullptr, 16) };
-    vfd.rushFrame = 0;
+      switch (typeName[0]) {
+      case 'V': // VideoFragment
+      case 'A': // AudioFragment & AUXFragment
 
-    printf("Checking poolFrame = %i rushFrame = %i skew = %i\n", vfd.poolFrame, vfd.rushFrame, vfd.skew);
+        status = napi_get_named_property(env, prop, "format", &subprop);
+        CHECK_STATUS;
+        status = napi_get_value_int32(env, subprop, (int32_t *) &vfd.format);
+        CHECK_STATUS;
 
-    Quentin::ServerFragmentData sfd;
-    sfd.videoFragmentData(vfd);
-    Quentin::ServerFragment sf = {};
-    sf.fragmentData = sfd;
+        status = napi_get_named_property(env, prop, "poolID", &subprop);
+        CHECK_STATUS;
+        status = napi_get_value_int32(env, subprop, (int32_t *) &vfd.poolID);
+        CHECK_STATUS;
 
-    status = napi_get_named_property(env, prop, "trackNum", &subprop);
-    CHECK_STATUS;
-    status = napi_get_value_int32(env, subprop, (int32_t *) &sf.trackNum);
-    CHECK_STATUS;
+        status = napi_get_named_property(env, prop, "poolFrame", &subprop);
+        CHECK_STATUS;
+        status = napi_get_value_int32(env, subprop, (int32_t *) &vfd.poolFrame);
+        CHECK_STATUS;
 
-    status = napi_get_named_property(env, prop, "start", &subprop);
-    CHECK_STATUS;
-    status = napi_get_value_int32(env, subprop, (int32_t *) &sf.start);
-    CHECK_STATUS;
+        status = napi_get_named_property(env, prop, "skew", &subprop);
+        CHECK_STATUS;
+        status = napi_get_value_int32(env, subprop, (int32_t *) &vfd.skew);
+        CHECK_STATUS;
 
-    status = napi_get_named_property(env, prop, "finish", &subprop);
-    CHECK_STATUS;
-    status = napi_get_value_int32(env, subprop, (int32_t *) &sf.finish);
-    CHECK_STATUS;
+        status = napi_get_named_property(env, prop, "rushFrame", &subprop);
+        CHECK_STATUS;
+        status = napi_get_value_int64(env, subprop, (int64_t *) &vfd.rushFrame);
+        CHECK_STATUS;
 
-    printf("trackNum = %i start = %i end = %i\n", sf.trackNum, sf.start, sf.finish);
-    fragments[0] = sf;
+        status = napi_get_named_property(env, prop, "rushID", &subprop);
+        CHECK_STATUS;
+        status = napi_get_value_string_utf8(env, subprop, rushID, 33, nullptr);
+        CHECK_STATUS;
+        rushIDStr.assign(rushID);
+        vfd.rushID = {
+          (CORBA::LongLong) strtoull(rushIDStr.substr(0, 16).c_str(), nullptr, 16),
+          (CORBA::LongLong) strtoull(rushIDStr.substr(16, 32).c_str(), nullptr, 16) };
+        vfd.rushFrame = 0;
+
+        if (typeName[0] == 'V') {
+          sfd.videoFragmentData(vfd);
+        } else if (typeName[1] == 'u') { // AudioFragment
+          sfd.audioFragmentData(vfd);
+        } else {
+          sfd.auxFragmentData(vfd);
+        }
+        sf.fragmentData = sfd;
+        fragments[fragmentCount++] = sf;
+        break;
+      default:
+        break;
+      } // switch typeName[0]
+    } // for loop through incoming fragments
+    fragments.length(fragmentCount);
 
     Quentin::Server_ptr server = zp->getServer(serverID);
 
@@ -1229,7 +1255,7 @@ napi_value trigger(napi_env env, napi_callback_info info) {
   return prop;
 }
 
-napi_value setJump(napi_env env, napi_callback_info info) {
+napi_value qJump(napi_env env, napi_callback_info info) {
   napi_status status;
   napi_value prop, options;
   napi_valuetype type;
@@ -1252,14 +1278,14 @@ napi_value setJump(napi_env env, napi_callback_info info) {
     CHECK_STATUS;
 
     if (argc < 2) {
-      NAPI_THROW_ORB_DESTROY("Options object with server ID, port name and action must be provided.");
+      NAPI_THROW_ORB_DESTROY("Options object with server ID, port name and jump offset must be provided.");
     }
     status = napi_typeof(env, argv[1], &type);
     CHECK_STATUS;
     status = napi_is_array(env, argv[1], &isArray);
     CHECK_STATUS;
     if (isArray || type != napi_object) {
-      NAPI_THROW_ORB_DESTROY("Argument must be an options object with server ID, port name and action.");
+      NAPI_THROW_ORB_DESTROY("Argument must be an options object with server ID, port name and jump offset.");
     }
 
     options = argv[1];
@@ -1306,7 +1332,103 @@ napi_value setJump(napi_env env, napi_callback_info info) {
 
     Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(portName).data(), 0);
 
-    port->jump(offset, true);
+    // Disable preload is documented as not implemented
+    port->jump(offset, false);
+  }
+  catch(CORBA::SystemException& ex) {
+    NAPI_THROW_CORBA_EXCEPTION(ex);
+  }
+  catch(CORBA::Exception& ex) {
+    NAPI_THROW_CORBA_EXCEPTION(ex);
+  }
+  catch(omniORB::fatalException& fe) {
+    NAPI_THROW_FATAL_EXCEPTION(fe);
+  }
+
+  orb->destroy();
+  status = napi_get_boolean(env, true, &prop);
+  CHECK_STATUS;
+  return prop;
+}
+
+napi_value setJump(napi_env env, napi_callback_info info) {
+  napi_status status;
+  napi_value prop, options;
+  napi_valuetype type;
+  bool isArray;
+  CORBA::ORB_var orb;
+  Quentin::ZonePortal::_ptr_type zp;
+  int32_t serverID;
+  int32_t offset = 0;
+  char* portName;
+  size_t portNameLen;
+  Quentin::WStrings_var portNames;
+
+  try {
+    status = retrieveZonePortal(env, info, &orb, &zp);
+    CHECK_STATUS;
+
+    size_t argc = 2;
+    napi_value argv[2];
+    status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    CHECK_STATUS;
+
+    if (argc < 2) {
+      NAPI_THROW_ORB_DESTROY("Options object with server ID, port name and jump offset must be provided.");
+    }
+    status = napi_typeof(env, argv[1], &type);
+    CHECK_STATUS;
+    status = napi_is_array(env, argv[1], &isArray);
+    CHECK_STATUS;
+    if (isArray || type != napi_object) {
+      NAPI_THROW_ORB_DESTROY("Argument must be an options object with server ID, port name and jump offset.");
+    }
+
+    options = argv[1];
+    status = napi_get_named_property(env, options, "serverID", &prop);
+    CHECK_STATUS;
+    status = napi_get_value_int32(env, prop, &serverID);
+    CHECK_STATUS;
+
+    status = napi_get_named_property(env, options, "portName", &prop);
+    CHECK_STATUS;
+    status = napi_get_value_string_utf8(env, prop, nullptr, 0, &portNameLen);
+    CHECK_STATUS;
+    portName = (char*) malloc((portNameLen + 1) * sizeof(char));
+    status = napi_get_value_string_utf8(env, prop, portName, portNameLen + 1, &portNameLen);
+    CHECK_STATUS;
+
+    status = napi_get_named_property(env, options, "offset", &prop);
+    CHECK_STATUS;
+    status = napi_typeof(env, prop, &type);
+    CHECK_STATUS;
+    if (type == napi_number) {
+      status = napi_get_value_int32(env, prop, &offset);
+      CHECK_STATUS;
+    }
+
+    Quentin::Server_ptr server = zp->getServer(serverID);
+
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+    std::wstring wportName = utf8_conv.from_bytes(portName);
+
+    // Prevent accidental creation of extra port
+    portNames = server->getPortNames();
+    bool foundPort = false;
+    for ( int x = 0 ; x < portNames->length() ; x++ ) {
+      if (wcscmp(wportName.data(), (const wchar_t *) portNames[x]) == 0) {
+        foundPort = true;
+        break;
+      }
+    }
+    free(portName);
+    if (!foundPort) {
+      NAPI_THROW_ORB_DESTROY("Cannot set jump point on a port with an unknown port name.");
+    }
+
+    Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(portName).data(), 0);
+
+    port->setJump(offset);
   }
   catch(CORBA::SystemException& ex) {
     NAPI_THROW_CORBA_EXCEPTION(ex);
@@ -1342,13 +1464,14 @@ napi_value Init(napi_env env, napi_value exports) {
     DECLARE_NAPI_METHOD("getAllFragments", getAllFragments),
     DECLARE_NAPI_METHOD("loadPlayPort", loadPlayPort),
     DECLARE_NAPI_METHOD("trigger", trigger),
+    DECLARE_NAPI_METHOD("jump", qJump),
     DECLARE_NAPI_METHOD("setJump", setJump),
     { "START", nullptr, nullptr, nullptr, nullptr, start, napi_enumerable, nullptr },
     { "STOP", nullptr, nullptr, nullptr, nullptr, stop, napi_enumerable, nullptr },
     { "JUMP", nullptr, nullptr, nullptr, nullptr, jump, napi_enumerable, nullptr },
     { "TRANSITION", nullptr, nullptr, nullptr, nullptr, transition, napi_enumerable, nullptr },
   };
-  status = napi_define_properties(env, exports, 14, desc);
+  status = napi_define_properties(env, exports, 15, desc);
 
   return exports;
 }

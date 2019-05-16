@@ -121,6 +121,7 @@ export namespace Quantel {
 	}
 
 	export async function testConnection (): Promise<boolean> {
+		if (!isaIOR) await getISAReference()
 		return quantel.testConnection(await isaIOR)
 	}
 
@@ -162,6 +163,11 @@ export namespace Quantel {
 	export async function trigger (options: TriggerInfo): Promise<boolean> {
 		if (!isaIOR) await getISAReference()
 		return quantel.trigger(await isaIOR, options)
+	}
+
+	export async function jump (options: JumpInfo): Promise<boolean> {
+		if (!isaIOR) await getISAReference()
+		return quantel.jump(await isaIOR, options)
 	}
 
 	export async function setJump (options: JumpInfo): Promise<boolean> {
