@@ -29,7 +29,7 @@ Install packages and build the native extension:
 
     yarn install
 
-Build the typescript interface:
+Build the typescript interface module:
 
     yarn build
 
