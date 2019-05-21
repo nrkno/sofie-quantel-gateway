@@ -1446,6 +1446,88 @@ napi_value setJump(napi_env env, napi_callback_info info) {
   return prop;
 }
 
+
+class ThumbyListener : public POA_Quentin::ThumbnailListener {
+public:
+	inline ThumbyListener() { }
+	virtual ~ThumbyListener() { }
+	virtual void newThumbnail(CORBA::Long ident, CORBA::Long offset, CORBA::Long width, CORBA::Long height, const Quentin::Longs & data);
+	virtual void noThumbnail(Quentin::ThumbnailListener::NoThumbnailReason reason, CORBA::Long ident, CORBA::Long offset, CORBA::Boolean tryAgainLater, const CORBA::WChar * reasonStr);
+  virtual void finished(CORBA::Long ident);
+};
+
+void ThumbyListener::newThumbnail(CORBA::Long ident, CORBA::Long offset, CORBA::Long width, CORBA::Long height, const Quentin::Longs & data) {
+	printf("newThumbnail called\n");
+}
+
+void ThumbyListener::noThumbnail(Quentin::ThumbnailListener::NoThumbnailReason reason, CORBA::Long ident, CORBA::Long offset, CORBA::Boolean tryAgainLater, const CORBA::WChar * reasonStr) {
+}
+
+void ThumbyListener::finished(CORBA::Long ident) {
+	printf("finished called\n");
+}
+
+napi_value getThumbnailSize(napi_env env, napi_callback_info info) {
+	napi_status status;
+	napi_value prop, result;
+	napi_valuetype type;
+	bool isArray;
+	CORBA::ORB_var orb;
+	Quentin::ZonePortal::_ptr_type zp;
+	CORBA::Long width(0);
+	CORBA::Long height(0);
+
+	try {
+		status = retrieveZonePortal(env, info, &orb, &zp);
+		CHECK_STATUS;
+
+		zp->getThumbnailSize(0, width, height);
+
+		status = napi_create_object(env, &result);
+		CHECK_STATUS;
+
+		status = napi_create_int32(env, width, &prop);
+		CHECK_STATUS;
+		status = napi_set_named_property(env, result, "width", prop);
+		CHECK_STATUS;
+
+		status = napi_create_int32(env, height, &prop);
+		CHECK_STATUS;
+		status = napi_set_named_property(env, result, "height", prop);
+		CHECK_STATUS;
+
+		CORBA::Object_var       obj = orb->resolve_initial_references("RootPOA");
+	  PortableServer::POA_var poa = PortableServer::POA::_narrow(obj);
+
+		PortableServer::Servant_var<ThumbyListener> mythumby = new ThumbyListener();
+		PortableServer::ObjectId_var mythumbyid = poa->activate_object(mythumby);
+
+		PortableServer::POAManager_var pman = poa->the_POAManager();
+    pman->activate();
+
+		Quentin::PositionData pd;
+		zp->requestThumbnails(9, pd, 10, 10, 10, 42, mythumby->_this());
+
+		orb->run();
+	}
+	catch(CORBA::SystemException& ex) {
+		NAPI_THROW_CORBA_EXCEPTION(ex);
+	}
+	catch(CORBA::Exception& ex) {
+		NAPI_THROW_CORBA_EXCEPTION(ex);
+	}
+	catch(omniORB::fatalException& fe) {
+		NAPI_THROW_FATAL_EXCEPTION(fe);
+	}
+
+	orb->destroy();
+	return result;
+}
+
+napi_value requestThumbnails(napi_env env, napi_callback_info info) {
+  return nullptr;
+}
+
 napi_value Init(napi_env env, napi_value exports) {
   napi_status status;
   napi_value start, stop, jump, transition;
@@ -1466,12 +1548,13 @@ napi_value Init(napi_env env, napi_value exports) {
     DECLARE_NAPI_METHOD("trigger", trigger),
     DECLARE_NAPI_METHOD("jump", qJump),
     DECLARE_NAPI_METHOD("setJump", setJump),
+		DECLARE_NAPI_METHOD("getThumbnailSize", getThumbnailSize),
     { "START", nullptr, nullptr, nullptr, nullptr, start, napi_enumerable, nullptr },
     { "STOP", nullptr, nullptr, nullptr, nullptr, stop, napi_enumerable, nullptr },
     { "JUMP", nullptr, nullptr, nullptr, nullptr, jump, napi_enumerable, nullptr },
     { "TRANSITION", nullptr, nullptr, nullptr, nullptr, transition, napi_enumerable, nullptr },
   };
-  status = napi_define_properties(env, exports, 15, desc);
+  status = napi_define_properties(env, exports, 16, desc);
 
   return exports;
 }

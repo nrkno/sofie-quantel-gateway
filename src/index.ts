@@ -102,6 +102,11 @@ export namespace Quantel {
 		offset: number
 	}
 
+	export interface ThumbnailSize {
+		width: number,
+		height: number
+	}
+
 	export async function getISAReference (ref?: string): Promise<string> {
 		isaIOR = new Promise((resolve, reject) => {
 			// TODO better port resolution
@@ -173,5 +178,10 @@ export namespace Quantel {
 	export async function setJump (options: JumpInfo): Promise<boolean> {
 		if (!isaIOR) await getISAReference()
 		return quantel.setJump(await isaIOR, options)
+	}
+
+	export async function getThumbnailSize (): Promise<ThumbnailSize> {
+		if (!isaIOR) await getISAReference()
+		return quantel.getThumbnailSize(await isaIOR)
 	}
 }
