@@ -342,7 +342,7 @@ napi_value createPlayPort(napi_env env, napi_callback_info info) {
       status = napi_get_value_bool(env, prop, &audioOnly);
       CHECK_STATUS;
     } else {
-      status = napi_get_value_bool(env, false, &prop);
+      status = napi_get_boolean(env, false, &prop);
       CHECK_STATUS;
     }
     status = napi_set_named_property(env, result, "audioOnly", prop);

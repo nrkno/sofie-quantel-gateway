@@ -36,7 +36,8 @@
     "types-build": "cd src/types && trash dist && yarn build:main && cd ../..",
     "types-install": "cd src/types && yarn install && cd ../..",
     "types-test": "cd src/types && yarn lint && yarn unitci && cd ../..",
-    "types-ci": "cd src/types && yarn lint && yarn unitci && cd ../.."
+    "types-ci": "cd src/types && yarn lint && yarn unitci && cd ../..",
+    "watch-server": "nodemon --watch src -e ts,tsx --exec ts-node ./src/server.ts"
   },
   "repository": {
     "type": "git",
@@ -59,28 +60,9 @@
       "url": "http://superfly.tv"
     },
     {
-      "name": "Balte de Wit",
-      "email": "balte@superfly.tv",
-      "url": "http://superfly.tv"
-    },
-    {
-      "name": "Jesper Stærkær",
-      "email": "jesper@superfly.tv",
-      "url": "http://superfly.tv"
-    },
-    {
-      "name": "Jan Starzak",
-      "email": "jan@superfly.tv",
-      "url": "http://superfly.tv"
-    },
-    {
-      "name": "Stephan Nordnes Eriksen",
-      "email": "Stephanruler@gmail.com"
-    },
-    {
-      "name": "Julian Waller",
-      "email": "julian@superfly.tv",
-      "url": "http://superfly.tv"
+      "name": "Richard Cartwright",
+      "email": "spark@streampunnk.media",
+      "url": "https://streampunk.media"
     }
   ],
   "license": "GPL-2.0-or-later",
@@ -111,7 +93,8 @@
     "reset": "Delete all untracked files and reset the repo to the last commit",
     "ci": "Test script for running by the CI (CircleCI)",
     "validate:dependencies": "Scan dependencies for vulnerabilities and check licenses",
-    "license-validate": "Validate licenses for dependencies."
+    "license-validate": "Validate licenses for dependencies.",
+    "watch-server": "Run HTTP server and restart when changes are made."
   },
   "engines": {
     "node": ">=8.1.15"
@@ -126,6 +109,7 @@
     "jest-resolve": "^24.7.1",
     "mkdirp": "^0.5.1",
     "node-license-validator": "^1.3.0",
+    "nodemon": "^1.19.0",
     "npm-scripts-info": "^0.3.9",
     "nyc": "^13.3.0",
     "opn-cli": "^4.1.0",
@@ -133,6 +117,7 @@
     "standard-version": "^5.0.2",
     "trash-cli": "^1.4.0",
     "ts-jest": "^24.0.2",
+    "ts-node": "^8.1.0",
     "tslint": "^5.15.0",
     "tslint-config-standard": "^8.0.1",
     "typedoc": "^0.14.2",
@@ -142,8 +127,12 @@
     "typedoc/**/marked": "^0.6.2"
   },
   "dependencies": {
+    "@types/koa": "^2.0.48",
+    "@types/koa-router": "^7.0.40",
     "@types/request": "^2.48.1",
     "bindings": "^1.5.0",
+    "koa": "^2.7.0",
+    "koa-router": "^7.4.0",
     "request": "^2.88.0",
     "segfault-handler": "^1.1.0"
   },
