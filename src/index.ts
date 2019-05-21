@@ -1,8 +1,8 @@
 import * as request from 'request'
-import * as SegfaultHandler from 'segfault-handler'
-
+// import * as SegfaultHandler from 'segfault-handler'
+//
 const quantel = require('../build/Release/quantel_gateway')
-SegfaultHandler.registerHandler('crash.log')
+// SegfaultHandler.registerHandler('crash.log')
 
 export namespace Quantel {
 

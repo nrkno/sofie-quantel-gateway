@@ -39,11 +39,41 @@ Types are:
 
 A GET requests to the root path `/` lists all available zones.
 
-***TODO: example***
+```JSON
+[ {
+  "type": "ZonePortal",
+  "zoneNumber": 1000,
+  "zoneName": "Dummy Zone 1000" } ]
+```
 
 A GET request to the zones name (`/:zoneID/`) retrieves details of all the available servers. This includes the assigned port names and number of channels.
 
-***TODO: example***
+```JSON
+[ { "type": "Server",
+    "ident": 1100,
+    "down": false,
+    "name": "Dummy 1100",
+    "numChannels": 4,
+    "pools": [ 11 ],
+    "portNames": []
+  }, {
+    "type": "Server",
+    "ident": 1200,
+    "down": false,
+    "name": "Dummy 1200",
+    "numChannels": 2,
+    "pools": [ 12 ],
+    "portNames": []
+  }, {
+    "type": "Server",
+    "ident": 1300,
+    "down": false,
+    "name": "Dummy 1300",
+    "numChannels": 3,
+    "pools": [ 13 ],
+    "portNames": []
+  } ]
+```
 
 ## Create a port
 
