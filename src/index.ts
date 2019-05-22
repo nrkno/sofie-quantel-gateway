@@ -1,5 +1,6 @@
 import * as request from 'request'
 import * as SegfaultHandler from 'segfault-handler'
+import { writeFileSync } from 'fs'
 //
 const quantel = require('../build/Release/quantel_gateway')
 SegfaultHandler.registerHandler('crash.log')
@@ -185,8 +186,10 @@ export namespace Quantel {
 		return quantel.getThumbnailSize(await isaIOR)
 	}
 
-	export async function requestThumbnails (): Promise<ThumbnailSize> {
+	export async function requestThumbnails (): Promise<Buffer> {
 		if (!isaIOR) await getISAReference()
-		return quantel.requestThumbnails(await isaIOR)
+		let b = quantel.requestThumbnails(await isaIOR)
+		writeFileSync('test.argb', b)
+		return b
 	}
 }

@@ -1492,16 +1492,29 @@ napi_value getThumbnailSize(napi_env env, napi_callback_info info) {
 class ThumbyListener : public POA_Quentin::ThumbnailListener {
 public:
 	inline ThumbyListener(CORBA::ORB_var orby) { orb = CORBA::ORB::_duplicate(orby); }
-	virtual ~ThumbyListener() { }
+	virtual ~ThumbyListener() { free(lastFrame); }
 	virtual void newThumbnail(CORBA::Long ident, CORBA::Long offset, CORBA::Long width, CORBA::Long height, const Quentin::Longs & data);
 	virtual void noThumbnail(Quentin::ThumbnailListener::NoThumbnailReason reason, CORBA::Long ident, CORBA::Long offset, CORBA::Boolean tryAgainLater, const CORBA::WChar * reasonStr);
   virtual void finished(CORBA::Long ident);
+	virtual char* getLastFrame();
+	virtual size_t getLastFrameSize();
 private:
 	CORBA::ORB_ptr orb;
+	size_t lastFrameSize = 0;
+	char* lastFrame = nullptr;
 };
 
 void ThumbyListener::newThumbnail(CORBA::Long ident, CORBA::Long offset, CORBA::Long width, CORBA::Long height, const Quentin::Longs & data) {
 	printf("newThumbnail called - offset %i, dimensions %ix%i, data length %i\n", offset, width, height, data.length());
+	if (lastFrame != nullptr) free(lastFrame);
+	lastFrameSize = data.length() * 4;
+	lastFrame = (char*) malloc(lastFrameSize * sizeof(char));
+	for ( int x = 0 ; x < data.length() ; x++ ) {
+		lastFrame[x * 4] = (data[x] >> 24) & 0xff;
+		lastFrame[x * 4 + 1] = (data[x] >> 16) & 0xff;
+		lastFrame[x * 4 + 2] = (data[x] >> 8) & 0xff;
+		lastFrame[x * 4 + 3] = data[x] & 0xff;
+	}
 }
 
 void ThumbyListener::noThumbnail(Quentin::ThumbnailListener::NoThumbnailReason reason, CORBA::Long ident, CORBA::Long offset, CORBA::Boolean tryAgainLater, const CORBA::WChar * reasonStr) {
@@ -1512,6 +1525,14 @@ void ThumbyListener::finished(CORBA::Long ident) {
 	printf("finished called\n");
 	orb->shutdown(false);
 	CORBA::release(orb);
+}
+
+char* ThumbyListener::getLastFrame() {
+	return lastFrame;
+}
+
+size_t ThumbyListener::getLastFrameSize() {
+	return lastFrameSize;
 }
 
 napi_value requestThumbnails(napi_env env, napi_callback_info info) {
@@ -1547,7 +1568,11 @@ napi_value requestThumbnails(napi_env env, napi_callback_info info) {
 		CORBA::release(qtip);
 		// poa->deactivate_object(mythumbyid);
 		// pman->deactivate(true, true);
+		void* resultData;
 
+		status = napi_create_buffer_copy(env, mythumby->getLastFrameSize(), mythumby->getLastFrame(),
+		  &resultData, &result);
+		CHECK_STATUS;
 		printf("End of try scope.\n");
 	}
 	catch(CORBA::SystemException& ex) {
@@ -1562,7 +1587,7 @@ napi_value requestThumbnails(napi_env env, napi_callback_info info) {
 	printf("Calling orb->destroy()\n");
 	orb->destroy();
 	printf("Reached return statement.\n");
-	return nullptr;
+	return result;
 }
 
 napi_value Init(napi_env env, napi_value exports) {
