@@ -1491,21 +1491,29 @@ napi_value getThumbnailSize(napi_env env, napi_callback_info info) {
 
 class ThumbyListener : public POA_Quentin::ThumbnailListener {
 public:
-	inline ThumbyListener(CORBA::ORB_var orby) { orb = CORBA::ORB::_duplicate(orby); }
+	inline ThumbyListener(CORBA::ORB_var orby /*, int32_t tnCount */) : ident(ID++) {
+		orb = CORBA::ORB::_duplicate(orby);
+		// count = tnCount;
+	}
 	virtual ~ThumbyListener() { free(lastFrame); }
 	virtual void newThumbnail(CORBA::Long ident, CORBA::Long offset, CORBA::Long width, CORBA::Long height, const Quentin::Longs & data);
 	virtual void noThumbnail(Quentin::ThumbnailListener::NoThumbnailReason reason, CORBA::Long ident, CORBA::Long offset, CORBA::Boolean tryAgainLater, const CORBA::WChar * reasonStr);
   virtual void finished(CORBA::Long ident);
 	virtual char* getLastFrame();
 	virtual size_t getLastFrameSize();
+	virtual inline int32_t getIdent() { return ident; };
 private:
 	CORBA::ORB_ptr orb;
 	size_t lastFrameSize = 0;
 	char* lastFrame = nullptr;
+	static int32_t ID;
+	int ident;
 };
 
+int32_t ThumbyListener::ID = 0;
+
 void ThumbyListener::newThumbnail(CORBA::Long ident, CORBA::Long offset, CORBA::Long width, CORBA::Long height, const Quentin::Longs & data) {
-	printf("newThumbnail called - offset %i, dimensions %ix%i, data length %i\n", offset, width, height, data.length());
+	printf("newThumbnail called - ident %i, offset %i, dimensions %ix%i, data length %i\n", ident, offset, width, height, data.length());
 	if (lastFrame != nullptr) free(lastFrame);
 	lastFrameSize = data.length() * 4;
 	lastFrame = (char*) malloc(lastFrameSize * sizeof(char));
@@ -1542,15 +1550,50 @@ napi_value requestThumbnails(napi_env env, napi_callback_info info) {
 	bool isArray;
 	CORBA::ORB_var orb;
 	Quentin::ZonePortal::_ptr_type zp;
-	CORBA::Long width(0);
-	CORBA::Long height(0);
 	Quentin::ServerFragments_var fragments;
+	int32_t clipID, offset, stride, tnCount;
 
 	try {
 		status = retrieveZonePortal(env, info, &orb, &zp);
 		CHECK_STATUS;
 
-		fragments = zp->getAllFragments(2);
+		size_t argc = 2;
+		napi_value argv[2];
+		status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+		CHECK_STATUS;
+
+		if (argc < 2) {
+			NAPI_THROW_ORB_DESTROY("Options object with clip ID, offset, stride and thumbnail count must be provided.");
+		}
+		status = napi_typeof(env, argv[1], &type);
+		CHECK_STATUS;
+		status = napi_is_array(env, argv[1], &isArray);
+		CHECK_STATUS;
+		if (isArray || type != napi_object) {
+			NAPI_THROW_ORB_DESTROY("Argument must be an options object with clip ID, offset, stride and thumbnail count.");
+		}
+
+		status = napi_get_named_property(env, argv[1], "clipID", &prop);
+		CHECK_STATUS;
+		status = napi_get_value_int32(env, prop, &clipID);
+		CHECK_STATUS;
+
+		status = napi_get_named_property(env, argv[1], "offset", &prop);
+		CHECK_STATUS;
+		status = napi_get_value_int32(env, prop, &offset);
+		CHECK_STATUS;
+
+		status = napi_get_named_property(env, argv[1], "stride", &prop);
+		CHECK_STATUS;
+		status = napi_get_value_int32(env, prop, &stride);
+		CHECK_STATUS;
+
+		status = napi_get_named_property(env, argv[1], "count", &prop);
+		CHECK_STATUS;
+		status = napi_get_value_int32(env, prop, &tnCount);
+		CHECK_STATUS;
+
+		fragments = zp->getTypeFragments(clipID, 0);
 
 		CORBA::Object_var       obj = orb->resolve_initial_references("RootPOA");
 		PortableServer::POA_var poa = PortableServer::POA::_narrow(obj);
@@ -1562,7 +1605,7 @@ napi_value requestThumbnails(napi_env env, napi_callback_info info) {
 		pman->activate();
 
 		Quentin::ThumbnailListener_ptr qtip = Quentin::ThumbnailListener::_duplicate(mythumby->_this());
-		zp->requestThumbnails(9, fragments[0].fragmentData.videoFragmentData(), 10, 1, 1, 42, qtip);
+		zp->requestThumbnails(0, fragments[0].fragmentData.videoFragmentData(), offset, stride, tnCount, mythumby->getIdent(), qtip);
 
 		orb->run();
 		CORBA::release(qtip);

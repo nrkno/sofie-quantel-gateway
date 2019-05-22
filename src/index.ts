@@ -108,6 +108,12 @@ export namespace Quantel {
 		height: number
 	}
 
+	export interface ThumbnailOrder extends ClipRef {
+		offset: number,
+		stride: number,
+		count: number,
+	}
+
 	export async function getISAReference (ref?: string): Promise<string> {
 		isaIOR = new Promise((resolve, reject) => {
 			// TODO better port resolution
@@ -186,9 +192,9 @@ export namespace Quantel {
 		return quantel.getThumbnailSize(await isaIOR)
 	}
 
-	export async function requestThumbnails (): Promise<Buffer> {
+	export async function requestThumbnails (options: ThumbnailOrder): Promise<Buffer> {
 		if (!isaIOR) await getISAReference()
-		let b = quantel.requestThumbnails(await isaIOR)
+		let b = quantel.requestThumbnails(await isaIOR, options)
 		writeFileSync('test.argb', b)
 		return b
 	}
