@@ -1,8 +1,8 @@
 import * as request from 'request'
-// import * as SegfaultHandler from 'segfault-handler'
+import * as SegfaultHandler from 'segfault-handler'
 //
 const quantel = require('../build/Release/quantel_gateway')
-// SegfaultHandler.registerHandler('crash.log')
+SegfaultHandler.registerHandler('crash.log')
 
 export namespace Quantel {
 
@@ -183,5 +183,10 @@ export namespace Quantel {
 	export async function getThumbnailSize (): Promise<ThumbnailSize> {
 		if (!isaIOR) await getISAReference()
 		return quantel.getThumbnailSize(await isaIOR)
+	}
+
+	export async function requestThumbnails (): Promise<ThumbnailSize> {
+		if (!isaIOR) await getISAReference()
+		return quantel.requestThumbnails(await isaIOR)
 	}
 }
