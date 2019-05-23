@@ -195,7 +195,7 @@ export namespace Quantel {
 	export async function requestThumbnails (options: ThumbnailOrder): Promise<Buffer> {
 		if (!isaIOR) await getISAReference()
 		let b = quantel.requestThumbnails(await isaIOR, options)
-		writeFileSync('test.argb', b)
+		// writeFileSync(`test${options.offset}.argb`, b)
 		return b
 	}
 }
