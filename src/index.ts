@@ -1,9 +1,10 @@
 import * as request from 'request'
-import * as SegfaultHandler from 'segfault-handler'
-import { writeFileSync } from 'fs'
+// import { writeFileSync } from 'fs'
 //
 const quantel = require('../build/Release/quantel_gateway')
-SegfaultHandler.registerHandler('crash.log')
+
+// import * as SegfaultHandler from 'segfault-handler'
+// SegfaultHandler.registerHandler('crash.log')
 
 export namespace Quantel {
 
@@ -12,7 +13,8 @@ export namespace Quantel {
 	export interface ZoneInfo {
 		type: string,
 		zoneNumber: number,
-		zoneName: string
+		zoneName: string,
+		isRemote: boolean
 	}
 
 	export interface ServerInfo {
@@ -21,8 +23,8 @@ export namespace Quantel {
 		down: boolean,
 		name?: string,
 		numChannels?: number,
-		pools?: Array<number>,
-		portNames?: Array<string>,
+		pools?: number[],
+		portNames?: string[],
 	}
 
 	export interface PortRef {
@@ -41,11 +43,14 @@ export namespace Quantel {
 	export interface PortStatus extends PortRef {
 		type: string,
 		portID: number,
+		refTime: string,
+		portTime: string,
 		speed: number,
 		offset: number,
 		flags: number,
 		endOfData: number,
 		framesUnused: number,
+		channels: number[],
 	}
 
 	export interface ClipRef {
@@ -80,11 +85,11 @@ export namespace Quantel {
 	// TODO extend with the different types
 	export interface ServerFragments extends ClipRef {
 		type: string,
-		fragments: Array<ServerFragment>
+		fragments: ServerFragment[]
 	}
 
 	export interface PortLoadInfo extends PortRef {
-		fragments: Array<ServerFragment>
+		fragments: ServerFragment[]
 	}
 
 	export enum Trigger {
@@ -116,7 +121,8 @@ export namespace Quantel {
 
 	export async function getISAReference (ref?: string): Promise<string> {
 		isaIOR = new Promise((resolve, reject) => {
-			// TODO better port resolution
+			if (ref && ref.endsWith('/')) ref = ref.slice(0, -1)
+			if (ref && ref.indexOf(':') < 0) ref = ref + ':2096'
 			request(ref ? ref + '/ZoneManager.ior' : 'http://localhost:2096/ZoneManager.ior', (err, res, body) => {
 				if (err) {
 					reject(err)
@@ -137,12 +143,17 @@ export namespace Quantel {
 		return quantel.testConnection(await isaIOR)
 	}
 
-	export async function getZoneInfo (): Promise<ZoneInfo> {
+	export async function listZones (): Promise<ZoneInfo[]> {
 		if (!isaIOR) await getISAReference()
-		return quantel.getZoneInfo(await isaIOR)
+		return quantel.listZones(await isaIOR)
 	}
 
-	export async function getServers (): Promise<Array<ServerInfo>> {
+	export async function getDefaultZoneInfo (): Promise<ZoneInfo> {
+		if (!isaIOR) await getISAReference()
+		return quantel.getDefaultZoneInfo(await isaIOR)
+	}
+
+	export async function getServers (): Promise<ServerInfo[]> {
 		if (!isaIOR) await getISAReference()
 		return quantel.getServers(await isaIOR)
 	}

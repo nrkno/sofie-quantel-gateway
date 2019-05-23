@@ -108,6 +108,8 @@ napi_status retrieveZonePortal(napi_env env, napi_callback_info info, CORBA::ORB
   free(isaIOR);
   *zp = Quentin::ZonePortal::_narrow(ptr);
   *orb = local_orb;
+
+	return napi_ok;
 }
 
 napi_value testConnection(napi_env env, napi_callback_info info) {
@@ -117,54 +119,149 @@ napi_value testConnection(napi_env env, napi_callback_info info) {
   CORBA::ORB_var orb;
   Quentin::ZonePortal::_ptr_type zp;
 
-  status = retrieveZonePortal(env, info, &orb, &zp);
-  CHECK_STATUS;
+	try {
+	  status = retrieveZonePortal(env, info, &orb, &zp);
+	  CHECK_STATUS;
 
-  long zoneNumber = zp->getZoneNumber();
-  status = napi_get_boolean(env, zoneNumber > 0, &result);
-  CHECK_STATUS;
+	  long zoneNumber = zp->getZoneNumber();
+	  status = napi_get_boolean(env, zoneNumber > 0, &result);
+	  CHECK_STATUS;
+	}
+	catch(CORBA::SystemException& ex) {
+		NAPI_THROW_CORBA_EXCEPTION(ex);
+	}
+	catch(CORBA::Exception& ex) {
+		NAPI_THROW_CORBA_EXCEPTION(ex);
+	}
+	catch(omniORB::fatalException& fe) {
+		NAPI_THROW_FATAL_EXCEPTION(fe);
+	}
 
   orb->destroy();
 
   return result;
 }
 
-napi_value getZoneInfo(napi_env env, napi_callback_info info) {
+napi_value listZones(napi_env env, napi_callback_info info) {
+	napi_status status;
+	napi_value result, item, prop;
+	CORBA::ORB_var orb;
+	Quentin::ZonePortal::_ptr_type zp;
+	CORBA::WChar* zoneName;
+	Quentin::Longs_var zoneIDs;
+
+	try {
+		status = retrieveZonePortal(env, info, &orb, &zp);
+		CHECK_STATUS;
+
+		status = napi_create_array(env, &result);
+		CHECK_STATUS;
+
+		zoneIDs = zp->getZones(false);
+		zoneIDs->length(zoneIDs->length() + 1);
+		for ( int x = zoneIDs->length() - 1 ; x > 0 ; x-- ) {
+			zoneIDs[x] = zoneIDs[x - 1];
+		}
+		zoneIDs[0] = zp->getZoneNumber(); // Always start with the local/default zone
+
+		for ( int x = 0 ; x < zoneIDs->length() ; x++ ) {
+			status = napi_create_object(env, &item);
+			CHECK_STATUS;
+
+			zoneName = zp->getZoneName(zoneIDs[x]);
+
+			status = napi_create_string_utf8(env, "ZonePortal", NAPI_AUTO_LENGTH, &prop);
+			CHECK_STATUS;
+			status = napi_set_named_property(env, item, "type", prop);
+			CHECK_STATUS;
+
+			status = napi_create_int32(env, zoneIDs[x], &prop);
+			CHECK_STATUS;
+			status = napi_set_named_property(env, item, "zoneNumber", prop);
+			CHECK_STATUS;
+
+			std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+			std::string zoneNameStr = utf8_conv.to_bytes(zoneName);
+
+			status = napi_create_string_utf8(env, zoneNameStr.c_str(), NAPI_AUTO_LENGTH, &prop);
+			CHECK_STATUS;
+			status = napi_set_named_property(env, item, "zoneName", prop);
+			CHECK_STATUS;
+
+			status = napi_get_boolean(env, zp->zoneIsRemote(zoneIDs[x]), &prop);
+			CHECK_STATUS;
+			status = napi_set_named_property(env, item, "isRemote", prop);
+			CHECK_STATUS;
+
+			status = napi_set_element(env, result, x, item);
+			CHECK_STATUS;
+		}
+	}
+	catch(CORBA::SystemException& ex) {
+		NAPI_THROW_CORBA_EXCEPTION(ex);
+	}
+	catch(CORBA::Exception& ex) {
+		NAPI_THROW_CORBA_EXCEPTION(ex);
+	}
+	catch(omniORB::fatalException& fe) {
+		NAPI_THROW_FATAL_EXCEPTION(fe);
+	}
+
+	orb->destroy();
+	return result;
+}
+
+napi_value getDefaultZoneInfo(napi_env env, napi_callback_info info) {
   napi_status status;
   napi_value result, prop;
   CORBA::ORB_var orb;
   Quentin::ZonePortal::_ptr_type zp;
   CORBA::WChar* zoneName;
 
-  status = retrieveZonePortal(env, info, &orb, &zp);
-  CHECK_STATUS;
+	try {
+	  status = retrieveZonePortal(env, info, &orb, &zp);
+	  CHECK_STATUS;
 
-  long zoneNumber = zp->getZoneNumber();
-  zoneName = zp->getZoneName(zoneNumber);
+	  long zoneNumber = zp->getZoneNumber();
+	  zoneName = zp->getZoneName(zoneNumber);
 
-  status = napi_create_object(env, &result);
-  CHECK_STATUS;
+	  status = napi_create_object(env, &result);
+	  CHECK_STATUS;
 
-  status = napi_create_string_utf8(env, "ZonePortal", NAPI_AUTO_LENGTH, &prop);
-  CHECK_STATUS;
-  status = napi_set_named_property(env, result, "type", prop);
-  CHECK_STATUS;
+	  status = napi_create_string_utf8(env, "ZonePortal", NAPI_AUTO_LENGTH, &prop);
+	  CHECK_STATUS;
+	  status = napi_set_named_property(env, result, "type", prop);
+	  CHECK_STATUS;
 
-  status = napi_create_int32(env, zoneNumber, &prop);
-  CHECK_STATUS;
-  status = napi_set_named_property(env, result, "zoneNumber", prop);
-  CHECK_STATUS;
+	  status = napi_create_int32(env, zoneNumber, &prop);
+	  CHECK_STATUS;
+	  status = napi_set_named_property(env, result, "zoneNumber", prop);
+	  CHECK_STATUS;
 
-  std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
-  std::string zoneNameStr = utf8_conv.to_bytes(zoneName);
+	  std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+	  std::string zoneNameStr = utf8_conv.to_bytes(zoneName);
 
-  status = napi_create_string_utf8(env, zoneNameStr.c_str(), NAPI_AUTO_LENGTH, &prop);
-  CHECK_STATUS;
-  status = napi_set_named_property(env, result, "zoneName", prop);
-  CHECK_STATUS;
+	  status = napi_create_string_utf8(env, zoneNameStr.c_str(), NAPI_AUTO_LENGTH, &prop);
+	  CHECK_STATUS;
+	  status = napi_set_named_property(env, result, "zoneName", prop);
+	  CHECK_STATUS;
+
+		status = napi_get_boolean(env, false, &prop);
+		CHECK_STATUS;
+		status = napi_set_named_property(env, result, "isRemote", prop);
+		CHECK_STATUS;
+	}
+	catch(CORBA::SystemException& ex) {
+    NAPI_THROW_CORBA_EXCEPTION(ex);
+  }
+  catch(CORBA::Exception& ex) {
+    NAPI_THROW_CORBA_EXCEPTION(ex);
+  }
+  catch(omniORB::fatalException& fe) {
+    NAPI_THROW_FATAL_EXCEPTION(fe);
+  }
 
   orb->destroy();
-
   return result;
 }
 
@@ -178,101 +275,95 @@ napi_value getServers(napi_env env, napi_callback_info info) {
   Quentin::WStrings_var portNames;
   std::string portName, serverNameStr;
 
-  status = retrieveZonePortal(env, info, &orb, &zp);
-  CHECK_STATUS;
+	try {
+	  status = retrieveZonePortal(env, info, &orb, &zp);
+	  CHECK_STATUS;
 
-  status = napi_create_array(env, &result);
-  CHECK_STATUS;
+	  status = napi_create_array(env, &result);
+	  CHECK_STATUS;
 
-  Quentin::Longs_var serverIDs = zp->getServers(true);
-  for ( int x = 0 ; x < serverIDs->length() ; x++ ) {
-    status = napi_create_object(env, &item);
-    CHECK_STATUS;
+	  Quentin::Longs_var serverIDs = zp->getServers(true);
+	  for ( int x = 0 ; x < serverIDs->length() ; x++ ) {
+	    status = napi_create_object(env, &item);
+	    CHECK_STATUS;
 
-    status = napi_create_string_utf8(env, "Server", NAPI_AUTO_LENGTH, &prop);
-    CHECK_STATUS;
-    status = napi_set_named_property(env, item, "type", prop);
-    CHECK_STATUS;
+	    status = napi_create_string_utf8(env, "Server", NAPI_AUTO_LENGTH, &prop);
+	    CHECK_STATUS;
+	    status = napi_set_named_property(env, item, "type", prop);
+	    CHECK_STATUS;
 
-    status = napi_create_int64(env, serverIDs[x] > 0 ? serverIDs[x] : -serverIDs[x], &prop);
-    CHECK_STATUS;
-    status = napi_set_named_property(env, item, "ident", prop);
-    CHECK_STATUS;
+	    status = napi_create_int64(env, serverIDs[x] > 0 ? serverIDs[x] : -serverIDs[x], &prop);
+	    CHECK_STATUS;
+	    status = napi_set_named_property(env, item, "ident", prop);
+	    CHECK_STATUS;
 
-    if (serverIDs[x] > 0) { // server is o
-      server = zp->getServer(serverIDs[x]);
-      serverInfo = server->getServerInfo();
+	    if (serverIDs[x] > 0) { // server is o
+	      server = zp->getServer(serverIDs[x]);
+	      serverInfo = server->getServerInfo();
 
-      status = napi_get_boolean(env, serverInfo->down, &prop);
-      CHECK_STATUS;
-      status = napi_set_named_property(env, item, "down", prop);
-      CHECK_STATUS;
+	      status = napi_get_boolean(env, serverInfo->down, &prop);
+	      CHECK_STATUS;
+	      status = napi_set_named_property(env, item, "down", prop);
+	      CHECK_STATUS;
 
-      std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
-      std::string serverNameStr = utf8_conv.to_bytes(serverInfo->name);
+	      std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+	      std::string serverNameStr = utf8_conv.to_bytes(serverInfo->name);
 
-      status = napi_create_string_utf8(env, serverNameStr.c_str(), NAPI_AUTO_LENGTH, &prop);
-      CHECK_STATUS;
-      status = napi_set_named_property(env, item, "name", prop);
-      CHECK_STATUS;
+	      status = napi_create_string_utf8(env, serverNameStr.c_str(), NAPI_AUTO_LENGTH, &prop);
+	      CHECK_STATUS;
+	      status = napi_set_named_property(env, item, "name", prop);
+	      CHECK_STATUS;
 
-      status = napi_create_int32(env, serverInfo->numChannels, &prop);
-      CHECK_STATUS;
-      status = napi_set_named_property(env, item, "numChannels", prop);
-      CHECK_STATUS;
+	      status = napi_create_int32(env, serverInfo->numChannels, &prop);
+	      CHECK_STATUS;
+	      status = napi_set_named_property(env, item, "numChannels", prop);
+	      CHECK_STATUS;
 
-      status = napi_create_array(env, &prop);
-      CHECK_STATUS;
-      for ( int y = 0 ; y < serverInfo->pools.length() ; y++ ) {
-        status = napi_create_int32(env, serverInfo->pools[y], &subprop);
-        CHECK_STATUS;
-        status = napi_set_element(env, prop, y, subprop);
-        CHECK_STATUS;
-      }
-      status = napi_set_named_property(env, item, "pools", prop);
-      CHECK_STATUS;
+	      status = napi_create_array(env, &prop);
+	      CHECK_STATUS;
+	      for ( int y = 0 ; y < serverInfo->pools.length() ; y++ ) {
+	        status = napi_create_int32(env, serverInfo->pools[y], &subprop);
+	        CHECK_STATUS;
+	        status = napi_set_element(env, prop, y, subprop);
+	        CHECK_STATUS;
+	      }
+	      status = napi_set_named_property(env, item, "pools", prop);
+	      CHECK_STATUS;
 
-      portNames = server->getPortNames();
-      status = napi_create_array(env, &prop);
-      CHECK_STATUS;
-      for ( int y = 0 ; y < portNames->length(); y++ ) {
-        std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
-        portName = utf8_conv.to_bytes(portNames[y]);
+	      portNames = server->getPortNames();
+	      status = napi_create_array(env, &prop);
+	      CHECK_STATUS;
+	      for ( int y = 0 ; y < portNames->length(); y++ ) {
+	        std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+	        portName = utf8_conv.to_bytes(portNames[y]);
 
-        status = napi_create_string_utf8(env, portName.c_str(), NAPI_AUTO_LENGTH, &subprop);
-        CHECK_STATUS;
-        status = napi_set_element(env, prop, y, subprop);
-        CHECK_STATUS;
-      }
-      status = napi_set_named_property(env, item, "portNames", prop);
-      CHECK_STATUS;
+	        status = napi_create_string_utf8(env, portName.c_str(), NAPI_AUTO_LENGTH, &subprop);
+	        CHECK_STATUS;
+	        status = napi_set_element(env, prop, y, subprop);
+	        CHECK_STATUS;
+	      }
+	      status = napi_set_named_property(env, item, "portNames", prop);
+	      CHECK_STATUS;
+	    } else {
+	      status = napi_get_boolean(env, true, &prop);
+	      CHECK_STATUS;
+	      status = napi_set_named_property(env, item, "down", prop);
+	      CHECK_STATUS;
+	    }
 
-      // Quentin::WStrings_var chanPorts = server->getChanPorts();
-      // status = napi_create_array(env, &prop);
-      // CHECK_STATUS;
-      // for ( int y = 0 ; y < chanPorts->length(); y++ ) {
-        // if (wcslen(chanPorts[y]) > 0) {
-        //   std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
-        //   std::string chanPort = utf8_conv.to_bytes(chanPorts[y]);
-        //   status = napi_create_string_utf8(env, chanPort.c_str(), NAPI_AUTO_LENGTH, &subprop);
-        //   CHECK_STATUS;
-        //   status = napi_set_element(env, prop, y, subprop);
-        //   CHECK_STATUS;
-        // }
-      // }
-      // status = napi_set_named_property(env, item, "chanPorts", prop);
-      // CHECK_STATUS;
-
-    } else {
-      status = napi_get_boolean(env, true, &prop);
-      CHECK_STATUS;
-      status = napi_set_named_property(env, item, "down", prop);
-      CHECK_STATUS;
-    }
-
-    status = napi_set_element(env, result, x, item);
-    CHECK_STATUS;
-  }
+	    status = napi_set_element(env, result, x, item);
+	    CHECK_STATUS;
+	  }
+	}
+	catch(CORBA::SystemException& ex) {
+		NAPI_THROW_CORBA_EXCEPTION(ex);
+	}
+	catch(CORBA::Exception& ex) {
+		NAPI_THROW_CORBA_EXCEPTION(ex);
+	}
+	catch(omniORB::fatalException& fe) {
+		NAPI_THROW_FATAL_EXCEPTION(fe);
+	}
 
   orb->destroy();
   return result;
@@ -419,9 +510,26 @@ napi_value createPlayPort(napi_env env, napi_callback_info info) {
   return result;
 }
 
+char* formatTimecode(Quentin::Timecode tc) {
+	int32_t HH, hh, MM, mm, SS, ss, FF, ff;
+	bool drop = (tc & 0x40000000) != 0;
+	char* tcstr = (char*) malloc(12 * sizeof(char));
+	HH = (tc >> 28) & 0x03;
+	hh = (tc >> 24) & 0x0f;
+	MM = (tc >> 20) & 0x07;
+	mm = (tc >> 16) & 0x0f;
+	SS = (tc >> 12) & 0x07;
+	ss = (tc >>  8) & 0x0f;
+	FF = (tc >>  4) & 0x07;
+	ff = (tc >>  0) & 0x0f;
+	sprintf(tcstr, "%i%i:%i%i:%i%i%s%i%i", HH, hh, MM, mm, SS, ss,
+    drop ? ";" : ":", FF, ff);
+	return tcstr;
+}
+
 napi_value getPlayPortStatus(napi_env env, napi_callback_info info) {
   napi_status status;
-  napi_value result, prop, options;
+  napi_value result, prop, options, chanList;
   napi_valuetype type;
   bool isArray;
   CORBA::ORB_var orb;
@@ -430,6 +538,7 @@ napi_value getPlayPortStatus(napi_env env, napi_callback_info info) {
   char* portName;
   size_t portNameLen;
   Quentin::WStrings_var portNames;
+	Quentin::Longs_var channels;
 
   try {
     status = retrieveZonePortal(env, info, &orb, &zp);
@@ -499,7 +608,15 @@ napi_value getPlayPortStatus(napi_env env, napi_callback_info info) {
 
     Quentin::PortListener::PlayPortStatus* gps = &port->getStatus().playStatus();
 
-    // TODO timecodes
+    status = napi_create_string_utf8(env, formatTimecode(gps->refTime), NAPI_AUTO_LENGTH, &prop);
+		CHECK_STATUS;
+		status = napi_set_named_property(env, result, "refTime", prop);
+		CHECK_STATUS;
+
+		status = napi_create_string_utf8(env, formatTimecode(gps->portTime), NAPI_AUTO_LENGTH, &prop);
+		CHECK_STATUS;
+		status = napi_set_named_property(env, result, "portTime", prop);
+		CHECK_STATUS;
 
     status = napi_create_int32(env, gps->portNumber, &prop);
     CHECK_STATUS;
@@ -566,6 +683,21 @@ napi_value getPlayPortStatus(napi_env env, napi_callback_info info) {
     CHECK_STATUS;
     status = napi_set_named_property(env, result, "framesUnused", prop);
     CHECK_STATUS;
+
+		channels = port->getChannels();
+		status = napi_create_array(env, &chanList);
+		CHECK_STATUS;
+
+		for ( int x = 0 ; x < channels->length() ; x++ ) {
+			status = napi_create_int32(env, channels[x], &prop);
+			CHECK_STATUS;
+			status = napi_set_element(env, chanList, x, prop);
+			CHECK_STATUS;
+		}
+
+		status = napi_set_named_property(env, result, "channels", chanList);
+		CHECK_STATUS;
+
   }
   catch(CORBA::SystemException& ex) {
     NAPI_THROW_CORBA_EXCEPTION(ex);
@@ -1643,7 +1775,8 @@ napi_value Init(napi_env env, napi_value exports) {
 
   napi_property_descriptor desc[] = {
     DECLARE_NAPI_METHOD("testConnection", testConnection),
-    DECLARE_NAPI_METHOD("getZoneInfo", getZoneInfo),
+		DECLARE_NAPI_METHOD("listZones", listZones),
+    DECLARE_NAPI_METHOD("getDefaultZoneInfo", getDefaultZoneInfo),
     DECLARE_NAPI_METHOD("getServers", getServers),
     DECLARE_NAPI_METHOD("createPlayPort", createPlayPort),
     DECLARE_NAPI_METHOD("getPlayPortStatus", getPlayPortStatus),
@@ -1660,7 +1793,7 @@ napi_value Init(napi_env env, napi_value exports) {
     { "JUMP", nullptr, nullptr, nullptr, nullptr, jump, napi_enumerable, nullptr },
     { "TRANSITION", nullptr, nullptr, nullptr, nullptr, transition, napi_enumerable, nullptr },
   };
-  status = napi_define_properties(env, exports, 17, desc);
+  status = napi_define_properties(env, exports, 18, desc);
 
   return exports;
 }
