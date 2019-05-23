@@ -57,6 +57,11 @@ export namespace Quantel {
 		clipID: number,
 	}
 
+	export interface FragmentRef extends ClipRef {
+		start?: number,
+		finish?: number,
+	}
+
 	export interface ServerFragment {
 		type: string,
 		trackNum: number,
@@ -173,9 +178,19 @@ export namespace Quantel {
 		return quantel.releasePort(await isaIOR, options)
 	}
 
-	export async function getAllFragments (options: ClipRef): Promise<ServerFragments> {
+	export async function getClipData (options: ClipRef): Promise<any> {
 		if (!isaIOR) await getISAReference()
-		return quantel.getAllFragments(await isaIOR, options)
+		return quantel.getClipData(await isaIOR, options)
+	}
+
+	export async function searchClips (options: any): Promise<any> {
+		if (!isaIOR) await getISAReference()
+		return quantel.searchClips(await isaIOR, options)
+	}
+
+	export async function getFragments (options: FragmentRef): Promise<ServerFragments> {
+		if (!isaIOR) await getISAReference()
+		return quantel.getFragments(await isaIOR, options)
 	}
 
 	export async function loadPlayPort (options: PortLoadInfo): Promise<any> {

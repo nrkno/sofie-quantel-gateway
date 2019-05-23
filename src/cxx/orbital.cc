@@ -799,7 +799,182 @@ napi_value releasePort(napi_env env, napi_callback_info info) {
   return prop;
 }
 
-napi_value getAllFragments(napi_env env, napi_callback_info info) {
+napi_value convertToDate(napi_env env, CORBA::ORB_var orb, std::string date) {
+	napi_status status;
+	napi_value global, dateObj, result, integerDate;
+
+	status = napi_get_global(env, &global);
+	CHECK_STATUS;
+
+	status = napi_get_named_property(env, global, "Date", &dateObj);
+	CHECK_STATUS;
+	status = napi_create_int64(env, std::stoll(date), &integerDate);
+	CHECK_STATUS;
+
+	napi_value argv[1] = { integerDate };
+	status = napi_new_instance(env, dateObj, 1, argv, &result);
+	CHECK_STATUS;
+
+	return result;
+}
+
+napi_value getClipData(napi_env env, napi_callback_info info) {
+	napi_status status;
+  napi_value result, prop, options, frag, fragprop;
+  napi_valuetype type;
+  bool isArray;
+  CORBA::ORB_var orb;
+  Quentin::ZonePortal::_ptr_type zp;
+  int32_t clipID;
+
+	try {
+		status = retrieveZonePortal(env, info, &orb, &zp);
+		CHECK_STATUS;
+
+		size_t argc = 2;
+		napi_value argv[2];
+		status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+		CHECK_STATUS;
+
+		if (argc < 2) {
+			NAPI_THROW_ORB_DESTROY("Options object with clip ID must be provided.");
+		}
+		status = napi_typeof(env, argv[1], &type);
+		CHECK_STATUS;
+		status = napi_is_array(env, argv[1], &isArray);
+		CHECK_STATUS;
+		if (isArray || type != napi_object) {
+			NAPI_THROW_ORB_DESTROY("Argument must be an options object with a clip ID.");
+		}
+
+		status = napi_create_object(env, &result);
+		CHECK_STATUS;
+		status = napi_create_string_utf8(env, "ClipData", NAPI_AUTO_LENGTH, &prop);
+		CHECK_STATUS;
+		status = napi_set_named_property(env, result, "type", prop);
+		CHECK_STATUS;
+
+		options = argv[1];
+		status = napi_get_named_property(env, options, "clipID", &prop);
+		CHECK_STATUS;
+		status = napi_get_value_int32(env, prop, &clipID);
+		CHECK_STATUS;
+
+		Quentin::ColumnDescList_var cdl = zp->getColumnDescriptions();
+		Quentin::WStrings columns;
+		columns.length(cdl->length());
+		for ( int x = 0 ; x < cdl->length() ; x++ ) {
+			columns[x] = cdl[x].columnName;
+		}
+
+		Quentin::WStrings_var results = zp->getClipData(clipID, columns);
+
+		std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+
+		for ( int x = 0 ; x < results->length() ; x++ ) {
+			std::string value = utf8_conv.to_bytes(results[x]);
+			status = napi_create_string_utf8(env, value.c_str(), NAPI_AUTO_LENGTH, &prop);
+			CHECK_STATUS;
+
+			if (wcscmp(cdl[x].columnType, L"Boolean") == 0) {
+				status = napi_get_boolean(env, wcscmp(results[x], L"1") == 0, &prop);
+				CHECK_STATUS;
+			}
+
+			if ((wcscmp(cdl[x].columnType, L"Number") == 0) && (value.length() > 0)) {
+				status = napi_create_int32(env, std::stol(value), &prop);
+				CHECK_STATUS;
+			}
+
+			if ((wcscmp(cdl[x].columnType, L"Date") == 0) && (value.length() > 0)) {
+				prop = convertToDate(env, orb, value);
+			}
+
+			std::string key = utf8_conv.to_bytes(columns[x]);
+			status = napi_set_named_property(env, result, key.c_str(), prop);
+			CHECK_STATUS;
+		}
+	}
+	catch(CORBA::SystemException& ex) {
+    NAPI_THROW_CORBA_EXCEPTION(ex);
+  }
+  catch(CORBA::Exception& ex) {
+    NAPI_THROW_CORBA_EXCEPTION(ex);
+  }
+  catch(omniORB::fatalException& fe) {
+    NAPI_THROW_FATAL_EXCEPTION(fe);
+  }
+
+  orb->destroy();
+  return result;
+}
+
+napi_value searchClips(napi_env env, napi_callback_info info) {
+	napi_status status;
+	napi_value result, prop, options, frag, fragprop;
+	napi_valuetype type;
+	bool isArray;
+	CORBA::ORB_var orb;
+	Quentin::ZonePortal::_ptr_type zp;
+	int32_t clipID;
+
+	try {
+		status = retrieveZonePortal(env, info, &orb, &zp);
+		CHECK_STATUS;
+
+		size_t argc = 2;
+		napi_value argv[2];
+		status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+		CHECK_STATUS;
+
+		if (argc < 2) {
+			NAPI_THROW_ORB_DESTROY("Options object with search terms must be provided.");
+		}
+		status = napi_typeof(env, argv[1], &type);
+		CHECK_STATUS;
+		status = napi_is_array(env, argv[1], &isArray);
+		CHECK_STATUS;
+		if (isArray || type != napi_object) {
+			NAPI_THROW_ORB_DESTROY("Argument must be an options object with search terms.");
+		}
+
+		status = napi_create_array(env, &result);
+		CHECK_STATUS;
+		
+		Quentin::ClipPropertyList cpl;
+		cpl.length(1);
+		Quentin::ClipProperty cp = { L"Title", L"Wobble" };
+		cpl[0] = cp;
+
+		wprintf(L"Clip property name %ws = %ws\n", cp.name, cp.value);
+
+		Quentin::WStrings columns;
+		columns.length(1);
+		columns[0] = L"ClipID";
+
+
+		Quentin::WStrings_var results = zp->searchClips(cpl, columns, 10);
+		printf("Results has length %i\n", results->length());
+		for ( int x = 0 ; x < results->length() ; x++ ) {
+			wprintf(L"I got %ws\n", results[x]);
+		}
+
+	}
+	catch(CORBA::SystemException& ex) {
+		NAPI_THROW_CORBA_EXCEPTION(ex);
+	}
+	catch(CORBA::Exception& ex) {
+		NAPI_THROW_CORBA_EXCEPTION(ex);
+	}
+	catch(omniORB::fatalException& fe) {
+		NAPI_THROW_FATAL_EXCEPTION(fe);
+	}
+
+	orb->destroy();
+	return result;
+}
+
+napi_value getFragments(napi_env env, napi_callback_info info) {
   napi_status status;
   napi_value result, prop, options, frag, fragprop;
   napi_valuetype type;
@@ -808,6 +983,7 @@ napi_value getAllFragments(napi_env env, napi_callback_info info) {
   Quentin::ZonePortal::_ptr_type zp;
   int32_t clipID;
   char rushID[33];
+	int32_t start = -1, finish = -1;
 
   try {
     status = retrieveZonePortal(env, info, &orb, &zp);
@@ -844,7 +1020,26 @@ napi_value getAllFragments(napi_env env, napi_callback_info info) {
     status = napi_set_named_property(env, result, "clipID", prop);
     CHECK_STATUS;
 
-    Quentin::ServerFragments_var fragments = zp->getAllFragments(clipID);
+		status = napi_get_named_property(env, options, "start", &prop);
+		CHECK_STATUS;
+		status = napi_typeof(env, prop, &type);
+		CHECK_STATUS;
+		if (type == napi_number) {
+			status = napi_get_value_int32(env, prop, &start);
+			CHECK_STATUS;
+		}
+
+		status = napi_get_named_property(env, options, "finish", &prop);
+		CHECK_STATUS;
+		status = napi_typeof(env, prop, &type);
+		CHECK_STATUS;
+		if (type == napi_number) {
+			status = napi_get_value_int32(env, prop, &finish);
+			CHECK_STATUS;
+		}
+
+    Quentin::ServerFragments_var fragments =
+		  (start >= 0) && (finish >= 0) ? zp->getFragments(clipID, start, finish) : zp->getAllFragments(clipID);
 
     status = napi_create_array(env, &prop);
     CHECK_STATUS;
@@ -1781,7 +1976,9 @@ napi_value Init(napi_env env, napi_value exports) {
     DECLARE_NAPI_METHOD("createPlayPort", createPlayPort),
     DECLARE_NAPI_METHOD("getPlayPortStatus", getPlayPortStatus),
     DECLARE_NAPI_METHOD("releasePort", releasePort),
-    DECLARE_NAPI_METHOD("getAllFragments", getAllFragments),
+		DECLARE_NAPI_METHOD("getClipData", getClipData),
+    DECLARE_NAPI_METHOD("getFragments", getFragments),
+		DECLARE_NAPI_METHOD("searchClips", searchClips),
     DECLARE_NAPI_METHOD("loadPlayPort", loadPlayPort),
     DECLARE_NAPI_METHOD("trigger", trigger),
     DECLARE_NAPI_METHOD("jump", qJump),
@@ -1793,7 +1990,7 @@ napi_value Init(napi_env env, napi_value exports) {
     { "JUMP", nullptr, nullptr, nullptr, nullptr, jump, napi_enumerable, nullptr },
     { "TRANSITION", nullptr, nullptr, nullptr, nullptr, transition, napi_enumerable, nullptr },
   };
-  status = napi_define_properties(env, exports, 18, desc);
+  status = napi_define_properties(env, exports, 20, desc);
 
   return exports;
 }

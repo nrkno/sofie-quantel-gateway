@@ -138,6 +138,7 @@ A GET request to this path returns the port status.
   "channels": [ 1 ]
 }
 ```
+
 ## Clip references
 
 _Fragments_ of _clips_ are loaded onto _ports_. This means that the above concept is not that useful to an automation systems that wants a specific video clip to appear on an output _channel_ (SDI port). So we need a way to reference clips by their integer identifier...
@@ -146,11 +147,32 @@ _Fragments_ of _clips_ are loaded onto _ports_. This means that the above concep
 
 A GET request to this path should return a selection of metadata known about the clip.
 
-***TODO: example***
+```JSON
+{
+  "type": "ClipData",
+  "ClipID": 3,
+  "Completed": "2019-05-13T17:46:59.000Z",
+  "Created": "2019-05-13T17:46:59.000Z",
+  "Description": "Example clip on a Quantel ISA.",
+  "Frames": "1000",
+  "NumAudTracks": 1,
+  "NumVidTracks": 1,
+  "PoolID": 11,
+  "PublishedBy": "",
+  "Register": "0",
+  "Tape": "",
+  "Template": 0,
+  "Title": "Example 3",
+  "AudioFormats": "73",
+  "VideoFormats": "90",
+  "ClipGUID": "0e2be6f2478649df9fcf56c0d0ecc040",
+  "PublishCompleted": "2019-05-13T17:46:59.000Z"
+}
+```
 
 If it is necessary to search for the clip by, say, title, a query interface can be provided ...
 
-    /:zoneID/clip?title=Game%20of%20Thrones%20Disappoints
+    /:zoneID/clip?Title=Game%20of%20Thrones%20Disappoints
 
 A GET request to this path should return a JSON array listing documents matching the query and each element must contain a _clipID_.
 
@@ -158,9 +180,35 @@ A GET request to this path should return a JSON array listing documents matching
 
 Clips consist of _fragments_. To play a _clip_, or a sub-clip of a clip, it is necessary to load fragments onto a port. To query all fragments:
 
-    /:zoneID/clip/:clipID/framgments
+    /:zoneID/clip/:clipID/fragments
 
-***TODO: example***
+```JSON
+{
+  "type": "ServerFramgments",
+  "clipID": 2,
+  "fragments": [ {
+    "type": "VideoFragment",
+    "trackNum": 0,
+    "start": 0,
+    "finish": 1000,
+    "rushID": "344aed5ed1204908a54302de951eecb7",
+    "format": 90,
+    "poolID": 11,
+    "poolFrame": 5,
+    "skew": 0,
+    "rushFrame": 0
+  }, {
+    "type": "AudioFragment",
+    "trackNum": 0,
+    "start": 0,
+    "finish": 1000,
+    "rushID": "520c2157fc66443b9e2fc580cb2cf789",
+    "format": 73,
+    "poolID": 11,
+    "poolFrame": 8960,
+    "skew": 0,
+    "rushFrame": 0 } ] }
+```
 
 To query fragments for a specific in and out range:
 
@@ -170,7 +218,7 @@ The `:in` and `:out` range parameters are measured in frame offset from the star
 
 To load the fragments onto a port, POST the fragments to the port reference, adding a frame offset to load onto the port at a position other than zero (unlikely for Sofie), e.g.:
 
-    /:zoneID/server/:serverID/port/:portID(/offset/:offset?)
+    /:zoneID/server/:serverID/port/:portID/fragments(/offset/:offset?)
 
 If fragments need to be cloned from one server to another, an asynchronous clone process is initiated. Although it is possible for servers to play material while it is cloning, clients should allow a couple of seconds between starting to load fragments and setting the jump (see below) before triggering start to allow the clone to progress around about the play head.
 

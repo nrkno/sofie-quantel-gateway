@@ -71,6 +71,26 @@ router.delete('/default/server/:serverID/port/:portID', async (ctx) => {
 	})
 })
 
+router.get('/default/clip/:clipID', async (ctx) => {
+	ctx.body = await Quantel.getClipData({
+		clipID: +ctx.params.clipID
+	})
+})
+
+router.get('/default/clip/:clipID/fragments', async (ctx) => {
+	ctx.body = await Quantel.getFragments({
+		clipID: +ctx.params.clipID
+	})
+})
+
+router.get('/default/clip/:clipID/fragments/:in-:out', async (ctx) => {
+	ctx.body = await Quantel.getFragments({
+		clipID: +ctx.params.clipID,
+		start: +ctx.params.in,
+		finish: +ctx.params.out
+	})
+})
+
 app.use(router.routes())
 
 app.listen(3000)
