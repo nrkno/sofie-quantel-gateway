@@ -488,10 +488,10 @@ napi_value createPlayPort(napi_env env, napi_callback_info info) {
     if (!port->actionAtTrigger(STOP, Quentin::Port::trActStop)) {
       NAPI_THROW_ORB_DESTROY("Failed to enable stop trigger on port.");
     }
-    /* TODO enable when needed
     if (!port->actionAtTrigger(JUMP, Quentin::Port::trActJump)) {
       NAPI_THROW_ORB_DESTROY("Failed to enable jump trigger on port.");
     };
+		/* TODO enable when needed
     if (!port->actionAtTrigger(TRANSITION, Quentin::Port::trActTransition)) {
       NAPI_THROW_ORB_DESTROY("Failed to enable transition trigger on port.");
     }; */
@@ -684,6 +684,11 @@ napi_value getPlayPortStatus(napi_env env, napi_callback_info info) {
     status = napi_set_named_property(env, result, "framesUnused", prop);
     CHECK_STATUS;
 
+		status = napi_create_string_utf8(env, formatTimecode(gps->outputTime), NAPI_AUTO_LENGTH, &prop);
+		CHECK_STATUS;
+		status = napi_set_named_property(env, result, "outputTime", prop);
+		CHECK_STATUS;
+
 		channels = port->getChannels();
 		status = napi_create_array(env, &chanList);
 		CHECK_STATUS;
@@ -780,6 +785,7 @@ napi_value releasePort(napi_env env, napi_callback_info info) {
 
     Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(portName).data(), 0);
 
+		port->setMode(Quentin::Port::PortMode::idle);
     port->reset();
     port->release();
   }
@@ -1431,6 +1437,12 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
     CHECK_STATUS;
     status = napi_get_named_property(env, prop, "fragments", &fragprop);
     CHECK_STATUS;
+
+		status = napi_typeof(env, fragprop, &type);
+		CHECK_STATUS;
+		if (type == napi_undefined) {
+			fragprop = prop;
+		}
 
     Quentin::ServerFragments fragments;
     status = napi_get_array_length(env, fragprop, &fragmentNo);

@@ -1,9 +1,12 @@
 import * as Koa from 'koa'
 import * as Router from 'koa-router'
+import * as bodyParser from 'koa-bodyparser'
 import { Quantel } from '.'
 
 const app = new Koa()
 const router = new Router()
+
+app.use(bodyParser())
 
 router.get('/', async (ctx) => {
 	ctx.body = await Quantel.listZones()
@@ -97,6 +100,54 @@ router.get('/default/clip/:clipID/fragments/:in-:out', async (ctx) => {
 		start: +ctx.params.in,
 		finish: +ctx.params.out
 	})
+})
+
+router.post('/default/server/:serverID/port/:portID/fragments/', async (ctx) => {
+	let fragments: Quantel.ServerFragment[] = ctx.request.body
+	ctx.body = await Quantel.loadPlayPort({
+		serverID: +ctx.params.serverID,
+		portName: ctx.params.portID,
+		fragments: fragments,
+		offset: ctx.query.offset ? +ctx.query.offset : 0
+	})
+})
+
+router.post('/default/server/:serverID/port/:portID/trigger/:trigger', async (ctx) => {
+	let trigger: Quantel.Trigger
+	switch (ctx.params.trigger) {
+		case 'START': trigger = Quantel.Trigger.START; break
+		case 'STOP': trigger = Quantel.Trigger.STOP; break
+		case 'JUMP': trigger = Quantel.Trigger.JUMP; break
+		default:
+			return // TODO report a 400 error
+	}
+	let options: Quantel.TriggerInfo = {
+		serverID: +ctx.params.serverID,
+		portName: ctx.params.portID,
+		trigger: trigger
+	}
+	if (ctx.query.offset) {
+		options.offset = +ctx.query.offset
+	}
+	ctx.body = await Quantel.trigger(options)
+})
+
+router.post('/default/server/:serverID/port/:portID/jump', async (ctx) => {
+	let options: Quantel.JumpInfo = {
+		serverID: +ctx.params.serverID,
+		portName: ctx.params.portID,
+		offset : ctx.query.offset ? +ctx.query.offset : 0
+	}
+	ctx.body = await Quantel.jump(options)
+})
+
+router.put('/default/server/:serverID/port/:portID/jump', async (ctx) => {
+	let options: Quantel.JumpInfo = {
+		serverID: +ctx.params.serverID,
+		portName: ctx.params.portID,
+		offset : ctx.query.offset ? +ctx.query.offset : 0
+	}
+	ctx.body = await Quantel.setJump(options)
 })
 
 app.use(router.routes())

@@ -142,7 +142,8 @@ export namespace Quantel {
 	}
 
 	export interface PortLoadInfo extends PortRef {
-		fragments: ServerFragment[]
+		fragments: ServerFragment[],
+		offset?: number
 	}
 
 	export enum Trigger {
