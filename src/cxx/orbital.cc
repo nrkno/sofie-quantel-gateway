@@ -799,23 +799,23 @@ napi_value releasePort(napi_env env, napi_callback_info info) {
   return prop;
 }
 
-napi_value convertToDate(napi_env env, CORBA::ORB_var orb, std::string date) {
+napi_status convertToDate(napi_env env, CORBA::ORB_var orb, std::string date, napi_value *nodeDate) {
 	napi_status status;
 	napi_value global, dateObj, result, integerDate;
 
 	status = napi_get_global(env, &global);
-	CHECK_STATUS;
+	PASS_STATUS;
 
 	status = napi_get_named_property(env, global, "Date", &dateObj);
-	CHECK_STATUS;
+	PASS_STATUS;
 	status = napi_create_int64(env, std::stoll(date), &integerDate);
-	CHECK_STATUS;
+	PASS_STATUS;
 
 	napi_value argv[1] = { integerDate };
-	status = napi_new_instance(env, dateObj, 1, argv, &result);
-	CHECK_STATUS;
+	status = napi_new_instance(env, dateObj, 1, argv, nodeDate);
+	PASS_STATUS;
 
-	return result;
+	return napi_ok;
 }
 
 napi_value getClipData(napi_env env, napi_callback_info info) {
@@ -864,6 +864,7 @@ napi_value getClipData(napi_env env, napi_callback_info info) {
 		Quentin::WStrings columns;
 		columns.length(cdl->length());
 		for ( int x = 0 ; x < cdl->length() ; x++ ) {
+			wprintf(L"Property %ws has type %ws\n", cdl[x].columnName, cdl[x].columnType);
 			columns[x] = cdl[x].columnName;
 		}
 
@@ -881,14 +882,27 @@ napi_value getClipData(napi_env env, napi_callback_info info) {
 				CHECK_STATUS;
 			}
 
-			if ((wcscmp(cdl[x].columnType, L"Number") == 0) && (value.length() > 0)) {
-				status = napi_create_int32(env, std::stol(value), &prop);
-				CHECK_STATUS;
+			if (wcscmp(cdl[x].columnType, L"Number") == 0) {
+				if (value.length() > 0) {
+					status = napi_create_int32(env, std::stol(value), &prop);
+					CHECK_STATUS;
+				} else {
+					status = napi_get_null(env, &prop);
+					CHECK_STATUS;
+				}
+			};
+
+			if (wcscmp(cdl[x].columnType, L"Date") == 0) {
+				if (value.length() > 0) {
+					status = convertToDate(env, orb, value, &prop);
+					CHECK_STATUS;
+				} else {
+					status = napi_get_null(env, &prop);
+					CHECK_STATUS;
+				}
 			}
 
-			if ((wcscmp(cdl[x].columnType, L"Date") == 0) && (value.length() > 0)) {
-				prop = convertToDate(env, orb, value);
-			}
+
 
 			std::string key = utf8_conv.to_bytes(columns[x]);
 			status = napi_set_named_property(env, result, key.c_str(), prop);
@@ -911,12 +925,16 @@ napi_value getClipData(napi_env env, napi_callback_info info) {
 
 napi_value searchClips(napi_env env, napi_callback_info info) {
 	napi_status status;
-	napi_value result, prop, options, frag, fragprop;
+	napi_value result, prop, options, terms, term;
 	napi_valuetype type;
 	bool isArray;
 	CORBA::ORB_var orb;
 	Quentin::ZonePortal::_ptr_type zp;
-	int32_t clipID;
+	Quentin::ClipPropertyList cpl;
+	uint32_t termCount, resultCount;
+	char* nameStr;
+	char* valueStr;
+	size_t strLen;
 
 	try {
 		status = retrieveZonePortal(env, info, &orb, &zp);
@@ -940,23 +958,90 @@ napi_value searchClips(napi_env env, napi_callback_info info) {
 
 		status = napi_create_array(env, &result);
 		CHECK_STATUS;
-		
-		Quentin::ClipPropertyList cpl;
-		cpl.length(1);
-		Quentin::ClipProperty cp = { L"Title", L"Wobble" };
-		cpl[0] = cp;
 
-		wprintf(L"Clip property name %ws = %ws\n", cp.name, cp.value);
+		std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+
+		options = argv[1];
+		status = napi_get_property_names(env, options, &terms);
+		CHECK_STATUS;
+		status = napi_get_array_length(env, terms, &termCount);
+		CHECK_STATUS;
+		cpl.length(termCount);
+		for ( int x = 0 ; x < termCount ; x++ ) {
+			status = napi_get_element(env, terms, x, &term);
+			CHECK_STATUS;
+			status = napi_get_property(env, options, term, &prop);
+			CHECK_STATUS;
+
+			status = napi_get_value_string_utf8(env, term, nullptr, 0, &strLen);
+			CHECK_STATUS;
+			nameStr = (char *) malloc((strLen + 1) * sizeof(char));
+			status = napi_get_value_string_utf8(env, term, nameStr, strLen + 1, &strLen);
+			CHECK_STATUS;
+
+			status = napi_get_value_string_utf8(env, prop, nullptr, 0, &strLen);
+			CHECK_STATUS;
+			valueStr = (char *) malloc((strLen + 1) * sizeof(char));
+			status = napi_get_value_string_utf8(env, prop, valueStr, strLen + 1, &strLen);
+			CHECK_STATUS;
+
+			Quentin::ClipProperty cp = {
+				utf8_conv.from_bytes(nameStr).data(),
+				utf8_conv.from_bytes(valueStr).data() };
+			cpl[x] = cp;
+			// wprintf(L"%ws = %ws\n", cp.name, cp.value);
+			free(nameStr);
+			free(valueStr);
+		}
 
 		Quentin::WStrings columns;
-		columns.length(1);
+		columns.length(7);
 		columns[0] = L"ClipID";
+		columns[1] = L"Completed";
+		columns[2] = L"Created";
+		columns[3] = L"Description";
+		columns[4] = L"Frames";
+		columns[5] = L"Owner";
+		columns[6] = L"Title";
 
+		status = napi_create_object(env, &term);
+		CHECK_STATUS;
+		status = napi_create_string_utf8(env, "ClipDataSummary", NAPI_AUTO_LENGTH, &prop);
+		CHECK_STATUS;
+		status = napi_set_named_property(env, term, "type", prop);
+		CHECK_STATUS;
 
 		Quentin::WStrings_var results = zp->searchClips(cpl, columns, 10);
-		printf("Results has length %i\n", results->length());
+		resultCount = 0;
 		for ( int x = 0 ; x < results->length() ; x++ ) {
-			wprintf(L"I got %ws\n", results[x]);
+			std::string value = utf8_conv.to_bytes(results[x]);
+			std::string key = utf8_conv.to_bytes(columns[x % 7]);
+
+			if (strcmp(key.c_str(), "ClipID") == 0) {
+				status = napi_create_int32(env, std::stol(value), &prop);
+				CHECK_STATUS;
+			} else if (strcmp(key.c_str(), "Completed") == 0 || strcmp(key.c_str(), "Created") == 0) {
+				status = convertToDate(env, orb, value, &prop);
+				CHECK_STATUS;
+			} else {
+				status = napi_create_string_utf8(env, value.c_str(), NAPI_AUTO_LENGTH, &prop);
+				CHECK_STATUS;
+			}
+			status = napi_set_named_property(env, term, key.c_str(), prop);
+			CHECK_STATUS;
+
+			if (x % 7 == 6) {
+				status = napi_set_element(env, result, resultCount++, term);
+				CHECK_STATUS;
+				if (x < results->length() - 2) {
+					status = napi_create_object(env, &term);
+					CHECK_STATUS;
+					status = napi_create_string_utf8(env, "ClipDataSummary", NAPI_AUTO_LENGTH, &prop);
+					CHECK_STATUS;
+					status = napi_set_named_property(env, term, "type", prop);
+					CHECK_STATUS;
+				}
+			}
 		}
 
 	}

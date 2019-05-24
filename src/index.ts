@@ -62,6 +62,54 @@ export namespace Quantel {
 		finish?: number,
 	}
 
+	export interface ClipPropertyList {
+		[ name: string ]: string
+	}
+
+	export interface ClipDataSummary {
+		type: string,
+		ClipID: number,
+		Completed: Date | null,
+		Created: Date, // ISO-formatted date
+		Description: string,
+		Frames: string, // TODO ISA type is None ... not sure whether to convert to number
+		Owner: string,
+		Title: string,
+	}
+
+	export interface ClipData extends ClipDataSummary {
+		Category: string,
+		CloneId: number | null,
+		CloneZone: number | null,
+		Destination: number | null,
+		Expiry: Date | null, // ISO-formatted date
+	 	HasEditData: number | null,
+		Inpoint: number | null,
+		JobID: number | null,
+		Modified: string | null,
+		NumAudTracks: number | null,
+		Number: number | null,
+		NumVidTracks: number | null,
+		Outpoint: number | null,
+		PlaceHolder: boolean,
+		PlayAspect: string,
+		PoolID: number | null,
+		PublishedBy: string,
+		Register: string,
+		Tape: string,
+		Template: number | null,
+		UnEdited: number | null,
+		PlayMode: string,
+		MosActive: boolean,
+		Division: string,
+		AudioFormats: string,
+		VideoFormats: string,
+		ClipGUID: string,
+		Protection: string,
+		VDCPID: string,
+		PublishCompleted: Date | null, // ISO-formatted date
+	}
+
 	export interface ServerFragment {
 		type: string,
 		trackNum: number,
@@ -178,12 +226,12 @@ export namespace Quantel {
 		return quantel.releasePort(await isaIOR, options)
 	}
 
-	export async function getClipData (options: ClipRef): Promise<any> {
+	export async function getClipData (options: ClipRef): Promise<ClipData> {
 		if (!isaIOR) await getISAReference()
 		return quantel.getClipData(await isaIOR, options)
 	}
 
-	export async function searchClips (options: any): Promise<any> {
+	export async function searchClips (options: ClipPropertyList): Promise<ClipDataSummary[]> {
 		if (!isaIOR) await getISAReference()
 		return quantel.searchClips(await isaIOR, options)
 	}

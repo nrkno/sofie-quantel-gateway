@@ -71,6 +71,14 @@ router.delete('/default/server/:serverID/port/:portID', async (ctx) => {
 	})
 })
 
+router.get('/default/clip', async (ctx) => {
+	if (!ctx.query || Object.keys(ctx.query).length === 0) {
+		ctx.body = []
+	} else {
+		ctx.body = await Quantel.searchClips(ctx.query)
+	}
+})
+
 router.get('/default/clip/:clipID', async (ctx) => {
 	ctx.body = await Quantel.getClipData({
 		clipID: +ctx.params.clipID

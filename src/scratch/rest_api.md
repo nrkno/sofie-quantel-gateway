@@ -174,7 +174,7 @@ If it is necessary to search for the clip by, say, title, a query interface can 
 
     /:zoneID/clip?Title=Game%20of%20Thrones%20Disappoints
 
-A GET request to this path should return a JSON array listing documents matching the query and each element must contain a _clipID_.
+A GET request to this path should return a JSON array listing documents matching the query and each element  contains a _clipID_. A wildcard character `*` can be used to match zero of more characters.
 
 ## Loading clips
 
@@ -214,7 +214,7 @@ To query fragments for a specific in and out range:
 
     /:zoneID/clip/:clipID/fragments/:in-:out
 
-The `:in` and `:out` range parameters are measured in frame offset from the start of the clip. To translate to time, the framerate of the clip must be known. For interlaced material, a frame is a pair of fields.
+The `:in` and `:out` range parameters are measured in frame offsets from the start of the clip. To translate to time, the framerate of the clip must be known. For interlaced material, a frame is a pair of fields.
 
 To load the fragments onto a port, POST the fragments to the port reference, adding a frame offset to load onto the port at a position other than zero (unlikely for Sofie), e.g.:
 
