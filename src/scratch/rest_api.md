@@ -48,7 +48,7 @@ In most cases and in the current implementation, `:zoneID` is the `default` loca
 Types are:
 
 * `:zoneID` - zone number or `default`;
-* `:serverID` - integer number of the server;
+* `:serverID` - integer number or the string name of the server;
 * `:portID` - string name of the port.
 
 A GET requests to the root path `/` lists all available zones.
@@ -248,3 +248,15 @@ For smoother jumping, each port can have a controlled jump point set and can cau
 2. Wait a second or so and trigger the jump by POSTing an empty document to `/:zoneID/server/:serverID/port/:portID/trigger/JUMP`
 
 It is not possible to query the currently set jump point.
+
+## Errors
+
+All error responses are in JSON format and includes properties for a numerical `status`, an error `message` and, where available, a `stack` trace to help pinpoint where the error occurs. For example:
+
+```JSON
+{
+	"status": 502,
+	"message": "Bad gateway. CORBA subsystem supports a transient connection problem. Check network and ISA server.",
+	"stack": "Error: Bad gateway. CORBA subsystem supports a transient connection problem. ..."
+}
+```

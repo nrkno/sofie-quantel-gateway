@@ -240,7 +240,7 @@ app.use(async (ctx, next) => {
 		}
 	} catch (err) {
 		if (err.message.indexOf('TRANSIENT') >= 0) {
-			err.message = 'CORBA subsystem reports a transient connection problem. Check network connection and/or ISA server status.'
+			err.message = 'Bad gateway. CORBA subsystem reports a transient connection problem. Check network connection and/or ISA server status.'
 			err.statusCode = 502
 		}
 		ctx.status = err.statusCode || err.status || 500
