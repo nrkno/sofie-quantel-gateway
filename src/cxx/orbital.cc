@@ -602,7 +602,7 @@ napi_value getPlayPortStatus(napi_env env, napi_callback_info info) {
     std::wstring wportName = utf8_conv.from_bytes(portName);
 
     // Prevent accidental creation of extra port
-    portNames = server->getPortNames();
+    /* portNames = server->getPortNames();
     bool foundPort = false;
     for ( int x = 0 ; x < portNames->length() ; x++ ) {
       if (wcscmp(wportName.data(), (const wchar_t *) portNames[x]) == 0) {
@@ -613,7 +613,7 @@ napi_value getPlayPortStatus(napi_env env, napi_callback_info info) {
     free(portName);
     if (!foundPort) {
       NAPI_THROW_ORB_DESTROY("Cannot retrieve status for an unknown port name.");
-    }
+    } */
 
     Quentin::Port_ptr port = server->getPort(wportName.data(), 0);
 
@@ -781,7 +781,7 @@ napi_value releasePort(napi_env env, napi_callback_info info) {
     std::wstring wportName = utf8_conv.from_bytes(portName);
 
     // Prevent accidental creation of extra port
-    portNames = server->getPortNames();
+    /* portNames = server->getPortNames();
     bool foundPort = false;
     for ( int x = 0 ; x < portNames->length() ; x++ ) {
       if (wcscmp(wportName.data(), (const wchar_t *) portNames[x]) == 0) {
@@ -792,7 +792,7 @@ napi_value releasePort(napi_env env, napi_callback_info info) {
     free(portName);
     if (!foundPort) {
       NAPI_THROW_ORB_DESTROY("Cannot release a port with an unknown port name.");
-    }
+    } */
 
     Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(portName).data(), 0);
 
@@ -1549,7 +1549,7 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
     Quentin::Server_ptr server = zp->getServer(serverID);
 
     std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
-    std::wstring wportName = utf8_conv.from_bytes(portName);
+    /* std::wstring wportName = utf8_conv.from_bytes(portName);
 
     // Prevent accidental creation of extra port
     portNames = server->getPortNames();
@@ -1563,7 +1563,7 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
     free(portName);
     if (!foundPort) {
       NAPI_THROW_ORB_DESTROY("Cannot load a port with an unknown port name.");
-    }
+    } */
 
     Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(portName).data(), 0);
     port->load(offset, fragments);
@@ -1646,7 +1646,7 @@ napi_value trigger(napi_env env, napi_callback_info info) {
     Quentin::Server_ptr server = zp->getServer(serverID);
 
     std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
-    std::wstring wportName = utf8_conv.from_bytes(portName);
+    /* std::wstring wportName = utf8_conv.from_bytes(portName);
 
     // Prevent accidental creation of extra port
     portNames = server->getPortNames();
@@ -1660,7 +1660,7 @@ napi_value trigger(napi_env env, napi_callback_info info) {
     free(portName);
     if (!foundPort) {
       NAPI_THROW_ORB_DESTROY("Cannot trigger action on a port with an unknown port name.");
-    }
+    } */
 
     Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(portName).data(), 0);
 
@@ -1749,7 +1749,7 @@ napi_value qJump(napi_env env, napi_callback_info info) {
     Quentin::Server_ptr server = zp->getServer(serverID);
 
     std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
-    std::wstring wportName = utf8_conv.from_bytes(portName);
+    /* std::wstring wportName = utf8_conv.from_bytes(portName);
 
     // Prevent accidental creation of extra port
     portNames = server->getPortNames();
@@ -1763,7 +1763,7 @@ napi_value qJump(napi_env env, napi_callback_info info) {
     free(portName);
     if (!foundPort) {
       NAPI_THROW_ORB_DESTROY("Cannot set jump point on a port with an unknown port name.");
-    }
+    } */
 
     Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(portName).data(), 0);
 
@@ -1845,7 +1845,7 @@ napi_value setJump(napi_env env, napi_callback_info info) {
     Quentin::Server_ptr server = zp->getServer(serverID);
 
     std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
-    std::wstring wportName = utf8_conv.from_bytes(portName);
+    /* std::wstring wportName = utf8_conv.from_bytes(portName);
 
     // Prevent accidental creation of extra port
     portNames = server->getPortNames();
@@ -1859,7 +1859,7 @@ napi_value setJump(napi_env env, napi_callback_info info) {
     free(portName);
     if (!foundPort) {
       NAPI_THROW_ORB_DESTROY("Cannot set jump point on a port with an unknown port name.");
-    }
+    } */
 
     Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(portName).data(), 0);
 

@@ -28,7 +28,7 @@ export namespace Quantel {
 	}
 
 	export interface PortRef {
-		serverID: number,
+		serverID: number | string,
 		portName: string,
 	}
 
@@ -50,6 +50,7 @@ export namespace Quantel {
 		flags: number,
 		endOfData: number,
 		framesUnused: number,
+		outputTime: string,
 		channels: number[],
 	}
 
@@ -234,59 +235,190 @@ export namespace Quantel {
 		}
 	}
 
-	export async function createPlayPort (options: PortInfo): Promise<PortInfo> {
-		await getISAReference()
-		return quantel.createPlayPort(await isaIOR, options)
+	async function checkServer (options: PortRef): Promise<ServerInfo> {
+		let servers = quantel.getServers(await isaIOR)
+		let server = servers.find((x: ServerInfo) =>
+			x.ident === +options.serverID || x.name === options.serverID)
+		if (!server) {
+			throw new ConnectError(`Not found. Could not find a server with identifier '${options.serverID}'.`, 404)
+		}
+		options.serverID = server.ident
+		return server
 	}
 
-	export async function getPlayPortStatus (options: PortRef): Promise<any> {
+	// TODO: allow assignment of more than one channel
+	// FIXME: warn on attempt to steal a channel
+	export async function createPlayPort (options: PortInfo): Promise<PortInfo> {
 		await getISAReference()
-		return quantel.getPlayPortStatus(await isaIOR, options)
+		try {
+			let server = await checkServer(options)
+			if (server.portNames && server.portNames.indexOf(options.portName) >= 0) {
+				let portStatus: PortStatus = quantel.getPlayPortStatus(await isaIOR, options)
+				if (portStatus.channels.indexOf(options.channelNo) < 0) {
+					throw new ConnectError(`Conflict. Port '${options.portName}' on server '${options.serverID}' is already assigned to channels '[${portStatus.channels}]' and cannot be assigned to channel '${options.channelNo}'.`, 409)
+				}
+				return {
+					type: 'PortInfo',
+					serverID: options.serverID,
+					portName: options.portName,
+					channelNo: options.channelNo,
+					portID: portStatus.portID,
+					assigned: true
+				} as PortInfo
+			} else {
+				return quantel.createPlayPort(await isaIOR, options)
+			}
+		} catch (err) {
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return createPlayPort(options)
+			}
+			throw err
+		}
+	}
+
+	async function checkServerPort (options: PortRef): Promise<ServerInfo> {
+		let server = await checkServer(options)
+		if (server.portNames && server.portNames.indexOf(options.portName) < 0) {
+			throw new ConnectError(`Not found. Could not find a port called '${options.portName}' on server '${server.name}'.`, 404)
+		}
+		return server
+	}
+
+	export async function getPlayPortStatus (options: PortRef): Promise<PortStatus> {
+		await getISAReference()
+		try {
+			await checkServerPort(options)
+			return quantel.getPlayPortStatus(await isaIOR, options)
+		} catch (err) {
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return getPlayPortStatus(options)
+			}
+			throw err
+		}
 	}
 
 	export async function releasePort (options: PortRef): Promise<boolean> {
 		await getISAReference()
-		return quantel.releasePort(await isaIOR, options)
+		try {
+			await checkServerPort(options)
+			return quantel.releasePort(await isaIOR, options)
+		} catch (err) {
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return releasePort(options)
+			}
+			throw err
+		}
 	}
 
 	export async function getClipData (options: ClipRef): Promise<ClipData> {
 		await getISAReference()
-		return quantel.getClipData(await isaIOR, options)
+		try {
+			return quantel.getClipData(await isaIOR, options)
+		} catch (err) {
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return getClipData(options)
+			}
+			throw err
+		}
 	}
 
 	export async function searchClips (options: ClipPropertyList): Promise<ClipDataSummary[]> {
 		await getISAReference()
-		return quantel.searchClips(await isaIOR, options)
+		try {
+			return quantel.searchClips(await isaIOR, options)
+		} catch (err) {
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return searchClips(options)
+			}
+			throw err
+		}
 	}
 
 	export async function getFragments (options: FragmentRef): Promise<ServerFragments> {
 		await getISAReference()
-		return quantel.getFragments(await isaIOR, options)
+		try {
+			return quantel.getFragments(await isaIOR, options)
+		} catch (err) {
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return getFragments(options)
+			}
+			throw err
+		}
 	}
 
 	export async function loadPlayPort (options: PortLoadInfo): Promise<any> {
 		await getISAReference()
-		return quantel.loadPlayPort(await isaIOR, options)
+		try {
+			await checkServerPort(options)
+			return quantel.loadPlayPort(await isaIOR, options)
+		} catch (err) {
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return loadPlayPort(options)
+			}
+			throw err
+		}
 	}
 
 	export async function trigger (options: TriggerInfo): Promise<boolean> {
 		await getISAReference()
-		return quantel.trigger(await isaIOR, options)
+		try {
+			await checkServerPort(options)
+			return quantel.trigger(await isaIOR, options)
+		} catch (err) {
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return trigger(options)
+			}
+			throw err
+		}
 	}
 
 	export async function jump (options: JumpInfo): Promise<boolean> {
 		await getISAReference()
-		return quantel.jump(await isaIOR, options)
+		try {
+			await checkServerPort(options)
+			return quantel.jump(await isaIOR, options)
+		} catch (err) {
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return jump(options)
+			}
+			throw err
+		}
 	}
 
 	export async function setJump (options: JumpInfo): Promise<boolean> {
 		await getISAReference()
-		return quantel.setJump(await isaIOR, options)
+		try {
+			await checkServerPort(options)
+			return quantel.setJump(await isaIOR, options)
+		} catch (err) {
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return setJump(options)
+			}
+			throw err
+		}
 	}
 
 	export async function getThumbnailSize (): Promise<ThumbnailSize> {
 		await getISAReference()
-		return quantel.getThumbnailSize(await isaIOR)
+		try {
+			return quantel.getThumbnailSize(await isaIOR)
+		} catch (err) {
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return getThumbnailSize()
+			}
+			throw err
+		}
 	}
 
 	export async function requestThumbnails (options: ThumbnailOrder): Promise<Buffer> {

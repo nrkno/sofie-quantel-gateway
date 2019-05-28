@@ -3,6 +3,12 @@ import * as Router from 'koa-router'
 import * as bodyParser from 'koa-bodyparser'
 import { Quantel } from '.'
 
+interface JSONError {
+	status: number,
+	message: string,
+	stack: string,
+}
+
 const app = new Koa()
 const router = new Router()
 
@@ -34,7 +40,17 @@ router.get('/:zoneID.json', async (ctx) => {
 		ctx.body = await Quantel.getDefaultZoneInfo()
 	} else {
 		let zones = await Quantel.listZones()
-		ctx.body = zones.find(x => x.zoneNumber === +ctx.params.zoneID || x.zoneName === ctx.params.zoneID)
+		let inTheZone = zones.find(x => x.zoneNumber === +ctx.params.zoneID || x.zoneName === ctx.params.zoneID)
+		if (inTheZone) {
+			ctx.body = inTheZone
+		} else {
+			ctx.status = 404,
+			ctx.body = {
+				status: 404,
+				message: `Not found. Could not find a zone called '${ctx.params.zoneID}'.`,
+				stack: ''
+			} as JSONError
+		}
 	}
 })
 
@@ -52,9 +68,9 @@ router.get('/:zoneID/', async (ctx) => {
 			ctx.status = 404
 			ctx.body = {
 				status: 404,
-				message: `Not found. Could not find a zone called ''${ctx.params.zoneID}'.`,
+				message: `Not found. Could not find a zone called '${ctx.params.zoneID}'.`,
 				stack: ''
-			}
+			} as JSONError
 		}
 	}
 })
@@ -65,23 +81,55 @@ router.get('/default/server/', async (ctx) => {
 
 router.get('/default/server/:serverID.json', async (ctx) => {
 	let servers = await Quantel.getServers()
-	ctx.body = servers.find(x => x.ident === +ctx.params.serverID || x.name === ctx.params.serverID)
+	let matchedServer = servers.find(x =>
+		x.ident === +ctx.params.serverID || x.name === ctx.params.serverID)
+	if (matchedServer) {
+		ctx.body = matchedServer
+	} else {
+		ctx.status = 404
+		ctx.body = {
+			status: 404,
+			message: `Not found. A server with identifier '${ctx.params.serverID}' was not found.`,
+			stack: ''
+		} as JSONError
+	}
 })
 
 router.get('/default/server/:serverID/', async (ctx) => {
-	ctx.body = [ 'port/' ]
+	let servers = await Quantel.getServers()
+	let matchedServer = servers
+		.find(x => x.ident === +ctx.params.serverID || x.name === ctx.params.serverID) // don't allow name resolution from here downwards
+	if (matchedServer) {
+		ctx.body = [ 'port/' ]
+	} else {
+		ctx.status = 404
+		ctx.body = {
+			status: 404,
+			message: `Not found. A server with identifier '${ctx.params.serverID}' was not found.`,
+			stack: ''
+		} as JSONError
+	}
 })
 
 router.get('/default/server/:serverID/port/', async (ctx) => {
 	let servers = await Quantel.getServers()
 	let matchedServer = servers
 		.find(x => x.ident === +ctx.params.serverID || x.name === ctx.params.serverID)
-	ctx.body = matchedServer ? matchedServer.portNames : []
+	if (matchedServer) {
+		ctx.body = matchedServer.portNames
+	} else {
+		ctx.status = 404
+		ctx.body = {
+			status: 404,
+			message: `Not found. A server with identifier '${ctx.params.serverID}' was not found.`,
+			stack: ''
+		} as JSONError
+	}
 })
 
 router.put('/default/server/:serverID/port/:portID/channel/:channelID', async (ctx) => {
 	ctx.body = await Quantel.createPlayPort({
-		serverID: +ctx.params.serverID,
+		serverID: ctx.params.serverID,
 		portName: ctx.params.portID,
 		channelNo: +ctx.params.channelID
 	})
@@ -89,14 +137,14 @@ router.put('/default/server/:serverID/port/:portID/channel/:channelID', async (c
 
 router.get('/default/server/:serverID/port/:portID', async (ctx) => {
 	ctx.body = await Quantel.getPlayPortStatus({
-		serverID: +ctx.params.serverID,
+		serverID: ctx.params.serverID,
 		portName: ctx.params.portID
 	})
 })
 
 router.delete('/default/server/:serverID/port/:portID', async (ctx) => {
 	ctx.body = await Quantel.releasePort({
-		serverID: +ctx.params.serverID,
+		serverID: ctx.params.serverID,
 		portName: ctx.params.portID
 	})
 })
@@ -132,7 +180,7 @@ router.get('/default/clip/:clipID/fragments/:in-:out', async (ctx) => {
 router.post('/default/server/:serverID/port/:portID/fragments/', async (ctx) => {
 	let fragments: Quantel.ServerFragment[] = ctx.request.body
 	ctx.body = await Quantel.loadPlayPort({
-		serverID: +ctx.params.serverID,
+		serverID: ctx.params.serverID,
 		portName: ctx.params.portID,
 		fragments: fragments,
 		offset: ctx.query.offset ? +ctx.query.offset : 0
@@ -149,7 +197,7 @@ router.post('/default/server/:serverID/port/:portID/trigger/:trigger', async (ct
 			return // TODO report a 400 error
 	}
 	let options: Quantel.TriggerInfo = {
-		serverID: +ctx.params.serverID,
+		serverID: ctx.params.serverID,
 		portName: ctx.params.portID,
 		trigger: trigger
 	}
@@ -161,7 +209,7 @@ router.post('/default/server/:serverID/port/:portID/trigger/:trigger', async (ct
 
 router.post('/default/server/:serverID/port/:portID/jump', async (ctx) => {
 	let options: Quantel.JumpInfo = {
-		serverID: +ctx.params.serverID,
+		serverID: ctx.params.serverID,
 		portName: ctx.params.portID,
 		offset : ctx.query.offset ? +ctx.query.offset : 0
 	}
@@ -170,7 +218,7 @@ router.post('/default/server/:serverID/port/:portID/jump', async (ctx) => {
 
 router.put('/default/server/:serverID/port/:portID/jump', async (ctx) => {
 	let options: Quantel.JumpInfo = {
-		serverID: +ctx.params.serverID,
+		serverID: ctx.params.serverID,
 		portName: ctx.params.portID,
 		offset : ctx.query.offset ? +ctx.query.offset : 0
 	}
@@ -187,16 +235,20 @@ app.use(async (ctx, next) => {
 					status: 404,
 					message: `Not found. Request ${ctx.method} ${ctx.path}`,
 					stack: ''
-				}
+				} as JSONError
 			}
 		}
 	} catch (err) {
+		if (err.message.indexOf('TRANSIENT') >= 0) {
+			err.message = 'CORBA subsystem reports a transient connection problem. Check network connection and/or ISA server status.'
+			err.statusCode = 502
+		}
 		ctx.status = err.statusCode || err.status || 500
 		ctx.body = {
 			status: ctx.status,
 			message: err.message,
 			stack: err.stack
-		}
+		} as JSONError
 	}
 })
 
