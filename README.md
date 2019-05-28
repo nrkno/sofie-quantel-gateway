@@ -33,6 +33,16 @@ Build the typescript interface module:
 
     yarn build
 
+### Running in development
+
+For development purposes, the HTTP server included with the quantel gateway can be run as follows:
+
+    yarn run watch-server
+
+This will start a [nodemon](https://nodemon.io/) watch on the source files and restart the server on any changes.
+
+See a draft [sketch of the emerging HTTP API](./src/scratch/resp_api.md).
+
 ## Play walkthrough
 
 ### Importing

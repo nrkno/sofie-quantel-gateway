@@ -230,7 +230,7 @@ To control the PORT, POST trigger messages:
 
     /:zoneID/server/:serverID/port/:portID/trigger/:trigger(?offset=:offset)
 
-The `:trigger` is one of `START`, `STOP` or `JUMP`. Note that `STOP` is equivalent to CasparCG _pause_. To _resume_, use `START`. The optional `:offset` is a frame at which to trigger the action, for example `.../trigger-STOP/345` signals that the playing of the clip should stop at frame 345 on the ports timeline.
+The `:trigger` is one of `START`, `STOP` or `JUMP`. Note that `STOP` is equivalent to CasparCG _pause_. To _resume_, use `START`. The optional `:offset` is a frame at which to trigger the action, for example `.../trigger/STOP/345` signals that the playing of the clip should stop at frame 345 on the ports timeline.
 
 ### Hard jump
 

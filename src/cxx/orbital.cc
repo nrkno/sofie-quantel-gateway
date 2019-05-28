@@ -7,6 +7,7 @@
 #include <cstring>
 #include <codecvt>
 #include <locale>
+#include <exception>
 #include "node_api.h"
 
 #define OMNI_UNLOADABLE_STUBS
@@ -26,6 +27,14 @@
   orb->destroy(); \
   char errorMsg[256]; \
   sprintf(errorMsg, "%s", msg); \
+  napi_throw_error(env, nullptr, errorMsg); \
+  return nullptr; \
+}
+
+#define NAPI_THROW_SYSTEM_EXCEPTION(ex) { \
+  orb->destroy(); \
+  char errorMsg[256]; \
+  sprintf(errorMsg, "System exception thrown from CORBA subsystem with code %lu: %s", ex.minor(), ex._name()); \
   napi_throw_error(env, nullptr, errorMsg); \
   return nullptr; \
 }
@@ -106,7 +115,7 @@ napi_status retrieveZonePortal(napi_env env, napi_callback_info info, CORBA::ORB
 
   CORBA::Object_ptr ptr = local_orb->string_to_object(isaIOR);
   free(isaIOR);
-  *zp = Quentin::ZonePortal::_narrow(ptr);
+	*zp = Quentin::ZonePortal::_unchecked_narrow(ptr);
   *orb = local_orb;
 
 	return napi_ok;
@@ -356,9 +365,11 @@ napi_value getServers(napi_env env, napi_callback_info info) {
 	  }
 	}
 	catch(CORBA::SystemException& ex) {
-		NAPI_THROW_CORBA_EXCEPTION(ex);
+		printf("I am a system exception!!!, %i\n", omni::TRANSIENT_minor::TRANSIENT_ConnectFailed);
+		NAPI_THROW_SYSTEM_EXCEPTION(ex);
 	}
 	catch(CORBA::Exception& ex) {
+		printf("I am a minion system exception!!!\n");
 		NAPI_THROW_CORBA_EXCEPTION(ex);
 	}
 	catch(omniORB::fatalException& fe) {

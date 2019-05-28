@@ -13,11 +13,23 @@ router.get('/', async (ctx) => {
 })
 
 router.post('/connect/:addr', async (ctx) => {
-	ctx.body = await Quantel.getISAReference(`http://${ctx.params.addr}`)
+	try {
+		ctx.body = await Quantel.getISAReference(`http://${ctx.params.addr}`)
+	} catch (err) {
+		if (err.message.indexOf('ENOTFOUND') >= 0) {
+			err.status = 404
+			err.message = `Not found: ${err.message}`
+		} else if (err.message.indexOf('ECONNREFUSED') >= 0) {
+			err.status = 502
+			err.message = `Bad gateway: ${err.message}`
+		} else if (!(err instanceof Quantel.ConnectError)) {
+			err.status = 500
+		}
+		throw err
+	}
 })
 
 router.get('/:zoneID.json', async (ctx) => {
-	console.log('Here I am', ctx.params)
 	if (ctx.params.zoneID.toLowerCase() === 'default') {
 		ctx.body = await Quantel.getDefaultZoneInfo()
 	} else {
@@ -29,7 +41,22 @@ router.get('/:zoneID.json', async (ctx) => {
 // TODO consider adding support for other zone portals other than default
 
 router.get('/:zoneID/', async (ctx) => {
-	ctx.body = [ 'server/', 'clip/' ]
+	if (ctx.params.zoneID === 'default') {
+		ctx.body = [ 'server/', 'clip/' ]
+	} else {
+		let zones = await Quantel.listZones()
+		let inTheZone = zones.find(z => z.zoneName === ctx.params.zoneID || z.zoneNumber.toString() === ctx.params.zoneID)
+		if (inTheZone) {
+			ctx.body = [ 'server/', 'clip/' ]
+		} else {
+			ctx.status = 404
+			ctx.body = {
+				status: 404,
+				message: `Not found. Could not find a zone called ''${ctx.params.zoneID}'.`,
+				stack: ''
+			}
+		}
+	}
 })
 
 router.get('/default/server/', async (ctx) => {
@@ -148,6 +175,29 @@ router.put('/default/server/:serverID/port/:portID/jump', async (ctx) => {
 		offset : ctx.query.offset ? +ctx.query.offset : 0
 	}
 	ctx.body = await Quantel.setJump(options)
+})
+
+// Make the default error handler use JSON
+app.use(async (ctx, next) => {
+	try {
+		await next()
+		if (ctx.status === 404) {
+			if (!ctx.body) {
+				ctx.body = {
+					status: 404,
+					message: `Not found. Request ${ctx.method} ${ctx.path}`,
+					stack: ''
+				}
+			}
+		}
+	} catch (err) {
+		ctx.status = err.statusCode || err.status || 500
+		ctx.body = {
+			status: ctx.status,
+			message: err.message,
+			stack: err.stack
+		}
+	}
 })
 
 app.use(router.routes())

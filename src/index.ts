@@ -8,7 +8,7 @@ const quantel = require('../build/Release/quantel_gateway')
 
 export namespace Quantel {
 
-	let isaIOR: Promise<string>
+	let isaIOR: Promise<string> | null = null
 
 	export interface ZoneInfo {
 		type: string,
@@ -173,8 +173,20 @@ export namespace Quantel {
 		count: number,
 	}
 
+	export class ConnectError extends Error {
+		public statusCode: number
+		constructor (message?: string | undefined, statusCode?: number) {
+			super(message)
+			this.statusCode = statusCode ? statusCode : 500
+		}
+		get status () {
+			return this.statusCode
+		}
+	}
+
 	export async function getISAReference (ref?: string): Promise<string> {
-		isaIOR = new Promise((resolve, reject) => {
+		if (isaIOR === null || ref) isaIOR = Promise.reject()
+		isaIOR = isaIOR.then(x => x, () => new Promise((resolve, reject) => {
 			if (ref && ref.endsWith('/')) ref = ref.slice(0, -1)
 			if (ref && ref.indexOf(':') < 0) ref = ref + ':2096'
 			request(ref ? ref + '/ZoneManager.ior' : 'http://localhost:2096/ZoneManager.ior', (err, res, body) => {
@@ -184,91 +196,101 @@ export namespace Quantel {
 					if (res.statusCode === 200) {
 						resolve(body)
 					} else {
-						reject(new Error(`HTTP request for ISA IOR failed with status ${res.statusCode}.`))
+						reject(new ConnectError(
+							`HTTP request for ISA IOR failed with status ${res.statusCode}: ${res.statusMessage}`,
+							res.statusCode))
 					}
 				}
 			})
-		})
+		}))
 		return isaIOR
 	}
 
 	export async function testConnection (): Promise<boolean> {
-		if (!isaIOR) await getISAReference()
+		await getISAReference()
 		return quantel.testConnection(await isaIOR)
 	}
 
 	export async function listZones (): Promise<ZoneInfo[]> {
-		if (!isaIOR) await getISAReference()
+		await getISAReference()
 		return quantel.listZones(await isaIOR)
 	}
 
 	export async function getDefaultZoneInfo (): Promise<ZoneInfo> {
-		if (!isaIOR) await getISAReference()
+		await getISAReference()
 		return quantel.getDefaultZoneInfo(await isaIOR)
 	}
 
 	export async function getServers (): Promise<ServerInfo[]> {
-		if (!isaIOR) await getISAReference()
-		return quantel.getServers(await isaIOR)
+		await getISAReference()
+		try {
+			return quantel.getServers(await isaIOR)
+		} catch (err) {
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return getServers()
+			}
+			throw err
+		}
 	}
 
 	export async function createPlayPort (options: PortInfo): Promise<PortInfo> {
-		if (!isaIOR) await getISAReference()
+		await getISAReference()
 		return quantel.createPlayPort(await isaIOR, options)
 	}
 
 	export async function getPlayPortStatus (options: PortRef): Promise<any> {
-		if (!isaIOR) await getISAReference()
+		await getISAReference()
 		return quantel.getPlayPortStatus(await isaIOR, options)
 	}
 
 	export async function releasePort (options: PortRef): Promise<boolean> {
-		if (!isaIOR) await getISAReference()
+		await getISAReference()
 		return quantel.releasePort(await isaIOR, options)
 	}
 
 	export async function getClipData (options: ClipRef): Promise<ClipData> {
-		if (!isaIOR) await getISAReference()
+		await getISAReference()
 		return quantel.getClipData(await isaIOR, options)
 	}
 
 	export async function searchClips (options: ClipPropertyList): Promise<ClipDataSummary[]> {
-		if (!isaIOR) await getISAReference()
+		await getISAReference()
 		return quantel.searchClips(await isaIOR, options)
 	}
 
 	export async function getFragments (options: FragmentRef): Promise<ServerFragments> {
-		if (!isaIOR) await getISAReference()
+		await getISAReference()
 		return quantel.getFragments(await isaIOR, options)
 	}
 
 	export async function loadPlayPort (options: PortLoadInfo): Promise<any> {
-		if (!isaIOR) await getISAReference()
+		await getISAReference()
 		return quantel.loadPlayPort(await isaIOR, options)
 	}
 
 	export async function trigger (options: TriggerInfo): Promise<boolean> {
-		if (!isaIOR) await getISAReference()
+		await getISAReference()
 		return quantel.trigger(await isaIOR, options)
 	}
 
 	export async function jump (options: JumpInfo): Promise<boolean> {
-		if (!isaIOR) await getISAReference()
+		await getISAReference()
 		return quantel.jump(await isaIOR, options)
 	}
 
 	export async function setJump (options: JumpInfo): Promise<boolean> {
-		if (!isaIOR) await getISAReference()
+		await getISAReference()
 		return quantel.setJump(await isaIOR, options)
 	}
 
 	export async function getThumbnailSize (): Promise<ThumbnailSize> {
-		if (!isaIOR) await getISAReference()
+		await getISAReference()
 		return quantel.getThumbnailSize(await isaIOR)
 	}
 
 	export async function requestThumbnails (options: ThumbnailOrder): Promise<Buffer> {
-		if (!isaIOR) await getISAReference()
+		await getISAReference()
 		let b = quantel.requestThumbnails(await isaIOR, options)
 		// writeFileSync(`test${options.offset}.argb`, b)
 		return b
