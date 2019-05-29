@@ -9,6 +9,7 @@ const quantel = require('../build/Release/quantel_gateway')
 export namespace Quantel {
 
 	let isaIOR: Promise<string> | null = null
+	let stickyRef: string = 'http://localhost:2096'
 
 	export interface ZoneInfo {
 		type: string,
@@ -175,6 +176,12 @@ export namespace Quantel {
 		count: number,
 	}
 
+	export interface ConnectionDetails {
+		type: string,
+		isaIOR: string | null,
+		href: string,
+	}
+
 	export class ConnectError extends Error {
 		public statusCode: number
 		constructor (message?: string | undefined, statusCode?: number) {
@@ -186,12 +193,13 @@ export namespace Quantel {
 		}
 	}
 
-	export async function getISAReference (ref?: string): Promise<string> {
+	export async function getISAReference (ref?: string): Promise<ConnectionDetails> {
 		if (isaIOR === null || ref) isaIOR = Promise.reject()
+		if (ref) { stickyRef = ref }
 		isaIOR = isaIOR.then(x => x, () => new Promise((resolve, reject) => {
 			if (ref && ref.endsWith('/')) ref = ref.slice(0, -1)
 			if (ref && ref.indexOf(':') < 0) ref = ref + ':2096'
-			request(ref ? ref + '/ZoneManager.ior' : 'http://localhost:2096/ZoneManager.ior', (err, res, body) => {
+			request(stickyRef + '/ZoneManager.ior', (err, res, body) => {
 				if (err) {
 					reject(err)
 				} else {
@@ -205,7 +213,19 @@ export namespace Quantel {
 				}
 			})
 		}))
-		return isaIOR
+		return {
+			type: 'ConnectionDetails',
+			isaIOR: await isaIOR,
+			href: stickyRef
+		}
+	}
+
+	export async function getConnectionDetails (): Promise<ConnectionDetails> {
+		return {
+			type: 'ConnectionDetails',
+			isaIOR: isaIOR ? await isaIOR : null,
+			href: stickyRef
+		}
 	}
 
 	export async function testConnection (): Promise<boolean> {

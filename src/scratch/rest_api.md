@@ -35,7 +35,7 @@ The `:address` should consist of a DNS name or IP address and, optionally, a por
 
     /connect/isa.national.ztv.com:3737
 
-A successful request produces the IOR reference as a plain text response.
+A successful request produces a JSON response with the discovered IOR (`isaIO`) and ISA endpoint address (`href`). Subsequently, the currently configured connection can be queried with `/connect`.
 
 ## Topology of a Quantel system
 
@@ -72,7 +72,8 @@ A GET request to the zones name (`/:zoneID/server/`) retrieves details of all th
     "name": "Dummy 1100",
     "numChannels": 4,
     "pools": [ 11 ],
-    "portNames": []
+    "portNames": [],
+		"chanPorts": [ "", "", "", "" ]
   }, {
     "type": "Server",
     "ident": 1200,
@@ -80,7 +81,8 @@ A GET request to the zones name (`/:zoneID/server/`) retrieves details of all th
     "name": "Dummy 1200",
     "numChannels": 2,
     "pools": [ 12 ],
-    "portNames": []
+    "portNames": [],
+		"chanPorts": [ "", "" ]
   }, {
     "type": "Server",
     "ident": 1300,
@@ -88,7 +90,8 @@ A GET request to the zones name (`/:zoneID/server/`) retrieves details of all th
     "name": "Dummy 1300",
     "numChannels": 3,
     "pools": [ 13 ],
-    "portNames": []
+    "portNames": [],
+		"chanPorts": [ "", "", "" ]
   } ]
 ```
 
@@ -135,7 +138,8 @@ A GET request to this path returns the port status.
   "status": "unknown",
   "endOfData": 0,
   "framesUnused": 0,
-  "channels": [ 1 ]
+  "channels": [ 1 ],
+	"outputTime": "00:00:00:00"
 }
 ```
 

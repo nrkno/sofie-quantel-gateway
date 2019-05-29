@@ -20,6 +20,9 @@ router.get('/', async (ctx) => {
 
 router.post('/connect/:addr', async (ctx) => {
 	try {
+		if (ctx.params.addr.indexOf(':') < 0) {
+			ctx.params.addr += ':2096'
+		}
 		ctx.body = await Quantel.getISAReference(`http://${ctx.params.addr}`)
 	} catch (err) {
 		if (err.message.indexOf('ENOTFOUND') >= 0) {
@@ -33,6 +36,10 @@ router.post('/connect/:addr', async (ctx) => {
 		}
 		throw err
 	}
+})
+
+router.get('/connect', async (ctx) => {
+	ctx.body = await Quantel.getConnectionDetails()
 })
 
 router.get('/:zoneID.json', async (ctx) => {
@@ -151,30 +158,148 @@ router.delete('/default/server/:serverID/port/:portID', async (ctx) => {
 
 router.get('/default/clip', async (ctx) => {
 	if (!ctx.query || Object.keys(ctx.query).length === 0) {
-		ctx.body = []
+		ctx.status = 400
+		ctx.body = {
+			status: 400,
+			message: 'Bad requests. Missing search query parameter, e.g. \'?Title=...\'',
+			stack: ''
+		} as JSONError
 	} else {
 		ctx.body = await Quantel.searchClips(ctx.query)
 	}
 })
 
 router.get('/default/clip/:clipID', async (ctx) => {
-	ctx.body = await Quantel.getClipData({
-		clipID: +ctx.params.clipID
-	})
+	if (isNaN(+ctx.params.clipID) || +ctx.params.clipID < 0) {
+		ctx.status = 400
+		ctx.body = {
+			status: 400,
+			message: 'Bad request. Clip ID must be a positive number.',
+			stack: ''
+		} as JSONError
+		return
+	}
+	try {
+		ctx.body = await Quantel.getClipData({
+			clipID: +ctx.params.clipID
+		})
+	} catch (err) {
+		if (err.message.indexOf('BadIdent') >= 0) {
+			ctx.status = 404
+			ctx.body = {
+				status: 404,
+				message: `Not found. A clip with identifier '${ctx.params.clipID}' was not found.`,
+				stack: ''
+			}
+		} else {
+			throw err
+		}
+	}
 })
 
 router.get('/default/clip/:clipID/fragments', async (ctx) => {
-	ctx.body = await Quantel.getFragments({
-		clipID: +ctx.params.clipID
-	})
+	if (isNaN(+ctx.params.clipID) || +ctx.params.clipID < 0) {
+		ctx.status = 400
+		ctx.body = {
+			status: 400,
+			message: 'Bad request. Clip ID must be a positive number.',
+			stack: ''
+		} as JSONError
+		return
+	}
+	try {
+		let fragments = await Quantel.getFragments({
+			clipID: +ctx.params.clipID
+		})
+		if (fragments.fragments.length > 0) {
+			ctx.body = fragments
+		} else {
+			ctx.status = 404
+			ctx.body = {
+				status: 404,
+				message: `Not found. A clip with identifier '${ctx.params.clipID}' was not found.`,
+				stack: ''
+			} as JSONError
+		}
+	} catch (err) {
+		if (err.message.indexOf('BadIdent') >= 0) {
+			ctx.status = 404
+			ctx.body = {
+				status: 404,
+				message: `Not found. A clip with identifier '${ctx.params.clipID}' was not found.`,
+				stack: ''
+			} as JSONError
+		} else {
+			throw err
+		}
+	}
 })
 
 router.get('/default/clip/:clipID/fragments/:in-:out', async (ctx) => {
-	ctx.body = await Quantel.getFragments({
-		clipID: +ctx.params.clipID,
-		start: +ctx.params.in,
-		finish: +ctx.params.out
-	})
+	if (isNaN(+ctx.params.clipID) || +ctx.params.clipID < 0) {
+		ctx.status = 400
+		ctx.body = {
+			status: 400,
+			message: 'Bad request. Clip ID must be a positive number.',
+			stack: ''
+		} as JSONError
+		return
+	}
+	if (isNaN(+ctx.params.in) || +ctx.params.in < 0) {
+		ctx.status = 400
+		ctx.body = {
+			status: 400,
+			message: 'Bad request. In point must be a positive number.',
+			stack: ''
+		} as JSONError
+		return
+	}
+	if (isNaN(+ctx.params.out) || +ctx.params.out < 0) {
+		ctx.status = 400
+		ctx.body = {
+			status: 400,
+			message: 'Bad request. Out point must be a positive number.',
+			stack: ''
+		} as JSONError
+		return
+	}
+	if (+ctx.params.out <= +ctx.params.in) {
+		ctx.status = 400
+		ctx.body = {
+			status: 400,
+			message: 'Bad request. Out point must be after in point.',
+			stack: ''
+		} as JSONError
+		return
+	}
+	try {
+		let fragments = await Quantel.getFragments({
+			clipID: +ctx.params.clipID,
+			start: +ctx.params.in,
+			finish: +ctx.params.out
+		})
+		if (fragments.fragments.length > 0) {
+			ctx.body = fragments
+		} else {
+			ctx.status = 404
+			ctx.body = {
+				status: 404,
+				message: `Not found. A clip with identifier '${ctx.params.clipID}' was not found or range is outside of clip boundary.`,
+				stack: ''
+			} as JSONError
+		}
+	} catch (err) {
+		if (err.message.indexOf('BadIdent') >= 0) {
+			ctx.status = 404
+			ctx.body = {
+				status: 404,
+				message: `Not found. A clip with identifier '${ctx.params.clipID}' was not found.`,
+				stack: ''
+			} as JSONError
+		} else {
+			throw err
+		}
+	}
 })
 
 router.post('/default/server/:serverID/port/:portID/fragments/', async (ctx) => {
