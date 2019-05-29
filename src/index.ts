@@ -25,6 +25,7 @@ export namespace Quantel {
 		numChannels?: number,
 		pools?: number[],
 		portNames?: string[],
+		chanPorts?: string[]
 	}
 
 	export interface PortRef {
@@ -265,9 +266,11 @@ export namespace Quantel {
 					portID: portStatus.portID,
 					assigned: true
 				} as PortInfo
-			} else {
-				return quantel.createPlayPort(await isaIOR, options)
 			}
+			if (server.chanPorts && server.chanPorts[options.channelNo].length !== 0) {
+				throw new ConnectError(`Bad request. Cannot assign channel '${options.channelNo}' to port '${options.portName}' on server '${options.serverID}' as it is already assigned to port '${server.chanPorts[options.channelNo]}'.`, 400)
+			}
+			return quantel.createPlayPort(await isaIOR, options)
 		} catch (err) {
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null

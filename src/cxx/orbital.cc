@@ -281,8 +281,9 @@ napi_value getServers(napi_env env, napi_callback_info info) {
   Quentin::ZonePortal::_ptr_type zp;
   Quentin::Server_ptr server;
   Quentin::ServerInfo* serverInfo;
-  Quentin::WStrings_var portNames;
+  Quentin::WStrings_var portNames, chanPorts;
   std::string portName, serverNameStr;
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
 	try {
 	  status = retrieveZonePortal(env, info, &orb, &zp);
@@ -315,7 +316,6 @@ napi_value getServers(napi_env env, napi_callback_info info) {
 	      status = napi_set_named_property(env, item, "down", prop);
 	      CHECK_STATUS;
 
-	      std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 	      std::string serverNameStr = utf8_conv.to_bytes(serverInfo->name);
 
 	      status = napi_create_string_utf8(env, serverNameStr.c_str(), NAPI_AUTO_LENGTH, &prop);
@@ -343,8 +343,7 @@ napi_value getServers(napi_env env, napi_callback_info info) {
 	      status = napi_create_array(env, &prop);
 	      CHECK_STATUS;
 	      for ( int y = 0 ; y < portNames->length(); y++ ) {
-	        std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
-	        portName = utf8_conv.to_bytes(portNames[y]);
+		      portName = utf8_conv.to_bytes(portNames[y]);
 
 	        status = napi_create_string_utf8(env, portName.c_str(), NAPI_AUTO_LENGTH, &subprop);
 	        CHECK_STATUS;
@@ -353,6 +352,20 @@ napi_value getServers(napi_env env, napi_callback_info info) {
 	      }
 	      status = napi_set_named_property(env, item, "portNames", prop);
 	      CHECK_STATUS;
+
+				chanPorts = server->getChanPorts();
+				status = napi_create_array(env, &prop);
+				CHECK_STATUS;
+				for ( int y = 0 ; y < chanPorts->length() ; y++ ) {
+					portName = utf8_conv.to_bytes(chanPorts[y]);
+
+					status = napi_create_string_utf8(env, portName.c_str(), NAPI_AUTO_LENGTH, &subprop);
+					CHECK_STATUS;
+					status = napi_set_element(env, prop, y, subprop);
+					CHECK_STATUS;
+				}
+				status = napi_set_named_property(env, item, "chanPorts", prop);
+				CHECK_STATUS;
 	    } else {
 	      status = napi_get_boolean(env, true, &prop);
 	      CHECK_STATUS;
