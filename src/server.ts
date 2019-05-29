@@ -12,7 +12,15 @@ interface JSONError {
 const app = new Koa()
 const router = new Router()
 
-app.use(bodyParser())
+app.use(bodyParser({
+	onerror: (err, ctx) => {
+		ctx.status = 400
+		ctx.body = {
+			status: 400,
+			message: err.message,
+		 	stack: '' } as JSONError
+	}
+}))
 
 router.get('/', async (ctx) => {
 	ctx.body = await Quantel.listZones()
@@ -303,51 +311,118 @@ router.get('/default/clip/:clipID/fragments/:in-:out', async (ctx) => {
 })
 
 router.post('/default/server/:serverID/port/:portID/fragments/', async (ctx) => {
-	let fragments: Quantel.ServerFragment[] = ctx.request.body
-	ctx.body = await Quantel.loadPlayPort({
-		serverID: ctx.params.serverID,
-		portName: ctx.params.portID,
-		fragments: fragments,
-		offset: ctx.query.offset ? +ctx.query.offset : 0
-	})
+	try {
+		if (ctx.body && ctx.status === 400) return
+		let fragments: Quantel.ServerFragment[] = ctx.request.body
+		if (!Array.isArray(fragments) || fragments.length === 0 || ctx.request.type !== 'application/json') {
+			ctx.status = 400
+			ctx.body = {
+				status: 400,
+				message: 'Bad request. Fragments must be a JSON array with at least one element.',
+				stack: ''} as JSONError
+			return
+		}
+		if (ctx.query.offset && (isNaN(+ctx.query.offset) || +ctx.query.offset < 0)) {
+			ctx.status = 400
+			ctx.body = {
+				status: 400,
+				message: 'Bad request. Optional offset parameter must be a non-negative integer.',
+				stack: ''
+			} as JSONError
+			return
+		}
+		ctx.body = await Quantel.loadPlayPort({
+			serverID: ctx.params.serverID,
+			portName: ctx.params.portID,
+			fragments: fragments,
+			offset: ctx.query.offset ? +ctx.query.offset : 0
+		})
+	} catch (err) {
+		throw err
+	}
 })
 
 router.post('/default/server/:serverID/port/:portID/trigger/:trigger', async (ctx) => {
-	let trigger: Quantel.Trigger
-	switch (ctx.params.trigger) {
-		case 'START': trigger = Quantel.Trigger.START; break
-		case 'STOP': trigger = Quantel.Trigger.STOP; break
-		case 'JUMP': trigger = Quantel.Trigger.JUMP; break
-		default:
-			return // TODO report a 400 error
+	try {
+		let trigger: Quantel.Trigger
+		switch (ctx.params.trigger) {
+			case 'START': trigger = Quantel.Trigger.START; break
+			case 'STOP': trigger = Quantel.Trigger.STOP; break
+			case 'JUMP': trigger = Quantel.Trigger.JUMP; break
+			default:
+				ctx.status = 400
+				ctx.body = {
+					status: 400,
+					message: 'Trigger must have path parameter \'START\', \'STOP\' or \'JUMP\'.',
+					stack: ''
+				} as JSONError
+				return
+		}
+		let options: Quantel.TriggerInfo = {
+			serverID: ctx.params.serverID,
+			portName: ctx.params.portID,
+			trigger: trigger
+		}
+		if (ctx.query.offset) {
+			if (ctx.query.offset && (isNaN(+ctx.query.offset) || +ctx.query.offset < 0)) {
+				ctx.status = 400
+				ctx.body = {
+					status: 400,
+					message: 'Bad request. Optional offset parameter must be a non-negative integer.',
+					stack: ''
+				} as JSONError
+				return
+			}
+			options.offset = +ctx.query.offset
+		}
+		ctx.body = await Quantel.trigger(options)
+	} catch (err) {
+		throw err
 	}
-	let options: Quantel.TriggerInfo = {
-		serverID: ctx.params.serverID,
-		portName: ctx.params.portID,
-		trigger: trigger
-	}
-	if (ctx.query.offset) {
-		options.offset = +ctx.query.offset
-	}
-	ctx.body = await Quantel.trigger(options)
 })
 
 router.post('/default/server/:serverID/port/:portID/jump', async (ctx) => {
-	let options: Quantel.JumpInfo = {
-		serverID: ctx.params.serverID,
-		portName: ctx.params.portID,
-		offset : ctx.query.offset ? +ctx.query.offset : 0
+	try {
+		if (ctx.query.offset && (isNaN(+ctx.query.offset) || +ctx.query.offset < 0)) {
+			ctx.status = 400
+			ctx.body = {
+				status: 400,
+				message: 'Bad request. Optional offset parameter must be a non-negative integer.',
+				stack: ''
+			} as JSONError
+			return
+		}
+		let options: Quantel.JumpInfo = {
+			serverID: ctx.params.serverID,
+			portName: ctx.params.portID,
+			offset : ctx.query.offset ? +ctx.query.offset : 0
+		}
+		ctx.body = await Quantel.jump(options)
+	} catch (err) {
+		throw err
 	}
-	ctx.body = await Quantel.jump(options)
 })
 
 router.put('/default/server/:serverID/port/:portID/jump', async (ctx) => {
-	let options: Quantel.JumpInfo = {
-		serverID: ctx.params.serverID,
-		portName: ctx.params.portID,
-		offset : ctx.query.offset ? +ctx.query.offset : 0
+	try {
+		if (ctx.query.offset && (isNaN(+ctx.query.offset) || +ctx.query.offset < 0)) {
+			ctx.status = 400
+			ctx.body = {
+				status: 400,
+				message: 'Bad request. Optional offset parameter must be a non-negative integer.',
+				stack: ''
+			} as JSONError
+			return
+		}
+		let options: Quantel.JumpInfo = {
+			serverID: ctx.params.serverID,
+			portName: ctx.params.portID,
+			offset : ctx.query.offset ? +ctx.query.offset : 0
+		}
+		ctx.body = await Quantel.setJump(options)
+	} catch (err) {
+		throw err
 	}
-	ctx.body = await Quantel.setJump(options)
 })
 
 // Make the default error handler use JSON

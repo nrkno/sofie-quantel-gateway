@@ -161,8 +161,18 @@ export namespace Quantel {
 		offset?: number
 	}
 
+	export interface TriggerResult extends TriggerInfo {
+		type: string,
+		success: boolean,
+	}
+
 	export interface JumpInfo extends PortRef {
 		offset: number
+	}
+
+	export interface JumpResult extends JumpInfo {
+		type: string,
+		success: boolean,
 	}
 
 	export interface ThumbnailSize {
@@ -389,11 +399,18 @@ export namespace Quantel {
 		}
 	}
 
-	export async function trigger (options: TriggerInfo): Promise<boolean> {
+	export async function trigger (options: TriggerInfo): Promise<TriggerResult> {
 		await getISAReference()
 		try {
 			await checkServerPort(options)
-			return quantel.trigger(await isaIOR, options)
+			return {
+				type: 'TriggerResult',
+				serverID: options.serverID,
+				portName: options.portName,
+				trigger: options.trigger,
+				offset: options.offset,
+				success: quantel.trigger(await isaIOR, options)
+			}
 		} catch (err) {
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
@@ -403,11 +420,17 @@ export namespace Quantel {
 		}
 	}
 
-	export async function jump (options: JumpInfo): Promise<boolean> {
+	export async function jump (options: JumpInfo): Promise<JumpResult> {
 		await getISAReference()
 		try {
 			await checkServerPort(options)
-			return quantel.jump(await isaIOR, options)
+			return {
+				type: 'HardJumpResult',
+				serverID: options.serverID,
+				portName: options.portName,
+				offset: options.offset,
+				success: quantel.jump(await isaIOR, options)
+			}
 		} catch (err) {
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
@@ -417,11 +440,17 @@ export namespace Quantel {
 		}
 	}
 
-	export async function setJump (options: JumpInfo): Promise<boolean> {
+	export async function setJump (options: JumpInfo): Promise<JumpResult> {
 		await getISAReference()
 		try {
 			await checkServerPort(options)
-			return quantel.setJump(await isaIOR, options)
+			return {
+				type: 'TriggeredJumpResult',
+				serverID: options.serverID,
+				portName: options.portName,
+				offset: options.offset,
+				success: quantel.setJump(await isaIOR, options)
+			}
 		} catch (err) {
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
