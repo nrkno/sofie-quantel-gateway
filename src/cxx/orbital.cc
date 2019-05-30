@@ -1937,6 +1937,77 @@ napi_value getThumbnailSize(napi_env env, napi_callback_info info) {
 	return result;
 }
 
+napi_value cloneIfNeeded(napi_env env, napi_callback_info info) {
+	napi_status status;
+	napi_value prop, result;
+	napi_valuetype type;
+	bool isArray;
+	CORBA::ORB_var orb;
+	Quentin::ZonePortal::_ptr_type zp;
+	int32_t clipID, poolID;
+	bool highPriority = false;
+
+	try {
+		status = retrieveZonePortal(env, info, &orb, &zp);
+		CHECK_STATUS;
+		CORBA::Boolean copyCreated;
+
+		size_t argc = 2;
+		napi_value argv[2];
+		status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+		CHECK_STATUS;
+
+		if (argc < 2) {
+			NAPI_THROW_ORB_DESTROY("Options object with clip ID and pool ID must be provided.");
+		}
+		status = napi_typeof(env, argv[1], &type);
+		CHECK_STATUS;
+		status = napi_is_array(env, argv[1], &isArray);
+		CHECK_STATUS;
+		if (isArray || type != napi_object) {
+			NAPI_THROW_ORB_DESTROY("Argument must be an options object with clip ID and pool ID.");
+		}
+
+		status = napi_get_named_property(env, argv[1], "clipID", &prop);
+		CHECK_STATUS;
+		status = napi_get_value_int32(env, prop, &clipID);
+		CHECK_STATUS;
+
+		status = napi_get_named_property(env, argv[1], "poolID", &prop);
+		CHECK_STATUS;
+		status = napi_get_value_int32(env, prop, &poolID);
+		CHECK_STATUS;
+
+		status = napi_get_named_property(env, argv[1], "highPriority", &prop);
+		CHECK_STATUS;
+		status = napi_typeof(env, prop, &type);
+		CHECK_STATUS;
+		if (type == napi_boolean) {
+			status = napi_get_value_bool(env, prop, &highPriority);
+			CHECK_STATUS;
+		}
+
+		zp->cloneIfNeeded(clipID, poolID, 0,
+			highPriority ? Quentin::Port::HighPriority : Quentin::Port::StandardPriority,
+			-1, copyCreated); // TODO -1 means the cloned clip never expires. Is this OK?
+
+		status = napi_get_boolean(env, copyCreated, &result);
+		CHECK_STATUS;
+	}
+	catch(CORBA::SystemException& ex) {
+		NAPI_THROW_CORBA_EXCEPTION(ex);
+	}
+	catch(CORBA::Exception& ex) {
+		NAPI_THROW_CORBA_EXCEPTION(ex);
+	}
+	catch(omniORB::fatalException& fe) {
+		NAPI_THROW_FATAL_EXCEPTION(fe);
+	}
+
+	orb->destroy();
+	return result;
+}
+
 class ThumbyListener : public POA_Quentin::ThumbnailListener {
 public:
 	inline ThumbyListener(CORBA::ORB_var orby /*, int32_t tnCount */) : ident(ID++) {
@@ -2106,12 +2177,13 @@ napi_value Init(napi_env env, napi_value exports) {
     DECLARE_NAPI_METHOD("setJump", setJump),
 		DECLARE_NAPI_METHOD("getThumbnailSize", getThumbnailSize),
 		DECLARE_NAPI_METHOD("requestThumbnails", requestThumbnails),
+		DECLARE_NAPI_METHOD("cloneIfNeeded", cloneIfNeeded),
     { "START", nullptr, nullptr, nullptr, nullptr, start, napi_enumerable, nullptr },
     { "STOP", nullptr, nullptr, nullptr, nullptr, stop, napi_enumerable, nullptr },
     { "JUMP", nullptr, nullptr, nullptr, nullptr, jump, napi_enumerable, nullptr },
     { "TRANSITION", nullptr, nullptr, nullptr, nullptr, transition, napi_enumerable, nullptr },
   };
-  status = napi_define_properties(env, exports, 20, desc);
+  status = napi_define_properties(env, exports, 21, desc);
 
   return exports;
 }

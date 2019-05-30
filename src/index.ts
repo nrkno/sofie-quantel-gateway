@@ -192,6 +192,11 @@ export namespace Quantel {
 		href: string,
 	}
 
+	export interface CloneRequest extends ClipRef {
+		poolID: number,
+		highPriority?: boolean
+	}
+
 	export class ConnectError extends Error {
 		public statusCode: number
 		constructor (message?: string | undefined, statusCode?: number) {
@@ -478,5 +483,21 @@ export namespace Quantel {
 		let b = quantel.requestThumbnails(await isaIOR, options)
 		// writeFileSync(`test${options.offset}.argb`, b)
 		return b
+	}
+
+	/*
+	Clone process ... (otherwise known as here is a bag of bits ... go figure)
+
+	1) Call clone if needed with the pool number (<poolID>) of a server with a port you want to play on
+	2) If result is true, cloning has started. Otherwise, skip to 4.
+	3) Query for a clip with CloneID=<clipID>&PoolID=<poolID>. Replace the <clipID> with that of the result
+	4) Get the fragments for <clipID>
+	5) Load the fragments onto the target port
+
+	Plan is to hide this behind the REST API
+	*/
+	export async function cloneIfNeeded (options: CloneRequest): Promise<boolean> {
+		await getISAReference()
+		return quantel.cloneIfNeeded(await isaIOR, options)
 	}
 }

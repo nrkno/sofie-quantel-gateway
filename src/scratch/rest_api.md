@@ -73,7 +73,7 @@ A GET request to the zones name (`/:zoneID/server/`) retrieves details of all th
     "numChannels": 4,
     "pools": [ 11 ],
     "portNames": [],
-		"chanPorts": [ "", "", "", "" ]
+    "chanPorts": [ "", "", "", "" ]
   }, {
     "type": "Server",
     "ident": 1200,
@@ -82,7 +82,7 @@ A GET request to the zones name (`/:zoneID/server/`) retrieves details of all th
     "numChannels": 2,
     "pools": [ 12 ],
     "portNames": [],
-		"chanPorts": [ "", "" ]
+    "chanPorts": [ "", "" ]
   }, {
     "type": "Server",
     "ident": 1300,
@@ -91,7 +91,7 @@ A GET request to the zones name (`/:zoneID/server/`) retrieves details of all th
     "numChannels": 3,
     "pools": [ 13 ],
     "portNames": [],
-		"chanPorts": [ "", "", "" ]
+    "chanPorts": [ "", "", "" ]
   } ]
 ```
 
