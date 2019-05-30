@@ -12,12 +12,24 @@ void testConnectionExecute(napi_env env, void* data);
 void testConnectionComplete(napi_env env, napi_status asyncStatus, void* data);
 
 struct testConnectionCarrier : carrier {
-	char* isaIOR = nullptr;
 	long zoneNumber = -1;
-	~testConnectionCarrier() {
-		if (isaIOR != nullptr) {
-			free(isaIOR);
-	 	}
+	~testConnectionCarrier() {}
+};
+
+void listZonesExecute(napi_env env, void* data);
+void listZonesComplete(napi_env env, napi_status asyncStatus, void* data);
+
+struct listZonesCarrier : carrier {
+	Quentin::Longs_var zoneIDs;
+	CORBA::WChar** zoneNames = nullptr;
+	CORBA::Boolean* remotes = nullptr;
+	~listZonesCarrier() {
+	  if (zoneNames != nullptr) {
+			free(zoneNames);
+		}
+		if (remotes != nullptr) {
+			free(remotes);
+		}
 	}
 };
 

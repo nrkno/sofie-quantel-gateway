@@ -66,7 +66,7 @@ napi_status checkStatus(napi_env env, napi_status status,
 #define NAPI_THROW_CORBA_EXCEPTION(ex) { \
   orb->destroy(); \
   char errorMsg[256]; \
-  snprintf(errorMsg, 256, "Exception thrown from CORBA subsystem: %s", ex._name()); \
+  snprintf(errorMsg, 256, "Exception thrown from CORBA subsystem: %s.", ex._name()); \
   napi_throw_error(env, nullptr, errorMsg); \
   return nullptr; \
 }
@@ -74,7 +74,7 @@ napi_status checkStatus(napi_env env, napi_status status,
 #define NAPI_REJECT_CORBA_EXCEPTION(ex) { \
 	orb->destroy(); \
 	char errorMsg[256]; \
-	snprintf(errorMsg, 256, "Exception thrown from CORBA subsystem: %s", ex._name()); \
+	snprintf(errorMsg, 256, "Exception thrown from CORBA subsystem: %s.", ex._name()); \
 	c->errorMsg = std::string(errorMsg); \
 	c->status = QGW_CORBA_EXCEPTION; \
 	return; \
@@ -83,7 +83,7 @@ napi_status checkStatus(napi_env env, napi_status status,
 #define NAPI_THROW_FATAL_EXCEPTION(fe) { \
   orb->destroy(); \
   char errorMsg[512]; \
-  snprintf(errorMsg, 512, "Omni ORB fatal exception thrown at line %i of %s: %s", fe.line(), fe.file(), fe.errmsg()); \
+  snprintf(errorMsg, 512, "Omni ORB fatal exception thrown at line %i of %s: %s.", fe.line(), fe.file(), fe.errmsg()); \
   napi_throw_error(env, nullptr, errorMsg); \
   return nullptr; \
 }
@@ -91,7 +91,7 @@ napi_status checkStatus(napi_env env, napi_status status,
 #define NAPI_REJECT_FATAL_EXCEPTION(fe) { \
   orb->destroy(); \
 	char errorMsg[512]; \
-	snprintf(errorMsg, 512, "Omni ORB fatal exception thrown at line %i of %s: %s", fe.line(), fe.file(), fe.errmsg()); \
+	snprintf(errorMsg, 512, "Omni ORB fatal exception thrown at line %i of %s: %s.", fe.line(), fe.file(), fe.errmsg()); \
 	c->errorMsg = std::string(errorMsg); \
 	c->status = QGW_FATAL_EXCEPTION; \
 	return; \
@@ -103,13 +103,18 @@ napi_status checkStatus(napi_env env, napi_status status,
 #define TRANSITION 3
 
 struct carrier {
-  virtual ~carrier() {}
   napi_ref passthru = nullptr;
   int32_t status = QGW_SUCCESS;
   std::string errorMsg;
   long long totalTime;
   napi_deferred _deferred;
   napi_async_work _request = nullptr;
+	char* isaIOR = nullptr;
+	virtual ~carrier() {
+		if (isaIOR != nullptr) {
+			free(isaIOR);
+		}
+	}
 };
 
 void tidyCarrier(napi_env env, carrier* c);

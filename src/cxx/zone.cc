@@ -2,11 +2,11 @@
 
 void testConnectionExecute(napi_env env, void* data) {
 	testConnectionCarrier* c = (testConnectionCarrier*) data;
-	napi_status status;
 	CORBA::ORB_var orb;
 	Quentin::ZonePortal::_ptr_type zp;
+
 	try {
-		status = resolveZonePortal(c->isaIOR, &orb, &zp);
+		resolveZonePortal(c->isaIOR, &orb, &zp);
 
 		c->zoneNumber = zp->getZoneNumber();
 	}
@@ -80,73 +80,131 @@ napi_value testConnection(napi_env env, napi_callback_info info) {
   return promise;
 }
 
-napi_value listZones(napi_env env, napi_callback_info info) {
-	napi_status status;
-	napi_value result, item, prop;
+void listZonesExecute(napi_env env, void* data) {
+	listZonesCarrier* c = (listZonesCarrier*) data;
 	CORBA::ORB_var orb;
 	Quentin::ZonePortal::_ptr_type zp;
-	CORBA::WChar* zoneName;
-	Quentin::Longs_var zoneIDs;
 
 	try {
-		status = retrieveZonePortal(env, info, &orb, &zp);
-		CHECK_STATUS;
+		resolveZonePortal(c->isaIOR, &orb, &zp);
 
-		status = napi_create_array(env, &result);
-		CHECK_STATUS;
-
-		zoneIDs = zp->getZones(false);
-		zoneIDs->length(zoneIDs->length() + 1);
-		for ( int x = zoneIDs->length() - 1 ; x > 0 ; x-- ) {
-			zoneIDs[x] = zoneIDs[x - 1];
+		c->zoneIDs = zp->getZones(false);
+		c->zoneIDs->length(c->zoneIDs->length() + 1);
+		for ( int x = c->zoneIDs->length() - 1 ; x > 0 ; x-- ) {
+			c->zoneIDs[x] = c->zoneIDs[x - 1];
 		}
-		zoneIDs[0] = zp->getZoneNumber(); // Always start with the local/default zone
+		c->zoneIDs[0] = zp->getZoneNumber(); // Always start with the local/default zone
 
-		for ( uint32_t x = 0 ; x < zoneIDs->length() ; x++ ) {
-			status = napi_create_object(env, &item);
-			CHECK_STATUS;
+		c->zoneNames = (CORBA::WChar**) malloc(c->zoneIDs->length() * sizeof(CORBA::WChar*));
+		c->remotes = (CORBA::Boolean*) malloc(c->zoneIDs->length() * sizeof(CORBA::Boolean));
 
-			zoneName = zp->getZoneName(zoneIDs[x]);
-
-			status = napi_create_string_utf8(env, "ZonePortal", NAPI_AUTO_LENGTH, &prop);
-			CHECK_STATUS;
-			status = napi_set_named_property(env, item, "type", prop);
-			CHECK_STATUS;
-
-			status = napi_create_int32(env, zoneIDs[x], &prop);
-			CHECK_STATUS;
-			status = napi_set_named_property(env, item, "zoneNumber", prop);
-			CHECK_STATUS;
-
-			std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
-			std::string zoneNameStr = utf8_conv.to_bytes(zoneName);
-
-			status = napi_create_string_utf8(env, zoneNameStr.c_str(), NAPI_AUTO_LENGTH, &prop);
-			CHECK_STATUS;
-			status = napi_set_named_property(env, item, "zoneName", prop);
-			CHECK_STATUS;
-
-			status = napi_get_boolean(env, zp->zoneIsRemote(zoneIDs[x]), &prop);
-			CHECK_STATUS;
-			status = napi_set_named_property(env, item, "isRemote", prop);
-			CHECK_STATUS;
-
-			status = napi_set_element(env, result, x, item);
-			CHECK_STATUS;
+		for ( uint32_t x = 0 ; x < c->zoneIDs->length() ; x++ ) {
+			c->zoneNames[x] = zp->getZoneName(c->zoneIDs[x]);
+			c->remotes[x] = zp->zoneIsRemote(c->zoneIDs[x]);
 		}
 	}
 	catch(CORBA::SystemException& ex) {
-		NAPI_THROW_CORBA_EXCEPTION(ex);
+		NAPI_REJECT_CORBA_EXCEPTION(ex);
 	}
 	catch(CORBA::Exception& ex) {
-		NAPI_THROW_CORBA_EXCEPTION(ex);
+		NAPI_REJECT_CORBA_EXCEPTION(ex);
 	}
 	catch(omniORB::fatalException& fe) {
-		NAPI_THROW_FATAL_EXCEPTION(fe);
+		NAPI_REJECT_FATAL_EXCEPTION(fe);
 	}
 
 	orb->destroy();
-	return result;
+}
+
+void listZonesComplete(napi_env env, napi_status asyncStatus, void* data) {
+	listZonesCarrier* c = (listZonesCarrier*) data;
+	napi_value result, item, prop;
+	CORBA::WChar* zoneName;
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+
+	if (asyncStatus != napi_ok) {
+		c->status = asyncStatus;
+		c->errorMsg = "List zones failed to complete.";
+	}
+	REJECT_STATUS;
+
+	c->status = napi_create_array(env, &result);
+	REJECT_STATUS;
+
+	for ( uint32_t x = 0 ; x < c->zoneIDs->length() ; x++ ) {
+		c->status = napi_create_object(env, &item);
+		REJECT_STATUS;
+
+		zoneName = c->zoneNames[x];
+
+		c->status = napi_create_string_utf8(env, "ZonePortal", NAPI_AUTO_LENGTH, &prop);
+		REJECT_STATUS;
+		c->status = napi_set_named_property(env, item, "type", prop);
+		REJECT_STATUS;
+
+		c->status = napi_create_int32(env, c->zoneIDs[x], &prop);
+		REJECT_STATUS;
+		c->status = napi_set_named_property(env, item, "zoneNumber", prop);
+		REJECT_STATUS;
+
+		std::string zoneNameStr = utf8_conv.to_bytes(zoneName);
+
+		c->status = napi_create_string_utf8(env, zoneNameStr.c_str(), NAPI_AUTO_LENGTH, &prop);
+		REJECT_STATUS;
+		c->status = napi_set_named_property(env, item, "zoneName", prop);
+		REJECT_STATUS;
+
+		c->status = napi_get_boolean(env, c->remotes[x], &prop);
+		REJECT_STATUS;
+		c->status = napi_set_named_property(env, item, "isRemote", prop);
+		REJECT_STATUS;
+
+		c->status = napi_set_element(env, result, x, item);
+		REJECT_STATUS;
+	}
+
+	napi_status status;
+	status = napi_resolve_deferred(env, c->_deferred, result);
+	FLOATING_STATUS;
+
+	tidyCarrier(env, c);
+}
+
+napi_value listZones(napi_env env, napi_callback_info info) {
+	listZonesCarrier* c = new listZonesCarrier;
+	napi_value promise, resourceName;
+	char* isaIOR = nullptr;
+	size_t iorLen = 0;
+
+	c->status = napi_create_promise(env, &c->_deferred, &promise);
+  REJECT_RETURN;
+
+	size_t argc = 1;
+	napi_value argv[1];
+	c->status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+	REJECT_RETURN;
+
+	if (argc < 1) {
+		REJECT_ERROR_RETURN("Connection test must be provided with a IOR reference to an ISA server.",
+	    QGW_INVALID_ARGS);
+	}
+	c->status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &iorLen);
+	REJECT_RETURN;
+	isaIOR = (char*) malloc((iorLen + 1) * sizeof(char));
+	c->status = napi_get_value_string_utf8(env, argv[0], isaIOR, iorLen + 1, &iorLen);
+	REJECT_RETURN;
+
+	c->isaIOR = isaIOR;
+
+	c->status = napi_create_string_utf8(env, "ListZones", NAPI_AUTO_LENGTH, &resourceName);
+	REJECT_RETURN;
+	c->status = napi_create_async_work(env, nullptr, resourceName, listZonesExecute,
+		listZonesComplete, c, &c->_request);
+	REJECT_RETURN;
+	c->status = napi_queue_async_work(env, c->_request);
+	REJECT_RETURN;
+
+	return promise;
 }
 
 napi_value getDefaultZoneInfo(napi_env env, napi_callback_info info) {

@@ -260,7 +260,7 @@ export namespace Quantel {
 	export async function listZones (): Promise<ZoneInfo[]> {
 		await getISAReference()
 		try {
-			return quantel.listZones(await isaIOR)
+			return await quantel.listZones(await isaIOR)
 		} catch (err) {
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
