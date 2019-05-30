@@ -61,6 +61,18 @@ napi_status retrieveZonePortal(napi_env env, napi_callback_info info, CORBA::ORB
 	return napi_ok;
 }
 
+napi_status resolveZonePortal(char* ior, CORBA::ORB_var *orb, Quentin::ZonePortal::_ptr_type *zp) {
+  const char* options[][2] = { { "traceLevel", "1" }, { 0, 0 } };
+  int orbc = 0;
+  CORBA::ORB_var local_orb = CORBA::ORB_init(orbc, nullptr, "omniORB4", options);
+
+  CORBA::Object_ptr ptr = local_orb->string_to_object(ior);
+	*zp = Quentin::ZonePortal::_unchecked_narrow(ptr);
+  *orb = local_orb;
+
+	return napi_ok;
+}
+
 char* formatTimecode(Quentin::Timecode tc) {
 	int32_t HH, hh, MM, mm, SS, ss, FF, ff;
 	bool drop = (tc & 0x40000000) != 0;

@@ -243,19 +243,44 @@ export namespace Quantel {
 		}
 	}
 
-	export async function testConnection (): Promise<boolean> {
+	// Resolves to 'PONG!' on success, otherwise rejects with a connection error
+	export async function testConnection (): Promise<string> {
 		await getISAReference()
-		return quantel.testConnection(await isaIOR)
+		try {
+			return await quantel.testConnection(await isaIOR)
+		} catch (err) {
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return testConnection()
+			}
+			throw err
+		}
 	}
 
 	export async function listZones (): Promise<ZoneInfo[]> {
 		await getISAReference()
-		return quantel.listZones(await isaIOR)
+		try {
+			return quantel.listZones(await isaIOR)
+		} catch (err) {
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return listZones()
+			}
+			throw err
+		}
 	}
 
 	export async function getDefaultZoneInfo (): Promise<ZoneInfo> {
 		await getISAReference()
-		return quantel.getDefaultZoneInfo(await isaIOR)
+		try {
+			return quantel.getDefaultZoneInfo(await isaIOR)
+		} catch (err) {
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return getDefaultZoneInfo()
+			}
+			throw err
+		}
 	}
 
 	export async function getServers (): Promise<ServerInfo[]> {

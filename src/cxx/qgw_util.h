@@ -23,6 +23,14 @@
 napi_status checkStatus(napi_env env, napi_status status,
   const char* file, uint32_t line);
 
+// Async error handling
+#define QGW_ERROR_START 6000
+#define QGW_INVALID_ARGS 6001
+#define QGW_SYSTEM_EXCEPTION 6002
+#define QGW_CORBA_EXCEPTION 6003
+#define QGW_FATAL_EXCEPTION 6004
+#define QGW_SUCCESS 0
+
 #define NAPI_THROW_ERROR(msg) { \
   char errorMsg[256]; \
   sprintf(errorMsg, "%s", msg); \
@@ -33,7 +41,7 @@ napi_status checkStatus(napi_env env, napi_status status,
 #define NAPI_THROW_ORB_DESTROY(msg) { \
   orb->destroy(); \
   char errorMsg[256]; \
-  sprintf(errorMsg, "%s", msg); \
+  snprintf(errorMsg, 256, "%s", msg); \
   napi_throw_error(env, nullptr, errorMsg); \
   return nullptr; \
 }
@@ -41,36 +49,58 @@ napi_status checkStatus(napi_env env, napi_status status,
 #define NAPI_THROW_SYSTEM_EXCEPTION(ex) { \
   orb->destroy(); \
   char errorMsg[256]; \
-  sprintf(errorMsg, "System exception thrown from CORBA subsystem with code %lu: %s", ex.minor(), ex._name()); \
+  snprintf(errorMsg, 256, "System exception thrown from CORBA subsystem with code 0x%lx: %s.", ex.minor(), ex._name()); \
   napi_throw_error(env, nullptr, errorMsg); \
   return nullptr; \
+}
+
+#define NAPI_REJECT_SYSTEM_EXCEPTION(ex) { \
+	orb->destroy(); \
+  char errorMsg[256]; \
+  snprintf(errorMsg, 256, "System exception thrown from CORBA subsystem with code 0x%lx: %s.", ex.minor(), ex._name()); \
+	c->errorMsg = std::string(errorMsg); \
+	c->status = QGW_SYSTEM_EXCEPTION; \
+	return; \
 }
 
 #define NAPI_THROW_CORBA_EXCEPTION(ex) { \
   orb->destroy(); \
   char errorMsg[256]; \
-  sprintf(errorMsg, "Exception thrown from CORBA subsystem: %s", ex._name()); \
+  snprintf(errorMsg, 256, "Exception thrown from CORBA subsystem: %s", ex._name()); \
   napi_throw_error(env, nullptr, errorMsg); \
   return nullptr; \
+}
+
+#define NAPI_REJECT_CORBA_EXCEPTION(ex) { \
+	orb->destroy(); \
+	char errorMsg[256]; \
+	snprintf(errorMsg, 256, "Exception thrown from CORBA subsystem: %s", ex._name()); \
+	c->errorMsg = std::string(errorMsg); \
+	c->status = QGW_CORBA_EXCEPTION; \
+	return; \
 }
 
 #define NAPI_THROW_FATAL_EXCEPTION(fe) { \
   orb->destroy(); \
   char errorMsg[512]; \
-  sprintf(errorMsg, "Omni ORB fatal exception thrown at line %i of %s: %s", fe.line(), fe.file(), fe.errmsg()); \
+  snprintf(errorMsg, 512, "Omni ORB fatal exception thrown at line %i of %s: %s", fe.line(), fe.file(), fe.errmsg()); \
   napi_throw_error(env, nullptr, errorMsg); \
   return nullptr; \
+}
+
+#define NAPI_REJECT_FATAL_EXCEPTION(fe) { \
+  orb->destroy(); \
+	char errorMsg[512]; \
+	snprintf(errorMsg, 512, "Omni ORB fatal exception thrown at line %i of %s: %s", fe.line(), fe.file(), fe.errmsg()); \
+	c->errorMsg = std::string(errorMsg); \
+	c->status = QGW_FATAL_EXCEPTION; \
+	return; \
 }
 
 #define START 0
 #define STOP 1
 #define JUMP 2
 #define TRANSITION 3
-
-// Async error handling
-#define QGW_ERROR_START 6000
-#define QGW_INVALID_ARGS 6001
-#define QGW_SUCCESS 0
 
 struct carrier {
   virtual ~carrier() {}
@@ -107,6 +137,7 @@ int32_t rejectStatus(napi_env env, carrier* c, char* file, int32_t line);
 
 napi_status retrieveZonePortal(napi_env env, napi_callback_info info,
 	CORBA::ORB_var *orb, Quentin::ZonePortal::_ptr_type *zp);
+napi_status resolveZonePortal(char* ior, CORBA::ORB_var *orb, Quentin::ZonePortal::_ptr_type *zp);
 char* formatTimecode(Quentin::Timecode tc);
 napi_status convertToDate(napi_env env, CORBA::ORB_var orb, std::string date, napi_value *nodeDate);
 

@@ -1,33 +1,83 @@
 #include "zone.h"
 
-napi_value testConnection(napi_env env, napi_callback_info info) {
-
-  napi_status status;
-  napi_value result;
-  CORBA::ORB_var orb;
-  Quentin::ZonePortal::_ptr_type zp;
-
+void testConnectionExecute(napi_env env, void* data) {
+	testConnectionCarrier* c = (testConnectionCarrier*) data;
+	napi_status status;
+	CORBA::ORB_var orb;
+	Quentin::ZonePortal::_ptr_type zp;
 	try {
-	  status = retrieveZonePortal(env, info, &orb, &zp);
-	  CHECK_STATUS;
+		status = resolveZonePortal(c->isaIOR, &orb, &zp);
 
-	  long zoneNumber = zp->getZoneNumber();
-	  status = napi_get_boolean(env, zoneNumber > 0, &result);
-	  CHECK_STATUS;
+		c->zoneNumber = zp->getZoneNumber();
 	}
 	catch(CORBA::SystemException& ex) {
-		NAPI_THROW_CORBA_EXCEPTION(ex);
+		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
 	}
 	catch(CORBA::Exception& ex) {
-		NAPI_THROW_CORBA_EXCEPTION(ex);
+		NAPI_REJECT_CORBA_EXCEPTION(ex);
 	}
 	catch(omniORB::fatalException& fe) {
-		NAPI_THROW_FATAL_EXCEPTION(fe);
+		NAPI_REJECT_FATAL_EXCEPTION(fe);
 	}
 
-  orb->destroy();
+	orb->destroy();
+}
 
-  return result;
+void testConnectionComplete(napi_env env, napi_status asyncStatus, void* data) {
+  testConnectionCarrier* c = (testConnectionCarrier*) data;
+	napi_value result;
+
+	if (asyncStatus != napi_ok) {
+		c->status = asyncStatus;
+		c->errorMsg = "Test connection failed to complete.";
+	}
+	REJECT_STATUS;
+
+	c->status = napi_create_string_utf8(env, "PONG!", NAPI_AUTO_LENGTH, &result);
+	REJECT_STATUS;
+
+	napi_status status;
+	status = napi_resolve_deferred(env, c->_deferred, result);
+	FLOATING_STATUS;
+
+	tidyCarrier(env, c);
+}
+
+napi_value testConnection(napi_env env, napi_callback_info info) {
+  testConnectionCarrier* c = new testConnectionCarrier;
+  napi_value promise, resourceName;
+	char* isaIOR = nullptr;
+	size_t iorLen = 0;
+
+  c->status = napi_create_promise(env, &c->_deferred, &promise);
+  REJECT_RETURN;
+
+	size_t argc = 1;
+	napi_value argv[1];
+	c->status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+	REJECT_RETURN;
+
+	if (argc < 1) {
+		REJECT_ERROR_RETURN("Connection test must be provided with a IOR reference to an ISA server.",
+	    QGW_INVALID_ARGS);
+	}
+	c->status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &iorLen);
+	REJECT_RETURN;
+	isaIOR = (char*) malloc((iorLen + 1) * sizeof(char));
+	c->status = napi_get_value_string_utf8(env, argv[0], isaIOR, iorLen + 1, &iorLen);
+	REJECT_RETURN;
+
+	c->isaIOR = isaIOR;
+
+	c->status = napi_create_string_utf8(env, "TestConnection", NAPI_AUTO_LENGTH, &resourceName);
+  REJECT_RETURN;
+  c->status = napi_create_async_work(env, nullptr, resourceName, testConnectionExecute,
+    testConnectionComplete, c, &c->_request);
+  REJECT_RETURN;
+  c->status = napi_queue_async_work(env, c->_request);
+  REJECT_RETURN;
+
+  return promise;
 }
 
 napi_value listZones(napi_env env, napi_callback_info info) {
