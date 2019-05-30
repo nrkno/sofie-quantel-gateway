@@ -307,7 +307,7 @@ napi_value getPlayPortStatus(napi_env env, napi_callback_info info) {
 		status = napi_create_array(env, &chanList);
 		CHECK_STATUS;
 
-		for ( int x = 0 ; x < channels->length() ; x++ ) {
+		for ( uint32_t x = 0 ; x < channels->length() ; x++ ) {
 			status = napi_create_int32(env, channels[x], &prop);
 			CHECK_STATUS;
 			status = napi_set_element(env, chanList, x, prop);
@@ -495,7 +495,7 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
     CHECK_STATUS;
     fragments.length(fragmentNo);
 
-    for ( int i = 0 ; i < fragmentNo ; i++ ) {
+    for ( uint32_t i = 0 ; i < fragmentNo ; i++ ) {
       status = napi_get_element(env, fragprop, i, &prop);
       CHECK_STATUS;
 

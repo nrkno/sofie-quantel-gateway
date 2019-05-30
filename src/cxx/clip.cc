@@ -2,7 +2,7 @@
 
 napi_value getClipData(napi_env env, napi_callback_info info) {
 	napi_status status;
-  napi_value result, prop, options, frag, fragprop;
+  napi_value result, prop, options;
   napi_valuetype type;
   bool isArray;
   CORBA::ORB_var orb;
@@ -45,8 +45,7 @@ napi_value getClipData(napi_env env, napi_callback_info info) {
 		Quentin::ColumnDescList_var cdl = zp->getColumnDescriptions();
 		Quentin::WStrings columns;
 		columns.length(cdl->length());
-		for ( int x = 0 ; x < cdl->length() ; x++ ) {
-			wprintf(L"Property %ws has type %ws\n", cdl[x].columnName, cdl[x].columnType);
+		for ( uint32_t x = 0 ; x < cdl->length() ; x++ ) {
 			columns[x] = cdl[x].columnName;
 		}
 
@@ -54,7 +53,7 @@ napi_value getClipData(napi_env env, napi_callback_info info) {
 
 		std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
-		for ( int x = 0 ; x < results->length() ; x++ ) {
+		for ( uint32_t x = 0 ; x < results->length() ; x++ ) {
 			std::string value = utf8_conv.to_bytes(results[x]);
 			status = napi_create_string_utf8(env, value.c_str(), NAPI_AUTO_LENGTH, &prop);
 			CHECK_STATUS;
@@ -150,7 +149,7 @@ napi_value searchClips(napi_env env, napi_callback_info info) {
 		status = napi_get_array_length(env, terms, &termCount);
 		CHECK_STATUS;
 		cpl.length(termCount);
-		for ( int x = 0 ; x < termCount ; x++ ) {
+		for ( uint32_t x = 0 ; x < termCount ; x++ ) {
 			status = napi_get_element(env, terms, x, &term);
 			CHECK_STATUS;
 			status = napi_get_property(env, options, term, &prop);
@@ -196,7 +195,7 @@ napi_value searchClips(napi_env env, napi_callback_info info) {
 
 		Quentin::WStrings_var results = zp->searchClips(cpl, columns, 10);
 		resultCount = 0;
-		for ( int x = 0 ; x < results->length() ; x++ ) {
+		for ( uint32_t x = 0 ; x < results->length() ; x++ ) {
 			std::string value = utf8_conv.to_bytes(results[x]);
 			std::string key = utf8_conv.to_bytes(columns[x % 7]);
 
@@ -312,7 +311,7 @@ napi_value getFragments(napi_env env, napi_callback_info info) {
     status = napi_create_array(env, &prop);
     CHECK_STATUS;
 
-    for ( int x = 0 ; x < fragments->length() ; x++ ) {
+    for ( uint32_t x = 0 ; x < fragments->length() ; x++ ) {
       status = napi_create_object(env, &frag);
       CHECK_STATUS;
 

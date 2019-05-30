@@ -52,7 +52,7 @@ napi_value listZones(napi_env env, napi_callback_info info) {
 		}
 		zoneIDs[0] = zp->getZoneNumber(); // Always start with the local/default zone
 
-		for ( int x = 0 ; x < zoneIDs->length() ; x++ ) {
+		for ( uint32_t x = 0 ; x < zoneIDs->length() ; x++ ) {
 			status = napi_create_object(env, &item);
 			CHECK_STATUS;
 
@@ -172,7 +172,7 @@ napi_value getServers(napi_env env, napi_callback_info info) {
 	  CHECK_STATUS;
 
 	  Quentin::Longs_var serverIDs = zp->getServers(true);
-	  for ( int x = 0 ; x < serverIDs->length() ; x++ ) {
+	  for ( uint32_t x = 0 ; x < serverIDs->length() ; x++ ) {
 	    status = napi_create_object(env, &item);
 	    CHECK_STATUS;
 
@@ -209,7 +209,7 @@ napi_value getServers(napi_env env, napi_callback_info info) {
 
 	      status = napi_create_array(env, &prop);
 	      CHECK_STATUS;
-	      for ( int y = 0 ; y < serverInfo->pools.length() ; y++ ) {
+	      for ( uint32_t y = 0 ; y < serverInfo->pools.length() ; y++ ) {
 	        status = napi_create_int32(env, serverInfo->pools[y], &subprop);
 	        CHECK_STATUS;
 	        status = napi_set_element(env, prop, y, subprop);
@@ -221,7 +221,7 @@ napi_value getServers(napi_env env, napi_callback_info info) {
 	      portNames = server->getPortNames();
 	      status = napi_create_array(env, &prop);
 	      CHECK_STATUS;
-	      for ( int y = 0 ; y < portNames->length(); y++ ) {
+	      for ( uint32_t y = 0 ; y < portNames->length(); y++ ) {
 		      portName = utf8_conv.to_bytes(portNames[y]);
 
 	        status = napi_create_string_utf8(env, portName.c_str(), NAPI_AUTO_LENGTH, &subprop);
@@ -235,7 +235,7 @@ napi_value getServers(napi_env env, napi_callback_info info) {
 				chanPorts = server->getChanPorts();
 				status = napi_create_array(env, &prop);
 				CHECK_STATUS;
-				for ( int y = 0 ; y < chanPorts->length() ; y++ ) {
+				for ( uint32_t y = 0 ; y < chanPorts->length() ; y++ ) {
 					portName = utf8_conv.to_bytes(chanPorts[y]);
 
 					status = napi_create_string_utf8(env, portName.c_str(), NAPI_AUTO_LENGTH, &subprop);

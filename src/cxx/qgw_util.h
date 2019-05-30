@@ -67,6 +67,44 @@ napi_status checkStatus(napi_env env, napi_status status,
 #define JUMP 2
 #define TRANSITION 3
 
+// Async error handling
+#define QGW_ERROR_START 6000
+#define QGW_INVALID_ARGS 6001
+#define QGW_SUCCESS 0
+
+struct carrier {
+  virtual ~carrier() {}
+  napi_ref passthru = nullptr;
+  int32_t status = QGW_SUCCESS;
+  std::string errorMsg;
+  long long totalTime;
+  napi_deferred _deferred;
+  napi_async_work _request = nullptr;
+};
+
+void tidyCarrier(napi_env env, carrier* c);
+int32_t rejectStatus(napi_env env, carrier* c, char* file, int32_t line);
+
+#define REJECT_STATUS if (rejectStatus(env, c, (char*) __FILE__, __LINE__) != QGW_SUCCESS) return;
+#define REJECT_BAIL if (rejectStatus(env, c, (char*) __FILE__, __LINE__) != QGW_SUCCESS) goto bail;
+#define REJECT_RETURN if (rejectStatus(env, c, (char*) __FILE__, __LINE__) != QGW_SUCCESS) return promise;
+#define FLOATING_STATUS if (status != napi_ok) { \
+  printf("Unexpected N-API status not OK in file %s at line %d value %i.\n", \
+    __FILE__, __LINE__ - 1, status); \
+}
+
+#define REJECT_ERROR(msg, status) { \
+  c->errorMsg = msg; \
+  c->status = status; \
+  REJECT_STATUS; \
+}
+
+#define REJECT_ERROR_RETURN(msg, stat) { \
+  c->errorMsg = msg; \
+  c->status = stat; \
+  REJECT_RETURN; \
+}
+
 napi_status retrieveZonePortal(napi_env env, napi_callback_info info,
 	CORBA::ORB_var *orb, Quentin::ZonePortal::_ptr_type *zp);
 char* formatTimecode(Quentin::Timecode tc);

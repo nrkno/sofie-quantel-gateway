@@ -705,7 +705,7 @@ public:
 
 
   inline ~_CORBA_Sequence_WString() {
-    printf("pd_rel %p && pd_data %p\n", pd_rel, pd_data);
+    printf("pd_rel %i && pd_data %p\n", pd_rel, pd_data);
     // FIXME work out why this causes seg faults
     // if (pd_rel && pd_data) freebuf(pd_data);
     pd_data = 0;
