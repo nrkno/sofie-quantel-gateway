@@ -1,14 +1,24 @@
 {
   "targets": [{
     "target_name" : "quantel_gateway",
-    "sources" : [ "src/cxx/orbital.cc", "src/cxx/quentin.cc" ],
+    "sources" : [
+	  "src/cxx/quantel_gateway.cc",
+	  "src/cxx/quentin.cc",
+	  "src/cxx/qgw_util.cc",
+	  "src/cxx/zone.cc",
+	  "src/cxx/clip.cc",
+	  "src/cxx/port.cc",
+	  "src/cxx/control.cc",
+	  "src/cxx/thumbs.cc"
+	],
     "conditions": [
       ['OS=="win"', {
         "configurations": {
           "Release": {
             "msvs_settings": {
               "VCCLCompilerTool": {
-                "RuntimeTypeInfo": "true"
+                "RuntimeTypeInfo": "true",
+				"ExceptionHandling": 1
               }
             }
           }
