@@ -3,8 +3,8 @@ import * as request from 'request'
 //
 const quantel = require('../build/Release/quantel_gateway')
 
-import * as SegfaultHandler from 'segfault-handler'
-SegfaultHandler.registerHandler('crash.log')
+// import * as SegfaultHandler from 'segfault-handler'
+// SegfaultHandler.registerHandler('crash.log')
 
 export namespace Quantel {
 
@@ -49,11 +49,16 @@ export namespace Quantel {
 		portTime: string,
 		speed: number,
 		offset: number,
-		flags: number,
+		status: string,
 		endOfData: number,
 		framesUnused: number,
 		outputTime: string,
 		channels: number[],
+	}
+
+	export interface ReleaseStatus extends PortRef {
+		type: string,
+		released: boolean
 	}
 
 	export interface ClipRef {
@@ -352,7 +357,7 @@ export namespace Quantel {
 		await getISAReference()
 		try {
 			await checkServerPort(options)
-			return quantel.getPlayPortStatus(await isaIOR, options)
+			return await quantel.getPlayPortStatus(await isaIOR, options)
 		} catch (err) {
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
@@ -362,11 +367,11 @@ export namespace Quantel {
 		}
 	}
 
-	export async function releasePort (options: PortRef): Promise<boolean> {
+	export async function releasePort (options: PortRef): Promise<ReleaseStatus> {
 		await getISAReference()
 		try {
 			await checkServerPort(options)
-			return quantel.releasePort(await isaIOR, options)
+			return await quantel.releasePort(await isaIOR, options)
 		} catch (err) {
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null

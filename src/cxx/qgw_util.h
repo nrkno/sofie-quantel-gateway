@@ -146,7 +146,7 @@ int32_t rejectStatus(napi_env env, carrier* c, char* file, int32_t line);
 napi_status retrieveZonePortal(napi_env env, napi_callback_info info,
 	CORBA::ORB_var *orb, Quentin::ZonePortal::_ptr_type *zp);
 napi_status resolveZonePortal(char* ior, CORBA::ORB_var *orb, Quentin::ZonePortal::_ptr_type *zp);
-char* formatTimecode(Quentin::Timecode tc);
+std::string formatTimecode(Quentin::Timecode tc);
 napi_status convertToDate(napi_env env, CORBA::ORB_var orb, std::string date, napi_value *nodeDate);
 
 #endif // QGW_UTIL

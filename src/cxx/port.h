@@ -2,6 +2,7 @@
 #define QGW_PORT
 
 #include "qgw_util.h"
+#include <vector>
 
 extern int32_t portCounter;
 
@@ -22,6 +23,34 @@ struct createPlayPortCarrier : carrier {
 	bool assigned = false;
 	int32_t portID = -1;
 	~createPlayPortCarrier() { }
+};
+
+void getPlayPortExecute(napi_env env, void* data);
+void getPlayPortComplete(napi_env env, napi_status asyncStatus, void* data);
+
+struct playPortStatusCarrier : carrier {
+	int32_t serverID;
+	std::string portName;
+  std::string refTime;
+	std::string portTime;
+	int32_t portNumber;
+	double speed;
+	int64_t offset;
+	std::string statusFlags;
+	int64_t endOfData;
+	int64_t framesUnused;
+	std::string outputTime;
+	std::vector<int32_t> channels;
+	~playPortStatusCarrier() { }
+};
+
+void releasePortExecute(napi_env env, void* data);
+void releasePortComplete(napi_env env, napi_status asyncStatus, void* data);
+
+struct releasePortCarrier : carrier {
+	int32_t serverID;
+	std::string portName;
+	~releasePortCarrier() { }
 };
 
 #endif // QGW_PORT

@@ -73,7 +73,7 @@ napi_status resolveZonePortal(char* ior, CORBA::ORB_var *orb, Quentin::ZonePorta
 	return napi_ok;
 }
 
-char* formatTimecode(Quentin::Timecode tc) {
+std::string formatTimecode(Quentin::Timecode tc) {
 	int32_t HH, hh, MM, mm, SS, ss, FF, ff;
 	bool drop = (tc & 0x40000000) != 0;
 	char* tcstr = (char*) malloc(12 * sizeof(char));
@@ -85,9 +85,11 @@ char* formatTimecode(Quentin::Timecode tc) {
 	ss = (tc >>  8) & 0x0f;
 	FF = (tc >>  4) & 0x07;
 	ff = (tc >>  0) & 0x0f;
-	sprintf(tcstr, "%i%i:%i%i:%i%i%s%i%i", HH, hh, MM, mm, SS, ss,
+	snprintf(tcstr, 12, "%i%i:%i%i:%i%i%s%i%i", HH, hh, MM, mm, SS, ss,
     drop ? ";" : ":", FF, ff);
-	return tcstr;
+	std::string result(tcstr);
+	free(tcstr);
+	return result;
 }
 
 napi_status convertToDate(napi_env env, CORBA::ORB_var orb, std::string date, napi_value *nodeDate) {

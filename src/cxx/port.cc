@@ -224,282 +224,368 @@ napi_value createPlayPort(napi_env env, napi_callback_info info) {
   return promise;
 }
 
-napi_value getPlayPortStatus(napi_env env, napi_callback_info info) {
-  napi_status status;
-  napi_value result, prop, options, chanList;
-  napi_valuetype type;
-  bool isArray;
-  CORBA::ORB_var orb;
-  Quentin::ZonePortal::_ptr_type zp;
-  int32_t serverID;
-  char* portName;
-  size_t portNameLen;
-  Quentin::WStrings_var portNames;
+void getPlayPortExecute(napi_env env, void* data) {
+	playPortStatusCarrier* c = (playPortStatusCarrier*) data;
+	CORBA::ORB_var orb;
+	Quentin::ZonePortal::_ptr_type zp;
 	Quentin::Longs_var channels;
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
-  try {
-    status = retrieveZonePortal(env, info, &orb, &zp);
-    CHECK_STATUS;
+	try {
+		resolveZonePortal(c->isaIOR, &orb, &zp);
 
-    size_t argc = 2;
-    napi_value argv[2];
-    status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    CHECK_STATUS;
+	 	Quentin::Server_ptr server = zp->getServer(c->serverID);
 
-    if (argc < 2) {
-      NAPI_THROW_ORB_DESTROY("Options object with server ID, port name and channel must be provided.");
-    }
-    status = napi_typeof(env, argv[1], &type);
-    CHECK_STATUS;
-    status = napi_is_array(env, argv[1], &isArray);
-    CHECK_STATUS;
-    if (isArray || type != napi_object) {
-      NAPI_THROW_ORB_DESTROY("Argument must be an options object with server ID, port name and channel.");
-    }
+	 	std::wstring wportName = utf8_conv.from_bytes(c->portName);
+		Quentin::Port_var port = server->getPort(wportName.data(), 0);
 
-    status = napi_create_object(env, &result);
-    CHECK_STATUS;
-    status = napi_create_string_utf8(env, "PortStatus", NAPI_AUTO_LENGTH, &prop);
-    CHECK_STATUS;
-    status = napi_set_named_property(env, result, "type", prop);
-    CHECK_STATUS;
+	 	Quentin::PortListener::PlayPortStatus* gps = &port->getStatus().playStatus();
 
-    options = argv[1];
-    status = napi_get_named_property(env, options, "serverID", &prop);
-    CHECK_STATUS;
-    status = napi_get_value_int32(env, prop, &serverID);
-    CHECK_STATUS;
-    status = napi_set_named_property(env, result, "serverID", prop);
-    CHECK_STATUS;
+		c->refTime = formatTimecode(gps->refTime);
+		c->portTime = formatTimecode(gps->portTime);
+		c->portNumber = gps->portNumber;
+		c->speed = gps->speed;
+		c->offset = gps->offset;
+		switch (gps->flags & 0x0f) {
+		case 1:
+			c->statusFlags = std::string("readyToPlay"); break;
+		case 2:
+			c->statusFlags = std::string("playing"); break;
+		case 3:
+			c->statusFlags = std::string("playing&readyToPlay"); break;
+		case 4:
+			c->statusFlags = std::string("jumpReady"); break;
+		case 5:
+			c->statusFlags = std::string("jumpReady&readyToPlay"); break;
+		case 6:
+			c->statusFlags = std::string("jumpReady&playing"); break;
+		case 7:
+			c->statusFlags = std::string("jumpReady&readyToPlay&playing"); break;
+		case 8:
+			c->statusFlags = std::string("fading"); break;
+		default:
+			c->statusFlags = std::string("unknown"); break;
+	 }
+	 c->endOfData = gps->endOfData;
+	 c->framesUnused = gps->framesUnused;
+	 c->outputTime = formatTimecode(gps->outputTime);
 
-    status = napi_get_named_property(env, options, "portName", &prop);
-    CHECK_STATUS;
-    status = napi_get_value_string_utf8(env, prop, nullptr, 0, &portNameLen);
-    CHECK_STATUS;
-    portName = (char*) malloc((portNameLen + 1) * sizeof(char));
-    status = napi_get_value_string_utf8(env, prop, portName, portNameLen + 1, &portNameLen);
-    CHECK_STATUS;
-    status = napi_set_named_property(env, result, "portName", prop);
-    CHECK_STATUS;
-
-    Quentin::Server_ptr server = zp->getServer(serverID);
-
-    std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
-    std::wstring wportName = utf8_conv.from_bytes(portName);
-
-    // Prevent accidental creation of extra port
-    /* portNames = server->getPortNames();
-    bool foundPort = false;
-    for ( int x = 0 ; x < portNames->length() ; x++ ) {
-      if (wcscmp(wportName.data(), (const wchar_t *) portNames[x]) == 0) {
-        foundPort = true;
-        break;
-      }
-    }
-    free(portName);
-    if (!foundPort) {
-      NAPI_THROW_ORB_DESTROY("Cannot retrieve status for an unknown port name.");
-    } */
-
-    Quentin::Port_ptr port = server->getPort(wportName.data(), 0);
-
-    Quentin::PortListener::PlayPortStatus* gps = &port->getStatus().playStatus();
-
-    status = napi_create_string_utf8(env, formatTimecode(gps->refTime), NAPI_AUTO_LENGTH, &prop);
-		CHECK_STATUS;
-		status = napi_set_named_property(env, result, "refTime", prop);
-		CHECK_STATUS;
-
-		status = napi_create_string_utf8(env, formatTimecode(gps->portTime), NAPI_AUTO_LENGTH, &prop);
-		CHECK_STATUS;
-		status = napi_set_named_property(env, result, "portTime", prop);
-		CHECK_STATUS;
-
-    status = napi_create_int32(env, gps->portNumber, &prop);
-    CHECK_STATUS;
-    status = napi_set_named_property(env, result, "portID", prop);
-    CHECK_STATUS;
-
-    status = napi_create_double(env, gps->speed, &prop);
-    CHECK_STATUS;
-    status = napi_set_named_property(env, result, "speed", prop);
-    CHECK_STATUS;
-
-    status = napi_create_int64(env, gps->offset, &prop);
-    CHECK_STATUS;
-    status = napi_set_named_property(env, result, "offset", prop);
-    CHECK_STATUS;
-
-    printf("Flags %i\n", gps->flags);
-    switch (gps->flags & 0x0f) {
-      case 1:
-        status = napi_create_string_utf8(env, "readyToPlay", NAPI_AUTO_LENGTH, &prop);
-        CHECK_STATUS;
-        break;
-      case 2:
-        status = napi_create_string_utf8(env, "playing", NAPI_AUTO_LENGTH, &prop);
-        CHECK_STATUS;
-        break;
-      case 3:
-        status = napi_create_string_utf8(env, "playing&readyToPlay", NAPI_AUTO_LENGTH, &prop);
-        CHECK_STATUS;
-        break;
-      case 4:
-        status = napi_create_string_utf8(env, "jumpReady", NAPI_AUTO_LENGTH, &prop);
-        CHECK_STATUS;
-        break;
-      case 5:
-        status = napi_create_string_utf8(env, "jumpReady&readyToPlay", NAPI_AUTO_LENGTH, &prop);
-        CHECK_STATUS;
-        break;
-      case 6:
-        status = napi_create_string_utf8(env, "jumpReady&playing", NAPI_AUTO_LENGTH, &prop);
-        CHECK_STATUS;
-        break;
-      case 7:
-        status = napi_create_string_utf8(env, "jumpReady&readyToPlay&playing", NAPI_AUTO_LENGTH, &prop);
-        CHECK_STATUS;
-        break;
-      case 8:
-        status = napi_create_string_utf8(env, "fading", NAPI_AUTO_LENGTH, &prop);
-        CHECK_STATUS;
-        break;
-      default:
-        status = napi_create_string_utf8(env, "unknown", NAPI_AUTO_LENGTH, &prop);
-        CHECK_STATUS;
-    }
-    status = napi_set_named_property(env, result, "status", prop);
-    CHECK_STATUS;
-
-    status = napi_create_int64(env, gps->endOfData, &prop);
-    CHECK_STATUS;
-    status = napi_set_named_property(env, result, "endOfData", prop);
-    CHECK_STATUS;
-
-    status = napi_create_int64(env, gps->framesUnused, &prop);
-    CHECK_STATUS;
-    status = napi_set_named_property(env, result, "framesUnused", prop);
-    CHECK_STATUS;
-
-		status = napi_create_string_utf8(env, formatTimecode(gps->outputTime), NAPI_AUTO_LENGTH, &prop);
-		CHECK_STATUS;
-		status = napi_set_named_property(env, result, "outputTime", prop);
-		CHECK_STATUS;
-
-		channels = port->getChannels();
-		status = napi_create_array(env, &chanList);
-		CHECK_STATUS;
-
-		for ( uint32_t x = 0 ; x < channels->length() ; x++ ) {
-			status = napi_create_int32(env, channels[x], &prop);
-			CHECK_STATUS;
-			status = napi_set_element(env, chanList, x, prop);
-			CHECK_STATUS;
-		}
-
-		status = napi_set_named_property(env, result, "channels", chanList);
-		CHECK_STATUS;
-
-  }
-  catch(CORBA::SystemException& ex) {
-    NAPI_THROW_CORBA_EXCEPTION(ex);
-  }
-  catch(CORBA::Exception& ex) {
-    NAPI_THROW_CORBA_EXCEPTION(ex);
-  }
-  catch(omniORB::fatalException& fe) {
-    NAPI_THROW_FATAL_EXCEPTION(fe);
-  }
+	 channels = port->getChannels();
+	 for ( uint32_t x = 0 ; x < channels->length() ; x++ ) {
+		 c->channels.push_back(channels[x]);
+	 }
+ }
+ catch(CORBA::SystemException& ex) {
+	 NAPI_REJECT_SYSTEM_EXCEPTION(ex);
+ }
+ catch(CORBA::Exception& ex) {
+	 NAPI_REJECT_CORBA_EXCEPTION(ex);
+ }
+ catch(omniORB::fatalException& fe) {
+	 NAPI_REJECT_FATAL_EXCEPTION(fe);
+ }
 
   orb->destroy();
-  return result;
 }
 
-napi_value releasePort(napi_env env, napi_callback_info info) {
-  napi_status status;
-  napi_value prop, options;
+void getPlayPortComplete(napi_env env, napi_status asyncStatus, void* data) {
+	playPortStatusCarrier* c = (playPortStatusCarrier*) data;
+	napi_value result, prop, chanList;
+
+	if (asyncStatus != napi_ok) {
+		c->status = asyncStatus;
+		c->errorMsg = "Test connection failed to complete.";
+	}
+	REJECT_STATUS;
+
+	c->status = napi_create_object(env, &result);
+	REJECT_STATUS;
+	c->status = napi_create_string_utf8(env, "PortStatus", NAPI_AUTO_LENGTH, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "type", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, c->serverID, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "serverID", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_string_utf8(env, c->portName.c_str(), NAPI_AUTO_LENGTH, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "portName", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_string_utf8(env, c->refTime.c_str(), NAPI_AUTO_LENGTH, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "refTime", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_string_utf8(env, c->portTime.c_str(), NAPI_AUTO_LENGTH, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "portTime", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, c->portNumber, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "portID", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_double(env, c->speed, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "speed", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int64(env, c->offset, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "offset", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_string_utf8(env, c->statusFlags.c_str(), NAPI_AUTO_LENGTH, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "status", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int64(env, c->endOfData, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "endOfData", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int64(env, c->framesUnused, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "framesUnused", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_string_utf8(env, c->outputTime.c_str(), NAPI_AUTO_LENGTH, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "outputTime", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_array(env, &chanList);
+	REJECT_STATUS;
+
+	for ( uint32_t x = 0 ; x < c->channels.size() ; x++ ) {
+		c->status = napi_create_int32(env, c->channels.at(x), &prop);
+		REJECT_STATUS;
+		c->status = napi_set_element(env, chanList, x, prop);
+		REJECT_STATUS;
+	}
+	c->status = napi_set_named_property(env, result, "channels", chanList);
+	REJECT_STATUS;
+
+	napi_status status;
+	status = napi_resolve_deferred(env, c->_deferred, result);
+	FLOATING_STATUS;
+
+	tidyCarrier(env, c);
+}
+
+napi_value getPlayPortStatus(napi_env env, napi_callback_info info) {
+  playPortStatusCarrier* c = new playPortStatusCarrier;
+  napi_value promise, resourceName, options, prop;
   napi_valuetype type;
   bool isArray;
-  CORBA::ORB_var orb;
-  Quentin::ZonePortal::_ptr_type zp;
-  int32_t serverID;
   char* portName;
   size_t portNameLen;
-  Quentin::WStrings_var portNames;
+	char* isaIOR = nullptr;
+	size_t iorLen = 0;
 
-  try {
-    status = retrieveZonePortal(env, info, &orb, &zp);
-    CHECK_STATUS;
+  c->status = napi_create_promise(env, &c->_deferred, &promise);
+  REJECT_RETURN;
 
-    size_t argc = 2;
-    napi_value argv[2];
-    status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    CHECK_STATUS;
+	size_t argc = 2;
+	napi_value argv[2];
+	c->status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+	REJECT_RETURN;
 
-    if (argc < 2) {
-      NAPI_THROW_ORB_DESTROY("Options object with server ID, port name and channel must be provided.");
-    }
-    status = napi_typeof(env, argv[1], &type);
-    CHECK_STATUS;
-    status = napi_is_array(env, argv[1], &isArray);
-    CHECK_STATUS;
-    if (isArray || type != napi_object) {
-      NAPI_THROW_ORB_DESTROY("Argument must be an options object with server ID, port name and channel.");
-    }
+	if (argc < 1) {
+		REJECT_ERROR_RETURN("Connection test must be provided with a IOR reference to an ISA server.",
+	    QGW_INVALID_ARGS);
+	}
+	c->status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &iorLen);
+	REJECT_RETURN;
+	isaIOR = (char*) malloc((iorLen + 1) * sizeof(char));
+	c->status = napi_get_value_string_utf8(env, argv[0], isaIOR, iorLen + 1, &iorLen);
+	REJECT_RETURN;
 
-    options = argv[1];
-    status = napi_get_named_property(env, options, "serverID", &prop);
-    CHECK_STATUS;
-    status = napi_get_value_int32(env, prop, &serverID);
-    CHECK_STATUS;
+	c->isaIOR = isaIOR;
 
-    status = napi_get_named_property(env, options, "portName", &prop);
-    CHECK_STATUS;
-    status = napi_get_value_string_utf8(env, prop, nullptr, 0, &portNameLen);
-    CHECK_STATUS;
-    portName = (char*) malloc((portNameLen + 1) * sizeof(char));
-    status = napi_get_value_string_utf8(env, prop, portName, portNameLen + 1, &portNameLen);
-    CHECK_STATUS;
+	if (argc < 2) {
+		REJECT_ERROR_RETURN("Options object with server ID and port name must be provided.",
+	    QGW_INVALID_ARGS);
+	}
+	c->status = napi_typeof(env, argv[1], &type);
+	REJECT_RETURN;
+	c->status = napi_is_array(env, argv[1], &isArray);
+	REJECT_RETURN;
+	if (isArray || type != napi_object) {
+		REJECT_ERROR_RETURN("Argument must be an options object with server ID and port name.",
+	    QGW_INVALID_ARGS);
+	}
 
-    Quentin::Server_ptr server = zp->getServer(serverID);
+	options = argv[1];
+	c->status = napi_get_named_property(env, options, "serverID", &prop);
+	REJECT_RETURN;
+	c->status = napi_get_value_int32(env, prop, &c->serverID);
+	REJECT_RETURN;
 
-    std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
-    std::wstring wportName = utf8_conv.from_bytes(portName);
+	c->status = napi_get_named_property(env, options, "portName", &prop);
+	REJECT_RETURN;
+	c->status = napi_get_value_string_utf8(env, prop, nullptr, 0, &portNameLen);
+	REJECT_RETURN;
+	portName = (char*) malloc((portNameLen + 1) * sizeof(char));
+	c->status = napi_get_value_string_utf8(env, prop, portName, portNameLen + 1, &portNameLen);
+	REJECT_RETURN;
+	c->portName = std::string(portName);
+	free(portName);
 
-    // Prevent accidental creation of extra port
-    /* portNames = server->getPortNames();
-    bool foundPort = false;
-    for ( int x = 0 ; x < portNames->length() ; x++ ) {
-      if (wcscmp(wportName.data(), (const wchar_t *) portNames[x]) == 0) {
-        foundPort = true;
-        break;
-      }
-    }
-    free(portName);
-    if (!foundPort) {
-      NAPI_THROW_ORB_DESTROY("Cannot release a port with an unknown port name.");
-    } */
+	c->status = napi_create_string_utf8(env, "GetPlayPortStatus", NAPI_AUTO_LENGTH, &resourceName);
+  REJECT_RETURN;
+  c->status = napi_create_async_work(env, nullptr, resourceName, getPlayPortExecute,
+    getPlayPortComplete, c, &c->_request);
+  REJECT_RETURN;
+  c->status = napi_queue_async_work(env, c->_request);
+  REJECT_RETURN;
 
-    Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(portName).data(), 0);
+  return promise;
+}
+
+void releasePortExecute(napi_env env, void* data) {
+	releasePortCarrier* c = (releasePortCarrier*) data;
+	CORBA::ORB_var orb;
+	Quentin::ZonePortal::_ptr_type zp;
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+
+	try {
+		resolveZonePortal(c->isaIOR, &orb, &zp);
+
+		Quentin::Server_ptr server = zp->getServer(c->serverID);
+    Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(c->portName).data(), 0);
 
 		port->setMode(Quentin::Port::PortMode::idle);
     port->reset();
     port->release();
-  }
-  catch(CORBA::SystemException& ex) {
-    NAPI_THROW_CORBA_EXCEPTION(ex);
-  }
-  catch(CORBA::Exception& ex) {
-    NAPI_THROW_CORBA_EXCEPTION(ex);
-  }
-  catch(omniORB::fatalException& fe) {
-    NAPI_THROW_FATAL_EXCEPTION(fe);
-  }
+	}
+	catch(CORBA::SystemException& ex) {
+		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
+	}
+	catch(CORBA::Exception& ex) {
+		NAPI_REJECT_CORBA_EXCEPTION(ex);
+	}
+	catch(omniORB::fatalException& fe) {
+		NAPI_REJECT_FATAL_EXCEPTION(fe);
+	}
 
-  orb->destroy();
-  status = napi_get_boolean(env, true, &prop);
-  CHECK_STATUS;
-  return prop;
+	orb->destroy();
+}
+
+void releasePortComplete(napi_env env, napi_status asyncStatus, void* data) {
+	releasePortCarrier* c = (releasePortCarrier*) data;
+	napi_value result, prop;
+
+	if (asyncStatus != napi_ok) {
+		c->status = asyncStatus;
+		c->errorMsg = "Test connection failed to complete.";
+	}
+	REJECT_STATUS;
+
+	c->status = napi_create_object(env, &result);
+	REJECT_STATUS;
+
+	c->status = napi_create_string_utf8(env, "ReleaseStatus", NAPI_AUTO_LENGTH, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "type", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, c->serverID, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "serverID", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_string_utf8(env, c->portName.c_str(), NAPI_AUTO_LENGTH, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "portName", prop);
+	REJECT_STATUS;
+
+	c->status = napi_get_boolean(env, true, &prop);
+  REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "released", prop);
+	REJECT_STATUS;
+
+	napi_status status;
+	status = napi_resolve_deferred(env, c->_deferred, result);
+	FLOATING_STATUS;
+
+	tidyCarrier(env, c);
+}
+
+napi_value releasePort(napi_env env, napi_callback_info info) {
+	releasePortCarrier* c = new releasePortCarrier;
+	napi_value promise, resourceName, options, prop;
+  napi_valuetype type;
+  bool isArray;
+  char* portName;
+  size_t portNameLen;
+	char* isaIOR = nullptr;
+	size_t iorLen = 0;
+
+  c->status = napi_create_promise(env, &c->_deferred, &promise);
+  REJECT_RETURN;
+
+	size_t argc = 2;
+	napi_value argv[2];
+	c->status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+	REJECT_RETURN;
+
+	if (argc < 1) {
+		REJECT_ERROR_RETURN("Connection test must be provided with a IOR reference to an ISA server.",
+	    QGW_INVALID_ARGS);
+	}
+	c->status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &iorLen);
+	REJECT_RETURN;
+	isaIOR = (char*) malloc((iorLen + 1) * sizeof(char));
+	c->status = napi_get_value_string_utf8(env, argv[0], isaIOR, iorLen + 1, &iorLen);
+	REJECT_RETURN;
+
+	c->isaIOR = isaIOR;
+
+	if (argc < 2) {
+		REJECT_ERROR_RETURN("Options object with server ID and port name must be provided.",
+	    QGW_INVALID_ARGS);
+	}
+	c->status = napi_typeof(env, argv[1], &type);
+	REJECT_RETURN;
+	c->status = napi_is_array(env, argv[1], &isArray);
+	REJECT_RETURN;
+	if (isArray || type != napi_object) {
+		REJECT_ERROR_RETURN("Argument must be an options object with server ID and port name.",
+	    QGW_INVALID_ARGS);
+	}
+
+	options = argv[1];
+	c->status = napi_get_named_property(env, options, "serverID", &prop);
+	REJECT_RETURN;
+	c->status = napi_get_value_int32(env, prop, &c->serverID);
+	REJECT_RETURN;
+
+	c->status = napi_get_named_property(env, options, "portName", &prop);
+	REJECT_RETURN;
+	c->status = napi_get_value_string_utf8(env, prop, nullptr, 0, &portNameLen);
+	REJECT_RETURN;
+	portName = (char*) malloc((portNameLen + 1) * sizeof(char));
+	c->status = napi_get_value_string_utf8(env, prop, portName, portNameLen + 1, &portNameLen);
+	REJECT_RETURN;
+	c->portName = std::string(portName);
+	free(portName);
+
+	c->status = napi_create_string_utf8(env, "ReleasePort", NAPI_AUTO_LENGTH, &resourceName);
+  REJECT_RETURN;
+  c->status = napi_create_async_work(env, nullptr, resourceName, releasePortExecute,
+    releasePortComplete, c, &c->_request);
+  REJECT_RETURN;
+  c->status = napi_queue_async_work(env, c->_request);
+  REJECT_RETURN;
+
+  return promise;
 }
 
 napi_value loadPlayPort(napi_env env, napi_callback_info info) {
