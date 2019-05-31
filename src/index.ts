@@ -3,8 +3,8 @@ import * as request from 'request'
 //
 const quantel = require('../build/Release/quantel_gateway')
 
-// import * as SegfaultHandler from 'segfault-handler'
-// SegfaultHandler.registerHandler('crash.log')
+import * as SegfaultHandler from 'segfault-handler'
+SegfaultHandler.registerHandler('crash.log')
 
 export namespace Quantel {
 
@@ -273,7 +273,7 @@ export namespace Quantel {
 	export async function getDefaultZoneInfo (): Promise<ZoneInfo> {
 		await getISAReference()
 		try {
-			return quantel.getDefaultZoneInfo(await isaIOR)
+			return await quantel.listZones(await isaIOR)[0]
 		} catch (err) {
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
@@ -286,7 +286,7 @@ export namespace Quantel {
 	export async function getServers (): Promise<ServerInfo[]> {
 		await getISAReference()
 		try {
-			return quantel.getServers(await isaIOR)
+			return await quantel.getServers(await isaIOR)
 		} catch (err) {
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
@@ -297,7 +297,7 @@ export namespace Quantel {
 	}
 
 	async function checkServer (options: PortRef): Promise<ServerInfo> {
-		let servers = quantel.getServers(await isaIOR)
+		let servers = await quantel.getServers(await isaIOR)
 		let server = servers.find((x: ServerInfo) =>
 			x.ident === +options.serverID || x.name === options.serverID)
 		if (!server) {

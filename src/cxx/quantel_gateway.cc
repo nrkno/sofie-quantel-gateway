@@ -16,7 +16,6 @@ napi_value Init(napi_env env, napi_value exports) {
   napi_property_descriptor desc[] = {
     DECLARE_NAPI_METHOD("testConnection", testConnection),
 		DECLARE_NAPI_METHOD("listZones", listZones),
-    DECLARE_NAPI_METHOD("getDefaultZoneInfo", getDefaultZoneInfo),
     DECLARE_NAPI_METHOD("getServers", getServers),
     DECLARE_NAPI_METHOD("createPlayPort", createPlayPort),
     DECLARE_NAPI_METHOD("getPlayPortStatus", getPlayPortStatus),
@@ -36,7 +35,7 @@ napi_value Init(napi_env env, napi_value exports) {
     { "JUMP", nullptr, nullptr, nullptr, nullptr, jump, napi_enumerable, nullptr },
     { "TRANSITION", nullptr, nullptr, nullptr, nullptr, transition, napi_enumerable, nullptr },
   };
-  status = napi_define_properties(env, exports, 21, desc);
+  status = napi_define_properties(env, exports, 20, desc);
 
   return exports;
 }
