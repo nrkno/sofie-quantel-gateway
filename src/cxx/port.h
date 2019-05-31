@@ -11,4 +11,17 @@ napi_value releasePort(napi_env env, napi_callback_info info);
 
 napi_value loadPlayPort(napi_env env, napi_callback_info info);
 
+void createPlayPortExecute(napi_env env, void* data);
+void createPlayPortComplete(napi_env env, napi_status asyncStatus, void* data);
+
+struct createPlayPortCarrier : carrier {
+	int32_t serverID;
+  int32_t channelNo;
+	std::string portName;
+	bool audioOnly = false;
+	bool assigned = false;
+	int32_t portID = -1;
+	~createPlayPortCarrier() { }
+};
+
 #endif // QGW_PORT

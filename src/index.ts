@@ -324,13 +324,13 @@ export namespace Quantel {
 					portName: options.portName,
 					channelNo: options.channelNo,
 					portID: portStatus.portID,
-					assigned: true
+					assigned: false
 				} as PortInfo
 			}
 			if (server.chanPorts && server.chanPorts[options.channelNo].length !== 0) {
 				throw new ConnectError(`Bad request. Cannot assign channel '${options.channelNo}' to port '${options.portName}' on server '${options.serverID}' as it is already assigned to port '${server.chanPorts[options.channelNo]}'.`, 400)
 			}
-			return quantel.createPlayPort(await isaIOR, options)
+			return await quantel.createPlayPort(await isaIOR, options)
 		} catch (err) {
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
