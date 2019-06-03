@@ -2,6 +2,7 @@
 #define QGW_CLIP
 
 #include <vector>
+#include <map>
 #include "qgw_util.h"
 
 napi_value getClipData(napi_env env, napi_callback_info info);
@@ -23,5 +24,26 @@ struct clipDataCarrier : carrier {
 const std::string booleanName = "Boolean";
 const std::string numberName = "Number";
 const std::string dateName = "Date";
+
+void searchClipsExecute(napi_env env, void* data);
+void searchClipsComplete(napi_env env, napi_status asyncStatus, void* data);
+
+const std::vector<std::string> columnNames = {
+	"ClipID",
+	"CloneID",
+	"Completed",
+	"Created",
+	"Description",
+	"Frames",
+	"Owner",
+	"PoolID",
+	"Title"
+};
+
+struct searchClipsCarrier : carrier {
+	std::map<std::wstring, std::wstring> query;
+	std::vector<std::string> values;
+	~searchClipsCarrier() { }
+};
 
 #endif // QGW_CLIP

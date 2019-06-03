@@ -153,141 +153,193 @@ napi_value getClipData(napi_env env, napi_callback_info info) {
   return promise;
 }
 
-
-napi_value searchClips(napi_env env, napi_callback_info info) {
-	napi_status status;
-	napi_value result, prop, options, terms, term;
-	napi_valuetype type;
-	bool isArray;
+void searchClipsExecute(napi_env env, void* data) {
+	searchClipsCarrier* c = (searchClipsCarrier*) data;
 	CORBA::ORB_var orb;
 	Quentin::ZonePortal::_ptr_type zp;
 	Quentin::ClipPropertyList cpl;
-	uint32_t termCount, resultCount;
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+	uint32_t queryCounter = 0;
+
+	try {
+		resolveZonePortal(c->isaIOR, &orb, &zp);
+
+		cpl.length(c->query.size());
+		for ( auto it = c->query.begin(); it != c->query.end() ; ++it ) {
+			Quentin::ClipProperty cp = { it->first.data(), it->second.data() };
+			cpl[queryCounter++] = cp;
+		}
+
+		Quentin::WStrings columnNamesWide;
+		columnNamesWide.length(columnNames.size());
+		for ( uint32_t i = 0 ; i < columnNames.size() ; i++ ) {
+			columnNamesWide[i] = utf8_conv.from_bytes(columnNames.at(i)).data();
+		}
+
+		Quentin::WStrings_var results = zp->searchClips(cpl, columnNamesWide, 10);
+
+		for ( uint32_t i = 0 ; i < results->length() ; i++ ) {
+			c->values.push_back(utf8_conv.to_bytes(results[i]));
+		}
+	}
+	catch(CORBA::SystemException& ex) {
+		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
+	}
+	catch(CORBA::Exception& ex) {
+		NAPI_REJECT_CORBA_EXCEPTION(ex);
+	}
+	catch(omniORB::fatalException& fe) {
+		NAPI_REJECT_FATAL_EXCEPTION(fe);
+	}
+
+	orb->destroy();
+}
+
+void searchClipsComplete(napi_env env, napi_status asyncStatus, void* data) {
+	searchClipsCarrier* c = (searchClipsCarrier*) data;
+	napi_value result, term, prop;
+	uint32_t resultCount = 0;
+
+	if (asyncStatus != napi_ok) {
+		c->status = asyncStatus;
+		c->errorMsg = "Search clips failed to complete.";
+	}
+	REJECT_STATUS;
+
+	c->status = napi_create_array(env, &result);
+	REJECT_STATUS;
+
+	c->status = napi_create_object(env, &term);
+	REJECT_STATUS;
+	c->status = napi_create_string_utf8(env, "ClipDataSummary", NAPI_AUTO_LENGTH, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, term, "type", prop);
+	REJECT_STATUS;
+
+	for ( uint32_t x = 0 ; x < c->values.size() ; x++ ) {
+		std::string value = c->values.at(x);
+		std::string key = columnNames.at(x % columnNames.size());
+
+		if ((key == "ClipID") || (key == "CloneID") || (key == "PoolID")) {
+			c->status = napi_create_int32(env, std::stol(value), &prop);
+			REJECT_STATUS;
+		} else if ((key == "Completed") || (key == "Created")) {
+			c->status = convertToDate(env, value, &prop);
+			REJECT_STATUS;
+		} else {
+			c->status = napi_create_string_utf8(env, value.c_str(), NAPI_AUTO_LENGTH, &prop);
+			REJECT_STATUS;
+		}
+		c->status = napi_set_named_property(env, term, key.c_str(), prop);
+		REJECT_STATUS;
+
+		if (x % columnNames.size() == (columnNames.size() - 1)) {
+			c->status = napi_set_element(env, result, resultCount++, term);
+			REJECT_STATUS;
+			if (x < c->values.size() - 2) {
+				c->status = napi_create_object(env, &term);
+				REJECT_STATUS;
+				c->status = napi_create_string_utf8(env, "ClipDataSummary", NAPI_AUTO_LENGTH, &prop);
+				REJECT_STATUS;
+				c->status = napi_set_named_property(env, term, "type", prop);
+				REJECT_STATUS;
+			}
+		}
+	}
+
+	napi_status status;
+	status = napi_resolve_deferred(env, c->_deferred, result);
+	FLOATING_STATUS;
+
+	tidyCarrier(env, c);
+}
+
+napi_value searchClips(napi_env env, napi_callback_info info) {
+	searchClipsCarrier* c = new searchClipsCarrier;
+	napi_value promise, prop, options, term, terms, resourceName;
+	napi_valuetype type;
+	bool isArray;
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+	uint32_t termCount;
 	char* nameStr;
 	char* valueStr;
 	size_t strLen;
 
-	try {
-		status = retrieveZonePortal(env, info, &orb, &zp);
-		CHECK_STATUS;
+	char* isaIOR = nullptr;
+	size_t iorLen = 0;
 
-		size_t argc = 2;
-		napi_value argv[2];
-		status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-		CHECK_STATUS;
+  c->status = napi_create_promise(env, &c->_deferred, &promise);
+  REJECT_RETURN;
 
-		if (argc < 2) {
-			NAPI_THROW_ORB_DESTROY("Options object with search terms must be provided.");
-		}
-		status = napi_typeof(env, argv[1], &type);
-		CHECK_STATUS;
-		status = napi_is_array(env, argv[1], &isArray);
-		CHECK_STATUS;
-		if (isArray || type != napi_object) {
-			NAPI_THROW_ORB_DESTROY("Argument must be an options object with search terms.");
-		}
+	size_t argc = 2;
+	napi_value argv[2];
+	c->status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+	REJECT_RETURN;
 
-		status = napi_create_array(env, &result);
-		CHECK_STATUS;
-
-		std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
-
-		options = argv[1];
-		status = napi_get_property_names(env, options, &terms);
-		CHECK_STATUS;
-		status = napi_get_array_length(env, terms, &termCount);
-		CHECK_STATUS;
-		cpl.length(termCount);
-		for ( uint32_t x = 0 ; x < termCount ; x++ ) {
-			status = napi_get_element(env, terms, x, &term);
-			CHECK_STATUS;
-			status = napi_get_property(env, options, term, &prop);
-			CHECK_STATUS;
-
-			status = napi_get_value_string_utf8(env, term, nullptr, 0, &strLen);
-			CHECK_STATUS;
-			nameStr = (char *) malloc((strLen + 1) * sizeof(char));
-			status = napi_get_value_string_utf8(env, term, nameStr, strLen + 1, &strLen);
-			CHECK_STATUS;
-
-			status = napi_get_value_string_utf8(env, prop, nullptr, 0, &strLen);
-			CHECK_STATUS;
-			valueStr = (char *) malloc((strLen + 1) * sizeof(char));
-			status = napi_get_value_string_utf8(env, prop, valueStr, strLen + 1, &strLen);
-			CHECK_STATUS;
-
-			Quentin::ClipProperty cp = {
-				utf8_conv.from_bytes(nameStr).data(),
-				utf8_conv.from_bytes(valueStr).data() };
-			cpl[x] = cp;
-			// wprintf(L"%ws = %ws\n", cp.name, cp.value);
-			free(nameStr);
-			free(valueStr);
-		}
-
-		Quentin::WStrings columns;
-		columns.length(7);
-		columns[0] = L"ClipID";
-		columns[1] = L"Completed";
-		columns[2] = L"Created";
-		columns[3] = L"Description";
-		columns[4] = L"Frames";
-		columns[5] = L"Owner";
-		columns[6] = L"Title";
-
-		status = napi_create_object(env, &term);
-		CHECK_STATUS;
-		status = napi_create_string_utf8(env, "ClipDataSummary", NAPI_AUTO_LENGTH, &prop);
-		CHECK_STATUS;
-		status = napi_set_named_property(env, term, "type", prop);
-		CHECK_STATUS;
-
-		Quentin::WStrings_var results = zp->searchClips(cpl, columns, 10);
-		resultCount = 0;
-		for ( uint32_t x = 0 ; x < results->length() ; x++ ) {
-			std::string value = utf8_conv.to_bytes(results[x]);
-			std::string key = utf8_conv.to_bytes(columns[x % 7]);
-
-			if (strcmp(key.c_str(), "ClipID") == 0) {
-				status = napi_create_int32(env, std::stol(value), &prop);
-				CHECK_STATUS;
-			} else if (strcmp(key.c_str(), "Completed") == 0 || strcmp(key.c_str(), "Created") == 0) {
-				status = convertToDate(env, value, &prop);
-				CHECK_STATUS;
-			} else {
-				status = napi_create_string_utf8(env, value.c_str(), NAPI_AUTO_LENGTH, &prop);
-				CHECK_STATUS;
-			}
-			status = napi_set_named_property(env, term, key.c_str(), prop);
-			CHECK_STATUS;
-
-			if (x % 7 == 6) {
-				status = napi_set_element(env, result, resultCount++, term);
-				CHECK_STATUS;
-				if (x < results->length() - 2) {
-					status = napi_create_object(env, &term);
-					CHECK_STATUS;
-					status = napi_create_string_utf8(env, "ClipDataSummary", NAPI_AUTO_LENGTH, &prop);
-					CHECK_STATUS;
-					status = napi_set_named_property(env, term, "type", prop);
-					CHECK_STATUS;
-				}
-			}
-		}
-
+	if (argc < 1) {
+		REJECT_ERROR_RETURN("Clip search must be provided with a IOR reference to an ISA server.",
+	    QGW_INVALID_ARGS);
 	}
-	catch(CORBA::SystemException& ex) {
-		NAPI_THROW_CORBA_EXCEPTION(ex);
+	c->status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &iorLen);
+	REJECT_RETURN;
+	isaIOR = (char*) malloc((iorLen + 1) * sizeof(char));
+	c->status = napi_get_value_string_utf8(env, argv[0], isaIOR, iorLen + 1, &iorLen);
+	REJECT_RETURN;
+
+	c->isaIOR = isaIOR;
+
+	if (argc < 2) {
+		REJECT_ERROR_RETURN("Options object with search terms must be provided.",
+	    QGW_INVALID_ARGS);
 	}
-	catch(CORBA::Exception& ex) {
-		NAPI_THROW_CORBA_EXCEPTION(ex);
-	}
-	catch(omniORB::fatalException& fe) {
-		NAPI_THROW_FATAL_EXCEPTION(fe);
+	c->status = napi_typeof(env, argv[1], &type);
+	REJECT_RETURN;
+	c->status = napi_is_array(env, argv[1], &isArray);
+	REJECT_RETURN;
+	if (isArray || type != napi_object) {
+		REJECT_ERROR_RETURN("Argument must be an options object with search terms.",
+	    QGW_INVALID_ARGS);
 	}
 
-	orb->destroy();
-	return result;
+	options = argv[1];
+	c->status = napi_get_property_names(env, options, &terms);
+	REJECT_RETURN;
+	c->status = napi_get_array_length(env, terms, &termCount);
+	REJECT_RETURN;
+	for ( uint32_t x = 0 ; x < termCount ; x++ ) {
+		c->status = napi_get_element(env, terms, x, &term);
+		REJECT_RETURN;
+		c->status = napi_get_property(env, options, term, &prop);
+		REJECT_RETURN;
+
+		c->status = napi_get_value_string_utf8(env, term, nullptr, 0, &strLen);
+		REJECT_RETURN;
+		nameStr = (char *) malloc((strLen + 1) * sizeof(char));
+		c->status = napi_get_value_string_utf8(env, term, nameStr, strLen + 1, &strLen);
+		REJECT_RETURN;
+
+		c->status = napi_get_value_string_utf8(env, prop, nullptr, 0, &strLen);
+		REJECT_RETURN;
+		valueStr = (char *) malloc((strLen + 1) * sizeof(char));
+		c->status = napi_get_value_string_utf8(env, prop, valueStr, strLen + 1, &strLen);
+		REJECT_RETURN;
+
+		c->query.emplace(
+			utf8_conv.from_bytes(std::string(nameStr)),
+			utf8_conv.from_bytes(std::string(valueStr)));
+		free(nameStr);
+		free(valueStr);
+	}
+
+	c->status = napi_create_string_utf8(env, "SearchClips", NAPI_AUTO_LENGTH, &resourceName);
+  REJECT_RETURN;
+  c->status = napi_create_async_work(env, nullptr, resourceName, searchClipsExecute,
+    searchClipsComplete, c, &c->_request);
+  REJECT_RETURN;
+  c->status = napi_queue_async_work(env, c->_request);
+  REJECT_RETURN;
+
+	return promise;
 }
 
 napi_value getFragments(napi_env env, napi_callback_info info) {

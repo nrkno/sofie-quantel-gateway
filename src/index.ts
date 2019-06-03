@@ -77,17 +77,18 @@ export namespace Quantel {
 	export interface ClipDataSummary {
 		type: string,
 		ClipID: number,
+		CloneID: number | null,
 		Completed: Date | null,
 		Created: Date, // ISO-formatted date
 		Description: string,
 		Frames: string, // TODO ISA type is None ... not sure whether to convert to number
 		Owner: string,
+		PoolID: number | null,
 		Title: string,
 	}
 
 	export interface ClipData extends ClipDataSummary {
 		Category: string,
-		CloneId: number | null,
 		CloneZone: number | null,
 		Destination: number | null,
 		Expiry: Date | null, // ISO-formatted date
@@ -101,7 +102,6 @@ export namespace Quantel {
 		Outpoint: number | null,
 		PlaceHolder: boolean,
 		PlayAspect: string,
-		PoolID: number | null,
 		PublishedBy: string,
 		Register: string,
 		Tape: string,
@@ -403,7 +403,7 @@ export namespace Quantel {
 	export async function searchClips (options: ClipPropertyList): Promise<ClipDataSummary[]> {
 		await getISAReference()
 		try {
-			return quantel.searchClips(await isaIOR, options)
+			return await quantel.searchClips(await isaIOR, options)
 		} catch (err) {
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
