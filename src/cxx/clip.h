@@ -46,4 +46,15 @@ struct searchClipsCarrier : carrier {
 	~searchClipsCarrier() { }
 };
 
+void getFragmentsExecute(napi_env env, void* data);
+void getFragmentsComplete(napi_env env, napi_status asyncStatus, void* data);
+
+struct getFragmentsCarrier : carrier {
+	int32_t clipID;
+	int32_t start = -1;
+	int32_t finish = -1;
+	Quentin::ServerFragments_var fragments = {};
+	~getFragmentsCarrier() { }
+};
+
 #endif // QGW_CLIP
