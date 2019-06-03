@@ -53,4 +53,15 @@ struct releasePortCarrier : carrier {
 	~releasePortCarrier() { }
 };
 
+void loadPlayPortExecute(napi_env env, void* data);
+void loadPlayPortComplete(napi_env env, napi_status asyncStatus, void* data);
+
+struct loadPlayPortCarrier : carrier {
+	int32_t serverID;
+	std::string portName;
+	int32_t offset = 0;
+	Quentin::ServerFragments fragments = {};
+	~loadPlayPortCarrier() { }
+};
+
 #endif // QGW_PORT

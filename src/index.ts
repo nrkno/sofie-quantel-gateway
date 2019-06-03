@@ -3,8 +3,8 @@ import * as request from 'request'
 //
 const quantel = require('../build/Release/quantel_gateway')
 
-// import * as SegfaultHandler from 'segfault-handler'
-// SegfaultHandler.registerHandler('crash.log')
+import * as SegfaultHandler from 'segfault-handler'
+SegfaultHandler.registerHandler('crash.log')
 
 export namespace Quantel {
 
@@ -152,6 +152,12 @@ export namespace Quantel {
 	export interface PortLoadInfo extends PortRef {
 		fragments: ServerFragment[],
 		offset?: number
+	}
+
+	export interface PortLoadStatus extends PortRef {
+		type: string,
+		fragmentCount: number,
+		offset: number
 	}
 
 	export enum Trigger {
@@ -420,11 +426,11 @@ export namespace Quantel {
 		}
 	}
 
-	export async function loadPlayPort (options: PortLoadInfo): Promise<any> {
+	export async function loadPlayPort (options: PortLoadInfo): Promise<PortLoadStatus> {
 		await getISAReference()
 		try {
 			await checkServerPort(options)
-			return quantel.loadPlayPort(await isaIOR, options)
+			return await quantel.loadPlayPort(await isaIOR, options)
 		} catch (err) {
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null

@@ -148,7 +148,7 @@ napi_value createPlayPort(napi_env env, napi_callback_info info) {
 	REJECT_RETURN;
 
 	if (argc < 1) {
-		REJECT_ERROR_RETURN("Connection test must be provided with a IOR reference to an ISA server.",
+		REJECT_ERROR_RETURN("Create play port must be provided with a IOR reference to an ISA server.",
 	    QGW_INVALID_ARGS);
 	}
 	c->status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &iorLen);
@@ -398,7 +398,7 @@ napi_value getPlayPortStatus(napi_env env, napi_callback_info info) {
 	REJECT_RETURN;
 
 	if (argc < 1) {
-		REJECT_ERROR_RETURN("Connection test must be provided with a IOR reference to an ISA server.",
+		REJECT_ERROR_RETURN("Play port status must be provided with a IOR reference to an ISA server.",
 	    QGW_INVALID_ARGS);
 	}
 	c->status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &iorLen);
@@ -537,7 +537,7 @@ napi_value releasePort(napi_env env, napi_callback_info info) {
 	REJECT_RETURN;
 
 	if (argc < 1) {
-		REJECT_ERROR_RETURN("Connection test must be provided with a IOR reference to an ISA server.",
+		REJECT_ERROR_RETURN("Release port must be provided with a IOR reference to an ISA server.",
 	    QGW_INVALID_ARGS);
 	}
 	c->status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &iorLen);
@@ -588,200 +588,260 @@ napi_value releasePort(napi_env env, napi_callback_info info) {
   return promise;
 }
 
+void loadPlayPortExecute(napi_env env, void* data) {
+	loadPlayPortCarrier* c = (loadPlayPortCarrier*) data;
+	CORBA::ORB_var orb;
+	Quentin::ZonePortal::_ptr_type zp;
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+
+	try {
+		resolveZonePortal(c->isaIOR, &orb, &zp);
+
+	  Quentin::Server_ptr server = zp->getServer(c->serverID);
+
+	  Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(c->portName).data(), 0);
+	  port->load(c->offset, c->fragments);
+	}
+	catch(CORBA::SystemException& ex) {
+		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
+	}
+	catch(CORBA::Exception& ex) {
+		NAPI_REJECT_CORBA_EXCEPTION(ex);
+	}
+	catch(omniORB::fatalException& fe) {
+		NAPI_REJECT_FATAL_EXCEPTION(fe);
+	}
+
+	orb->destroy();
+}
+
+void loadPlayPortComplete(napi_env env, napi_status asyncStatus, void* data) {
+	loadPlayPortCarrier* c = (loadPlayPortCarrier*) data;
+	napi_value result, prop;
+
+	if (asyncStatus != napi_ok) {
+		c->status = asyncStatus;
+		c->errorMsg = "Test connection failed to complete.";
+	}
+	REJECT_STATUS;
+
+	c->status = napi_create_object(env, &result);
+	REJECT_STATUS;
+
+	c->status = napi_create_string_utf8(env, "PortLoadStatus", NAPI_AUTO_LENGTH, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "type", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, c->serverID, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "serverID", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_string_utf8(env, c->portName.c_str(), NAPI_AUTO_LENGTH, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "portName", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, c->fragments.length(), &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "fragmentCount", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, c->offset, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "offset", prop);
+	REJECT_STATUS;
+
+	napi_status status;
+	status = napi_resolve_deferred(env, c->_deferred, result);
+	FLOATING_STATUS;
+
+	tidyCarrier(env, c);
+}
+
 napi_value loadPlayPort(napi_env env, napi_callback_info info) {
-  napi_status status;
-  napi_value prop, subprop, options, fragprop;
+  loadPlayPortCarrier* c = new loadPlayPortCarrier;
+  napi_value promise, prop, subprop, options, fragprop, resourceName;
   napi_valuetype type;
   bool isArray;
-  CORBA::ORB_var orb;
-  Quentin::ZonePortal::_ptr_type zp;
-  int32_t serverID;
-  int32_t offset = 0;
+
   char* portName;
   size_t portNameLen;
-  Quentin::WStrings_var portNames;
   char rushID[33];
   char typeName[32];
   uint32_t fragmentNo;
   uint32_t fragmentCount = 0;
+	char* isaIOR = nullptr;
+	size_t iorLen = 0;
 
-  try {
-    status = retrieveZonePortal(env, info, &orb, &zp);
-    CHECK_STATUS;
+  c->status = napi_create_promise(env, &c->_deferred, &promise);
+  REJECT_RETURN;
 
-    size_t argc = 2;
-    napi_value argv[2];
-    status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    CHECK_STATUS;
+  size_t argc = 2;
+  napi_value argv[2];
+  c->status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+  REJECT_RETURN;
 
-    if (argc < 2) {
-      NAPI_THROW_ORB_DESTROY("Options object with server ID, port name and channel must be provided.");
-    }
-    status = napi_typeof(env, argv[1], &type);
-    CHECK_STATUS;
-    status = napi_is_array(env, argv[1], &isArray);
-    CHECK_STATUS;
-    if (isArray || type != napi_object) {
-      NAPI_THROW_ORB_DESTROY("Argument must be an options object with server ID, port name and channel.");
-    }
+	if (argc < 1) {
+		REJECT_ERROR_RETURN("Load plat port must be provided with a IOR reference to an ISA server.",
+	    QGW_INVALID_ARGS);
+	}
+	c->status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &iorLen);
+	REJECT_RETURN;
+	isaIOR = (char*) malloc((iorLen + 1) * sizeof(char));
+	c->status = napi_get_value_string_utf8(env, argv[0], isaIOR, iorLen + 1, &iorLen);
+	REJECT_RETURN;
 
-    options = argv[1];
-    status = napi_get_named_property(env, options, "serverID", &prop);
-    CHECK_STATUS;
-    status = napi_get_value_int32(env, prop, &serverID);
-    CHECK_STATUS;
+	c->isaIOR = isaIOR;
 
-    status = napi_get_named_property(env, options, "portName", &prop);
-    CHECK_STATUS;
-    status = napi_get_value_string_utf8(env, prop, nullptr, 0, &portNameLen);
-    CHECK_STATUS;
-    portName = (char*) malloc((portNameLen + 1) * sizeof(char));
-    status = napi_get_value_string_utf8(env, prop, portName, portNameLen + 1, &portNameLen);
-    CHECK_STATUS;
+  if (argc < 2) {
+    REJECT_ERROR_RETURN("Options object with server ID, port name and fragments must be provided.",
+		 	QGW_INVALID_ARGS);
+  }
+  c->status = napi_typeof(env, argv[1], &type);
+  REJECT_RETURN;
+  c->status = napi_is_array(env, argv[1], &isArray);
+  REJECT_RETURN;
+  if (isArray || type != napi_object) {
+    REJECT_ERROR_RETURN("Argument must be an options object with server ID, port name and fragments.",
+			QGW_INVALID_ARGS);
+  }
 
-    status = napi_get_named_property(env, options, "offset", &prop);
-    CHECK_STATUS;
-    status = napi_typeof(env, prop, &type);
-    CHECK_STATUS;
-    if (type == napi_number) {
-      status = napi_get_value_int32(env, prop, &offset);
-      CHECK_STATUS;
-    }
+  options = argv[1];
+  c->status = napi_get_named_property(env, options, "serverID", &prop);
+  REJECT_RETURN;
+  c->status = napi_get_value_int32(env, prop, &c->serverID);
+  REJECT_RETURN;
 
-    status = napi_get_named_property(env, options, "fragments", &prop);
-    CHECK_STATUS;
-    status = napi_get_named_property(env, prop, "fragments", &fragprop);
-    CHECK_STATUS;
+  c->status = napi_get_named_property(env, options, "portName", &prop);
+  REJECT_RETURN;
+  c->status = napi_get_value_string_utf8(env, prop, nullptr, 0, &portNameLen);
+  REJECT_RETURN;
+  portName = (char*) malloc((portNameLen + 1) * sizeof(char));
+  c->status = napi_get_value_string_utf8(env, prop, portName, portNameLen + 1, &portNameLen);
+  REJECT_RETURN;
+	c->portName = std::string(portName);
+	free(portName);
 
-		status = napi_typeof(env, fragprop, &type);
-		CHECK_STATUS;
-		if (type == napi_undefined) {
-			fragprop = prop;
-		}
+  c->status = napi_get_named_property(env, options, "offset", &prop);
+  REJECT_RETURN;
+  c->status = napi_typeof(env, prop, &type);
+  REJECT_RETURN;
+  if (type == napi_number) {
+    c->status = napi_get_value_int32(env, prop, &c->offset);
+    REJECT_RETURN;
+  }
 
-    Quentin::ServerFragments fragments;
-    status = napi_get_array_length(env, fragprop, &fragmentNo);
-    CHECK_STATUS;
-    fragments.length(fragmentNo);
+  c->status = napi_get_named_property(env, options, "fragments", &prop);
+  REJECT_RETURN;
+  c->status = napi_get_named_property(env, prop, "fragments", &fragprop);
+  REJECT_RETURN;
 
-    for ( uint32_t i = 0 ; i < fragmentNo ; i++ ) {
-      status = napi_get_element(env, fragprop, i, &prop);
-      CHECK_STATUS;
+	c->status = napi_typeof(env, fragprop, &type);
+	REJECT_RETURN;
+	if (type == napi_undefined) {
+		fragprop = prop;
+	}
 
-      Quentin::ServerFragment sf = {};
-      Quentin::PositionData vfd = {};
-      Quentin::ServerFragmentData sfd;
-      std::string rushIDStr;
+  c->status = napi_get_array_length(env, fragprop, &fragmentNo);
+  REJECT_RETURN;
+	printf("Number of fragments is %i\n", fragmentNo);
+  c->fragments.length(fragmentNo);
 
-      status = napi_get_named_property(env, prop, "trackNum", &subprop);
-      CHECK_STATUS;
-      status = napi_get_value_int32(env, subprop, (int32_t *) &sf.trackNum);
-      CHECK_STATUS;
+  for ( uint32_t i = 0 ; i < fragmentNo ; i++ ) {
+    c->status = napi_get_element(env, fragprop, i, &prop);
+    REJECT_RETURN;
 
-      status = napi_get_named_property(env, prop, "start", &subprop);
-      CHECK_STATUS;
-      status = napi_get_value_int32(env, subprop, (int32_t *) &sf.start);
-      CHECK_STATUS;
+    Quentin::ServerFragment sf = {};
+    Quentin::PositionData vfd = {};
+    Quentin::ServerFragmentData sfd;
+    std::string rushIDStr;
 
-      status = napi_get_named_property(env, prop, "finish", &subprop);
-      CHECK_STATUS;
-      status = napi_get_value_int32(env, subprop, (int32_t *) &sf.finish);
-      CHECK_STATUS;
+    c->status = napi_get_named_property(env, prop, "trackNum", &subprop);
+    REJECT_RETURN;
+    c->status = napi_get_value_int32(env, subprop, (int32_t *) &sf.trackNum);
+    REJECT_RETURN;
 
-      status = napi_get_named_property(env, prop, "type", &subprop);
-      CHECK_STATUS;
-      status = napi_get_value_string_utf8(env, subprop, typeName, 32, nullptr);
-      CHECK_STATUS;
+    c->status = napi_get_named_property(env, prop, "start", &subprop);
+    REJECT_RETURN;
+    c->status = napi_get_value_int32(env, subprop, (int32_t *) &sf.start);
+    REJECT_RETURN;
 
-      printf("Processing fragment of type: %s\n", typeName);
+    c->status = napi_get_named_property(env, prop, "finish", &subprop);
+    REJECT_RETURN;
+    c->status = napi_get_value_int32(env, subprop, (int32_t *) &sf.finish);
+    REJECT_RETURN;
 
-      switch (typeName[0]) {
-      case 'V': // VideoFragment
-      case 'A': // AudioFragment & AUXFragment
+    c->status = napi_get_named_property(env, prop, "type", &subprop);
+    REJECT_RETURN;
+    c->status = napi_get_value_string_utf8(env, subprop, typeName, 32, nullptr);
+    REJECT_RETURN;
 
-        status = napi_get_named_property(env, prop, "format", &subprop);
-        CHECK_STATUS;
-        status = napi_get_value_int32(env, subprop, (int32_t *) &vfd.format);
-        CHECK_STATUS;
+    printf("Processing fragment of type: %s\n", typeName);
 
-        status = napi_get_named_property(env, prop, "poolID", &subprop);
-        CHECK_STATUS;
-        status = napi_get_value_int32(env, subprop, (int32_t *) &vfd.poolID);
-        CHECK_STATUS;
+    switch (typeName[0]) {
+    case 'V': // VideoFragment
+    case 'A': // AudioFragment & AUXFragment
 
-        status = napi_get_named_property(env, prop, "poolFrame", &subprop);
-        CHECK_STATUS;
-        status = napi_get_value_int32(env, subprop, (int32_t *) &vfd.poolFrame);
-        CHECK_STATUS;
+      c->status = napi_get_named_property(env, prop, "format", &subprop);
+      REJECT_RETURN;
+      c->status = napi_get_value_int32(env, subprop, (int32_t *) &vfd.format);
+      REJECT_RETURN;
 
-        status = napi_get_named_property(env, prop, "skew", &subprop);
-        CHECK_STATUS;
-        status = napi_get_value_int32(env, subprop, (int32_t *) &vfd.skew);
-        CHECK_STATUS;
+      c->status = napi_get_named_property(env, prop, "poolID", &subprop);
+      REJECT_RETURN;
+      c->status = napi_get_value_int32(env, subprop, (int32_t *) &vfd.poolID);
+      REJECT_RETURN;
 
-        status = napi_get_named_property(env, prop, "rushFrame", &subprop);
-        CHECK_STATUS;
-        status = napi_get_value_int64(env, subprop, (int64_t *) &vfd.rushFrame);
-        CHECK_STATUS;
+      c->status = napi_get_named_property(env, prop, "poolFrame", &subprop);
+      REJECT_RETURN;
+      c->status = napi_get_value_int32(env, subprop, (int32_t *) &vfd.poolFrame);
+      REJECT_RETURN;
 
-        status = napi_get_named_property(env, prop, "rushID", &subprop);
-        CHECK_STATUS;
-        status = napi_get_value_string_utf8(env, subprop, rushID, 33, nullptr);
-        CHECK_STATUS;
-        rushIDStr.assign(rushID);
-        vfd.rushID = {
-          (CORBA::LongLong) strtoull(rushIDStr.substr(0, 16).c_str(), nullptr, 16),
-          (CORBA::LongLong) strtoull(rushIDStr.substr(16, 32).c_str(), nullptr, 16) };
-        vfd.rushFrame = 0;
+      c->status = napi_get_named_property(env, prop, "skew", &subprop);
+      REJECT_RETURN;
+      c->status = napi_get_value_int32(env, subprop, (int32_t *) &vfd.skew);
+      REJECT_RETURN;
 
-        if (typeName[0] == 'V') {
-          sfd.videoFragmentData(vfd);
-        } else if (typeName[1] == 'u') { // AudioFragment
-          sfd.audioFragmentData(vfd);
-        } else {
-          sfd.auxFragmentData(vfd);
-        }
-        sf.fragmentData = sfd;
-        fragments[fragmentCount++] = sf;
-        break;
-      default:
-        break;
-      } // switch typeName[0]
-    } // for loop through incoming fragments
-    fragments.length(fragmentCount);
+      c->status = napi_get_named_property(env, prop, "rushFrame", &subprop);
+      REJECT_RETURN;
+      c->status = napi_get_value_int64(env, subprop, (int64_t *) &vfd.rushFrame);
+      REJECT_RETURN;
 
-    Quentin::Server_ptr server = zp->getServer(serverID);
+      c->status = napi_get_named_property(env, prop, "rushID", &subprop);
+      REJECT_RETURN;
+      c->status = napi_get_value_string_utf8(env, subprop, rushID, 33, nullptr);
+      REJECT_RETURN;
+      rushIDStr.assign(rushID);
+      vfd.rushID = {
+        (CORBA::LongLong) strtoull(rushIDStr.substr(0, 16).c_str(), nullptr, 16),
+        (CORBA::LongLong) strtoull(rushIDStr.substr(16, 32).c_str(), nullptr, 16) };
+      vfd.rushFrame = 0;
 
-    std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
-    /* std::wstring wportName = utf8_conv.from_bytes(portName);
-
-    // Prevent accidental creation of extra port
-    portNames = server->getPortNames();
-    bool foundPort = false;
-    for ( int x = 0 ; x < portNames->length() ; x++ ) {
-      if (wcscmp(wportName.data(), (const wchar_t *) portNames[x]) == 0) {
-        foundPort = true;
-        break;
+      if (typeName[0] == 'V') {
+        sfd.videoFragmentData(vfd);
+      } else if (typeName[1] == 'u') { // AudioFragment
+        sfd.audioFragmentData(vfd);
+      } else {
+        sfd.auxFragmentData(vfd);
       }
-    }
-    free(portName);
-    if (!foundPort) {
-      NAPI_THROW_ORB_DESTROY("Cannot load a port with an unknown port name.");
-    } */
+      sf.fragmentData = sfd;
+      c->fragments[fragmentCount++] = sf;
+      break;
+    default:
+      break;
+    } // switch typeName[0]
+  } // for loop through incoming fragments
+  c->fragments.length(fragmentCount);
 
-    Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(portName).data(), 0);
-    port->load(offset, fragments);
-  }
-  catch(CORBA::SystemException& ex) {
-    NAPI_THROW_CORBA_EXCEPTION(ex);
-  }
-  catch(CORBA::Exception& ex) {
-    NAPI_THROW_CORBA_EXCEPTION(ex);
-  }
-  catch(omniORB::fatalException& fe) {
-    NAPI_THROW_FATAL_EXCEPTION(fe);
-  }
+	c->status = napi_create_string_utf8(env, "LoadPlayPort", NAPI_AUTO_LENGTH, &resourceName);
+  REJECT_RETURN;
+  c->status = napi_create_async_work(env, nullptr, resourceName, loadPlayPortExecute,
+    loadPlayPortComplete, c, &c->_request);
+  REJECT_RETURN;
+  c->status = napi_queue_async_work(env, c->_request);
+  REJECT_RETURN;
 
-  orb->destroy();
-  return nullptr;
+  return promise;
 }
