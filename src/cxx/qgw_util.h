@@ -32,6 +32,8 @@ napi_status checkStatus(napi_env env, napi_status status,
 #define QGW_GET_PORT_FAIL 6005
 #define QGW_SET_MODE_FAIL 6006
 #define QGW_TRIGGER_SETUP_FAIL 6007
+#define QGW_TRIGGER_OFFSET_FAIL 6008
+#define QGW_TRIGGER_NOW_FAIL 6009
 #define QGW_SUCCESS 0
 
 #define NAPI_THROW_ERROR(msg) { \

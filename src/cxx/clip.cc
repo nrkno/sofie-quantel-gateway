@@ -714,6 +714,7 @@ napi_value getFragments(napi_env env, napi_callback_info info) {
 }
 
 // TODO leaving sync for now until requirements are clearer
+
 napi_value cloneIfNeeded(napi_env env, napi_callback_info info) {
 	napi_status status;
 	napi_value prop, result;

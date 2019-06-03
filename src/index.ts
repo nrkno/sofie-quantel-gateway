@@ -416,7 +416,7 @@ export namespace Quantel {
 	export async function getFragments (options: FragmentRef): Promise<ServerFragments> {
 		await getISAReference()
 		try {
-			return quantel.getFragments(await isaIOR, options)
+			return await quantel.getFragments(await isaIOR, options)
 		} catch (err) {
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
@@ -450,7 +450,7 @@ export namespace Quantel {
 				portName: options.portName,
 				trigger: options.trigger,
 				offset: options.offset,
-				success: quantel.trigger(await isaIOR, options)
+				success: await quantel.trigger(await isaIOR, options)
 			}
 		} catch (err) {
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
