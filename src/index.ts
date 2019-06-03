@@ -390,7 +390,7 @@ export namespace Quantel {
 	export async function getClipData (options: ClipRef): Promise<ClipData> {
 		await getISAReference()
 		try {
-			return quantel.getClipData(await isaIOR, options)
+			return await quantel.getClipData(await isaIOR, options)
 		} catch (err) {
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null

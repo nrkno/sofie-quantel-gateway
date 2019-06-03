@@ -1,107 +1,156 @@
 #include "clip.h"
 
-napi_value getClipData(napi_env env, napi_callback_info info) {
-	napi_status status;
-  napi_value result, prop, options;
-  napi_valuetype type;
-  bool isArray;
-  CORBA::ORB_var orb;
-  Quentin::ZonePortal::_ptr_type zp;
-  int32_t clipID;
+void getClipDataExecute(napi_env env, void* data) {
+  clipDataCarrier* c = (clipDataCarrier*) data;
+	CORBA::ORB_var orb;
+	Quentin::ZonePortal::_ptr_type zp;
+	Quentin::WStrings columns;
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
 	try {
-		status = retrieveZonePortal(env, info, &orb, &zp);
-		CHECK_STATUS;
-
-		size_t argc = 2;
-		napi_value argv[2];
-		status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-		CHECK_STATUS;
-
-		if (argc < 2) {
-			NAPI_THROW_ORB_DESTROY("Options object with clip ID must be provided.");
-		}
-		status = napi_typeof(env, argv[1], &type);
-		CHECK_STATUS;
-		status = napi_is_array(env, argv[1], &isArray);
-		CHECK_STATUS;
-		if (isArray || type != napi_object) {
-			NAPI_THROW_ORB_DESTROY("Argument must be an options object with a clip ID.");
-		}
-
-		status = napi_create_object(env, &result);
-		CHECK_STATUS;
-		status = napi_create_string_utf8(env, "ClipData", NAPI_AUTO_LENGTH, &prop);
-		CHECK_STATUS;
-		status = napi_set_named_property(env, result, "type", prop);
-		CHECK_STATUS;
-
-		options = argv[1];
-		status = napi_get_named_property(env, options, "clipID", &prop);
-		CHECK_STATUS;
-		status = napi_get_value_int32(env, prop, &clipID);
-		CHECK_STATUS;
-
+		resolveZonePortal(c->isaIOR, &orb, &zp);
 		Quentin::ColumnDescList_var cdl = zp->getColumnDescriptions();
-		Quentin::WStrings columns;
 		columns.length(cdl->length());
 		for ( uint32_t x = 0 ; x < cdl->length() ; x++ ) {
 			columns[x] = cdl[x].columnName;
+			c->columnNames.push_back(utf8_conv.to_bytes(cdl[x].columnName));
+			c->columnTypes.push_back(utf8_conv.to_bytes(cdl[x].columnType));
 		}
 
-		Quentin::WStrings_var results = zp->getClipData(clipID, columns);
+		Quentin::WStrings_var results = zp->getClipData(c->clipID, columns);
 
-		std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
-
-		for ( uint32_t x = 0 ; x < results->length() ; x++ ) {
-			std::string value = utf8_conv.to_bytes(results[x]);
-			status = napi_create_string_utf8(env, value.c_str(), NAPI_AUTO_LENGTH, &prop);
-			CHECK_STATUS;
-
-			if (wcscmp(cdl[x].columnType, L"Boolean") == 0) {
-				status = napi_get_boolean(env, wcscmp(results[x], L"1") == 0, &prop);
-				CHECK_STATUS;
-			}
-
-			if (wcscmp(cdl[x].columnType, L"Number") == 0) {
-				if (value.length() > 0) {
-					status = napi_create_int32(env, std::stol(value), &prop);
-					CHECK_STATUS;
-				} else {
-					status = napi_get_null(env, &prop);
-					CHECK_STATUS;
-				}
-			};
-
-			if (wcscmp(cdl[x].columnType, L"Date") == 0) {
-				if (value.length() > 0) {
-					status = convertToDate(env, orb, value, &prop);
-					CHECK_STATUS;
-				} else {
-					status = napi_get_null(env, &prop);
-					CHECK_STATUS;
-				}
-			}
-
-
-
-			std::string key = utf8_conv.to_bytes(columns[x]);
-			status = napi_set_named_property(env, result, key.c_str(), prop);
-			CHECK_STATUS;
+		for ( uint32_t i = 0 ; i < results->length() ; i++ ) {
+			c->values.push_back(utf8_conv.to_bytes(results[i]));
 		}
+
 	}
 	catch(CORBA::SystemException& ex) {
-    NAPI_THROW_CORBA_EXCEPTION(ex);
-  }
-  catch(CORBA::Exception& ex) {
-    NAPI_THROW_CORBA_EXCEPTION(ex);
-  }
-  catch(omniORB::fatalException& fe) {
-    NAPI_THROW_FATAL_EXCEPTION(fe);
-  }
+		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
+	}
+	catch(CORBA::Exception& ex) {
+		NAPI_REJECT_CORBA_EXCEPTION(ex);
+	}
+	catch(omniORB::fatalException& fe) {
+		NAPI_REJECT_FATAL_EXCEPTION(fe);
+	}
 
-  orb->destroy();
-  return result;
+	orb->destroy();
+}
+
+void getClipDataComplete(napi_env env, napi_status asyncStatus, void* data) {
+	clipDataCarrier* c = (clipDataCarrier*) data;
+	napi_value result, prop;
+
+	if (asyncStatus != napi_ok) {
+		c->status = asyncStatus;
+		c->errorMsg = "Test connection failed to complete.";
+	}
+	REJECT_STATUS;
+
+	napi_create_object(env, &result);
+	REJECT_STATUS;
+
+	c->status = napi_create_string_utf8(env, "ClipData", NAPI_AUTO_LENGTH, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "type", prop);
+	REJECT_STATUS;
+
+	for ( uint32_t x = 0 ; x < c->values.size() ; x++ ) {
+		c->status = napi_create_string_utf8(env, c->values.at(x).c_str(), NAPI_AUTO_LENGTH, &prop);
+		REJECT_STATUS;
+
+		if (c->columnTypes.at(x) == booleanName) {
+			c->status = napi_get_boolean(env, c->values.at(x) == "1", &prop);
+			REJECT_STATUS;
+		}
+
+		if (c->columnTypes.at(x) == numberName) {
+			if (c->values.at(x).length() > 0) {
+				c->status = napi_create_int32(env, std::stol(c->values.at(x)), &prop);
+				REJECT_STATUS;
+			} else {
+				c->status = napi_get_null(env, &prop);
+				REJECT_STATUS;
+			}
+		};
+
+		if (c->columnTypes.at(x) == dateName) {
+			if (c->values.at(x).length() > 0) {
+				c->status = convertToDate(env, c->values.at(x), &prop);
+				REJECT_STATUS;
+			} else {
+				c->status = napi_get_null(env, &prop);
+				REJECT_STATUS;
+			}
+		}
+
+		c->status = napi_set_named_property(env, result, c->columnNames.at(x).c_str(), prop);
+		REJECT_STATUS;
+	}
+
+	napi_status status;
+	status = napi_resolve_deferred(env, c->_deferred, result);
+	FLOATING_STATUS;
+
+	tidyCarrier(env, c);
+}
+
+napi_value getClipData(napi_env env, napi_callback_info info) {
+	clipDataCarrier* c = new clipDataCarrier;
+  napi_value promise, prop, options, resourceName;
+  napi_valuetype type;
+  bool isArray;
+	char* isaIOR = nullptr;
+	size_t iorLen = 0;
+
+  c->status = napi_create_promise(env, &c->_deferred, &promise);
+  REJECT_RETURN;
+
+	size_t argc = 2;
+	napi_value argv[2];
+	c->status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+	REJECT_RETURN;
+
+	if (argc < 1) {
+		REJECT_ERROR_RETURN("Clip data request must be provided with a IOR reference to an ISA server.",
+	    QGW_INVALID_ARGS);
+	}
+	c->status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &iorLen);
+	REJECT_RETURN;
+	isaIOR = (char*) malloc((iorLen + 1) * sizeof(char));
+	c->status = napi_get_value_string_utf8(env, argv[0], isaIOR, iorLen + 1, &iorLen);
+	REJECT_RETURN;
+
+	c->isaIOR = isaIOR;
+
+	if (argc < 2) {
+		REJECT_ERROR_RETURN("Options object with clip ID must be provided.",
+			QGW_INVALID_ARGS);
+	}
+	c->status = napi_typeof(env, argv[1], &type);
+	REJECT_RETURN;
+	c->status = napi_is_array(env, argv[1], &isArray);
+	REJECT_RETURN;
+	if (isArray || type != napi_object) {
+		REJECT_ERROR_RETURN("Argument must be an options object with a clip ID.",
+			QGW_INVALID_ARGS);
+	}
+
+	options = argv[1];
+	c->status = napi_get_named_property(env, options, "clipID", &prop);
+	REJECT_RETURN;
+	c->status = napi_get_value_int32(env, prop, &c->clipID);
+	REJECT_RETURN;
+
+	c->status = napi_create_string_utf8(env, "GetClipData", NAPI_AUTO_LENGTH, &resourceName);
+	REJECT_RETURN;
+	c->status = napi_create_async_work(env, nullptr, resourceName, getClipDataExecute,
+		getClipDataComplete, c, &c->_request);
+	REJECT_RETURN;
+	c->status = napi_queue_async_work(env, c->_request);
+	REJECT_RETURN;
+
+  return promise;
 }
 
 
@@ -203,7 +252,7 @@ napi_value searchClips(napi_env env, napi_callback_info info) {
 				status = napi_create_int32(env, std::stol(value), &prop);
 				CHECK_STATUS;
 			} else if (strcmp(key.c_str(), "Completed") == 0 || strcmp(key.c_str(), "Created") == 0) {
-				status = convertToDate(env, orb, value, &prop);
+				status = convertToDate(env, value, &prop);
 				CHECK_STATUS;
 			} else {
 				status = napi_create_string_utf8(env, value.c_str(), NAPI_AUTO_LENGTH, &prop);

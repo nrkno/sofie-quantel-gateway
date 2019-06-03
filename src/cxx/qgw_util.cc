@@ -92,7 +92,7 @@ std::string formatTimecode(Quentin::Timecode tc) {
 	return result;
 }
 
-napi_status convertToDate(napi_env env, CORBA::ORB_var orb, std::string date, napi_value *nodeDate) {
+napi_status convertToDate(napi_env env, std::string date, napi_value *nodeDate) {
 	napi_status status;
 	napi_value global, dateObj, integerDate;
 

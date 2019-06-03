@@ -147,6 +147,6 @@ napi_status retrieveZonePortal(napi_env env, napi_callback_info info,
 	CORBA::ORB_var *orb, Quentin::ZonePortal::_ptr_type *zp);
 napi_status resolveZonePortal(char* ior, CORBA::ORB_var *orb, Quentin::ZonePortal::_ptr_type *zp);
 std::string formatTimecode(Quentin::Timecode tc);
-napi_status convertToDate(napi_env env, CORBA::ORB_var orb, std::string date, napi_value *nodeDate);
+napi_status convertToDate(napi_env env, std::string date, napi_value *nodeDate);
 
 #endif // QGW_UTIL
