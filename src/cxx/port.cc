@@ -78,7 +78,7 @@ void createPlayPortComplete(napi_env env, napi_status asyncStatus, void* data) {
 
 	if (asyncStatus != napi_ok) {
 		c->status = asyncStatus;
-		c->errorMsg = "Test connection failed to complete.";
+		c->errorMsg = "Create play port failed to complete.";
 	}
 	REJECT_STATUS;
 
@@ -294,7 +294,7 @@ void getPlayPortComplete(napi_env env, napi_status asyncStatus, void* data) {
 
 	if (asyncStatus != napi_ok) {
 		c->status = asyncStatus;
-		c->errorMsg = "Test connection failed to complete.";
+		c->errorMsg = "Get play port failed to complete.";
 	}
 	REJECT_STATUS;
 
@@ -484,7 +484,7 @@ void releasePortComplete(napi_env env, napi_status asyncStatus, void* data) {
 
 	if (asyncStatus != napi_ok) {
 		c->status = asyncStatus;
-		c->errorMsg = "Test connection failed to complete.";
+		c->errorMsg = "Release port failed to complete.";
 	}
 	REJECT_STATUS;
 
@@ -621,7 +621,7 @@ void loadPlayPortComplete(napi_env env, napi_status asyncStatus, void* data) {
 
 	if (asyncStatus != napi_ok) {
 		c->status = asyncStatus;
-		c->errorMsg = "Test connection failed to complete.";
+		c->errorMsg = "Load play port failed to complete.";
 	}
 	REJECT_STATUS;
 

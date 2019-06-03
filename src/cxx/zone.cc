@@ -267,7 +267,7 @@ void getServersComplete(napi_env env, napi_status asyncStatus, void* data) {
 
 	if (asyncStatus != napi_ok) {
 		c->status = asyncStatus;
-		c->errorMsg = "Test connection failed to complete.";
+		c->errorMsg = "Get servers failed to complete.";
 	}
 	REJECT_STATUS;
 

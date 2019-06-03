@@ -470,7 +470,7 @@ export namespace Quantel {
 				serverID: options.serverID,
 				portName: options.portName,
 				offset: options.offset,
-				success: quantel.jump(await isaIOR, options)
+				success: await quantel.jump(await isaIOR, options)
 			}
 		} catch (err) {
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
@@ -490,7 +490,7 @@ export namespace Quantel {
 				serverID: options.serverID,
 				portName: options.portName,
 				offset: options.offset,
-				success: quantel.setJump(await isaIOR, options)
+				success: await quantel.setJump(await isaIOR, options)
 			}
 		} catch (err) {
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
