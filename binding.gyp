@@ -53,7 +53,25 @@
               ]
             }
           ]
-    }]
-  ]
-}]
+    }],
+	  ['OS!="win"', {
+	    "defines": [
+	      "__STDC_CONSTANT_MACROS", "OMNI_UNLOADABLE_STUBS"
+	    ],
+        "include_dirs" : [
+          "include/quantel"
+        ],
+	    "cflags_cc": [
+	      "-std=c++11",
+	      "-fexceptions"
+	    ],
+	    "link_settings": {
+	      "libraries": [
+	        "-lomniORB4",
+			"-lomnithread"
+	      ]
+	    }
+	  }]
+	]
+  }]
 }

@@ -13,7 +13,11 @@ This library uses native bindings to bridge the Quantel ISA System CORBA API and
 
 ## Dev install instructions
 
-TBD. Note that in its current form, this library will only build on Windows and targets Win32 (`ia32`) architecture. A 32-bit version of node is required to run it.
+This software can be built for Windows and Linux platforms:
+
+* On Linux, an OmniORB4 development package should be available ([Ubuntu example](https://packages.ubuntu.com/search?keywords=omniorb)).
+
+* In its current form, this library will only build on Windows Win32 (`ia32`) architecture. A 32-bit version of node is required to run it. The [nvm tool for Windows](https://github.com/coreybutler/nvm-windows) is a useful way to switch between Node version and architectures. A 64-bit Windows version is under investigation.
 
 ### Prerequisites
 
@@ -22,6 +26,10 @@ TBD. Note that in its current form, this library will only build on Windows and 
 * For development, install the `node-gyp` build tool globally with `npm install -g node-gyp`.
 * Either install the Quantel ISA dummy server installation or ensure you have access to an installed ISA and sQ servers. (Not ones that are on-air ... yet!)
 * Install the [yarn package manager](https://yarnpkg.com/en/docs/instal).
+
+On Linux systems, install the OmniORB development package. On Ubuntu, this can be achieved with:
+
+    sudo apt-get install libomniorb4-dev
 
 ### Building
 

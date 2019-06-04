@@ -10,8 +10,12 @@
 
 OMNI_USING_NAMESPACE(omni)
 
+// TODO this stays until we have a build of omniorb 4.2 for Windows
+#ifdef __WIN32__
 static const char* _0RL_library_version = omniORB_4_1;
-
+#else
+static const char* _0RL_library_version = omniORB_4_2;
+#endif
 
 
 _init_in_def_( const ::CORBA::Long Quentin::maxNumber = 9999; )

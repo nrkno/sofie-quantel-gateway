@@ -54,15 +54,16 @@ napi_status checkStatus(napi_env env, napi_status status,
 #define NAPI_THROW_SYSTEM_EXCEPTION(ex) { \
   orb->destroy(); \
   char errorMsg[256]; \
-  snprintf(errorMsg, 256, "System exception thrown from CORBA subsystem with code 0x%lx: %s.", ex.minor(), ex._name()); \
+  snprintf(errorMsg, 256, "System exception thrown from CORBA subsystem: %s.", ex._name()); \
   napi_throw_error(env, nullptr, errorMsg); \
   return nullptr; \
 }
 
+//snprintf(errorMsg, 256, "System exception thrown from CORBA subsystem with code 0x%lx: %s.", ex.minor(), ex._name());
 #define NAPI_REJECT_SYSTEM_EXCEPTION(ex) { \
 	orb->destroy(); \
   char errorMsg[256]; \
-  snprintf(errorMsg, 256, "System exception thrown from CORBA subsystem with code 0x%lx: %s.", ex.minor(), ex._name()); \
+	snprintf(errorMsg, 256, "System exception thrown from CORBA subsystem: %s.", ex._name()); \
 	c->errorMsg = std::string(errorMsg); \
 	c->status = QGW_SYSTEM_EXCEPTION; \
 	return; \
