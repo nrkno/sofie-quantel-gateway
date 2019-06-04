@@ -9,6 +9,7 @@ napi_value getClipData(napi_env env, napi_callback_info info);
 napi_value searchClips(napi_env env, napi_callback_info info);
 napi_value getFragments(napi_env env, napi_callback_info info);
 napi_value cloneIfNeeded(napi_env env, napi_callback_info info);
+napi_value deleteClip(napi_env env, napi_callback_info info);
 
 void getClipDataExecute(napi_env env, void* data);
 void getClipDataComplete(napi_env env, napi_status asyncStatus, void* data);
@@ -55,6 +56,26 @@ struct getFragmentsCarrier : carrier {
 	int32_t finish = -1;
 	Quentin::ServerFragments_var fragments = {};
 	~getFragmentsCarrier() { }
+};
+
+void cloneIfNeededExecute(napi_env env, void* data);
+void cloneIfNeededComplete(napi_env env, napi_status asyncStatus, void* data);
+
+struct cloneIfNeededCarrier : carrier {
+	int32_t clipID;
+	int32_t poolID;
+	bool highPriority = false;
+	bool copyCreated;
+	~cloneIfNeededCarrier() { }
+};
+
+void deletClipExecute(napi_env env, void* data);
+void deleteClipComplete(napi_env env, napi_status asyncStatus, void* data);
+
+struct deleteClipCarrier : carrier {
+	int32_t clipID;
+	bool deleted;
+	~deleteClipCarrier() { }
 };
 
 #endif // QGW_CLIP

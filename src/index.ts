@@ -3,8 +3,8 @@ import * as request from 'request'
 //
 const quantel = require('../build/Release/quantel_gateway')
 
-import * as SegfaultHandler from 'segfault-handler'
-SegfaultHandler.registerHandler('crash.log')
+// import * as SegfaultHandler from 'segfault-handler'
+// SegfaultHandler.registerHandler('crash.log')
 
 export namespace Quantel {
 
@@ -534,6 +534,27 @@ export namespace Quantel {
 	*/
 	export async function cloneIfNeeded (options: CloneRequest): Promise<boolean> {
 		await getISAReference()
-		return quantel.cloneIfNeeded(await isaIOR, options)
+		try {
+			return await quantel.cloneIfNeeded(await isaIOR, options)
+		} catch (err) {
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return cloneIfNeeded(options)
+			}
+			throw err
+		}
+	}
+
+	export async function deleteClip (options: ClipRef): Promise<boolean> {
+		await getISAReference()
+		try {
+			return await quantel.deleteClip(await isaIOR, options)
+		} catch (err) {
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return deleteClip(options)
+			}
+			throw err
+		}
 	}
 }

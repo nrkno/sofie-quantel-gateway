@@ -30,12 +30,13 @@ napi_value Init(napi_env env, napi_value exports) {
 		DECLARE_NAPI_METHOD("getThumbnailSize", getThumbnailSize),
 		DECLARE_NAPI_METHOD("requestThumbnails", requestThumbnails),
 		DECLARE_NAPI_METHOD("cloneIfNeeded", cloneIfNeeded),
+		DECLARE_NAPI_METHOD("deleteClip", deleteClip),
     { "START", nullptr, nullptr, nullptr, nullptr, start, napi_enumerable, nullptr },
     { "STOP", nullptr, nullptr, nullptr, nullptr, stop, napi_enumerable, nullptr },
     { "JUMP", nullptr, nullptr, nullptr, nullptr, jump, napi_enumerable, nullptr },
     { "TRANSITION", nullptr, nullptr, nullptr, nullptr, transition, napi_enumerable, nullptr },
   };
-  status = napi_define_properties(env, exports, 20, desc);
+  status = napi_define_properties(env, exports, 21, desc);
 
   return exports;
 }

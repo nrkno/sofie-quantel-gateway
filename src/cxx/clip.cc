@@ -638,7 +638,7 @@ void getFragmentsComplete(napi_env env, napi_status asyncStatus, void* data) {
 
 napi_value getFragments(napi_env env, napi_callback_info info) {
   getFragmentsCarrier* c = new getFragmentsCarrier;
-  napi_value promise, prop, options, frag, resourceName;
+  napi_value promise, prop, options, resourceName;
   napi_valuetype type;
   bool isArray;
 
@@ -714,74 +714,222 @@ napi_value getFragments(napi_env env, napi_callback_info info) {
 }
 
 // TODO leaving sync for now until requirements are clearer
-
-napi_value cloneIfNeeded(napi_env env, napi_callback_info info) {
-	napi_status status;
-	napi_value prop, result;
-	napi_valuetype type;
-	bool isArray;
+void cloneIfNeededExecute(napi_env env, void* data) {
+	cloneIfNeededCarrier* c = (cloneIfNeededCarrier*) data;
 	CORBA::ORB_var orb;
 	Quentin::ZonePortal::_ptr_type zp;
-	int32_t clipID, poolID;
-	bool highPriority = false;
+	CORBA::Boolean copyCreated;
 
 	try {
-		status = retrieveZonePortal(env, info, &orb, &zp);
-		CHECK_STATUS;
-		CORBA::Boolean copyCreated;
+		resolveZonePortal(c->isaIOR, &orb, &zp);
 
-		size_t argc = 2;
-		napi_value argv[2];
-		status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-		CHECK_STATUS;
-
-		if (argc < 2) {
-			NAPI_THROW_ORB_DESTROY("Options object with clip ID and pool ID must be provided.");
-		}
-		status = napi_typeof(env, argv[1], &type);
-		CHECK_STATUS;
-		status = napi_is_array(env, argv[1], &isArray);
-		CHECK_STATUS;
-		if (isArray || type != napi_object) {
-			NAPI_THROW_ORB_DESTROY("Argument must be an options object with clip ID and pool ID.");
-		}
-
-		status = napi_get_named_property(env, argv[1], "clipID", &prop);
-		CHECK_STATUS;
-		status = napi_get_value_int32(env, prop, &clipID);
-		CHECK_STATUS;
-
-		status = napi_get_named_property(env, argv[1], "poolID", &prop);
-		CHECK_STATUS;
-		status = napi_get_value_int32(env, prop, &poolID);
-		CHECK_STATUS;
-
-		status = napi_get_named_property(env, argv[1], "highPriority", &prop);
-		CHECK_STATUS;
-		status = napi_typeof(env, prop, &type);
-		CHECK_STATUS;
-		if (type == napi_boolean) {
-			status = napi_get_value_bool(env, prop, &highPriority);
-			CHECK_STATUS;
-		}
-
-		zp->cloneIfNeeded(clipID, poolID, 0,
-			highPriority ? Quentin::Port::HighPriority : Quentin::Port::StandardPriority,
+		zp->cloneIfNeeded(c->clipID, c->poolID, 0,
+			c->highPriority ? Quentin::Port::HighPriority : Quentin::Port::StandardPriority,
 			-1, copyCreated); // TODO -1 means the cloned clip never expires. Is this OK?
 
-		status = napi_get_boolean(env, copyCreated, &result);
-		CHECK_STATUS;
+		c->copyCreated = copyCreated;
 	}
 	catch(CORBA::SystemException& ex) {
-		NAPI_THROW_CORBA_EXCEPTION(ex);
+		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
 	}
 	catch(CORBA::Exception& ex) {
-		NAPI_THROW_CORBA_EXCEPTION(ex);
+		NAPI_REJECT_CORBA_EXCEPTION(ex);
 	}
 	catch(omniORB::fatalException& fe) {
-		NAPI_THROW_FATAL_EXCEPTION(fe);
+		NAPI_REJECT_FATAL_EXCEPTION(fe);
 	}
 
 	orb->destroy();
-	return result;
+}
+
+void cloneIfNeededComplete(napi_env env, napi_status asyncStatus, void* data) {
+	cloneIfNeededCarrier* c = (cloneIfNeededCarrier*) data;
+	napi_value result;
+
+	if (asyncStatus != napi_ok) {
+		c->status = asyncStatus;
+		c->errorMsg = "Clone if needed failed to complete.";
+	}
+	REJECT_STATUS;
+
+	c->status = napi_get_boolean(env, c->copyCreated, &result);
+	REJECT_STATUS;
+
+	napi_status status;
+	status = napi_resolve_deferred(env, c->_deferred, result);
+	FLOATING_STATUS;
+
+	tidyCarrier(env, c);
+}
+
+napi_value cloneIfNeeded(napi_env env, napi_callback_info info) {
+	cloneIfNeededCarrier* c = new cloneIfNeededCarrier;
+	napi_value promise, prop, resourceName;
+	napi_valuetype type;
+	bool isArray;
+	char* isaIOR = nullptr;
+	size_t iorLen = 0;
+
+  c->status = napi_create_promise(env, &c->_deferred, &promise);
+  REJECT_RETURN;
+
+	size_t argc = 2;
+	napi_value argv[2];
+	c->status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+	REJECT_RETURN;
+
+	if (argc < 1) {
+		REJECT_ERROR_RETURN("Clone if needed must be provided with a IOR reference to an ISA server.",
+	    QGW_INVALID_ARGS);
+	}
+	c->status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &iorLen);
+	REJECT_RETURN;
+	isaIOR = (char*) malloc((iorLen + 1) * sizeof(char));
+	c->status = napi_get_value_string_utf8(env, argv[0], isaIOR, iorLen + 1, &iorLen);
+	REJECT_RETURN;
+
+	c->isaIOR = isaIOR;
+
+	if (argc < 2) {
+		REJECT_ERROR_RETURN("Options object with clip ID and pool ID must be provided.",
+			QGW_INVALID_ARGS);
+	}
+	c->status = napi_typeof(env, argv[1], &type);
+	REJECT_RETURN;
+	c->status = napi_is_array(env, argv[1], &isArray);
+	REJECT_RETURN;
+	if (isArray || type != napi_object) {
+		REJECT_ERROR_RETURN("Argument must be an options object with clip ID and pool ID.",
+			QGW_INVALID_ARGS);
+	}
+
+	c->status = napi_get_named_property(env, argv[1], "clipID", &prop);
+	REJECT_RETURN;
+	c->status = napi_get_value_int32(env, prop, &c->clipID);
+	REJECT_RETURN;
+
+	c->status = napi_get_named_property(env, argv[1], "poolID", &prop);
+	REJECT_RETURN;
+	c->status = napi_get_value_int32(env, prop, &c->poolID);
+	REJECT_RETURN;
+
+	c->status = napi_get_named_property(env, argv[1], "highPriority", &prop);
+	REJECT_RETURN;
+	c->status = napi_typeof(env, prop, &type);
+	REJECT_RETURN;
+	if (type == napi_boolean) {
+		c->status = napi_get_value_bool(env, prop, &c->highPriority);
+		REJECT_RETURN;
+	}
+
+	c->status = napi_create_string_utf8(env, "CloneIfNeeded", NAPI_AUTO_LENGTH, &resourceName);
+  REJECT_RETURN;
+  c->status = napi_create_async_work(env, nullptr, resourceName, cloneIfNeededExecute,
+    cloneIfNeededComplete, c, &c->_request);
+  REJECT_RETURN;
+  c->status = napi_queue_async_work(env, c->_request);
+  REJECT_RETURN;
+
+	return promise;
+}
+
+void deletClipExecute(napi_env env, void* data) {
+	deleteClipCarrier* c = (deleteClipCarrier*) data;
+	CORBA::ORB_var orb;
+	Quentin::ZonePortal::_ptr_type zp;
+
+	try {
+		resolveZonePortal(c->isaIOR, &orb, &zp);
+
+		c->deleted = zp->deleteClip(c->clipID);
+	}
+	catch(CORBA::SystemException& ex) {
+		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
+	}
+	catch(CORBA::Exception& ex) {
+		NAPI_REJECT_CORBA_EXCEPTION(ex);
+	}
+	catch(omniORB::fatalException& fe) {
+		NAPI_REJECT_FATAL_EXCEPTION(fe);
+	}
+
+	orb->destroy();
+}
+
+void deleteClipComplete(napi_env env, napi_status asyncStatus, void* data) {
+	deleteClipCarrier* c = (deleteClipCarrier*) data;
+	napi_value result;
+
+	if (asyncStatus != napi_ok) {
+		c->status = asyncStatus;
+		c->errorMsg = "Test connection failed to complete.";
+	}
+	REJECT_STATUS;
+
+	c->status = napi_get_boolean(env, c->deleted, &result);
+	REJECT_STATUS;
+
+	napi_status status;
+	status = napi_resolve_deferred(env, c->_deferred, result);
+	FLOATING_STATUS;
+
+	tidyCarrier(env, c);
+}
+
+napi_value deleteClip(napi_env env, napi_callback_info info) {
+	deleteClipCarrier* c = new deleteClipCarrier;
+	napi_valuetype type;
+	bool isArray;
+	napi_value promise, prop, resourceName;
+	char* isaIOR = nullptr;
+	size_t iorLen = 0;
+
+	c->status = napi_create_promise(env, &c->_deferred, &promise);
+	REJECT_RETURN;
+
+	size_t argc = 2;
+	napi_value argv[2];
+	c->status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+	REJECT_RETURN;
+
+	if (argc < 1) {
+		REJECT_ERROR_RETURN("Delete clip must be provided with a IOR reference to an ISA server.",
+			QGW_INVALID_ARGS);
+	}
+	c->status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &iorLen);
+	REJECT_RETURN;
+	isaIOR = (char*) malloc((iorLen + 1) * sizeof(char));
+	c->status = napi_get_value_string_utf8(env, argv[0], isaIOR, iorLen + 1, &iorLen);
+	REJECT_RETURN;
+
+	c->isaIOR = isaIOR;
+
+	if (argc < 2) {
+		REJECT_ERROR_RETURN("Options object with a clip ID must be provided.",
+			QGW_INVALID_ARGS);
+	}
+	c->status = napi_typeof(env, argv[1], &type);
+	REJECT_RETURN;
+	c->status = napi_is_array(env, argv[1], &isArray);
+	REJECT_RETURN;
+	if (isArray || type != napi_object) {
+		REJECT_ERROR_RETURN("Argument must be an options object with clip ID.",
+			QGW_INVALID_ARGS);
+	}
+
+	c->status = napi_get_named_property(env, argv[1], "clipID", &prop);
+	REJECT_RETURN;
+	c->status = napi_get_value_int32(env, prop, &c->clipID);
+	REJECT_RETURN;
+
+	c->status = napi_create_string_utf8(env, "DeleteClip", NAPI_AUTO_LENGTH, &resourceName);
+	REJECT_RETURN;
+	c->status = napi_create_async_work(env, nullptr, resourceName, deletClipExecute,
+		deleteClipComplete, c, &c->_request);
+	REJECT_RETURN;
+	c->status = napi_queue_async_work(env, c->_request);
+	REJECT_RETURN;
+
+	return promise;
+
 }
