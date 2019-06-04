@@ -548,7 +548,7 @@ void getFragmentsComplete(napi_env env, napi_status asyncStatus, void* data) {
       REJECT_STATUS;
       break;
     case Quentin::FragmentType::auxFragment:
-      sprintf(rushID, "%016" PRIx64 "%016" PRIx64,// "%016llx%016llx",
+      sprintf(rushID, "%016" PRIx64 "%016" PRIx64, // "%016llx%016llx",
         c->fragments[x].fragmentData.auxFragmentData().rushID.first,
         c->fragments[x].fragmentData.auxFragmentData().rushID.second);
       c->status =  napi_create_string_utf8(env, rushID, 32, &fragprop);
@@ -585,7 +585,17 @@ void getFragmentsComplete(napi_env env, napi_status asyncStatus, void* data) {
       // TODO
       break;
     case Quentin::FragmentType::timecodeFragment:
-      // TODO
+      c->status = napi_create_string_utf8(env,
+				formatTimecode(c->fragments[x].fragmentData.timecodeFragmentData().startTimecode).c_str(),
+				NAPI_AUTO_LENGTH, &fragprop);
+			REJECT_STATUS;
+			c->status = napi_set_named_property(env, frag, "startTimecode", fragprop);
+			REJECT_STATUS;
+
+			c->status = napi_create_int32(env, c->fragments[x].fragmentData.timecodeFragmentData().userBits, &fragprop);
+			REJECT_STATUS;
+			c->status = napi_set_named_property(env, frag, "userBits", fragprop);
+			REJECT_STATUS;
       break;
     case Quentin::FragmentType::cropFragment:
       // TODO
@@ -600,9 +610,9 @@ void getFragmentsComplete(napi_env env, napi_status asyncStatus, void* data) {
       // TODO
       break;
     case Quentin::FragmentType::ccFragment:
-      /* sprintf(rushID, "%016llx%016llx",
+      sprintf(rushID, "%016" PRIx64 "%016" PRIx64, // "%016llx%016llx",
         c->fragments[x].fragmentData.ccFragmentData().ccID.first,
-        c->fragments[x].fragmentData.ccFragmentData().ccID.second); */
+        c->fragments[x].fragmentData.ccFragmentData().ccID.second);
       c->status =  napi_create_string_utf8(env, rushID, 32, &fragprop);
       REJECT_STATUS;
       c->status =  napi_set_named_property(env, frag, "ccID", fragprop);

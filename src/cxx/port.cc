@@ -670,6 +670,7 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
   char* portName;
   size_t portNameLen;
   char rushID[33];
+	char timecode[12];
   char typeName[32];
   uint32_t fragmentNo;
   uint32_t fragmentCount = 0;
@@ -756,8 +757,9 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
 
     Quentin::ServerFragment sf = {};
     Quentin::PositionData vfd = {};
+		Quentin::ServerTimecodeFragment stf = {};
     Quentin::ServerFragmentData sfd;
-    std::string rushIDStr;
+    std::string rushIDStr, tcStr;
 
     c->status = napi_get_named_property(env, prop, "trackNum", &subprop);
     REJECT_RETURN;
@@ -830,6 +832,23 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
       sf.fragmentData = sfd;
       c->fragments[fragmentCount++] = sf;
       break;
+		case 'T': // TimecodeFragment
+
+			c->status = napi_get_named_property(env, prop, "startTimecode", &subprop);
+			REJECT_RETURN;
+			c->status = napi_get_value_string_utf8(env, subprop, timecode, 12, nullptr);
+			REJECT_RETURN;
+			tcStr.assign(timecode);
+			stf.startTimecode = timecodeFromString(tcStr);
+
+			c->status = napi_get_named_property(env, prop, "userBits", &subprop);
+			REJECT_RETURN;
+			c->status = napi_get_value_int32(env, prop, &stf.userBits);
+			REJECT_RETURN;
+
+			sfd.timecodeFragmentData(stf);
+			sf.fragmentData = sfd;
+			c->fragments[fragmentCount++] = sf;
     default:
       break;
     } // switch typeName[0]

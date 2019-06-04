@@ -92,6 +92,27 @@ std::string formatTimecode(Quentin::Timecode tc) {
 	return result;
 }
 
+Quentin::Timecode timecodeFromString(std::string tcs) {
+	int32_t HH, hh, MM, mm, SS, ss, FF, ff;
+	bool drop;
+	HH = std::stoi(tcs.substr(0, 1));
+	hh = std::stoi(tcs.substr(1, 1));
+	MM = std::stoi(tcs.substr(3, 1));
+	mm = std::stoi(tcs.substr(4, 1));
+	SS = std::stoi(tcs.substr(6, 1));
+	ss = std::stoi(tcs.substr(7, 1));
+	FF = std::stoi(tcs.substr(9, 1));
+	ff = std::stoi(tcs.substr(10, 1));
+	drop = tcs.substr(8, 1) == ";";
+	Quentin::Timecode tc =
+		HH << 28 | hh << 24 |
+		MM << 20 | mm << 16 |
+		SS << 12 | ss <<  8 |
+		FF <<  4 | ff;
+	if (drop) tc = tc | 0x40000000;
+	return tc;
+}
+
 napi_status convertToDate(napi_env env, std::string date, napi_value *nodeDate) {
 	napi_status status;
 	napi_value global, dateObj, integerDate;
