@@ -85,7 +85,7 @@ std::string formatTimecode(Quentin::Timecode tc) {
 	ss = (tc >>  8) & 0x0f;
 	FF = (tc >>  4) & 0x07;
 	ff = (tc >>  0) & 0x0f;
-	snprintf(tcstr, 12, "%i%i:%i%i:%i%i%s%i%i", HH, hh, MM, mm, SS, ss,
+	snprintf(tcstr, 12, "%01x%01x:%01x%01x:%01x%01x%s%01x%01x", HH, hh, MM, mm, SS, ss,
     drop ? ";" : ":", FF, ff);
 	std::string result(tcstr);
 	free(tcstr);

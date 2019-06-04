@@ -11,13 +11,14 @@
 #include <codecvt>
 #include <locale>
 #include <exception>
+#include <inttypes.h>
 #include "node_api.h"
 
 // Now setting from binding.gyp
 // #define OMNI_UNLOADABLE_STUBS
 
 #define DECLARE_NAPI_METHOD(name, func) { name, 0, func, 0, 0, 0, napi_default, 0 }
-#define CHECK_STATUS if (checkStatus(env, status, __FILE__, __LINE__ - 1) != napi_ok) { orb->destroy(); return nullptr; }
+#define CHECK_STATUS if (checkStatus(env, status, __FILE__, __LINE__ - 1) != napi_ok) { return nullptr; }
 #define PASS_STATUS if (status != napi_ok) return status
 
 napi_status checkStatus(napi_env env, napi_status status,

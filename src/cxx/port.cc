@@ -239,7 +239,8 @@ void getPlayPortExecute(napi_env env, void* data) {
 	 	std::wstring wportName = utf8_conv.from_bytes(c->portName);
 		Quentin::Port_var port = server->getPort(wportName.data(), 0);
 
-	 	Quentin::PortListener::PlayPortStatus* gps = &port->getStatus().playStatus();
+	 	Quentin::PortListener::PlayPortStatus_var gps;
+		gps = &port->getStatus().playStatus();
 
 		c->refTime = formatTimecode(gps->refTime);
 		c->portTime = formatTimecode(gps->portTime);

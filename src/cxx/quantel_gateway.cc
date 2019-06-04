@@ -9,9 +9,13 @@ napi_value Init(napi_env env, napi_value exports) {
   napi_status status;
   napi_value start, stop, jump, transition;
   status = napi_create_int32(env, START, &start);
+	CHECK_STATUS;
   status = napi_create_int32(env, STOP, &stop);
+	CHECK_STATUS;
   status = napi_create_int32(env, JUMP, &jump);
+	CHECK_STATUS;
   status = napi_create_int32(env, TRANSITION, &transition);
+	CHECK_STATUS;
 
   napi_property_descriptor desc[] = {
     DECLARE_NAPI_METHOD("testConnection", testConnection),
@@ -37,6 +41,7 @@ napi_value Init(napi_env env, napi_value exports) {
     { "TRANSITION", nullptr, nullptr, nullptr, nullptr, transition, napi_enumerable, nullptr },
   };
   status = napi_define_properties(env, exports, 21, desc);
+	CHECK_STATUS;
 
   return exports;
 }
