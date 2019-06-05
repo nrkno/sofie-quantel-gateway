@@ -5,6 +5,53 @@
 #include "control.h"
 #include "thumbs.h"
 
+napi_value timecodeFromBCD(napi_env env, napi_callback_info info) {
+	napi_status status;
+	napi_value result;
+	uint32_t timecode;
+
+	size_t argc = 1;
+	napi_value argv[1];
+	status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+	CHECK_STATUS;
+
+	if (argc != 1) {
+		NAPI_THROW_ERROR("Timecode conversion requires a single numberical value.");
+	}
+
+	status = napi_get_value_uint32(env, argv[0], &timecode);
+	CHECK_STATUS;
+
+	status = napi_create_string_utf8(env, formatTimecode(timecode).c_str(),
+		NAPI_AUTO_LENGTH, &result);
+	CHECK_STATUS;
+
+	return result;
+}
+
+napi_value timecodeToBCD(napi_env env, napi_callback_info info) {
+	napi_status status;
+	napi_value result;
+	char tcChars[12];
+
+	size_t argc = 1;
+	napi_value argv[1];
+	status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+	CHECK_STATUS;
+
+	if (argc != 1) {
+		NAPI_THROW_ERROR("Timecode conversion requires a single string value.");
+	}
+
+	status = napi_get_value_string_utf8(env, argv[0], tcChars, 12, nullptr);
+	CHECK_STATUS;
+
+	status = napi_create_uint32(env, timecodeFromString(std::string(tcChars)), &result);
+	CHECK_STATUS;
+
+	return result;
+}
+
 napi_value Init(napi_env env, napi_value exports) {
   napi_status status;
   napi_value start, stop, jump, transition;
@@ -35,12 +82,14 @@ napi_value Init(napi_env env, napi_value exports) {
 		DECLARE_NAPI_METHOD("requestThumbnails", requestThumbnails),
 		DECLARE_NAPI_METHOD("cloneIfNeeded", cloneIfNeeded),
 		DECLARE_NAPI_METHOD("deleteClip", deleteClip),
+		DECLARE_NAPI_METHOD("timecodeFromBCD", timecodeFromBCD),
+		DECLARE_NAPI_METHOD("timecodeToBCD", timecodeToBCD),
     { "START", nullptr, nullptr, nullptr, nullptr, start, napi_enumerable, nullptr },
     { "STOP", nullptr, nullptr, nullptr, nullptr, stop, napi_enumerable, nullptr },
     { "JUMP", nullptr, nullptr, nullptr, nullptr, jump, napi_enumerable, nullptr },
     { "TRANSITION", nullptr, nullptr, nullptr, nullptr, transition, napi_enumerable, nullptr },
   };
-  status = napi_define_properties(env, exports, 21, desc);
+  status = napi_define_properties(env, exports, 23, desc);
 	CHECK_STATUS;
 
   return exports;

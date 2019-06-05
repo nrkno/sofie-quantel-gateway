@@ -557,4 +557,21 @@ export namespace Quantel {
 			throw err
 		}
 	}
+
+	const tcPattern = /[0-2][0-9]:[0-5][0-9]:[0-5][0-9](:|;)[0-9][0-9]/
+
+	export function timecodeToBCD (timecode: string): number {
+		if (!tcPattern.test(timecode)) {
+			throw new TypeError('Timecode string does not match an accceptable pattern for conversion.')
+		}
+		return quantel.timecodeToBCD(timecode)
+	}
+
+	export function timecodeFromBCD (timecode: number): string {
+		let result = quantel.timecodeFromBCD(timecode)
+		if (!tcPattern.test(result)) {
+			throw new TypeError('Given number does not map to a valid timecode.')
+		}
+		return result
+	}
 }
