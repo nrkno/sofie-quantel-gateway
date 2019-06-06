@@ -1,133 +1,30 @@
 // -*- Mode: C++; -*-
-//                            Package   : omniORB2
+//                            Package   : omniORB
 // seqtemplates.h             Created on: 14/5/96
 //                            Author    : Sai Lai Lo (sll)
 //
+//    Copyright (C) 2009 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library.
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 
-/*
- $Log: seqTemplatedecls.h,v $
- Revision 1.1.4.4  2006/04/28 18:40:46  dgrisby
- Merge from omni4_0_develop.
-
- Revision 1.1.4.3  2005/11/17 17:03:27  dgrisby
- Merge from omni4_0_develop.
-
- Revision 1.1.4.2  2005/01/06 23:08:21  dgrisby
- Big merge from omni4_0_develop.
-
- Revision 1.1.4.1  2003/03/23 21:04:03  dgrisby
- Start of omniORB 4.1.x development branch.
-
- Revision 1.1.2.8  2003/01/16 12:47:08  dgrisby
- Const cast macro. Thanks Matej Kenda.
-
- Revision 1.1.2.7  2003/01/14 11:48:15  dgrisby
- Remove warnings from gcc -Wshadow. Thanks Pablo Mejia.
-
- Revision 1.1.2.6  2001/10/29 17:42:36  dpg1
- Support forward-declared structs/unions, ORB::create_recursive_tc().
-
- Revision 1.1.2.5  2001/06/08 17:12:08  dpg1
- Merge all the bug fixes from omni3_develop.
-
- Revision 1.1.2.4  2000/11/20 18:56:39  sll
- Sequence templates were broken by the previous checkin. They are now fixed.
-
- Revision 1.1.2.3  2000/11/20 14:41:43  sll
- Simplified sequence template hierachy and added templates for sequence of
- wchar and sequence of array of wchar.
-
- Revision 1.1.2.2  2000/11/03 19:02:45  sll
- Separate out the marshalling of byte, octet and char into 3 set of distinct
- marshalling functions. Sequence of and sequence of array of these types
- updated correspondingly.
-
- Revision 1.1.2.1  2000/09/27 16:54:09  sll
- *** empty log message ***
-
- Revision 1.2  2000/07/04 15:23:30  dpg1
- Merge from omni3_develop.
-
- Revision 1.1.2.1  1999/09/24 09:51:53  djr
- Moved from omniORB2 + some new files.
-
- Revision 1.21  1999/08/15 13:54:01  sll
- Added tyepdef ... BaseT to various sequence templates.
-
- Revision 1.20  1999/06/18 20:33:42  sll
- Updated to CORBA 2.3 mapping.
-
- Revision 1.19  1999/05/26 15:55:39  sll
-    Added new template _CORBA_Sequence_ObjRef to deal with sequence
-    of object reference. This is necessary in order to implment the value ctor
-    correctly.
-
- Revision 1.18  1999/05/26 15:04:15  sll
-
- Revision 1.17  1999/05/26 14:55:06  sll
-
- Revision 1.16  1999/05/25 13:18:20  sll
- 
- Revision 1.15  1999/04/21 13:15:31  djr
- *** empty log message ***
-
- Revision 1.14  1999/01/07 18:44:55  djr
- *** empty log message ***
-
- Revision 1.13  1998/04/07 20:01:05  sll
- Added specialised marshalling functions for sequence boolean,
- sequence array boolean when bool type is used to represent CORBA::Boolean.
-
- Revision 1.12  1998/03/05 11:21:16  sll
- Added NP_data() to all the derived class of Sequence_Array. This is
- to remove the warning given by some compiler, such as HPUX C++.
-
- Revision 1.11  1998/01/28 14:29:48  ewc
- *** empty log message ***
-
- * Revision 1.10  1998/01/27  19:35:56  ewc
- * Revised Octet and Boolean templates
- *
- * Revision 1.9  1998/01/27  16:08:45  ewc
- * Added new classes and templates for sequence of Boolean and sequence
- * of Octet.
- *
- Revision 1.8  1997/12/18 17:35:52  sll
- _CORBA_Sequence copy ctor should allocate s.pd_max elements instead of
- s.pd_len elements.
-
- Revision 1.7  1997/12/09 20:42:25  sll
- Updated sequence array templates.
-
- Revision 1.6  1997/08/21 22:21:56  sll
- New templates to support sequence of array.
-
- * Revision 1.5  1997/05/06  16:11:10  sll
- * Public release.
- *
- */
 
 #ifndef __SEQTEMPLATEDECLS_H__
 #define __SEQTEMPLATEDECLS_H__
@@ -147,15 +44,28 @@ public:
   inline _CORBA_ULong length() const { return pd_len; }
   inline void length(_CORBA_ULong len)
   {
-    if (pd_bounded && len > pd_max) {
-      _CORBA_bound_check_error();
-      // never reach here.
-    }
     if (len) {
-      // Allocate buffer on-demand. Either pd_data == 0 
-      //                            or pd_data = buffer for pd_max elements
-      if (!pd_buf || len > pd_max) {
-	copybuffer(((len > pd_max) ? len : pd_max));
+      if (len > pd_max) {
+	if (pd_bounded) {
+	  _CORBA_bound_check_error();
+	  // Never reach here.
+	}
+	// Grow exponentially
+	_CORBA_ULong newmax = pd_max * 2;
+	copybuffer((len > newmax) ? len : newmax);
+      }
+      else if (!pd_buf) {
+	// Allocate initial buffer
+	copybuffer(pd_max);
+      }
+    }
+    else {
+      // Zero length. Deallocate buffer if it is owned by us.
+      if (pd_rel && pd_buf) {
+	freebuf(pd_buf);
+	pd_buf = 0;
+	if (!pd_bounded)
+	  pd_max = 0;
       }
     }
     pd_len = len;
@@ -175,7 +85,7 @@ public:
     }
     return tmp;
   }
-  static inline void freebuf(T * b) {
+  static inline void freebuf(T* b) {
     if (b) delete [] b; 
   }
 
@@ -190,8 +100,9 @@ public:
       return pd_buf;
     }
     else {
-      if (!pd_rel)
+      if (!pd_rel) {
 	return 0;
+      }
       else {
 	T* tmp = pd_buf;
 	pd_buf = 0;
@@ -199,7 +110,6 @@ public:
 	  pd_max = 0;
 	}
 	pd_len = 0;
-	pd_rel = 1;
 	return tmp;
       }
     }
@@ -240,12 +150,11 @@ protected:
     }
   }
 
-  inline _CORBA_Sequence(_CORBA_ULong max,
-			 _CORBA_ULong len,
-			 T           *value,
+  inline _CORBA_Sequence(_CORBA_ULong 	max,
+			 _CORBA_ULong 	len,
+			 T*             value,
 			 _CORBA_Boolean release_ = 0,
-			 _CORBA_Boolean bounded = 0
-			 ) 
+			 _CORBA_Boolean bounded  = 0) 
       : pd_max(max), 
 	pd_len(len), 
 	pd_rel(release_),
@@ -260,9 +169,14 @@ protected:
 
   inline T_seq &operator= (const T_seq &s)
   {
-    length(s.pd_len);
-    for (unsigned long i=0; i < pd_len; i++) {
-      pd_buf[i] = s.pd_buf[i];
+    if (&s != this) {
+      // Prevent copybuffer from copying any of the current sequence members
+      pd_len = 0;
+
+      length(s.pd_len);
+      for (unsigned long i=0; i < pd_len; i++) {
+        pd_buf[i] = s.pd_buf[i];
+      }
     }
     return *this;
   }
@@ -294,7 +208,7 @@ protected:
       // never reach here
     }
     for (unsigned long i=0; i < pd_len; i++) {
-       newbuf[i] = pd_buf[i];
+      newbuf[i] = pd_buf[i];
     }
     if (pd_rel && pd_buf) {
       freebuf(pd_buf);
@@ -306,11 +220,11 @@ protected:
     pd_max = newmax;
   }
 
-  _CORBA_ULong    pd_max;
-  _CORBA_ULong    pd_len;
-  _CORBA_Boolean  pd_rel;
-  _CORBA_Boolean  pd_bounded;
-  T              *pd_buf;
+  _CORBA_ULong   pd_max;
+  _CORBA_ULong   pd_len;
+  _CORBA_Boolean pd_rel;
+  _CORBA_Boolean pd_bounded;
+  T*             pd_buf;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -370,6 +284,13 @@ public:
     Base_T_seq::operator= (s);
     return *this;
   }
+
+  static inline T* allocbuf(_CORBA_ULong /*nelems*/) {
+    return Base_T_seq::allocbuf(max);
+  }
+
+  static inline T* allocbuf() { return allocbuf(max); }
+
   // CORBA 2.3 additions
 
   inline void replace(_CORBA_ULong len, T* data,_CORBA_Boolean release_ = 0) {
@@ -393,15 +314,28 @@ public:
   inline _CORBA_ULong length() const { return pd_len; }
   inline void length(_CORBA_ULong len)
   {
-    if (pd_bounded && len > pd_max) {
-      _CORBA_bound_check_error();
-      // never reach here.
-    }
     if (len) {
-      // Allocate buffer on-demand. Either pd_data == 0 
-      //                            or pd_data = buffer for pd_max elements
-      if (!pd_buf || len > pd_max) {
-	NP_copybuffer(((len > pd_max) ? len : pd_max));
+      if (len > pd_max) {
+	if (pd_bounded) {
+	  _CORBA_bound_check_error();
+	  // Never reach here.
+	}
+	// Grow exponentially
+	_CORBA_ULong newmax = pd_max * 2;
+	NP_copybuffer((len > newmax) ? len : newmax);
+      }
+      else if (!pd_buf) {
+	// Allocate initial buffer
+	NP_copybuffer(pd_max);
+      }
+    }
+    else {
+      // Zero length. Deallocate buffer if it is owned by us.
+      if (pd_rel && pd_buf) {
+	NP_freebuf();
+	pd_buf = 0;
+	if (!pd_bounded)
+	  pd_max = 0;
       }
     }
     pd_len = len;
@@ -456,9 +390,9 @@ protected:
   inline _CORBA_Sequence_Forward(_CORBA_ULong max, _CORBA_Boolean bounded=0) :
     pd_max(max), pd_len(0), pd_rel(1), pd_bounded(bounded), pd_buf(0) {}
 
-  inline _CORBA_Sequence_Forward(_CORBA_ULong max,
-				 _CORBA_ULong len,
-				 T           *value,
+  inline _CORBA_Sequence_Forward(_CORBA_ULong   max,
+				 _CORBA_ULong   len,
+				 T*             value,
 				 _CORBA_Boolean release_ = 0,
 				 _CORBA_Boolean bounded = 0)
       : pd_max(max),
@@ -493,11 +427,11 @@ protected:
   virtual void NP_copybuffer(_CORBA_ULong newmax) = 0;
   virtual void NP_freebuf() = 0;
 
-  _CORBA_ULong    pd_max;
-  _CORBA_ULong    pd_len;
-  _CORBA_Boolean  pd_rel;
-  _CORBA_Boolean  pd_bounded;
-  T              *pd_buf;
+  _CORBA_ULong   pd_max;
+  _CORBA_ULong   pd_len;
+  _CORBA_Boolean pd_rel;
+  _CORBA_Boolean pd_bounded;
+  T*             pd_buf;
 };
 
 
@@ -1091,30 +1025,40 @@ public:
 //////////////////////// _CORBA_Sequence_Array ///////////////////////
 //////////////////////////////////////////////////////////////////////
 
-template <class T,class T_slice,class Telm,int dimension>
+template <class T,class T_slice,class T_elm,int dimension>
 class _CORBA_Sequence_Array {
 public:
-  typedef _CORBA_Sequence_Array<T,T_slice,Telm,dimension> T_seq;
+  typedef _CORBA_Sequence_Array<T,T_slice,T_elm,dimension> T_seq;
 
   inline _CORBA_ULong maximum() const { return pd_max; }
   inline _CORBA_ULong length() const { return pd_len; }
   inline void length(_CORBA_ULong len)
   {
-    if (pd_bounded && len > pd_max) {
-      _CORBA_bound_check_error();
-      // never reach here.
-    }
-
     if (len) {
-      // Allocate buffer on-demand. Either pd_data == 0 
-      //                            or pd_data = buffer for pd_max elements
-      if (!pd_buf || len > pd_max) {
-	copybuffer(((len > pd_max) ? len : pd_max));
+      if (len > pd_max) {
+	if (pd_bounded) {
+	  _CORBA_bound_check_error();
+	  // Never reach here.
+	}
+	// Grow exponentially
+	_CORBA_ULong newmax = pd_max * 2;
+	copybuffer((len > newmax) ? len : newmax);
+      }
+      else if (!pd_buf) {
+	// Allocate initial buffer
+	copybuffer(pd_max);
       }
     }
-
+    else {
+      // Zero length. Deallocate buffer if it is owned by us.
+      if (pd_rel && pd_buf) {
+	freebuf(pd_buf);
+	pd_buf = 0;
+	if (!pd_bounded)
+	  pd_max = 0;
+      }
+    }
     pd_len = len;
-
   }
   // These have to return pointer to slice to support brain-dead compilers
   // (such as MSVC, which handles references to arrays poorly).
@@ -1128,6 +1072,7 @@ public:
     if (index_ >= pd_len) _CORBA_bound_check_error();
     return (const T_slice*)(pd_buf[index_]);
   }
+
   static inline T* allocbuf(_CORBA_ULong nelems)
   {
     if (nelems) return new T[nelems];
@@ -1179,7 +1124,7 @@ public:
     return;
   }
 
-  // omniORB2 extensions
+  // omniORB extensions
   inline T *NP_data() const { return pd_buf; }
   inline void NP_norelease() { pd_rel = 0; }
 
@@ -1199,7 +1144,7 @@ protected:
     length(s.pd_len);
     for (_CORBA_ULong i=0; i < pd_len; i++) {
       for (_CORBA_ULong j=0; j < dimension; j++) {
-	*((Telm*)(pd_buf[i]) + j) = *((Telm*)(s.pd_buf[i]) + j);
+	*((T_elm*)(pd_buf[i]) + j) = *((T_elm*)(s.pd_buf[i]) + j);
       }
     }
   }
@@ -1225,10 +1170,15 @@ protected:
 
   inline T_seq& operator= (const T_seq& s)
   {
-    length(s.pd_len);
-    for (unsigned long i=0; i < pd_len; i++) {
-      for (_CORBA_ULong j=0; j < dimension; j++) {
-	*((Telm*)(pd_buf[i]) + j) = *((Telm*)(s.pd_buf[i]) + j);
+    if (&s != this) {
+      // Prevent copybuffer from copying any of the current sequence members 
+      pd_len = 0;
+
+      length(s.pd_len);
+      for (unsigned long i=0; i < pd_len; i++) {
+        for (_CORBA_ULong j=0; j < dimension; j++) {
+          *((T_elm*)(pd_buf[i]) + j) = *((T_elm*)(s.pd_buf[i]) + j);
+        }
       }
     }
     return *this;
@@ -1264,7 +1214,7 @@ protected:
     }
     for (unsigned long i=0; i < pd_len; i++) {
       for (_CORBA_ULong j=0; j < dimension; j++) {
-	*((Telm*)(newbuf[i]) + j) = *((Telm*)(pd_buf[i]) + j);
+	*((T_elm*)(newbuf[i]) + j) = *((T_elm*)(pd_buf[i]) + j);
       }
     }
     if (pd_rel && pd_buf) {
@@ -1288,11 +1238,11 @@ protected:
 /////////////////// _CORBA_Unbounded_Sequence_Array //////////////////
 //////////////////////////////////////////////////////////////////////
 
-template <class T,class T_slice,class Telm,int dimension>
-class _CORBA_Unbounded_Sequence_Array : public _CORBA_Sequence_Array<T,T_slice,Telm,dimension> {
+template <class T,class T_slice,class T_elm,int dimension>
+class _CORBA_Unbounded_Sequence_Array : public _CORBA_Sequence_Array<T,T_slice,T_elm,dimension> {
 public:
   typedef _CORBA_Unbounded_Sequence_Array T_seq;
-  typedef  _CORBA_Sequence_Array<T,T_slice,Telm,dimension> Base_T_seq ;
+  typedef  _CORBA_Sequence_Array<T,T_slice,T_elm,dimension> Base_T_seq ;
 
   inline _CORBA_Unbounded_Sequence_Array() {}
   inline _CORBA_Unbounded_Sequence_Array(_CORBA_ULong max) : Base_T_seq(max) {}
@@ -1323,11 +1273,11 @@ public:
 //////////////////// _CORBA_Bounded_Sequence_Array ///////////////////
 //////////////////////////////////////////////////////////////////////
 
-template <class T,class T_slice,class Telm,int dimension,int max>
-class _CORBA_Bounded_Sequence_Array : public _CORBA_Sequence_Array<T,T_slice,Telm,dimension> {
+template <class T,class T_slice,class T_elm,int dimension,int max>
+class _CORBA_Bounded_Sequence_Array : public _CORBA_Sequence_Array<T,T_slice,T_elm,dimension> {
 public:
-  typedef _CORBA_Bounded_Sequence_Array<T,T_slice,Telm,dimension,max> T_seq;
-  typedef _CORBA_Sequence_Array<T,T_slice,Telm,dimension> Base_T_seq ;
+  typedef _CORBA_Bounded_Sequence_Array<T,T_slice,T_elm,dimension,max> T_seq;
+  typedef _CORBA_Sequence_Array<T,T_slice,T_elm,dimension> Base_T_seq ;
 
   inline _CORBA_Bounded_Sequence_Array() : Base_T_seq(max,1) {}
   inline _CORBA_Bounded_Sequence_Array(_CORBA_ULong len,
@@ -1341,6 +1291,12 @@ public:
   }
 
   inline ~_CORBA_Bounded_Sequence_Array() {}
+
+  static inline T* allocbuf(_CORBA_ULong /*nelems*/) {
+    return Base_T_seq::allocbuf(max);
+  }
+
+  static inline T* allocbuf() { return allocbuf(max); }
 
   // CORBA 2.3 additions
 
@@ -1356,13 +1312,13 @@ public:
 ////////// _CORBA_Unbounded_Sequence_Array_w_FixSizeElement //////////
 //////////////////////////////////////////////////////////////////////
 
-template <class T,class T_slice, class Telm,int dimension,int elmSize,int elmAlignment>
+template <class T,class T_slice, class T_elm,int dimension,int elmSize,int elmAlignment>
 class _CORBA_Unbounded_Sequence_Array_w_FixSizeElement 
-   : public _CORBA_Unbounded_Sequence_Array<T,T_slice,Telm,dimension> 
+   : public _CORBA_Unbounded_Sequence_Array<T,T_slice,T_elm,dimension> 
 {
 public:
-  typedef _CORBA_Unbounded_Sequence_Array_w_FixSizeElement<T,T_slice,Telm,dimension,elmSize,elmAlignment> T_seq;
-  typedef _CORBA_Unbounded_Sequence_Array<T,T_slice,Telm,dimension> Base_T_seq;
+  typedef _CORBA_Unbounded_Sequence_Array_w_FixSizeElement<T,T_slice,T_elm,dimension,elmSize,elmAlignment> T_seq;
+  typedef _CORBA_Unbounded_Sequence_Array<T,T_slice,T_elm,dimension> Base_T_seq;
 
   inline _CORBA_Unbounded_Sequence_Array_w_FixSizeElement() {}
   inline _CORBA_Unbounded_Sequence_Array_w_FixSizeElement(_CORBA_ULong max) : 
@@ -1399,13 +1355,13 @@ public:
 /////////// _CORBA_Bounded_Sequence_Array_w_FixSizeElement ///////////
 //////////////////////////////////////////////////////////////////////
 
-template <class T,class T_slice,class Telm,int dimension,int max,int elmSize, int elmAlignment>
+template <class T,class T_slice,class T_elm,int dimension,int max,int elmSize, int elmAlignment>
 class _CORBA_Bounded_Sequence_Array_w_FixSizeElement 
-  : public _CORBA_Bounded_Sequence_Array<T,T_slice,Telm,dimension,max> 
+  : public _CORBA_Bounded_Sequence_Array<T,T_slice,T_elm,dimension,max> 
 {
 public:
-  typedef _CORBA_Bounded_Sequence_Array_w_FixSizeElement<T,T_slice,Telm,dimension,max,elmSize,elmAlignment> T_seq;
-  typedef _CORBA_Bounded_Sequence_Array<T,T_slice,Telm,dimension,max> Base_T_seq;
+  typedef _CORBA_Bounded_Sequence_Array_w_FixSizeElement<T,T_slice,T_elm,dimension,max,elmSize,elmAlignment> T_seq;
+  typedef _CORBA_Bounded_Sequence_Array<T,T_slice,T_elm,dimension,max> Base_T_seq;
 
   inline _CORBA_Bounded_Sequence_Array_w_FixSizeElement() {}
 
@@ -1878,76 +1834,80 @@ public:
 ///////////////// _CORBA_Sequence_ObjRef              ////////////////
 //////////////////////////////////////////////////////////////////////
 
-template <class T, class ElemT, class T_Helper>
+template <class T, class T_Elem, class T_Helper>
 class _CORBA_Sequence_ObjRef {
 public:
-  typedef _CORBA_Sequence_ObjRef<T,ElemT,T_Helper> T_seq;
+  typedef _CORBA_Sequence_ObjRef<T,T_Elem,T_Helper> T_seq;
 
   inline _CORBA_ULong maximum() const { return pd_max; }
   inline _CORBA_ULong length() const { return pd_len; }
-  inline void length(_CORBA_ULong len) {
-    if (pd_bounded && len > pd_max) {
-      _CORBA_bound_check_error();
-      // never reach here.
-    }
-
-    // If we've shrunk we need to clear the entries at the top.
-    for( _CORBA_ULong i = len; i < pd_len; i++ ) 
-      operator[](i) = T_Helper::_nil();
-
+  inline void length(_CORBA_ULong len)
+  {
     if (len) {
-      // Allocate buffer on-demand. Either pd_data == 0 
-      //                            or pd_data = buffer for pd_max elements
-      if (!pd_data || len > pd_max) {
-	copybuffer(((len > pd_max) ? len : pd_max));
+      if (len > pd_max) {
+	if (pd_bounded) {
+	  _CORBA_bound_check_error();
+	  // Never reach here.
+	}
+	// Grow exponentially
+	_CORBA_ULong newmax = pd_max * 2;
+	copybuffer((len > newmax) ? len : newmax);
+      }
+      else if (!pd_buf) {
+	// Allocate initial buffer
+	copybuffer(pd_max);
+      }
+      else {
+	// We have shrunk. Clear the entries at the top
+	T* nil_ = T_Helper::_nil();
+	for (_CORBA_ULong i = len; i < pd_len; i++) {
+	  T_Helper::release(pd_buf[i]);
+	  pd_buf[i] = nil_;
+	}
       }
     }
-
+    else {
+      // Zero length. Deallocate buffer if it is owned by us.
+      if (pd_rel && pd_buf) {
+	freebuf(pd_buf);
+	pd_buf = 0;
+	if (!pd_bounded)
+	  pd_max = 0;
+      }
+    }
     pd_len = len;
   }
 
-  inline ElemT operator[] (_CORBA_ULong i) {
+  inline T_Elem operator[] (_CORBA_ULong i) {
     if( i >= pd_len )  _CORBA_bound_check_error();
-    return ElemT(pd_data[i],pd_rel);
+    return T_Elem(pd_buf[i],pd_rel);
   }
-  inline ElemT operator[] (_CORBA_ULong i) const {
+  inline T_Elem operator[] (_CORBA_ULong i) const {
     if( i >= pd_len )  _CORBA_bound_check_error();
-    return ElemT(pd_data[i],pd_rel);
+    return T_Elem(pd_buf[i],pd_rel);
   }
 
-#if SIZEOF_PTR == SIZEOF_LONG
-  typedef unsigned long ptr_arith_t;
-#elif SIZEOF_PTR == SIZEOF_INT
-  typedef unsigned int ptr_arith_t;
-#elif defined (_WIN64)
-  typedef size_t ptr_arith_t;
-#else
-#error "No suitable type to do pointer arithmetic"
-#endif
-  
-  static inline T** allocbuf(_CORBA_ULong nelems) { 
+  static inline T** allocbuf(_CORBA_ULong nelems) {
     if (!nelems) return 0;
-    T** b = new T*[nelems+2];
-    ptr_arith_t l = nelems;
-    for (_CORBA_ULong i_ = 2; i_ < nelems+2; i_++) {
-      b[i_] = T_Helper::_nil();
+
+    T** b = new T*[nelems+1];
+
+    T* nil_ = T_Helper::_nil();
+    for (_CORBA_ULong i_ = 1; i_ < nelems+1; i_++) {
+      b[i_] = nil_;
     }
-    b[0] = (T*) ((ptr_arith_t)0x53514F4AU);
-    b[1] = (T*) l;
-    return b+2;
+    b[0] = (T*) (omni_ptr_arith_t) nelems;
+    return b+1;
   }
 
   static inline void freebuf(T** buf) { 
     if (!buf) return;
-    T** b = buf-2;
-    if ((ptr_arith_t)b[0] != ((ptr_arith_t) 0x53514F4AU)) {
-      _CORBA_bad_param_freebuf();
-      return;
-    }
-    ptr_arith_t l = (ptr_arith_t) b[1];
-    for (_CORBA_ULong i = 0; i < (_CORBA_ULong) l; i++) {
-      if (!T_Helper::is_nil(buf[i]))
-	T_Helper::release(buf[i]);
+
+    T** b = buf-1;
+
+    _CORBA_ULong l = (_CORBA_ULong)(omni_ptr_arith_t)b[0];
+    for (_CORBA_ULong i = 0; i < l; i++) {
+      T_Helper::release(buf[i]);
     }
     b[0] = (T*) 0;
     delete [] b;
@@ -1957,18 +1917,19 @@ public:
   inline _CORBA_Boolean release() const { return pd_rel; }
 
   inline T** get_buffer(_CORBA_Boolean orphan = 0) {
-    if (pd_max && !pd_data) {
+    if (pd_max && !pd_buf) {
       copybuffer(pd_max);
     }
     if (!orphan) {
-      return pd_data;
+      return pd_buf;
     }
     else {
-      if (!pd_rel)
+      if (!pd_rel) {
 	return 0;
+      }
       else {
-	T** tmp = pd_data;
-	pd_data = 0;
+	T** tmp = pd_buf;
+	pd_buf = 0;
 	if (!pd_bounded) {
 	  pd_max = 0;
 	}
@@ -1980,30 +1941,30 @@ public:
   }
 
   inline T*const * get_buffer() const { 
-    if (pd_max && !pd_data) {
+    if (pd_max && !pd_buf) {
       T_seq* s = OMNI_CONST_CAST(T_seq*, this);
       s->copybuffer(pd_max);
     }
-    return pd_data; 
+    return pd_buf; 
   }
 
   inline ~_CORBA_Sequence_ObjRef() {
-    if (pd_rel && pd_data) freebuf(pd_data);
-    pd_data = 0;
+    if (pd_rel && pd_buf) freebuf(pd_buf);
+    pd_buf = 0;
   }
 
 
-  // omniORB2 extensions
+  // omniORB extensions
   inline void operator>>= (cdrStream &s) const;
   inline void operator<<= (cdrStream &s);
 
 protected:
   inline _CORBA_Sequence_ObjRef()
-    : pd_max(0), pd_len(0), pd_rel(1), pd_bounded(0), pd_data(0) {}
+    : pd_max(0), pd_len(0), pd_rel(1), pd_bounded(0), pd_buf(0) {}
 
   inline _CORBA_Sequence_ObjRef(_CORBA_ULong max,
 				_CORBA_Boolean bounded=0)
-    : pd_max(max), pd_len(0), pd_rel(1), pd_bounded(bounded), pd_data(0) {}
+    : pd_max(max), pd_len(0), pd_rel(1), pd_bounded(bounded), pd_buf(0) {}
 
   inline _CORBA_Sequence_ObjRef(_CORBA_ULong max,
 				_CORBA_ULong len,
@@ -2011,7 +1972,7 @@ protected:
 				_CORBA_Boolean release_ = 0,
 				_CORBA_Boolean bounded = 0)
     : pd_max(max), pd_len(len), pd_rel(release_),
-      pd_bounded(bounded), pd_data(value)
+      pd_bounded(bounded), pd_buf(value)
   {
     if (len > max || (len && !value)) {
       _CORBA_bound_check_error();
@@ -2021,16 +1982,39 @@ protected:
 
   inline _CORBA_Sequence_ObjRef(const T_seq& s)
     : pd_max(s.pd_max), pd_len(0), pd_rel(1),
-      pd_bounded(s.pd_bounded), pd_data(0) {
+      pd_bounded(s.pd_bounded), pd_buf(0) {
     length(s.pd_len);
-    for( _CORBA_ULong i = 0; i < pd_len; i++ ) 
-      operator[](i) = s[i];
+    for (_CORBA_ULong i = 0; i < pd_len; i++) {
+      pd_buf[i] = s.pd_buf[i];
+      T_Helper::duplicate(pd_buf[i]);
+    }
   }
 
   inline T_seq& operator= (const T_seq& s) {
-    length(s.pd_len);
-    for( _CORBA_ULong i = 0; i < pd_len; i++ )
-      operator[](i) = s[i];
+    if (&s != this) {
+      _CORBA_ULong i;
+
+      if (pd_rel) {
+        T* nil_ = T_Helper::_nil();
+        for (i=0; i < pd_len; i++) {
+          T_Helper::release(pd_buf[i]);
+          pd_buf[i] = nil_;
+        }
+        pd_len = 0;
+        length(s.pd_len);
+        for (i = 0; i < pd_len; i++) {
+          pd_buf[i] = s.pd_buf[i];
+          T_Helper::duplicate(pd_buf[i]);
+        }
+      }
+      else {
+        pd_len = 0;
+        length(s.pd_len);
+        for (i = 0; i < pd_len; i++) {
+          pd_buf[i] = s.pd_buf[i];
+        }
+      }
+    }
     return *this;
   }
 
@@ -2041,12 +2025,12 @@ protected:
       _CORBA_bound_check_error();
       // never reach here
     }
-    if (pd_rel && pd_data) {
-      freebuf(pd_data);
+    if (pd_rel && pd_buf) {
+      freebuf(pd_buf);
     }
     pd_max = max;
     pd_len = len;
-    pd_data = data;
+    pd_buf = data;
     pd_rel = release_;
   }
 
@@ -2054,7 +2038,7 @@ protected:
 protected:
 
   void copybuffer(_CORBA_ULong newmax) {
-    // replace pd_data with a new buffer of size newmax.
+    // replace pd_buf with a new buffer of size newmax.
     // Invariant:  pd_len <= newmax
     //
     T** newdata = allocbuf(newmax);
@@ -2062,23 +2046,24 @@ protected:
       _CORBA_new_operator_return_null();
       // never reach here
     }
-    for (unsigned long i_=0; i_ < pd_len; i_++) {
-      if (pd_rel) {
-	newdata[i_] = pd_data[i_];
-	pd_data[i_] = T_Helper::_nil();
+    if (pd_rel) {
+      T* nil_ = T_Helper::_nil();
+      for (unsigned long i_=0; i_ < pd_len; i_++) {
+	newdata[i_] = pd_buf[i_];
+	pd_buf[i_]  = nil_;
       }
-      else {
-	T_Helper::duplicate(pd_data[i_]);
-	newdata[i_] = pd_data[i_];
+      if (pd_buf) {
+	freebuf(pd_buf);
       }
-    }
-    if (pd_rel && pd_data) {
-      freebuf(pd_data);
     }
     else {
+      for (unsigned long i_=0; i_ < pd_len; i_++) {
+	T_Helper::duplicate(pd_buf[i_]);
+	newdata[i_] = pd_buf[i_];
+      }
       pd_rel = 1;
     }
-    pd_data = newdata;
+    pd_buf = newdata;
     pd_max = newmax;
   }
 
@@ -2086,18 +2071,18 @@ protected:
   _CORBA_ULong    pd_len;
   _CORBA_Boolean  pd_rel;
   _CORBA_Boolean  pd_bounded;
-  T**             pd_data;
+  T**             pd_buf;
 };
 
 //////////////////////////////////////////////////////////////////////
 ///////////////// _CORBA_Unbounded_Sequence_ObjRef    ////////////////
 //////////////////////////////////////////////////////////////////////
 
-template <class T, class ElemT, class T_Helper>
-class _CORBA_Unbounded_Sequence_ObjRef : public _CORBA_Sequence_ObjRef<T,ElemT,T_Helper> {
+template <class T, class T_Elem, class T_Helper>
+class _CORBA_Unbounded_Sequence_ObjRef : public _CORBA_Sequence_ObjRef<T,T_Elem,T_Helper> {
 public:
-  typedef _CORBA_Unbounded_Sequence_ObjRef<T,ElemT,T_Helper> T_seq;
-  typedef _CORBA_Sequence_ObjRef<T,ElemT,T_Helper> Base_T_seq;
+  typedef _CORBA_Unbounded_Sequence_ObjRef<T,T_Elem,T_Helper> T_seq;
+  typedef _CORBA_Sequence_ObjRef<T,T_Elem,T_Helper> Base_T_seq;
 
   inline _CORBA_Unbounded_Sequence_ObjRef() {}
   inline _CORBA_Unbounded_Sequence_ObjRef(_CORBA_ULong max) : 
@@ -2129,13 +2114,13 @@ public:
 ///////////////// _CORBA_Bounded_Sequence_ObjRef      ////////////////
 //////////////////////////////////////////////////////////////////////
 
-template<class T, class ElemT,class T_Helper,int max>
+template<class T, class T_Elem,class T_Helper,int max>
 class _CORBA_Bounded_Sequence_ObjRef
-  : public _CORBA_Sequence_ObjRef<T,ElemT,T_Helper>
+  : public _CORBA_Sequence_ObjRef<T,T_Elem,T_Helper>
 {
 public:
-  typedef _CORBA_Bounded_Sequence_ObjRef<T,ElemT,T_Helper,max> T_seq;
-  typedef _CORBA_Sequence_ObjRef<T,ElemT,T_Helper> Base_T_seq;
+  typedef _CORBA_Bounded_Sequence_ObjRef<T,T_Elem,T_Helper,max> T_seq;
+  typedef _CORBA_Sequence_ObjRef<T,T_Elem,T_Helper> Base_T_seq;
 
   inline _CORBA_Bounded_Sequence_ObjRef() : Base_T_seq(max,1){}
   inline _CORBA_Bounded_Sequence_ObjRef(_CORBA_ULong len,
@@ -2151,6 +2136,12 @@ public:
     Base_T_seq::operator= (s);
     return *this;
   }
+
+  static inline T** allocbuf(_CORBA_ULong /*nelems*/) {
+    return Base_T_seq::allocbuf(max);
+  }
+
+  static inline T** allocbuf() { return allocbuf(max); }
 
   // CORBA 2.3 additions
   inline void replace(_CORBA_ULong len, T** data,

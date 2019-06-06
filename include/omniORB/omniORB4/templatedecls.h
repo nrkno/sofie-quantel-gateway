@@ -8,23 +8,21 @@
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 
 #ifndef __TEMPLATEDECLS_H__
 #define __TEMPLATEDECLS_H__
@@ -180,7 +178,7 @@ public:
 					  _CORBA_ULong length_,
 					  T** value,
 					  _CORBA_Boolean release_ = 0)
-    : pd_max(max), pd_len(length_)
+    : pd_max(max), pd_len(length_), pd_rel(release_)
   {
     if( length_ > max )  _CORBA_bound_check_error();
     pd_buf = new ElemT[length_];
@@ -584,13 +582,15 @@ public:
   }
 
   inline T_element& operator= (const T_element& p) {
-    if( pd_rel ) {
-      T_Helper::release(pd_data);
-      T_Helper::duplicate(p.pd_data);
-      pd_data = p.pd_data;
+    if (p.pd_data != pd_data) {
+      if( pd_rel ) {
+        T_Helper::release(pd_data);
+        T_Helper::duplicate(p.pd_data);
+        pd_data = p.pd_data;
+      }
+      else
+        pd_data = p.pd_data;
     }
-    else
-      pd_data = p.pd_data;
     return *this;
   }
 
@@ -792,21 +792,28 @@ public:
 
   inline _CORBA_ConstrType_Fix_Var()  {}
   inline _CORBA_ConstrType_Fix_Var(T* p) { pd_data = *p; delete p; }
+  inline _CORBA_ConstrType_Fix_Var(const T& d) { pd_data = d; }
   inline _CORBA_ConstrType_Fix_Var(const T_var& p) {
     pd_data = p.pd_data;
   }
   inline ~_CORBA_ConstrType_Fix_Var()  {}
-  inline T_var&operator= (T* p) {
-    pd_data = *p;
-    delete p;
+  inline T_var& operator= (T* p) {
+    if (p != &pd_data) {
+      pd_data = *p;
+      delete p;
+    }
     return *this;
   }
   inline T_var& operator= (const T_var& p) {
-    pd_data = p.pd_data;
+    if (&p != this)
+      pd_data = p.pd_data;
+
     return *this;
   }
-  inline T_var& operator= (T p) {
-    pd_data = p;
+  inline T_var& operator= (const T& p) {
+    if (&p != &pd_data)
+      pd_data = p;
+
     return *this;
   }
   inline T* operator->() const { return (T*) &pd_data; }

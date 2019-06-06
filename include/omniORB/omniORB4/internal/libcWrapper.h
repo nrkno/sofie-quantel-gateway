@@ -3,99 +3,28 @@
 // LibcWrapper.h              Created on: 19/3/96
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2003-2006 Apasphere Ltd
+//    Copyright (C) 2003-2010 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
-//	Wrapper for libc functions which are non-reentrant
+//    Wrapper for libc functions which are non-reentrant / non-portable
 //
-
-/*
-  $Log: libcWrapper.h,v $
-  Revision 1.1.6.7  2009/05/06 16:16:04  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.1.6.6  2006/04/21 14:38:35  dgrisby
-  Typo in comment.
-
-  Revision 1.1.6.5  2006/04/09 19:52:31  dgrisby
-  More IPv6, endPointPublish parameter.
-
-  Revision 1.1.6.4  2006/03/25 18:54:03  dgrisby
-  Initial IPv6 support.
-
-  Revision 1.1.6.3  2006/02/22 14:56:37  dgrisby
-  New endPointPublishHostname and endPointResolveNames parameters.
-
-  Revision 1.1.6.2  2005/01/06 23:08:25  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.6.1  2003/03/23 21:03:45  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.8  2003/01/06 11:11:55  dgrisby
-  New AddrInfo instead of gethostbyname.
-
-  Revision 1.1.4.7  2002/11/06 11:31:21  dgrisby
-  Old ETS patches that got lost; updates patches README.
-
-  Revision 1.1.4.6  2002/09/08 22:12:22  dgrisby
-  Last checkin broke it.
-
-  Revision 1.1.4.5  2002/02/25 11:17:12  dpg1
-  Use tracedmutexes everywhere.
-
-  Revision 1.1.4.4  2002/02/11 17:09:48  dpg1
-  Fix Windows brokenness caused by autoconf stuff.
-
-  Revision 1.1.4.3  2001/08/24 16:43:25  sll
-  Switch to use Winsock 2. Removed reference to winsock.h. Let the pre-processor
-  define _WIN32_WINNT=0x0400 to select the right header.
-
-  Revision 1.1.4.2  2001/06/13 20:11:37  sll
-  Minor update to make the ORB compiles with MSVC++.
-
-  Revision 1.1.4.1  2001/04/18 17:18:16  sll
-  Big checkin with the brand new internal APIs.
-  These files were relocated and scoped with the omni namespace.
-
-  Revision 1.7.2.1  2000/07/17 10:35:54  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.8  2000/07/13 15:25:57  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.6.8.1  1999/09/22 14:26:52  djr
-  Major rewrite of orbcore to support POA.
-
-  Revision 1.6  1999/03/11 16:25:54  djr
-  Updated copyright notice
-
-  Revision 1.5  1997/12/09 18:25:28  sll
-  Use __WIN32__ instead of __NT__
-
- * Revision 1.4  1997/05/06  15:23:10  sll
- * Public release.
- *
-  */
 
 #ifndef __LIBCWRAPPER_H__
 #define __LIBCWRAPPER_H__
@@ -112,6 +41,12 @@ OMNI_NAMESPACE_BEGIN(omni)
 class LibcWrapper {
 public:
   class AddrInfo;
+
+  static unsigned int Rand();
+  // Thread-safe pseudo-random number
+
+  static void SRand(unsigned int seed);
+  // Set seed for Rand().
 
   static CORBA::Boolean isip4addr(const char* node);
   // True if node is an IPv4 address.

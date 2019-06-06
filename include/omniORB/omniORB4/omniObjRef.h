@@ -3,110 +3,28 @@
 // omniObjRef.h               Created on: 22/2/99
 //                            Author    : David Riddoch (djr)
 //
-//    Copyright (C) 2002-2006 Apasphere Ltd
+//    Copyright (C) 2002-2011 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Research Cambridge
 //
 //    This file is part of the omniORB library.
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //    Base class for object references.
 //
-
-/*
-  $Log: omniObjRef.h,v $
-  Revision 1.4.2.4  2009/05/06 16:16:12  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.4.2.3  2006/07/18 16:21:24  dgrisby
-  New experimental connection management extension; ORB core support
-  for it.
-
-  Revision 1.4.2.2  2005/11/09 12:22:18  dgrisby
-  Local interfaces support.
-
-  Revision 1.4.2.1  2003/03/23 21:04:12  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.2.2.12  2002/10/14 20:06:06  dgrisby
-  Per objref / per thread timeouts.
-
-  Revision 1.2.2.11  2001/11/12 13:46:07  dpg1
-  _unchecked_narrow, improved _narrow.
-
-  Revision 1.2.2.10  2001/11/08 16:33:49  dpg1
-  Local servant POA shortcut policy.
-
-  Revision 1.2.2.9  2001/09/19 17:26:43  dpg1
-  Full clean-up after orb->destroy().
-
-  Revision 1.2.2.8  2001/08/15 10:26:08  dpg1
-  New object table behaviour, correct POA semantics.
-
-  Revision 1.2.2.7  2001/05/31 16:21:13  dpg1
-  object references optionally just store a pointer to their repository
-  id string rather than copying it.
-
-  Revision 1.2.2.6  2001/05/10 15:08:37  dpg1
-  _compatibleServant() replaced with _localServantTarget().
-  createIdentity() now takes a target string.
-  djr's fix to deactivateObject().
-
-  Revision 1.2.2.5  2001/04/18 17:50:43  sll
-  Big checkin with the brand new internal APIs.
-  Scoped where appropriate with the omni namespace.
-
-  Revision 1.2.2.4  2000/11/07 18:44:03  sll
-  Renamed omniObjRef::_hash and _is_equivalent to __hash and __is_equivalent
-  to avoid name clash with the member functions of CORBA::Object.
-
-  Revision 1.2.2.3  2000/10/03 17:37:07  sll
-  Changed omniIOR synchronisation mutex from omni::internalLock to its own
-  mutex.
-
-  Revision 1.2.2.2  2000/09/27 17:16:20  sll
-  Replaced data member pd_iopProfiles with pd_ior which contains decoded
-  members of the IOR.
-  Removed _getRopeAndKey(), _getTheKey() and _iopProfiles().
-  Added new functions _getIOR(), _marshal(), _unMarshal(), _toString,
-  _fromString(), _hash(), _is_equivalent().
-
-  Revision 1.2.2.1  2000/07/17 10:35:35  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:26:05  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.4  2000/03/01 17:57:42  dpg1
-  New omniObjRef::_compatibleServant() function to support object
-  references and servants written for languages other than C++.
-
-  Revision 1.1.2.3  2000/02/22 12:25:38  dpg1
-  A few things made `publicly' accessible so omniORBpy can get its hands
-  on them.
-
-  Revision 1.1.2.2  1999/10/27 17:32:09  djr
-  omni::internalLock and objref_rc_lock are now pointers.
-
-  Revision 1.1.2.1  1999/09/24 09:51:48  djr
-  Moved from omniORB2 + some new files.
-
-*/
 
 #ifndef __OMNIOBJREF_H__
 #define __OMNIOBJREF_H__
@@ -119,6 +37,7 @@ OMNI_NAMESPACE_END(omni)
 
 class omniIOR;
 class omniCallDescriptor;
+class omniAsyncCallDescriptor;
 class omniIdentity;
 class omniLocalIdentity;
 class omniObjTableEntry;
@@ -203,55 +122,80 @@ public:
   // not.  May throw other system exceptions.
   //  This function is thread-safe.
 
-  void* _transientExceptionHandler(void*& cookie);
+  void* _transientExceptionHandler(void*& cookie, _CORBA_Boolean& ext);
   // If a transientExceptionHandler_t has been installed for this object
   // by _transientExceptionHandler(void*,void*), returns this handler and its
   // associated opaque argument in cookie.
   // Otherwise return 0.
   //  This function is thread-safe.
 
-  void _transientExceptionHandler(void* new_handler, void* cookie);
+  void _transientExceptionHandler(void* new_handler, void* cookie,
+                                  _CORBA_Boolean ext);
   // Set the transientExceptionHandler_t of this object.  By default,
   // i.e. when this function is not called for an object, the global
-  // transientExceptionHandler_t will be invoked when a CORBA::TRANSIENT
-  // exception is caught in a remote call from a proxy object.
-  // The argument <cookie> is an opaque argument that will be passed
-  // to the exception handler.
+  // transientExceptionHandler_t will be invoked when a
+  // CORBA::TRANSIENT exception is caught in a remote call from a
+  // proxy object.  The argument <cookie> is an opaque argument that
+  // will be passed to the exception handler. ext is true if the
+  // handler has extended parameters.
   //  This function is thread-safe.
 
-  void* _commFailureExceptionHandler(void*& cookie);
+  void* _timeoutExceptionHandler(void*& cookie, _CORBA_Boolean& ext);
+  // If a timeoutExceptionHandler_t has been installed for this object
+  // by _timeoutExceptionHandler(void*,void*), returns this handler and its
+  // associated opaque argument in cookie.
+  // Otherwise return 0.
+  //  This function is thread-safe.
+
+  void _timeoutExceptionHandler(void* new_handler, void* cookie,
+                                _CORBA_Boolean ext);
+  // Set the timeoutExceptionHandler_t of this object.  By default,
+  // i.e. when this function is not called for an object, the global
+  // timeoutExceptionHandler_t will be invoked when a CORBA::TIMEOUT
+  // exception is caught in a remote call from a proxy object.  The
+  // argument <cookie> is an opaque argument that will be passed to
+  // the exception handler. ext is true if the handler has extended
+  // parameters.
+  //  This function is thread-safe.
+
+  void* _commFailureExceptionHandler(void*& cookie, _CORBA_Boolean& ext);
   // If a commFailureExceptionHandler_t has been installed for this object
   // by _commFailureExceptionHandler(void*,void*), returns this handler and its
   // associated opaque argument in cookie.
   // Otherwise return 0.
   //  This function is thread-safe.
 
-  void _commFailureExceptionHandler(void* new_handler, void* cookie);
-  // Set the commFailureExceptionHandler_t of this object.  By default,
-  // i.e. when this function is not called for an object, the global
-  // commFailureExceptionHandler_t will be invoked when a CORBA::COMM_FAILURE
-  // exception is caught in a remote call from a proxy object.
-  // The argument <cookie> is an opaque argument that will be passed
-  // to the exception handler.
+  void _commFailureExceptionHandler(void* new_handler, void* cookie,
+                                    _CORBA_Boolean ext);
+  // Set the commFailureExceptionHandler_t of this object.  By
+  // default, i.e. when this function is not called for an object, the
+  // global commFailureExceptionHandler_t will be invoked when a
+  // CORBA::COMM_FAILURE exception is caught in a remote call from a
+  // proxy object.  The argument <cookie> is an opaque argument that
+  // will be passed to the exception handler. ext is true if the
+  // handler has extended parameters.
   //  This function is thread-safe.
 
-  void* _systemExceptionHandler(void*& cookie);
+  void* _systemExceptionHandler(void*& cookie, _CORBA_Boolean& ext);
   // If a systemExceptionHandler_t has been installed for this object
   // by _systemExceptionHandler(void*,void*), returns this handler and its
   // associated opaque argument in cookie.
   // Otherwise return 0.
   //  This function is thread-safe.
 
-  void _systemExceptionHandler(void* new_handler, void* cookie);
+  void _systemExceptionHandler(void* new_handler, void* cookie,
+                               _CORBA_Boolean ext);
   // Set the systemExceptionHandler_t of this object.  By default,
   // i.e. when this function is not called for an object, the global
-  // systemExceptionHandler_t will be invoked when a CORBA::SystemException
-  // exception, other than CORBA::TRANSIENT and CORBA::COMM_FAILURE is caught
-  // in a remote call from a proxy object.  The handlers for CORBA::TRANSIENT
-  // and CORBA::COMM_FAILURE are installed their own install functions.
-  // The argument <cookie> is an opaque argument that will be passed
-  // to the exception handler.
-  //  This function is thread-safe.
+  // systemExceptionHandler_t will be invoked when a
+  // CORBA::SystemException exception, other than CORBA::TRANSIENT,
+  // CORBA::COMM_FAILURE or CORBA::TIMEOUT is caught in a remote call
+  // from a proxy object.  The handlers for CORBA::TRANSIENT,
+  // CORBA::COMM_FAILURE and CORBA::TIMEOUT are installed their own
+  // install functions.  The argument <cookie> is an opaque argument
+  // that will be passed to the exception handler. ext is true if the
+  // handler has extended parameters.
+  // This function is thread-safe.
 
   inline omniIdentity* _identity() {
     ASSERT_OMNI_TRACEDMUTEX_HELD(*omni::internalLock, 1);
@@ -295,6 +239,10 @@ public:
   // the call to the object identity, and deals with exception
   // handlers, retries and location forwarding.
 
+  void _invoke_async(omniAsyncCallDescriptor*);
+  // Equivalent to _invoke, but the call is performed asynchronously.
+  // The call descriptor is informed when the call completes.
+
   omniIOR* _getIOR();
   // Returns an omniIOR. The object contains all the fields in
   // the IOR of the object reference. The object is read-only
@@ -336,9 +284,12 @@ public:
 
   inline void _setTimeout(unsigned long secs, unsigned long ns)
   {
-    pd_timeout_secs     = secs;
-    pd_timeout_nanosecs = ns;
+    pd_timeout.assign(secs, ns);
   }
+
+  void _NP_disconnect();
+  // Forcibly disconnect all connections associated with this object
+  // reference.
 
 protected:
   virtual ~omniObjRef();
@@ -453,6 +404,7 @@ private:
     // very first invocation.
 
     unsigned transient_exception_handler : 1;
+    unsigned timeout_exception_handler   : 1;
     unsigned commfail_exception_handler  : 1;
     unsigned system_exception_handler    : 1;
     // True if a per-object exception handler has been installed
@@ -468,8 +420,7 @@ private:
   } pd_flags;
   // Mutable.  Protected by <omni::internalLock>.
 
-  unsigned long pd_timeout_secs;
-  unsigned long pd_timeout_nanosecs;
+  omni_time_t pd_timeout;
 };
 
 

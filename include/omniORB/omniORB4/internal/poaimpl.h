@@ -9,117 +9,22 @@
 //    This file is part of the omniORB library.
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //    Internal implementation of the POA.
 //
-
-/*
-  $Log: poaimpl.h,v $
-  Revision 1.1.6.5  2009/05/06 16:16:02  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.1.6.4  2007/03/23 14:36:46  dgrisby
-  Use one etherealisation queue per POA, rather than one global one.
-  Thanks Teemu Torma.
-
-  Revision 1.1.6.3  2006/07/18 16:21:23  dgrisby
-  New experimental connection management extension; ORB core support
-  for it.
-
-  Revision 1.1.6.2  2005/07/22 17:18:39  dgrisby
-  Another merge from omni4_0_develop.
-
-  Revision 1.1.6.1  2003/03/23 21:03:43  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.12  2002/11/08 17:26:25  dgrisby
-  Hang on shutdown with servant locators.
-
-  Revision 1.1.4.11  2002/10/14 15:14:54  dgrisby
-  Fix create_POA / destroy deadlock, unique persistent system ids.
-
-  Revision 1.1.4.10  2001/11/13 14:11:44  dpg1
-  Tweaks for CORBA 2.5 compliance.
-
-  Revision 1.1.4.9  2001/11/08 16:33:50  dpg1
-  Local servant POA shortcut policy.
-
-  Revision 1.1.4.8  2001/08/17 15:00:48  dpg1
-  Fixes for pre-historic compilers.
-
-  Revision 1.1.4.7  2001/08/15 10:26:09  dpg1
-  New object table behaviour, correct POA semantics.
-
-  Revision 1.1.4.6  2001/08/01 10:08:21  dpg1
-  Main thread policy.
-
-  Revision 1.1.4.5  2001/07/31 16:10:38  sll
-  Added GIOP BiDir support.
-
-  Revision 1.1.4.4  2001/06/29 16:24:47  dpg1
-  Support re-entrancy in single thread policy POAs.
-
-  Revision 1.1.4.3  2001/06/07 16:24:09  dpg1
-  PortableServer::Current support.
-
-  Revision 1.1.4.2  2001/05/29 17:03:49  dpg1
-  In process identity.
-
-  Revision 1.1.4.1  2001/04/18 17:18:15  sll
-  Big checkin with the brand new internal APIs.
-  These files were relocated and scoped with the omni namespace.
-
-  Revision 1.2.2.1  2000/07/17 10:35:57  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:25:56  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.8  2000/06/02 16:09:59  dpg1
-  If an object is deactivated while its POA is in the HOLDING state,
-  clients which were held now receive a TRANSIENT exception when the POA
-  becomes active again.
-
-  Revision 1.1.2.7  2000/04/27 10:51:44  dpg1
-  Interoperable Naming Service
-
-  Add magic INS POA.
-
-  Revision 1.1.2.6  2000/02/09 12:04:53  djr
-  Fixed memory allocation bug in Any insertion/extraction of strings.
-  Optimisation for insertion/extraction of sequence of simple types.
-
-  Revision 1.1.2.5  1999/10/04 17:08:33  djr
-  Some more fixes/MSVC work-arounds.
-
-  Revision 1.1.2.4  1999/09/30 11:52:32  djr
-  Implemented use of AdapterActivators in POAs.
-
-  Revision 1.1.2.3  1999/09/28 10:54:35  djr
-  Removed pretty-printing of object keys from object adapters.
-
-  Revision 1.1.2.2  1999/09/24 10:28:52  djr
-  Added POA_Helper and POA::the_children().
-
-  Revision 1.1.2.1  1999/09/22 14:27:01  djr
-  Major rewrite of orbcore to support POA.
-
-*/
 
 #ifndef __POAIMPL_H__
 #define __POAIMPL_H__
@@ -142,7 +47,7 @@
 
 OMNI_NAMESPACE_BEGIN(omni)
 
-#define PS_VERSION  ":2.4"
+#define PS_VERSION  ":1.0"
 
 class omniOrbPOAManager;
 class omniServantActivatorTaskQueue;

@@ -3,63 +3,27 @@
 // context.h                  Created on: 9/1998
 //                            Author    : David Riddoch (djr)
 //
+//    Copyright (C) 2013 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //
-
-/*
- $Log: context.h,v $
- Revision 1.1.4.1  2003/03/23 21:03:52  dgrisby
- Start of omniORB 4.1.x development branch.
-
- Revision 1.1.2.3  2001/11/27 14:35:08  dpg1
- Context, DII fixes.
-
- Revision 1.1.2.2  2001/11/06 15:41:36  dpg1
- Reimplement Context. Remove CORBA::Status. Tidying up.
-
- Revision 1.1.2.1  2001/04/18 17:18:18  sll
- Big checkin with the brand new internal APIs.
- These files were relocated and scoped with the omni namespace.
-
- Revision 1.5.2.2  2000/09/27 17:25:40  sll
- Changed include/omniORB3 to include/omniORB4.
-
- Revision 1.5.2.1  2000/07/17 10:35:40  sll
- Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
- Revision 1.6  2000/07/13 15:26:02  dpg1
- Merge from omni3_develop for 3.0 release.
-
- Revision 1.4.6.1  1999/09/22 14:26:29  djr
- Major rewrite of orbcore to support POA.
-
- Revision 1.4  1999/05/25 17:48:50  sll
- Now use _CORBA_PseudoValue_Sequence.
-
- Revision 1.3  1999/04/21 11:22:14  djr
- CORBA::Context is a friend of ContextImpl
-
-*/
 
 #ifndef __CONTEXT_H__
 #define __CONTEXT_H__

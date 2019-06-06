@@ -3,64 +3,28 @@
 // CORBA_Any.h                Created on: 2001/08/17
 //                            Author    : Duncan Grisby (dgrisby)
 //
-//    Copyright (C) 2004 Apasphere Ltd.
+//    Copyright (C) 2004-2011 Apasphere Ltd.
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //    CORBA::Any
 //
-
-/*
-  $Log: CORBA_Any.h,v $
-  Revision 1.1.4.5  2006/11/02 17:33:08  dgrisby
-  Convert some casts to use const_cast<> where available.
-
-  Revision 1.1.4.4  2004/10/13 17:58:18  dgrisby
-  Abstract interfaces support; values support interfaces; value bug fixes.
-
-  Revision 1.1.4.3  2004/07/23 10:29:56  dgrisby
-  Completely new, much simpler Any implementation.
-
-  Revision 1.1.4.2  2004/02/16 10:10:28  dgrisby
-  More valuetype, including value boxes. C++ mapping updates.
-
-  Revision 1.1.4.1  2003/03/23 21:04:25  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.5  2003/01/16 12:47:08  dgrisby
-  Const cast macro. Thanks Matej Kenda.
-
-  Revision 1.1.2.4  2002/03/11 12:23:03  dpg1
-  Tweaks to avoid compiler warnings.
-
-  Revision 1.1.2.3  2002/01/09 11:37:46  dpg1
-  Platform, constness fixes.
-
-  Revision 1.1.2.2  2001/10/17 16:43:59  dpg1
-  Update DynAny to CORBA 2.5 spec, const Any exception extraction.
-
-  Revision 1.1.2.1  2001/08/17 13:39:44  dpg1
-  Split CORBA.h into separate bits.
-
-*/
 
 #ifndef INSIDE_OMNIORB_CORBA_MODULE
 #  error "Must only be #included by CORBA.h"
@@ -258,7 +222,36 @@ public:
 
 
   //
-  // Deprecated non-typesafe functions. Do not use.
+  // omniORB non-portable extensions
+  //
+
+  TypeCode_ptr NP_type() const;
+  // Non-portable equivalent of type() that borrows a reference to the
+  // TypeCode.
+
+  inline void NP_swap(CORBA::Any& other)
+  {
+    CORBA::TypeCode_ptr tc         = pd_tc;
+    cdrAnyMemoryStream* mbuf	   = pd_mbuf;
+    void*		data	   = pd_data;
+    pr_marshal_fn	marshal	   = pd_marshal;
+    pr_destructor_fn	destructor = pd_destructor;
+
+    pd_tc         = other.pd_tc;
+    pd_mbuf	  = other.pd_mbuf;
+    pd_data	  = other.pd_data;
+    pd_marshal	  = other.pd_marshal;
+    pd_destructor = other.pd_destructor;
+
+    other.pd_tc         = tc;
+    other.pd_mbuf	= mbuf;
+    other.pd_data	= data;
+    other.pd_marshal	= marshal;
+    other.pd_destructor = destructor;
+  }
+
+  //
+  // Non-typesafe functions.
   //
 
   Any(TypeCode_ptr tc, void* value, Boolean release = 0);
@@ -328,7 +321,7 @@ private:
   Boolean operator>>=(unsigned char&) const;
   // Not implemented.
 
-  TypeCode_member pd_tc;
+  TypeCode_ptr pd_tc;
 
   // The Any contents can be stored in marshalled form, or as a
   // pointer to the unmarshalled data, or both. When stored as a

@@ -3,102 +3,29 @@
 // CORBA_sysdep.h             Created on: 30/1/96
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2007 Apasphere Ltd
+//    Copyright (C) 2002-2012 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //	*** PROPRIETARY INTERFACE ***
 //
 //      Traditional-style hard-coded system dependencies.
-
-/*
-  $Log: CORBA_sysdep_trad.h,v $
-  Revision 1.1.4.12  2009/05/06 16:16:14  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.1.4.11  2007/06/22 17:28:25  dgrisby
-  Definitions for Darwin traditional compile.
-
-  Revision 1.1.4.10  2007/01/12 10:19:51  dgrisby
-  Support for MontaVista ARM Linux.
-
-  Revision 1.1.4.9  2006/11/28 14:17:13  dgrisby
-  This is omniORB 4.1.0.
-
-  Revision 1.1.4.8  2006/11/20 15:04:54  dgrisby
-  IA64 is usually little endian; only big endian on HPUX.
-
-  Revision 1.1.4.7  2006/03/25 18:54:04  dgrisby
-  Initial IPv6 support.
-
-  Revision 1.1.4.6  2005/11/17 17:03:27  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.4.5  2005/04/14 00:04:00  dgrisby
-  New traceInvocationReturns and traceTime options; remove logf function.
-
-  Revision 1.1.4.4  2005/01/25 11:17:49  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.4.3  2005/01/13 21:09:57  dgrisby
-  New SocketCollection implementation, using poll() where available and
-  select() otherwise. Windows specific version to follow.
-
-  Revision 1.1.4.2  2005/01/06 23:08:09  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.4.1  2003/03/23 21:04:21  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.9  2003/03/12 14:07:44  dgrisby
-  MacOS port. Thanks Wolfgang Textor.
-
-  Revision 1.1.2.8  2003/02/21 15:56:09  dgrisby
-  Silence macro redefinition warnings on Windows.
-
-  Revision 1.1.2.7  2003/02/17 02:03:07  dgrisby
-  vxWorks port. (Thanks Michael Sturm / Acterna Eningen GmbH).
-
-  Revision 1.1.2.6  2003/01/16 11:08:26  dgrisby
-  Patches to support Digital Mars C++. Thanks Christof Meerwald.
-
-  Revision 1.1.2.5  2002/11/06 11:58:28  dgrisby
-  Partial AIX patches.
-
-  Revision 1.1.2.4  2002/10/14 15:09:58  dgrisby
-  Cope with platforms where sizeof(bool) != 1.
-
-  Revision 1.1.2.3  2002/03/13 16:05:38  dpg1
-  Transport shutdown fixes. Reference count SocketCollections to avoid
-  connections using them after they are deleted. Properly close
-  connections when in thread pool mode.
-
-  Revision 1.1.2.2  2002/01/31 10:16:33  dpg1
-  Missing define in traditional sysdep.
-
-  Revision 1.1.2.1  2002/01/15 16:38:10  dpg1
-  On the road to autoconf. Dependencies refactored, configure.ac
-  written. No makefiles yet.
-
-*/
 
 #ifndef __CORBA_SYSDEP_TRAD_H__
 #define __CORBA_SYSDEP_TRAD_H__
@@ -136,7 +63,9 @@
 #define HAVE_LOCALTIME 1
 // Unset if no localtime() function
 
-#define HAVE_STRFTIME 1
+#ifndef HAVE_STRFTIME
+#  define HAVE_STRFTIME 1
+#endif
 // Unset if no strftime() function
 
 #define HAVE_GETTIMEOFDAY 1
@@ -227,7 +156,9 @@
 #     define HAS_Cplusplus_Namespace
 #     define HAS_Std_Namespace
 #     define HAS_pch
-#     define OMNI_REQUIRES_FQ_BASE_CTOR
+#     if __DECCXX_VER < 70390009
+#       define OMNI_REQUIRES_FQ_BASE_CTOR
+#     endif
 // Uncomment the following lines to enable the use of namespace with cxx v5.6
 // Notice that the source code may have to be patched to compile.
 //#  elif __DECCXX_VER >= 50600000
@@ -530,6 +461,9 @@
 #    undef HAVE_STRCASECMP
 #    undef HAVE_STRNCASECMP
 #    undef HAVE_GETTIMEOFDAY
+#  endif
+#  if __CRTL_VER >= 70311000
+#    define HAVE_POLL
 #  endif
 
 #elif defined(__WIN32__)

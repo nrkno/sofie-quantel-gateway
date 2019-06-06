@@ -6,7 +6,7 @@ INSTALL=@INSTALL@
 
 INSTALLDIR = $(INSTALLINCDIR)/omniORB4
 
-HEADERS = acconfig.h BiDirPolicy.h CORBA.h CORBA_AbstractBase.h		\
+HEADERS = acconfig.h ami.h BiDirPolicy.h CORBA.h CORBA_AbstractBase.h	\
           CORBA_Any.h CORBA_Any_vartypes.h				\
           CORBA_BOA.h CORBA_Context.h CORBA_Current.h			\
           CORBA_DomainManager.h						\
@@ -34,7 +34,7 @@ HEADERS = acconfig.h BiDirPolicy.h CORBA.h CORBA_AbstractBase.h		\
           templatedefns.h tracedthread.h userexception.h		\
           valueFactoryManager.h valueType.h valueTemplatedecls.h	\
           valueTemplatedefns.h wstringtypes.h                           \
-          omniConnectionMgmt.h
+          omniConnectionMgmt.h omniZIOP.h ziopStubs.h
 
 SUBDIRS = internal
 

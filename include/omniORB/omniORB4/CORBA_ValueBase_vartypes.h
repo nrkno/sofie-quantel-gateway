@@ -8,43 +8,22 @@
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //    ValueType _var definitions
 //
-
-/*
-  $Log: CORBA_ValueBase_vartypes.h,v $
-  Revision 1.1.2.5  2009/05/06 16:16:14  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.1.2.4  2005/11/09 12:16:46  dgrisby
-  Remove obsolete tcDesc helper classes.
-
-  Revision 1.1.2.3  2004/10/13 17:58:18  dgrisby
-  Abstract interfaces support; values support interfaces; value bug fixes.
-
-  Revision 1.1.2.2  2003/11/06 11:56:55  dgrisby
-  Yet more valuetype. Plain valuetype and abstract valuetype are now working.
-
-  Revision 1.1.2.1  2003/09/26 16:12:53  dgrisby
-  Start of valuetype support.
-
-*/
 
 #ifndef INSIDE_OMNIORB_CORBA_MODULE
 #  error "Must only be #included by CORBA.h"
@@ -396,7 +375,9 @@ public:
     if (_pd_val != b._pd_val) {
       if (_pd_val)
 	_pd_val->_remove_ref();
-      if ((_pd_val = b._pd_val))
+
+      _pd_val = b._pd_val;
+      if (_pd_val)
 	_pd_val->_add_ref();
     }
     return *this; 

@@ -3,62 +3,28 @@
 // GIOP_C.h                   Created on: 05/01/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2006 Apasphere Ltd
+//    Copyright (C) 2006-2013 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //	
-
-/*
-  $Log: GIOP_C.h,v $
-  Revision 1.1.6.4  2009/05/06 16:16:10  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.1.6.3  2006/07/18 16:21:24  dgrisby
-  New experimental connection management extension; ORB core support
-  for it.
-
-  Revision 1.1.6.2  2006/06/05 13:33:25  dgrisby
-  Inline declarations; operation() access function.
-
-  Revision 1.1.6.1  2003/03/23 21:03:56  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.4  2001/10/17 16:33:27  dpg1
-  New downcast mechanism for cdrStreams.
-
-  Revision 1.1.4.3  2001/09/04 14:38:08  sll
-  Added the boolean argument to notifyCommFailure to indicate if
-  omniTransportLock is held by the caller.
-
-  Revision 1.1.4.2  2001/05/01 16:07:33  sll
-  All GIOP implementations should now work with fragmentation and abitrary
-  sizes non-copy transfer.
-
-  Revision 1.1.4.1  2001/04/18 17:19:01  sll
-  Big checkin with the brand new internal APIs.
-
-  */
-
 
 #ifndef __GIOP_C_H__
 #define __GIOP_C_H__

@@ -3,100 +3,27 @@
 // objectAdapter.h            Created on: 5/3/99
 //                            Author    : David Riddoch (djr)
 //
-//    Copyright (C) 2002-2006 Apasphere Ltd
+//    Copyright (C) 2002-2013 Apasphere Ltd
 //    Copyright (C) 1996,1999 AT&T Research Cambridge
 //
 //    This file is part of the omniORB library.
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //
-
-/*
- $Log: objectAdapter.h,v $
- Revision 1.1.6.8  2009/05/06 16:16:04  dgrisby
- Update lots of copyright notices.
-
- Revision 1.1.6.7  2006/07/18 16:21:23  dgrisby
- New experimental connection management extension; ORB core support
- for it.
-
- Revision 1.1.6.6  2006/04/10 12:50:35  dgrisby
- More endPointPublish; support for deprecated endPointNoListen,
- endPointPublishAllIFs.
-
- Revision 1.1.6.5  2006/04/09 19:52:31  dgrisby
- More IPv6, endPointPublish parameter.
-
- Revision 1.1.6.4  2006/03/26 20:59:28  dgrisby
- Merge from omni4_0_develop.
-
- Revision 1.1.6.3  2006/02/22 14:56:37  dgrisby
- New endPointPublishHostname and endPointResolveNames parameters.
-
- Revision 1.1.6.2  2005/11/17 17:03:26  dgrisby
- Merge from omni4_0_develop.
-
- Revision 1.1.6.1  2003/03/23 21:03:45  dgrisby
- Start of omniORB 4.1.x development branch.
-
- Revision 1.1.4.7  2002/08/21 19:55:42  dgrisby
- Add endPointPublishAllIFs option.
-
- Revision 1.1.4.6  2001/09/20 09:27:43  dpg1
- Remove assertion failure on exit if not all POAs are deleted.
-
- Revision 1.1.4.5  2001/08/17 17:10:28  sll
- Removed option noBootStrapAgent.
-
- Revision 1.1.4.4  2001/08/15 10:26:09  dpg1
- New object table behaviour, correct POA semantics.
-
- Revision 1.1.4.3  2001/07/31 16:34:53  sll
- New function listMyEndpoints(). Remove explicit instantiation of
- giopServer, do it via interceptor.
-
- Revision 1.1.4.2  2001/05/29 17:03:49  dpg1
- In process identity.
-
- Revision 1.1.4.1  2001/04/18 17:18:16  sll
- Big checkin with the brand new internal APIs.
- These files were relocated and scoped with the omni namespace.
-
- Revision 1.2.2.2  2000/11/09 12:27:57  dpg1
- Huge merge from omni3_develop, plus full long long from omni3_1_develop.
-
- Revision 1.2.2.1  2000/07/17 10:35:55  sll
- Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
- Revision 1.3  2000/07/13 15:25:56  dpg1
- Merge from omni3_develop for 3.0 release.
-
- Revision 1.1.2.3  1999/10/27 17:32:13  djr
- omni::internalLock and objref_rc_lock are now pointers.
-
- Revision 1.1.2.2  1999/09/28 10:54:34  djr
- Removed pretty-printing of object keys from object adapters.
-
- Revision 1.1.2.1  1999/09/22 14:26:56  djr
- Major rewrite of orbcore to support POA.
-
-*/
 
 #ifndef __OMNI_OBJECTADAPTER_H__
 #define __OMNI_OBJECTADAPTER_H__
@@ -294,7 +221,7 @@ public:
 
 
 protected:
-  omniObjAdapter(int nil=0);
+  omniObjAdapter(int is_nil=0);
 
   void adapterDestroyed();
   // Called by derived adapter classes when the adapter has been destroyed.

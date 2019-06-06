@@ -8,43 +8,22 @@
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log: omniTransport.h,v $
-  Revision 1.1.6.1  2003/03/23 21:04:08  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.4  2002/03/27 11:44:51  dpg1
-  Check in interceptors things left over from last week.
-
-  Revision 1.1.4.3  2001/08/03 17:48:43  sll
-  Make sure dll import spec for win32 is properly done.
-
-  Revision 1.1.4.2  2001/06/13 20:07:25  sll
-  Minor update to make the ORB compiles with MSVC++.
-
-  Revision 1.1.4.1  2001/04/18 17:26:28  sll
-  Big checkin with the brand new internal APIs.
-
-  */
 
 #ifndef __OMNITRANSPORT_H__
 #define __OMNITRANSPORT_H__
@@ -139,7 +118,7 @@ public:
   virtual void incrRefCount() = 0;
   virtual void decrRefCount() = 0;
 
-
+  virtual void disconnect() = 0;
 
   friend class Strand;
 

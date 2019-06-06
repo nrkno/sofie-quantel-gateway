@@ -3,115 +3,28 @@
 // stringtypes.h              Created on: 16/4/99
 //                            Author    : David Riddoch (djr)
 //
-//    Copyright (C) 2003-2005 Apasphere Ltd
+//    Copyright (C) 2003-2015 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library.
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //    The CORBA string type helpers. Also sequence of string.
 //
-
-/*
- $Log: stringtypes.h,v $
- Revision 1.4.2.4  2009/05/06 16:16:11  dgrisby
- Update lots of copyright notices.
-
- Revision 1.4.2.3  2005/11/17 17:03:27  dgrisby
- Merge from omni4_0_develop.
-
- Revision 1.4.2.2  2005/01/06 23:08:22  dgrisby
- Big merge from omni4_0_develop.
-
- Revision 1.4.2.1  2003/03/23 21:04:01  dgrisby
- Start of omniORB 4.1.x development branch.
-
- Revision 1.2.2.12  2003/01/16 12:47:08  dgrisby
- Const cast macro. Thanks Matej Kenda.
-
- Revision 1.2.2.11  2003/01/14 11:48:15  dgrisby
- Remove warnings from gcc -Wshadow. Thanks Pablo Mejia.
-
- Revision 1.2.2.10  2002/03/11 12:23:03  dpg1
- Tweaks to avoid compiler warnings.
-
- Revision 1.2.2.9  2001/11/06 15:41:35  dpg1
- Reimplement Context. Remove CORBA::Status. Tidying up.
-
- Revision 1.2.2.8  2001/09/19 17:26:44  dpg1
- Full clean-up after orb->destroy().
-
- Revision 1.2.2.7  2001/08/17 13:44:08  dpg1
- Change freeing behaviour of string members and elements.
-
- Revision 1.2.2.6  2001/08/03 17:47:45  sll
- Removed obsoluted code.
-
- Revision 1.2.2.5  2000/11/22 14:37:59  dpg1
- Code set marshalling functions now take a string length argument.
-
- Revision 1.2.2.4  2000/11/09 12:27:50  dpg1
- Huge merge from omni3_develop, plus full long long from omni3_1_develop.
-
- Revision 1.2.2.3  2000/11/03 19:04:34  sll
- Renamed _CORBA_Unbounded_Sequence__String to _CORBA_Unbounded_Sequence_String
- and _CORBA_Bounded_Sequence__String to _CORBA_Bounded_Sequence_String
- Removed marshal() and unmarshal() from String_helper.
-
- Revision 1.2.2.2  2000/09/27 17:02:24  sll
- Consolidate all string allocation functions into the _CORBA_String_helper
- class. Updated to use the new cdrStream abstraction.
-
- Revision 1.2.2.1  2000/07/17 10:35:37  sll
- Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
- Revision 1.3  2000/07/13 15:26:04  dpg1
- Merge from omni3_develop for 3.0 release.
-
- Revision 1.1.2.4  2000/06/27 16:15:08  sll
- New classes: _CORBA_String_element, _CORBA_ObjRef_Element,
- _CORBA_ObjRef_tcDesc_arg to support assignment to an element of a
- sequence of string and a sequence of object reference.
-
- Revision 1.1.2.3  2000/02/09 15:01:28  djr
- Fixed _CORBA_String_member bug.
-
- Revision 1.1.2.2  2000/01/27 16:31:32  djr
- String_member now initialised to empty string by default.
-
- Revision 1.1.2.1  1999/09/24 09:51:54  djr
- Moved from omniORB2 + some new files.
-
- Revision 1.4  1999/06/18 20:28:30  sll
- New Sequence string implementation. New string_member.
-
- Revision 1.3  1999/06/03 17:10:50  sll
- Updated String_out and String_var to CORBA 2.2
-
- Revision 1.2  1999/05/25 13:24:06  sll
- Removed unnecessary const qualifier in operator char*().
-
- Revision 1.1  1999/04/21 11:18:31  djr
- Initial revision
-
-*/
-
 
 #ifndef __OMNI_STRINGTYPES_H__
 #define __OMNI_STRINGTYPES_H__
@@ -136,15 +49,22 @@ static inline char* alloc(int len) { return new char[len + 1]; }
 // we don't initialise to empty string.
 //  <len> does not include nul terminator.
 
-static inline void free(char* s) { 
+static inline void dealloc(char* s) { 
   if (s && s != empty_string) delete[] s; 
 }
 // As CORBA::string_free().
 
 static inline char* dup(const char* s) { 
-  char* r = alloc(strlen(s));
+  int   l = (int)strlen(s);
+  char* r = alloc(l);
   if (r) {
+#if defined(_MSC_VER)
+    strcpy_s(r, l+1, s);
+#elif defined(__darwin__)
+    strlcpy(r, s, l+1);
+#else
     strcpy(r, s);
+#endif
     return r;
   }
   return 0;
@@ -184,17 +104,17 @@ public:
   inline _CORBA_String_var(const _CORBA_String_element& s);
 
   inline ~_CORBA_String_var() {
-    _CORBA_String_helper::free(_data);
+    _CORBA_String_helper::dealloc(_data);
   }
 
   inline _CORBA_String_var& operator=(char* p) {
-    _CORBA_String_helper::free(_data);
+    _CORBA_String_helper::dealloc(_data);
     _data = p;
     return *this;
   }
 
   inline _CORBA_String_var& operator=(const char* p) {
-    _CORBA_String_helper::free(_data);
+    _CORBA_String_helper::dealloc(_data);
     _data = 0;
     if (p)  _data = _CORBA_String_helper::dup(p);
     return *this;
@@ -202,7 +122,7 @@ public:
 
   inline _CORBA_String_var& operator=(const _CORBA_String_var& s) {
     if (&s != this) {
-      _CORBA_String_helper::free(_data);
+      _CORBA_String_helper::dealloc(_data);
       _data = 0;
       if( (const char*)s )  _data = _CORBA_String_helper::dup(s);
     }
@@ -238,7 +158,7 @@ public:
   inline char*& inout()         { return _data; }
   inline char*& out() {
     if( _data ){
-      _CORBA_String_helper::free(_data);
+      _CORBA_String_helper::dealloc(_data);
       _data = 0;
     }
     return _data;
@@ -278,17 +198,17 @@ public:
   }
 
   inline ~_CORBA_String_member() {
-    _CORBA_String_helper::free(_ptr);
+    _CORBA_String_helper::dealloc(_ptr);
   }
 
   inline _CORBA_String_member& operator=(char* s) {
-    _CORBA_String_helper::free(_ptr);
+    _CORBA_String_helper::dealloc(_ptr);
     _ptr = s;
     return *this;
   }
 
   inline _CORBA_String_member& operator= (const char* s) {
-    _CORBA_String_helper::free(_ptr);
+    _CORBA_String_helper::dealloc(_ptr);
     if (s)
       _ptr = _CORBA_String_helper::dup(s);
     else
@@ -298,7 +218,7 @@ public:
 
   inline _CORBA_String_member& operator=(const _CORBA_String_member& s) {
     if (&s != this) {
-      _CORBA_String_helper::free(_ptr);
+      _CORBA_String_helper::dealloc(_ptr);
       if (s._ptr && s._ptr != _CORBA_String_helper::empty_string)
 	_ptr = _CORBA_String_helper::dup(s._ptr);
       else
@@ -308,7 +228,7 @@ public:
   }
 
   inline _CORBA_String_member& operator=(const _CORBA_String_var& s) {
-    _CORBA_String_helper::free(_ptr);
+    _CORBA_String_helper::dealloc(_ptr);
     if( (const char*)s ) {
       _ptr = _CORBA_String_helper::dup((const char*)s);
     }
@@ -344,7 +264,7 @@ public:
   inline const char* in() const { return _ptr; }
   inline char*& inout()         { return _ptr; }
   inline char*& out() {
-    _CORBA_String_helper::free(_ptr);
+    _CORBA_String_helper::dealloc(_ptr);
     _ptr = 0;
     return _ptr;
   }
@@ -385,14 +305,14 @@ public:
 
   inline _CORBA_String_element& operator=(char* s) {
     if (pd_rel) 
-      _CORBA_String_helper::free(pd_data);
+      _CORBA_String_helper::dealloc(pd_data);
     pd_data = s;
     return *this;
   }
 
   inline _CORBA_String_element& operator= (const char* s) {
     if (pd_rel)
-      _CORBA_String_helper::free(pd_data);
+      _CORBA_String_helper::dealloc(pd_data);
     if (s)
       pd_data = _CORBA_String_helper::dup(s);
     else
@@ -401,9 +321,9 @@ public:
   }
 
   inline _CORBA_String_element& operator=(const _CORBA_String_element& s) {
-    if (&s != this) {
+    if (s.pd_data != pd_data) {
       if (pd_rel)
-	_CORBA_String_helper::free(pd_data);
+	_CORBA_String_helper::dealloc(pd_data);
       if (s.pd_data && s.pd_data != _CORBA_String_helper::empty_string)
 	pd_data = _CORBA_String_helper::dup(s.pd_data);
       else {
@@ -415,7 +335,7 @@ public:
 
   inline _CORBA_String_element& operator=(const _CORBA_String_var& s) {
     if (pd_rel)
-      _CORBA_String_helper::free(pd_data);
+      _CORBA_String_helper::dealloc(pd_data);
     if( (const char*)s )
       pd_data = _CORBA_String_helper::dup((const char*)s);
     else
@@ -425,7 +345,7 @@ public:
 
   inline _CORBA_String_element& operator=(const _CORBA_String_member& s) {
     if (pd_rel)
-      _CORBA_String_helper::free(pd_data);
+      _CORBA_String_helper::dealloc(pd_data);
     if( (const char*)s &&
 	(const char*) s != _CORBA_String_helper::empty_string)
       pd_data = _CORBA_String_helper::dup((const char*)s);
@@ -460,7 +380,7 @@ public:
   inline char*& inout()         { return pd_data; }
   inline char*& out() {
     if (pd_rel) {
-      _CORBA_String_helper::free(pd_data);
+      _CORBA_String_helper::dealloc(pd_data);
       pd_data = 0;
     }
     else {
@@ -517,7 +437,7 @@ inline _CORBA_String_var::_CORBA_String_var(const _CORBA_String_element& s)
 inline _CORBA_String_var&
 _CORBA_String_var::operator= (const _CORBA_String_member& s)
 {
-  _CORBA_String_helper::free(_data);
+  _CORBA_String_helper::dealloc(_data);
   if ((const char*)s) 
     _data = _CORBA_String_helper::dup(s);
   else
@@ -528,7 +448,7 @@ _CORBA_String_var::operator= (const _CORBA_String_member& s)
 inline _CORBA_String_var&
 _CORBA_String_var::operator= (const _CORBA_String_element& s)
 {
-  _CORBA_String_helper::free(_data);
+  _CORBA_String_helper::dealloc(_data);
   if ((const char*)s)
     _data = _CORBA_String_helper::dup(s);
   else
@@ -538,7 +458,7 @@ _CORBA_String_var::operator= (const _CORBA_String_element& s)
 
 inline _CORBA_String_member& 
 _CORBA_String_member::operator=(const _CORBA_String_element& s) {
-  _CORBA_String_helper::free(_ptr);
+  _CORBA_String_helper::dealloc(_ptr);
   if( (const char*)s )
     _ptr = _CORBA_String_helper::dup((const char*)s);
   else
@@ -576,6 +496,7 @@ public:
 
 private:
   _CORBA_String_inout();
+  _CORBA_String_inout& operator=(const _CORBA_String_inout&);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -684,7 +605,7 @@ public:
     }
     ptr_arith_t l = (ptr_arith_t) b[1];
     for (_CORBA_ULong i = 0; i < (_CORBA_ULong) l; i++) {
-      _CORBA_String_helper::free(buf[i]);
+      _CORBA_String_helper::dealloc(buf[i]);
     }
     b[0] = (char*) 0;
     delete [] b;

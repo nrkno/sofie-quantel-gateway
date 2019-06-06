@@ -3,61 +3,43 @@
 // transportRule.h            Created on: 21/08/2001
 //                            Author    : Sai Lai Lo (sll)
 //
+//    Copyright (C) 2013 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //
 
-/*
-  $Log: transportRules.h,v $
-  Revision 1.1.4.1  2003/03/23 21:03:42  dgrisby
-  Start of omniORB 4.1.x development branch.
+#ifndef __TRANSPORTRULES_H__
+#define __TRANSPORTRULES_H__
 
-  Revision 1.1.2.3  2001/09/03 13:27:12  sll
-  Minor update to comments.
+#include <omniORB4/CORBA.h>
 
-  Revision 1.1.2.2  2001/08/29 17:50:39  sll
-  New method dumpRule.
-
-  Revision 1.1.2.1  2001/08/23 16:00:35  sll
-  Added method in giopTransportImpl to return the addresses of the host
-  interfaces.
-
-*/
-
-#ifndef __TRANSPORTRULE_H__
-#define __TRANSPORTRULE_H__
 
 OMNI_NAMESPACE_BEGIN(omni)
 
 class transportRules {
- public:
+public:
 
   ////////////////////////////////////////////////////////////////////////
   static transportRules& serverRules();
   static transportRules& clientRules();
 
-  ////////////////////////////////////////////////////////////////////////
-  class sequenceString;
-  
   ////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////
   class Rule {
@@ -76,15 +58,16 @@ class transportRules {
     Rule& operator=(const Rule&);
   };
 
-  void addRule(Rule*,sequenceString*);
-
   ////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////
   class RuleType {
   public:
-    virtual Rule* createRule(const char* address_mask) = 0;
-    // If <address_mask> is recognised by this RuleType instance, return
-    // a Rule instance to handle this <address_mask>. Otherwise return 0.
+    virtual CORBA::Boolean createRules(const char*             address_mask,
+                                       const CORBA::StringSeq& actions,
+                                       transportRules&         tr) = 0;
+    // If <address_mask> is recognised by this RuleType instance, add
+    // one or more rules to the transportRules and return true; if not
+    // recognised, return false.
 
     RuleType() {}
     virtual ~RuleType() {}
@@ -94,12 +77,14 @@ class transportRules {
     RuleType& operator=(const RuleType&);
   };
 
+  typedef omnivector<RuleType*> RuleTypes;
+
   static void addRuleType(RuleType*);
 
 
   ////////////////////////////////////////////////////////////////////////
   CORBA::Boolean match(const char* endpoint,
-		       sequenceString& actions/* return arg */,
+		       CORBA::StringSeq& actions/* return arg */,
 		       CORBA::ULong& priority/* return arg */);
   // Return true if <endpoint> matches one of the transport rules.
   // The action list of the matched rule is returned in <actions>.
@@ -114,115 +99,40 @@ class transportRules {
   // by match() is used as <index> in this function, the string representation
   // of the rule that match() matches is returned.
 
-  ////////////////////////////////////////////////////////////////////////
-  class sequenceString_var;
-
-  class sequenceString : public _CORBA_Unbounded_Sequence_String {
-  public:
-    typedef sequenceString_var _var_type;
-    inline sequenceString() {}
-    inline sequenceString(const sequenceString& s)
-      : _CORBA_Unbounded_Sequence_String(s) {}
-
-    inline sequenceString(_CORBA_ULong _max)
-      : _CORBA_Unbounded_Sequence_String(_max) {}
-    inline sequenceString(_CORBA_ULong _max, _CORBA_ULong _len, char** _val, _CORBA_Boolean _rel=0)
-      : _CORBA_Unbounded_Sequence_String(_max, _len, _val, _rel) {}
-
-
-
-    inline sequenceString& operator = (const sequenceString& s) {
-      _CORBA_Unbounded_Sequence_String::operator=(s);
-      return *this;
-    }
-  };
 
   ////////////////////////////////////////////////////////////////////////
-  class sequenceString_var {
-  public:
-    typedef sequenceString T;
-    typedef sequenceString_var T_var;
-
-    inline sequenceString_var() : _pd_seq(0) {}
-    inline sequenceString_var(T* s) : _pd_seq(s) {}
-    inline sequenceString_var(const T_var& s) {
-      if( s._pd_seq )  _pd_seq = new T(*s._pd_seq);
-      else             _pd_seq = 0;
-    }
-    inline ~sequenceString_var() { if( _pd_seq )  delete _pd_seq; }
-
-    inline T_var& operator = (T* s) {
-      if( _pd_seq )  delete _pd_seq;
-      _pd_seq = s;
-      return *this;
-    }
-    inline T_var& operator = (const T_var& s) {
-      if( s._pd_seq ) {
-	if( !_pd_seq )  _pd_seq = new T;
-	*_pd_seq = *s._pd_seq;
-      } else if( _pd_seq ) {
-	delete _pd_seq;
-	_pd_seq = 0;
-      }
-      return *this;
-    }
-
-    inline _CORBA_String_element operator [] (_CORBA_ULong s) {
-      return (*_pd_seq)[s];
-    }
-
-    inline T* operator -> () { return _pd_seq; }
-#if defined(__GNUG__)
-    inline operator T& () const { return *_pd_seq; }
-#else
-    inline operator const T& () const { return *_pd_seq; }
-    inline operator T& () { return *_pd_seq; }
-#endif
-
-    inline const T& in() const { return *_pd_seq; }
-    inline T&       inout()    { return *_pd_seq; }
-    inline T*&      out() {
-      if( _pd_seq ) { delete _pd_seq; _pd_seq = 0; }
-      return _pd_seq;
-    }
-    inline T* _retn() { T* tmp = _pd_seq; _pd_seq = 0; return tmp; }
-
-  private:
-    T* _pd_seq;
-  };
-
-#ifdef __GNUG__
-  friend class _keep_gcc_quiet_;
-#endif
-
   friend class omni_transportRules_initialiser;
   friend class clientTransportRuleHandler;
   friend class serverTransportRuleHandler;
 
   struct RuleActionPair {
+    RuleActionPair(Rule* r, const CORBA::StringSeq& a)
+      : rule_(r), action_(a) {}
 
-    RuleActionPair(Rule* r,sequenceString& a) : rule_(r) {
-      CORBA::ULong max = a.maximum();
-      CORBA::ULong len = a.length();
-      action_.replace(max,len,a.get_buffer(1),1);
-    }
     ~RuleActionPair() { 
       if (rule_) delete rule_; 
     }
-    Rule*               rule_;
-    sequenceString      action_;
+    Rule*            rule_;
+    CORBA::StringSeq action_;
   };
+
+  typedef omnivector<RuleActionPair*> RuleActionPairs;
+
+  inline void addRule(Rule* r, const CORBA::StringSeq& a)
+  {
+    pd_rules.push_back(new RuleActionPair(r, a));
+  }
+
 
   transportRules();
   ~transportRules();
 
- private:
-
-  omnivector<RuleType*>       pd_ruletypes;
-  omnivector<RuleActionPair*> pd_rules;
-
   void reset();
 
+private:
+
+  RuleTypes       pd_ruletypes;
+  RuleActionPairs pd_rules;
 
   transportRules(const transportRules&);
   transportRules& operator=(const transportRules&);
@@ -230,4 +140,4 @@ class transportRules {
 
 OMNI_NAMESPACE_END(omni)
 
-#endif // __TRANSPORTRULE_H__
+#endif // __TRANSPORTRULES_H__

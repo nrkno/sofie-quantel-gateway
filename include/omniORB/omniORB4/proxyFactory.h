@@ -8,60 +8,22 @@
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
- $Log: proxyFactory.h,v $
- Revision 1.4.2.1  2003/03/23 21:04:03  dgrisby
- Start of omniORB 4.1.x development branch.
-
- Revision 1.2.2.4  2001/08/15 10:26:08  dpg1
- New object table behaviour, correct POA semantics.
-
- Revision 1.2.2.3  2001/04/18 17:50:43  sll
- Big checkin with the brand new internal APIs.
- Scoped where appropriate with the omni namespace.
-
- Revision 1.2.2.2  2000/09/27 17:03:57  sll
- Changed newObjRef signature to accept omniIOR* as an argument.
-
- Revision 1.2.2.1  2000/07/17 10:35:37  sll
- Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
- Revision 1.3  2000/07/13 15:26:04  dpg1
- Merge from omni3_develop for 3.0 release.
-
- Revision 1.1.2.1  1999/09/24 09:51:52  djr
- Moved from omniORB2 + some new files.
-
- Revision 1.7  1999/01/07 18:40:32  djr
- Changes to support split of omniORB library into two.
-
- Revision 1.6  1998/04/07 19:56:44  sll
- Replace _OMNIORB2_NTDLL_ specification on class proxyObjectFactory with
- _OMNIORB_NTDLL_IMPORT on static member variables.
-
- * Revision 1.5  1997/05/06  16:10:05  sll
- * Public release.
- *
-*/
 
 #ifndef __OMNI_PROXYFACTORY_H__
 #define __OMNI_PROXYFACTORY_H__

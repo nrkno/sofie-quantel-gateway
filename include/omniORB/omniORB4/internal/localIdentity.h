@@ -3,89 +3,28 @@
 // localIdentity.h            Created on: 16/6/99
 //                            Author    : David Riddoch (djr)
 //
-//    Copyright (C) 2003-2007 Apasphere Ltd
+//    Copyright (C) 2003-2010 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Research Cambridge
 //
 //    This file is part of the omniORB library.
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //    Encapsulation of the identity of a local object implementation.
 //
-
-/*
-  $Log: localIdentity.h,v $
-  Revision 1.1.6.3  2009/05/06 16:16:04  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.1.6.2  2007/04/14 17:56:53  dgrisby
-  Identity downcasting mechanism was broken by VC++ 8's
-  over-enthusiastic optimiser.
-
-  Revision 1.1.6.1  2003/03/23 21:03:45  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.9  2002/11/29 14:03:41  dgrisby
-  Rearrange declarations to make Code Warrior happy.
-
-  Revision 1.1.4.8  2001/11/27 14:36:17  dpg1
-  Local _is_equivalent fix.
-
-  Revision 1.1.4.7  2001/11/08 16:33:50  dpg1
-  Local servant POA shortcut policy.
-
-  Revision 1.1.4.6  2001/09/03 16:52:05  sll
-  New signature for locateRequest. Now accept a calldescriptor argument.
-
-  Revision 1.1.4.5  2001/08/22 13:31:31  dpg1
-  Christof's fixes for gcc 3.0.1.
-
-  Revision 1.1.4.4  2001/08/15 10:26:09  dpg1
-  New object table behaviour, correct POA semantics.
-
-  Revision 1.1.4.3  2001/06/13 20:11:37  sll
-  Minor update to make the ORB compiles with MSVC++.
-
-  Revision 1.1.4.2  2001/05/29 17:03:49  dpg1
-  In process identity.
-
-  Revision 1.1.4.1  2001/04/18 17:18:16  sll
-  Big checkin with the brand new internal APIs.
-  These files were relocated and scoped with the omni namespace.
-
-  Revision 1.2.2.1  2000/07/17 10:35:55  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:25:57  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.3  2000/06/02 16:09:59  dpg1
-  If an object is deactivated while its POA is in the HOLDING state,
-  clients which were held now receive a TRANSIENT exception when the POA
-  becomes active again.
-
-  Revision 1.1.2.2  1999/10/27 17:32:12  djr
-  omni::internalLock and objref_rc_lock are now pointers.
-
-  Revision 1.1.2.1  1999/09/22 14:26:53  djr
-  Major rewrite of orbcore to support POA.
-
-*/
 
 #ifndef __OMNIORB_LOCALIDENTITY_H__
 #define __OMNIORB_LOCALIDENTITY_H__
@@ -144,7 +83,6 @@ public:
   virtual void dispatch(omniCallDescriptor&);
   virtual void gainRef(omniObjRef* obj = 0);
   virtual void loseRef(omniObjRef* obj = 0);
-  virtual void locateRequest(omniCallDescriptor&);
 protected:
   virtual omniIdentity::equivalent_fn get_real_is_equivalent() const;
   // Override omniIdentity.

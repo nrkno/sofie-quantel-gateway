@@ -8,45 +8,22 @@
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //	*** PROPRIETARY INTERFACE ***
 //	
-
-/*
-  $Log: codeSetUtil.h,v $
-  Revision 1.1.6.1  2003/03/23 21:03:52  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.3  2002/04/26 20:23:54  dgrisby
-  codeSetUtil didn't do the _core_attr thing for the GIOP version constants.
-
-  Revision 1.1.4.2  2001/10/17 16:47:08  dpg1
-  New minor codes
-
-  Revision 1.1.4.1  2001/04/18 17:18:18  sll
-  Big checkin with the brand new internal APIs.
-  These files were relocated and scoped with the omni namespace.
-
-
-  Revision 1.1.2.1  2000/10/27 15:42:04  dpg1
-  Initial code set conversion support. Not yet enabled or fully tested.
-
-*/
 
 #ifndef __CODESETUTIL_H__
 #define __CODESETUTIL_H__
@@ -89,7 +66,7 @@ public:
   }
 
   static inline void freeC(char* buf) {
-    _CORBA_String_helper::free(buf);
+    _CORBA_String_helper::dealloc(buf);
   }
 
   static inline char* reallocC(char*        oldbuf,
@@ -114,7 +91,7 @@ public:
 
   static inline void freeU(omniCodeSet::UniChar* buf) {
 #if (SIZEOF_WCHAR == 2)
-    _CORBA_WString_helper::free(buf);
+    _CORBA_WString_helper::dealloc(buf);
 #else
     delete [] buf;
 #endif
@@ -137,7 +114,7 @@ public:
   }
 
   static inline void freeW(_CORBA_WChar* buf) {
-    _CORBA_WString_helper::free(buf);
+    _CORBA_WString_helper::dealloc(buf);
   }
 
   static inline _CORBA_WChar* reallocW(_CORBA_WChar* oldbuf,
@@ -229,7 +206,7 @@ public:
 	pd_buf = reallocW(pd_buf, pd_len, newlen);
 	pd_len = newlen;
       }
-      pd_buf[pd_i++] = c;
+      pd_buf[pd_i++] = (_CORBA_WChar)c;
     }
     inline _CORBA_ULong  length() { return pd_i; }
     inline _CORBA_WChar* buffer() { return pd_buf; }
@@ -287,23 +264,29 @@ do { \
       GIOP::Version v = gs->version(); \
       if (v.major == 1 && v.minor == 0) { \
         if (GIOP_S::downcast(&stream)) \
-          OMNIORB_THROW(MARSHAL, MARSHAL_WCharSentByGIOP10Server, \
+          OMNIORB_THROW(MARSHAL, MARSHAL_WCharSentByGIOP10Client, \
                         (CORBA::CompletionStatus)stream.completion()); \
         if (GIOP_C::downcast(&stream)) \
-          OMNIORB_THROW(MARSHAL, MARSHAL_WCharSentByGIOP10Client, \
+          OMNIORB_THROW(MARSHAL, MARSHAL_WCharSentByGIOP10Server, \
                         (CORBA::CompletionStatus)stream.completion()); \
       } \
     } \
-    OMNIORB_THROW(BAD_PARAM,BAD_PARAM_WCharTCSNotKnown, \
-		  (CORBA::CompletionStatus)stream.completion()); \
+    if (GIOP_C::downcast(&stream))                                 \
+      OMNIORB_THROW(INV_OBJREF, INV_OBJREF_WCharNotSupported,      \
+                    (CORBA::CompletionStatus)stream.completion()); \
+    OMNIORB_THROW(BAD_PARAM,BAD_PARAM_WCharTCSNotKnown,            \
+		  (CORBA::CompletionStatus)stream.completion());   \
   } \
 } while(0)
 
 #define OMNIORB_CHECK_TCS_W_FOR_MARSHAL(tcs, stream) \
 do { \
   if (!tcs) { \
-    OMNIORB_THROW(BAD_PARAM,BAD_PARAM_WCharTCSNotKnown, \
-		  (CORBA::CompletionStatus)stream.completion()); \
+    if (GIOP_C::downcast(&stream))                                 \
+      OMNIORB_THROW(INV_OBJREF, INV_OBJREF_WCharNotSupported,      \
+                    (CORBA::CompletionStatus)stream.completion()); \
+    OMNIORB_THROW(BAD_PARAM,BAD_PARAM_WCharTCSNotKnown,            \
+                  (CORBA::CompletionStatus)stream.completion());   \
   } \
 } while(0)
 

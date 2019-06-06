@@ -3,82 +3,28 @@
 // orbParameters.h            Created on: 15/8/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2008 Apasphere Ltd
+//    Copyright (C) 2002-2011 Apasphere Ltd
 //    Copyright (C) 2001      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log: orbParameters.h,v $
-  Revision 1.1.4.11  2009/05/06 16:16:03  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.1.4.10  2008/02/14 12:37:50  dgrisby
-  New immediateAddressSwitch parameter.
-
-  Revision 1.1.4.9  2007/07/31 16:38:31  dgrisby
-  New resetTimeOutOnRetries parameter.
-
-  Revision 1.1.4.8  2007/02/26 15:16:31  dgrisby
-  New socketSendBuffer parameter, defaulting to 16384 on Windows.
-  Avoids a bug in Windows where select() on send waits for all sent data
-  to be acknowledged.
-
-  Revision 1.1.4.7  2006/01/10 13:59:37  dgrisby
-  New clientConnectTimeOutPeriod configuration parameter.
-
-  Revision 1.1.4.6  2005/11/17 17:03:26  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.4.5  2005/09/01 14:52:12  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.4.4  2005/03/02 12:39:23  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.4.3  2005/01/06 23:08:26  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.4.2  2003/11/06 11:56:55  dgrisby
-  Yet more valuetype. Plain valuetype and abstract valuetype are now working.
-
-  Revision 1.1.4.1  2003/03/23 21:03:43  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.4  2002/10/14 20:06:41  dgrisby
-  Per objref / per thread timeouts.
-
-  Revision 1.1.2.3  2002/03/18 16:50:17  dpg1
-  New threadPoolWatchConnection parameter.
-
-  Revision 1.1.2.2  2001/08/21 11:02:12  sll
-  orbOptions handlers are now told where an option comes from. This
-  is necessary to process DefaultInitRef and InitRef correctly.
-
-  Revision 1.1.2.1  2001/08/17 17:12:34  sll
-  Modularise ORB configuration parameters.
-
-*/
 
 #ifndef __ORBPARAMETERS_H__
 #define __ORBPARAMETERS_H__
@@ -98,11 +44,6 @@ OMNI_NAMESPACE_BEGIN(omni)
 _CORBA_MODULE orbParameters
 
 _CORBA_MODULE_BEG
-
-struct timeValue {
-  unsigned long secs;
-  unsigned long nanosecs;
-};
 
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
@@ -165,6 +106,15 @@ _CORBA_MODULE_VAR _core_attr omniCodeSet::TCS_C* anyCharCodeSet;
 _CORBA_MODULE_VAR _core_attr omniCodeSet::TCS_W* anyWCharCodeSet;
 //  set the preferred code set for wchar data inside anys
 //
+
+_CORBA_MODULE_VAR _core_attr omniCodeSet::TCS_C* defaultCharCodeSet;
+//  set the code set for char data sent to servers that have not specified one
+//
+
+_CORBA_MODULE_VAR _core_attr omniCodeSet::TCS_W* defaultWCharCodeSet;
+//  set the code set for wchar data sent to servers that have not specified one
+//
+
 
 _CORBA_MODULE_VAR _core_attr CORBA::Boolean      lcdMode;
 //  Set to 1 to enable 'Lowest Common Denominator' Mode.
@@ -283,6 +233,13 @@ _CORBA_MODULE_VAR _core_attr CORBA::Boolean  acceptMisalignedTcIndirections;
 //  
 //   Valid values = 0 or 1
 
+_CORBA_MODULE_VAR _core_attr CORBA::Boolean  throwTransientOnTimeOut;
+//   If true, CORBA::TRANSIENT is thrown when a timeout occurs. If
+//   false (the default), CORBA::TIMEOUT is thrown.
+//  
+//   Valid values = 0 or 1
+
+
 
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
@@ -301,7 +258,6 @@ _CORBA_MODULE_VAR _core_attr CORBA::Boolean verifyObjectExistsAndType;
 //
 //  Valid values = 0 or 1
 
-
 _CORBA_MODULE_VAR _core_attr CORBA::Boolean oneCallPerConnection;
 //  1 means only one call can be in progress at any time per connection.
 //
@@ -318,7 +274,6 @@ _CORBA_MODULE_VAR _core_attr CORBA::ULong maxGIOPConnectionPerServer;
 //
 //  Valid values = (n >= 1) 
 
-
 _CORBA_MODULE_VAR _core_attr GIOP::AddressingDisposition giopTargetAddressMode;
 //  On the client side, if it is to use GIOP 1.2 or above to talk to a 
 //  server, use this Target Address Mode.
@@ -326,7 +281,6 @@ _CORBA_MODULE_VAR _core_attr GIOP::AddressingDisposition giopTargetAddressMode;
 //  Valid values = 0 (GIOP::KeyAddr)
 //                 1 (GIOP::ProfileAddr)
 //                 2 (GIOP::ReferenceAddr)
-
 
 _CORBA_MODULE_VAR _core_attr CORBA::Boolean offerBiDirectionalGIOP;
 //   Applies to the client side. Set to 1 to indicates that the
@@ -345,6 +299,12 @@ _CORBA_MODULE_VAR _core_attr CORBA::Boolean  diiThrowsSysExceptions;
 //
 // Valid values = 0 or 1
 
+_CORBA_MODULE_VAR _core_attr CORBA::ULong   maxClientThreadPoolSize;
+//   The max. no. of threads a client will allocate to do asynchronous
+//   calls.
+//
+//   Valid values = (n >= 1) 
+
 _CORBA_MODULE_VAR _core_attr CORBA::ULong outConScanPeriod;
 //  Idle connections shutdown. The ORB periodically scans all the
 //  incoming connections to detect if they are idle.
@@ -354,7 +314,7 @@ _CORBA_MODULE_VAR _core_attr CORBA::ULong outConScanPeriod;
 //  Valid values = (n >= 0 in seconds) 
 //                  0 --> do not close idle connections.
 
-_CORBA_MODULE_VAR _core_attr timeValue clientCallTimeOutPeriod;
+_CORBA_MODULE_VAR _core_attr omni_time_t clientCallTimeOutPeriod;
 //   Call timeout. On the client side, if a remote call takes longer
 //   than the timeout value, the ORB will shutdown the connection and
 //   raise a COMM_FAILURE.
@@ -362,7 +322,7 @@ _CORBA_MODULE_VAR _core_attr timeValue clientCallTimeOutPeriod;
 //   Valid values = (n >= 0 in milliseconds) 
 //                   0 --> no timeout. Block till a reply comes back
 
-_CORBA_MODULE_VAR _core_attr timeValue clientConnectTimeOutPeriod;
+_CORBA_MODULE_VAR _core_attr omni_time_t clientConnectTimeOutPeriod;
 //   Connect timeout. When a client has no existing connection to
 //   communicate with a server, it must open a new connection before
 //   performing the call. If this parameter is non-zero, it sets a
@@ -411,6 +371,36 @@ _CORBA_MODULE_VAR _core_attr CORBA::Boolean immediateRopeSwitch;
 //
 //   Valid values = 0 or 1
 
+_CORBA_MODULE_VAR _core_attr CORBA::Boolean resolveNamesForTransportRules;
+//   If true, names in IORs will be resolved when evaluating client
+//   transport rules, and remembered from then on; if false, names
+//   will not be resolved until connect time. Client transport rules
+//   based on IP address will therefore not match, but some platforms
+//   can use external knowledge to pick the best address to use if
+//   given a name to connect to.
+//
+//   Valid values = 0 or 1
+
+_CORBA_MODULE_VAR _core_attr CORBA::Boolean retainAddressOrder;
+//   For IORs with multiple addresses, determines how the address to
+//   connect to is chosen. When first estabilishing a connection, the
+//   addresses are ordered according to the client transport rules
+//   (after resolving names if resolveNamesForTransportRules is true),
+//   and the addresses are tried in priority order until one connects
+//   successfully. For as long as there is at least one connection
+//   open to the address, new connections continue to use the same
+//   address.
+//
+//   After a failure, or after all open connections have been
+//   scavenged and closed, this parameter determines the address used
+//   to reconnect on the next call. If this parameter is true, the
+//   address order and chosen address within the order is remembered;
+//   if false, a new connection attempt causes re-evaluation of the
+//   order (in case name resolutions change), and the highest priority
+//   address is tried first.
+//
+//   Valid values = 0 or 1
+
 
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
@@ -453,7 +443,7 @@ _CORBA_MODULE_VAR _core_attr CORBA::ULong   maxServerThreadPerConnection;
 _CORBA_MODULE_VAR _core_attr CORBA::ULong   maxServerThreadPoolSize;
 //   The max. no. of threads the server will allocate to do various
 //   ORB tasks. This number does not include the dedicated thread
-//   per connection when the threadPerConnectionPolicy is in effect
+//   per connection when the threadPerConnectionPolicy is in effect.
 //
 //   Valid values = (n >= 1) 
 
@@ -497,7 +487,7 @@ _CORBA_MODULE_VAR _core_attr CORBA::ULong  inConScanPeriod;
 //                   0 --> do not close idle connections.
 
 
-_CORBA_MODULE_VAR _core_attr timeValue serverCallTimeOutPeriod;
+_CORBA_MODULE_VAR _core_attr omni_time_t serverCallTimeOutPeriod;
 //   Call timeout. On the server side, if the ORB cannot completely 
 //   unmarshal a call's arguments in the defined timeout, it shutdown the
 //   connection.
@@ -541,6 +531,9 @@ _CORBA_MODULE_VAR _core_attr CORBA::Boolean connectionWatchImmediate;
 //  If true, connections are watched immediately while an upcall is
 //  handled; otherwise, they are not watched until the
 //  SocketCollection next scans the connection list.
+
+_CORBA_MODULE_VAR _core_attr CORBA::ULong listenBacklog;
+//  Allows setting of listen backlog size. The default value is SOMAXCONN.
 
 _CORBA_MODULE_END
 

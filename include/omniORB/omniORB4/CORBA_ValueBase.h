@@ -3,62 +3,27 @@
 // CORBA_ValueBase.h          Created on: 2003/08/11
 //                            Author    : Duncan Grisby
 //
-//    Copyright (C) 2003-2006 Apasphere Ltd.
+//    Copyright (C) 2003-2012 Apasphere Ltd.
 //
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //    ValueType definitions
 //
-
-/*
-  $Log: CORBA_ValueBase.h,v $
-  Revision 1.1.2.9  2009/05/06 16:16:14  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.1.2.8  2006/10/23 15:08:31  dgrisby
-  Suppress GCC warnings about missing base class constructor calls.
-  Thanks Tamas Kerecsen. Somehow, this patch works on VC++ 6, where
-  before a similar change failed.
-
-  Revision 1.1.2.7  2006/01/19 17:21:59  dgrisby
-  Avoid member name conflict in DefaultValueRefCountBase.
-
-  Revision 1.1.2.6  2005/08/16 13:51:21  dgrisby
-  Problems with valuetype / abstract interface C++ mapping.
-
-  Revision 1.1.2.5  2005/01/17 18:08:41  dgrisby
-  Small tweaks to compile with Sun CC.
-
-  Revision 1.1.2.4  2005/01/06 16:39:23  dgrisby
-  DynValue and DynValueBox implementations; misc small fixes.
-
-  Revision 1.1.2.3  2004/07/04 23:53:35  dgrisby
-  More ValueType TypeCode and Any support.
-
-  Revision 1.1.2.2  2003/11/06 11:56:55  dgrisby
-  Yet more valuetype. Plain valuetype and abstract valuetype are now working.
-
-  Revision 1.1.2.1  2003/09/26 16:12:53  dgrisby
-  Start of valuetype support.
-
-*/
 
 #ifndef INSIDE_OMNIORB_CORBA_MODULE
 #  error "Must only be #included by CORBA.h"
@@ -188,7 +153,7 @@ private:
   void operator=(const DefaultValueRefCountBase&);
   // Not implemented.
 
-  ULong _pd__refCount;
+  omni_refcount _pd__refCount;
 };
 
 
@@ -211,7 +176,7 @@ protected:
 
 private:
   virtual ValueBase* create_for_unmarshal() = 0;
-  ULong _pd_refCount;
+  omni_refcount _pd_refCount;
 
   //////////////////////
   // omniORB internal //

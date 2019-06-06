@@ -11,120 +11,22 @@
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //   Internal typecode classes.
 //
-
-/*
- * $Log: typecode.h,v $
- * Revision 1.1.4.6  2009/05/06 16:16:00  dgrisby
- * Update lots of copyright notices.
- *
- * Revision 1.1.4.5  2006/11/28 00:09:42  dgrisby
- * TypeCode collector could access deleted data when freeing TypeCodes
- * with multiple loops.
- *
- * Revision 1.1.4.4  2006/05/20 16:23:37  dgrisby
- * Minor cdrMemoryStream and TypeCode performance tweaks.
- *
- * Revision 1.1.4.3  2004/05/25 14:20:50  dgrisby
- * ValueType TypeCode support.
- *
- * Revision 1.1.4.2  2004/04/02 13:26:24  dgrisby
- * Start refactoring TypeCode to support value TypeCodes, start of
- * abstract interfaces support.
- *
- * Revision 1.1.4.1  2003/03/23 21:03:42  dgrisby
- * Start of omniORB 4.1.x development branch.
- *
- * Revision 1.1.2.4  2002/12/18 15:58:52  dgrisby
- * Proper clean-up of recursive TypeCodes.
- *
- * Revision 1.1.2.3  2001/10/29 17:42:38  dpg1
- * Support forward-declared structs/unions, ORB::create_recursive_tc().
- *
- * Revision 1.1.2.2  2001/06/08 17:12:10  dpg1
- * Merge all the bug fixes from omni3_develop.
- *
- * Revision 1.1.2.1  2001/04/18 17:18:13  sll
- * Big checkin with the brand new internal APIs.
- * These files were relocated and scoped with the omni namespace.
- *
- * Revision 1.10.2.6  2001/03/13 10:32:06  dpg1
- * Fixed point support.
- *
- * Revision 1.10.2.5  2000/11/17 19:09:39  dpg1
- * Support codeset conversion in any.
- *
- * Revision 1.10.2.4  2000/11/09 12:27:55  dpg1
- * Huge merge from omni3_develop, plus full long long from omni3_1_develop.
- *
- * Revision 1.10.2.3  2000/10/06 16:40:55  sll
- * Changed to use cdrStream.
- *
- * Revision 1.10.2.2  2000/09/27 17:25:45  sll
- * Changed include/omniORB3 to include/omniORB4.
- *
- * Revision 1.10.2.1  2000/07/17 10:35:43  sll
- * Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
- *
- * Revision 1.11  2000/07/13 15:26:02  dpg1
- * Merge from omni3_develop for 3.0 release.
- *
- * Revision 1.8.6.5  2000/06/22 10:40:13  dpg1
- * exception.h renamed to exceptiondefs.h to avoid name clash on some
- * platforms.
- *
- * Revision 1.8.6.4  2000/02/15 13:43:43  djr
- * Fixed bug in create_union_tc() -- problem if discriminator was an alias.
- *
- * Revision 1.8.6.3  1999/10/14 17:31:34  djr
- * Minor corrections.
- *
- * Revision 1.8.6.2  1999/10/14 16:22:04  djr
- * Implemented logging when system exceptions are thrown.
- *
- * Revision 1.8.6.1  1999/09/22 14:26:39  djr
- * Major rewrite of orbcore to support POA.
- *
- * Revision 1.7  1999/07/01 10:28:14  djr
- * Added two methods to TypeCode_pairlist.
- * Declare inline methods as inline.
- *
- * Revision 1.6  1999/06/18 21:00:31  sll
- * Updated to CORBA 2.3 mapping.
- *
- * Revision 1.5  1999/05/25 17:47:09  sll
- * Changed to use _CORBA_PseudoValue_Sequence.
- *
- * Revision 1.4  1999/03/11 16:25:59  djr
- * Updated copyright notice
- *
- * Revision 1.3  1999/02/18 15:49:30  djr
- * Simplified NP_namesEqualOrNull()
- *
- * Revision 1.2  1999/01/18 13:56:20  djr
- * Fixed bug in TypeCode_union.
- *
- * Revision 1.1  1999/01/07 17:12:37  djr
- * Initial revision
- *
- */
 
 #ifndef __TYPECODE_H__
 #define __TYPECODE_H__
@@ -263,7 +165,7 @@ public:
     unsigned i = new_entry();
     pd_table[i]->type = it_simple;
     pd_table[i]->simple.alignment = a;
-    pd_table[i]->simple.size = s;
+    pd_table[i]->simple.size = (CORBA::ULong)s;
   }
   inline void addNasty(TypeCode_base* tc) {
     unsigned i = new_entry();

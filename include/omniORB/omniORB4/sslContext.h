@@ -3,69 +3,28 @@
 // sslContext.h               Created on: 29 May 2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2005-2008 Apasphere Ltd
+//    Copyright (C) 2005-2012 Apasphere Ltd
 //    Copyright (C) 2001      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 // 
-
-/*
-  $Log: sslContext.h,v $
-  Revision 1.1.4.6  2009/05/06 16:16:12  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.1.4.5  2008/02/14 13:50:03  dgrisby
-  Initialise openssl only if necessary. Thanks Teemu Torma.
-
-  Revision 1.1.4.4  2006/01/10 12:24:04  dgrisby
-  Merge from omni4_0_develop pre 4.0.7 release.
-
-  Revision 1.1.4.3  2005/09/05 17:12:20  dgrisby
-  Merge again. Mainly SSL transport changes.
-
-  Revision 1.1.4.2  2005/01/06 23:08:22  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.4.1  2003/03/23 21:04:02  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.5  2002/09/05 14:29:01  dgrisby
-  Link force mechanism wasn't working with gcc.
-
-  Revision 1.1.2.4  2002/02/25 11:17:11  dpg1
-  Use tracedmutexes everywhere.
-
-  Revision 1.1.2.3  2001/09/14 11:10:35  sll
-  Do the right dllimport for win32.
-
-  Revision 1.1.2.2  2001/09/13 15:36:00  sll
-  Provide hooks to openssl for thread safety.
-  Switched to select v2 or v3 methods but accept only v3 or tls v1 protocol.
-  Added extra method set_supported_versions.
-
-  Revision 1.1.2.1  2001/06/11 18:11:07  sll
-  *** empty log message ***
-
-*/
 
 #ifndef __SSLCONTEXT_H__
 #define __SSLCONTEXT_H__
@@ -99,13 +58,45 @@ class sslContext {
 
   SSL_CTX* get_SSL_CTX() const { return pd_ctx; }
   
-  // These four parameters must be set or else the default way to
+  // These parameters must be set or else the default way to
   // initialise a sslContext singleton will not be used.
   static _core_attr const char* certificate_authority_file; // In PEM format
+  static _core_attr const char* certificate_authority_path; // Path
   static _core_attr const char* key_file;                   // In PEM format
   static _core_attr const char* key_file_password;
-  static _core_attr int         verify_mode;
 
+  // These parameters can be overriden to adjust the verify mode and
+  // verify callback passed to SSL_CTX_set_verify and the info
+  // callback passed to SSL_CTX_set_info_callback.
+  static _core_attr int         verify_mode;
+  static _core_attr int       (*verify_callback)(int, X509_STORE_CTX*);
+
+  static _core_attr void      (*info_callback)(const SSL *s,
+					       int where, int ret);
+
+  // If this parameter is false (the default), interceptor
+  // peerdetails() calls treturn an X509*. If set true, the calls
+  // return a pointer to an sslContext::PeerDetails object.
+  static _core_attr CORBA::Boolean full_peerdetails;
+
+  class PeerDetails {
+  public:
+    inline PeerDetails(SSL* s, X509* c, CORBA::Boolean v)
+      : pd_ssl(s), pd_cert(c), pd_verified(v) {}
+
+    ~PeerDetails();
+
+    inline SSL*           ssl()      { return pd_ssl; }
+    inline X509*          cert()     { return pd_cert; }
+    inline CORBA::Boolean verified() { return pd_verified; }
+
+  private:
+    SSL*           pd_ssl;
+    X509*          pd_cert;
+    CORBA::Boolean pd_verified;
+  };
+
+  // sslContext singleton object.
   static _core_attr sslContext* singleton;
 
   virtual ~sslContext();
@@ -115,8 +106,8 @@ class sslContext {
   // Default to return SSLv23_method().
 
   virtual void set_supported_versions(); 
-  // Default to SSL_CTX_set_options(ssL_ctx, SSL_OP_NO_SSLv2); That is
-  // only accept SSL version 3 or TLS version 1.
+  // Default to SSL_CTX_set_options(ssl_ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3);
+  // That is only accept TLS.
 
   virtual void set_CA();
   // Default to read the certificates of the Certificate Authorities in the 

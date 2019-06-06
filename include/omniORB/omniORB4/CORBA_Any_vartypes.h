@@ -9,46 +9,22 @@
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //    CORBA::Any_var, etc.
 //
-
-/*
-  $Log: CORBA_Any_vartypes.h,v $
-  Revision 1.1.4.4  2009/05/06 16:16:15  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.1.4.3  2004/10/13 17:58:18  dgrisby
-  Abstract interfaces support; values support interfaces; value bug fixes.
-
-  Revision 1.1.4.2  2004/07/23 10:29:56  dgrisby
-  Completely new, much simpler Any implementation.
-
-  Revision 1.1.4.1  2003/03/23 21:04:25  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.2  2001/10/17 16:43:59  dpg1
-  Update DynAny to CORBA 2.5 spec, const Any exception extraction.
-
-  Revision 1.1.2.1  2001/08/17 13:39:44  dpg1
-  Split CORBA.h into separate bits.
-
-*/
 
 #ifndef INSIDE_OMNIORB_CORBA_MODULE
 #  error "Must only be #included by CORBA.h"
@@ -83,19 +59,21 @@ public:
   }
 
   inline Any_var& operator= (const Any_var& p) {
-    if (p.pd_data) {
-      if (!pd_data) {
-	pd_data = new Any;
-	if (!pd_data) {
-	  _CORBA_new_operator_return_null();
-	  // never reach here
-	}
+    if (&p != this) {
+      if (p.pd_data) {
+        if (!pd_data) {
+          pd_data = new Any;
+          if (!pd_data) {
+            _CORBA_new_operator_return_null();
+            // never reach here
+          }
+        }
+        *pd_data = *p.pd_data;
       }
-      *pd_data = *p.pd_data;
-    }
-    else {
-      if (pd_data) delete pd_data;
-      pd_data = 0;
+      else {
+        if (pd_data) delete pd_data;
+        pd_data = 0;
+      }
     }
     return *this;
   }

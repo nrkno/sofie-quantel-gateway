@@ -3,48 +3,28 @@
 // CORBA_Exception.h          Created on: 2001/08/17
 //                            Author    : Duncan Grisby (dpg1)
 //
+//    Copyright (C) 2013 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //    CORBA::Exception, SystemException, UserException
 //
-
-/*
-  $Log: CORBA_Exception.h,v $
-  Revision 1.1.4.1  2003/03/23 21:04:24  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.4  2003/01/14 11:48:15  dgrisby
-  Remove warnings from gcc -Wshadow. Thanks Pablo Mejia.
-
-  Revision 1.1.2.3  2001/11/01 12:04:31  dpg1
-  Function in SystemException to return minor code string.
-
-  Revision 1.1.2.2  2001/10/17 16:44:00  dpg1
-  Update DynAny to CORBA 2.5 spec, const Any exception extraction.
-
-  Revision 1.1.2.1  2001/08/17 13:39:46  dpg1
-  Split CORBA.h into separate bits.
-
-*/
 
 #ifndef INSIDE_OMNIORB_CORBA_MODULE
 #  error "Must only be #included by CORBA.h"
@@ -74,7 +54,7 @@ public:
   // returning a pointer to the descendant's type.
   // NOTE: deprecated function from CORBA 2.2. Same as _downcast.
 
-  static Exception* _duplicate(Exception* e);
+  static Exception* _duplicate(const Exception* e);
 
   virtual const char* _name() const;
   virtual const char* _rep_id() const;
@@ -275,16 +255,21 @@ OMNIORB_DECLARE_USER_EXCEPTION_IN_CORBA(WrongTransaction, _dyn_attr)
 ////////////////////////// PolicyError      //////////////////////////
 //////////////////////////////////////////////////////////////////////
 typedef _CORBA_Short PolicyErrorCode;
-_CORBA_MODULE_VARINT const PolicyErrorCode 
-BAD_POLICY _init_in_decl_( = 0 );
-_CORBA_MODULE_VARINT const PolicyErrorCode 
-UNSUPPORTED_POLICY _init_in_decl_( = 1 );
-_CORBA_MODULE_VARINT const PolicyErrorCode 
-BAD_POLICY_TYPE _init_in_decl_( = 2 );
-_CORBA_MODULE_VARINT const PolicyErrorCode
-BAD_POLICY_VALUE _init_in_decl_( = 3 );
-_CORBA_MODULE_VARINT const PolicyErrorCode
-UNSUPPORTED_POLICY_VALUE _init_in_decl_( = 4 );
+
+_CORBA_MODULE_VARINT
+const PolicyErrorCode BAD_POLICY               _init_in_decl_( = 0 );
+
+_CORBA_MODULE_VARINT
+const PolicyErrorCode UNSUPPORTED_POLICY       _init_in_decl_( = 1 );
+
+_CORBA_MODULE_VARINT
+const PolicyErrorCode BAD_POLICY_TYPE          _init_in_decl_( = 2 );
+
+_CORBA_MODULE_VARINT
+const PolicyErrorCode BAD_POLICY_VALUE         _init_in_decl_( = 3 );
+
+_CORBA_MODULE_VARINT
+const PolicyErrorCode UNSUPPORTED_POLICY_VALUE _init_in_decl_( = 4 );
 
 _CORBA_MODULE_VAR _dyn_attr const CORBA::TypeCode_ptr _tc_PolicyErrorCode; 
 
@@ -310,10 +295,10 @@ public:
   void operator>>=(cdrStream&) const;
   void operator<<=(cdrStream&);
 
-  static _dyn_attr insertExceptionToAny    insertToAnyFn;
-  static _dyn_attr insertExceptionToAnyNCP insertToAnyFnNCP;
+  static _core_attr insertExceptionToAny    insertToAnyFn;
+  static _core_attr insertExceptionToAnyNCP insertToAnyFnNCP;
 
-  static _dyn_attr const char* _PD_repoId;
+  static _core_attr const char* _PD_repoId;
 
 private:
   virtual CORBA::Exception* _NP_duplicate() const;

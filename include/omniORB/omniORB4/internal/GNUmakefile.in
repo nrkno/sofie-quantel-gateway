@@ -8,7 +8,7 @@ INSTALLDIR = $(INSTALLINCDIR)/omniORB4/internal
 
 HEADERS = GIOP_C.h GIOP_S.h SocketCollection.h anonObject.h		\
           codeSetUtil.h context.h corbaBoa.h corbaOrb.h			\
-          deferredRequest.h dynAnyImpl.h dynamicImplementation.h	\
+          dynAnyImpl.h dynamicImplementation.h				\
           dynamicLib.h excepthandler.h exceptiondefs.h giopBiDir.h	\
           giopMonitor.h giopRendezvouser.h giopRope.h giopServer.h	\
           giopStrand.h giopStrandFlags.h giopStream.h giopStreamImpl.h	\
@@ -17,7 +17,8 @@ HEADERS = GIOP_C.h GIOP_S.h SocketCollection.h anonObject.h		\
           objectStub.h objectTable.h omniCurrent.h omniIdentity.h	\
           orbOptions.h orbParameters.h poacurrentimpl.h poaimpl.h	\
           poamanager.h pseudo.h remoteIdentity.h request.h rmutex.h	\
-          shutdownIdentity.h tcParser.h transportRules.h typecode.h
+          shutdownIdentity.h tcParser.h transportRules.h typecode.h \
+          interceptors.h tcpSocket.h unknownValue.h valueTrackerImpl.h
 
 include $(TOP)/mk/beforeauto.mk
 

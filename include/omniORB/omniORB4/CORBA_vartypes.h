@@ -8,56 +8,21 @@
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //
-
-/*
- $Log: CORBA_vartypes.h,v $
- Revision 1.4.2.1  2003/03/23 21:04:21  dgrisby
- Start of omniORB 4.1.x development branch.
-
- Revision 1.2.2.4  2001/10/17 16:44:00  dpg1
- Update DynAny to CORBA 2.5 spec, const Any exception extraction.
-
- Revision 1.2.2.3  2001/08/17 13:39:49  dpg1
- Split CORBA.h into separate bits.
-
- Revision 1.2.2.2  2000/09/27 17:07:25  sll
- Updated to use the new cdrStream abstraction.
-
- Revision 1.2.2.1  2000/07/17 10:35:33  sll
- Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
- Revision 1.3  2000/07/13 15:26:05  dpg1
- Merge from omni3_develop for 3.0 release.
-
- Revision 1.1.2.3  2000/06/27 16:15:08  sll
- New classes: _CORBA_String_element, _CORBA_ObjRef_Element,
- _CORBA_ObjRef_tcDesc_arg to support assignment to an element of a
- sequence of string and a sequence of object reference.
-
- Revision 1.1.2.2  1999/10/13 12:44:35  djr
- Added definition of TypeCode_out.
-
- Revision 1.1.2.1  1999/09/24 09:51:39  djr
- Moved from omniORB2 + some new files.
-
-*/
 
 #ifndef INSIDE_OMNIORB_CORBA_MODULE
 #  error "Must only be #included by CORBA.h"

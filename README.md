@@ -15,9 +15,9 @@ This library uses native bindings to bridge the Quantel ISA System CORBA API and
 
 This software can be built for Windows and Linux platforms:
 
-* On Linux, an OmniORB4 development package should be available ([Ubuntu example](https://packages.ubuntu.com/search?keywords=omniorb)).
+* On Linux, an OmniORB4 development package should be available ([Ubuntu example](https://packages.ubuntu.com/search?keywords=omniorb)) for you distribution.
 
-* In its current form, this library will only build on Windows Win32 (`ia32`) architecture. A 32-bit version of node is required to run it. The [nvm tool for Windows](https://github.com/coreybutler/nvm-windows) is a useful way to switch between Node version and architectures. A 64-bit Windows version is under investigation.
+* On Windows, the necessart DLL and LIB files are included. The included OmniORB was built with Visual Studio 2017 for x64 architecture. The native extension runs with the 64-bit version of Node.js.
 
 ### Prerequisites
 

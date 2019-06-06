@@ -3,220 +3,35 @@
 // cdrStream.h                Created on: 11/1/99
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2003-2007 Apasphere Ltd
+//    Copyright (C) 2003-2013 Apasphere Ltd
 //    Copyright (C) 1999      AT&T Laboratories, Cambridge
 //
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //	*** PROPRIETARY INTERFACE ***
 //
 
-/*
-  $Log: cdrStream.h,v $
-  Revision 1.1.4.18  2009/05/06 16:16:13  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.1.4.17  2007/04/12 19:50:33  dgrisby
-  A few cases of sizeof(bool) > 1 were not handled correctly.
-
-  Revision 1.1.4.16  2007/02/11 23:44:59  dgrisby
-  Value chunk stream looked at wrong byteswap flag in getLength.
-
-  Revision 1.1.4.15  2006/06/06 16:39:37  dgrisby
-  marshalRawString and chunking stream did not byte-swap length fields
-  when required to.
-
-  Revision 1.1.4.14  2006/05/21 17:43:24  dgrisby
-  Remove obsolete pd_chunked flag.
-
-  Revision 1.1.4.13  2006/05/20 16:23:37  dgrisby
-  Minor cdrMemoryStream and TypeCode performance tweaks.
-
-  Revision 1.1.4.12  2006/05/15 10:13:00  dgrisby
-  Data was overwritten when a chunk ended with an array; make
-  declareArrayLength() virtual.
-
-  Revision 1.1.4.11  2006/04/28 18:40:46  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.4.10  2005/12/08 14:22:31  dgrisby
-  Better string marshalling performance; other minor optimisations.
-
-  Revision 1.1.4.9  2005/07/22 17:18:40  dgrisby
-  Another merge from omni4_0_develop.
-
-  Revision 1.1.4.8  2005/01/06 23:08:09  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.4.7  2005/01/06 17:31:07  dgrisby
-  Changes (mainly from omni4_0_develop) to compile on gcc 3.4.
-
-  Revision 1.1.4.6  2004/07/23 10:29:56  dgrisby
-  Completely new, much simpler Any implementation.
-
-  Revision 1.1.4.5  2004/07/04 23:53:35  dgrisby
-  More ValueType TypeCode and Any support.
-
-  Revision 1.1.4.4  2003/11/06 11:56:55  dgrisby
-  Yet more valuetype. Plain valuetype and abstract valuetype are now working.
-
-  Revision 1.1.4.3  2003/07/10 21:52:31  dgrisby
-  Value chunks should start after URL / repoids.
-
-  Revision 1.1.4.2  2003/05/20 16:53:12  dgrisby
-  Valuetype marshalling support.
-
-  Revision 1.1.4.1  2003/03/23 21:04:17  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.20  2003/03/02 17:10:41  dgrisby
-  AIX patches integrated in main tree.
-
-  Revision 1.1.2.19  2002/03/14 14:39:44  dpg1
-  Obscure bug in objref creation with unaligned buffers.
-
-  Revision 1.1.2.18  2002/03/11 12:23:03  dpg1
-  Tweaks to avoid compiler warnings.
-
-  Revision 1.1.2.17  2001/11/14 17:13:41  dpg1
-  Long double support.
-
-  Revision 1.1.2.16  2001/10/17 16:33:27  dpg1
-  New downcast mechanism for cdrStreams.
-
-  Revision 1.1.2.15  2001/09/19 17:29:04  dpg1
-  Cosmetic changes.
-
-  Revision 1.1.2.14  2001/08/22 13:29:45  dpg1
-  Re-entrant Any marshalling.
-
-  Revision 1.1.2.13  2001/08/17 17:02:22  sll
-  Removed static variables ncs_c, ncs_w, default_tcs_c, default_tcs_w.
-
-  Revision 1.1.2.12  2001/07/31 16:32:02  sll
-  Added virtual function is_giopStream to check if a cdrStream is a giopStream.
-  That is, a poor man's substitute for dynamic_cast.
-
-  Revision 1.1.2.11  2001/06/13 19:58:37  sll
-  Added omni namespace scoping for omniCodeSet.
-
-  Revision 1.1.2.10  2001/05/10 15:03:50  dpg1
-  Update cdrStreamAdapter to modified cdrStream interface.
-
-  Revision 1.1.2.9  2001/04/18 17:50:44  sll
-  Big checkin with the brand new internal APIs.
-  Scoped where appropriate with the omni namespace.
-
-  Revision 1.1.2.8  2001/01/09 17:16:59  dpg1
-  New cdrStreamAdapter class to allow omniORBpy to intercept buffer
-  management.
-
-  Revision 1.1.2.7  2000/12/05 17:39:31  dpg1
-  New cdrStream functions to marshal and unmarshal raw strings.
-
-  Revision 1.1.2.6  2000/11/22 14:37:58  dpg1
-  Code set marshalling functions now take a string length argument.
-
-  Revision 1.1.2.5  2000/11/15 17:16:23  sll
-  Added char, wchar codeset convertor support to cdrStream.
-
-  Revision 1.1.2.4  2000/11/09 12:27:49  dpg1
-  Huge merge from omni3_develop, plus full long long from omni3_1_develop.
-
-  Revision 1.1.2.3  2000/11/03 18:49:16  sll
-  Separate out the marshalling of byte, octet and char into 3 set of distinct
-  marshalling functions.
-  Renamed put_char_array and get_char_array to put_octet_array and
-  get_octet_array.
-  New string marshal member functions.
-
-  Revision 1.1.2.2  2000/10/10 10:14:27  sll
-  Extra ctor for cdrEncapsulationStream which initialise the buffer by
-  fetching data from the argument cdrStream.
-
-  Revision 1.1.2.1  2000/09/27 16:54:08  sll
-  *** empty log message ***
-
-*/
-
 #ifndef __CDRSTREAM_H__
 #define __CDRSTREAM_H__
 
 #include <limits.h>
 
-#ifndef Swap16
-#define Swap16(s) ((((s) & 0xff) << 8) | (((s) >> 8) & 0xff))
-#else
-#error "Swap16 has already been defined"
-#endif
-
-#ifndef Swap32
-#define Swap32(l) ((((l) & 0xff000000) >> 24) | \
-		   (((l) & 0x00ff0000) >> 8)  | \
-		   (((l) & 0x0000ff00) << 8)  | \
-		   (((l) & 0x000000ff) << 24))
-#else
-#error "Swap32 has already been defined"
-#endif
-
-#ifdef HAS_LongLong
-#ifndef Swap64
-#define Swap64(l) \
-  ((((l) & _CORBA_LONGLONG_CONST(0xff00000000000000)) >> 56) | \
-   (((l) & _CORBA_LONGLONG_CONST(0x00ff000000000000)) >> 40) | \
-   (((l) & _CORBA_LONGLONG_CONST(0x0000ff0000000000)) >> 24) | \
-   (((l) & _CORBA_LONGLONG_CONST(0x000000ff00000000)) >> 8)  | \
-   (((l) & _CORBA_LONGLONG_CONST(0x00000000ff000000)) << 8)  | \
-   (((l) & _CORBA_LONGLONG_CONST(0x0000000000ff0000)) << 24) | \
-   (((l) & _CORBA_LONGLONG_CONST(0x000000000000ff00)) << 40) | \
-   (((l) & _CORBA_LONGLONG_CONST(0x00000000000000ff)) << 56))
-#else
-#error "Swap64 has already been defined"
-#endif
-#endif
-
-// Technically, we have to declare friend functions outside of the
-// class to put them into the global scope (this is pretty esoteric:
-// friend functions are not in class scope but if they are first
-// declared inside the class they aren't in global scope either...or
-// something like that...)  It is too bad we have to have operators in
-// global scope but some compilers don't handle Koenig lookup
-// correctly.
-
 class cdrStream;
-inline void operator>>= (_CORBA_Short      a, cdrStream& s);
-inline void operator<<= (_CORBA_Short&     a, cdrStream& s);
-inline void operator>>= (_CORBA_UShort     a, cdrStream& s);
-inline void operator<<= (_CORBA_UShort&    a, cdrStream& s);
-inline void operator>>= (_CORBA_Long       a, cdrStream& s);
-inline void operator<<= (_CORBA_Long&      a, cdrStream& s);
-inline void operator>>= (_CORBA_ULong      a, cdrStream& s);
-inline void operator<<= (_CORBA_ULong&     a, cdrStream& s);
-#ifdef HAS_LongLong
-inline void operator>>= (_CORBA_LongLong   a, cdrStream& s);
-inline void operator<<= (_CORBA_LongLong&  a, cdrStream& s);
-inline void operator>>= (_CORBA_ULongLong  a, cdrStream& s);
-inline void operator<<= (_CORBA_ULongLong& a, cdrStream& s);
-#endif
-
-
 class cdrStreamAdapter;
 class cdrValueChunkStream;
 
@@ -228,6 +43,9 @@ OMNI_NAMESPACE_BEGIN(omni)
 OMNI_NAMESPACE_END(omni)
 
 
+//
+// cdrStream abstract base class
+
 class cdrStream {
 public:
 
@@ -235,69 +53,56 @@ public:
 
   virtual ~cdrStream();
 
-#ifndef CdrMarshal
-#define CdrMarshal(s,type,align,arg) do {\
-   again: \
-   omni::ptr_arith_t p1 = omni::align_to((omni::ptr_arith_t)s.pd_outb_mkr,align);\
-   omni::ptr_arith_t p2 = p1 + sizeof(type);\
-   if( (void*)p2 > s.pd_outb_end ) {\
-     if (s.reserveOutputSpaceForPrimitiveType(align,sizeof(type)))\
-       goto again;\
-     else {\
-       s.pd_outb_mkr = (void*) p2;\
-       break;\
-     }\
-   }\
-   s.pd_outb_mkr = (void*) p2;\
-   *((type*)p1) = arg;\
-} while(0)
-#else
-#error "CdrMarshal has already been defined"
+  //
+  // Byte swapping functions
+
+  static inline _CORBA_Short byteSwap(_CORBA_Short s) {
+    return (((s & 0xff00) >> 8 |
+	     (s & 0x00ff) << 8));
+  }
+  static inline _CORBA_UShort byteSwap(_CORBA_UShort s) {
+    return (((s & 0xff00) >> 8 |
+	     (s & 0x00ff) << 8));
+  }
+  static inline _CORBA_Long byteSwap(_CORBA_Long l) {
+    return (((l & 0xff000000) >> 24) |
+	    ((l & 0x00ff0000) >> 8)  |
+	    ((l & 0x0000ff00) << 8)  |
+	    ((l & 0x000000ff) << 24));
+  }
+  static inline _CORBA_ULong byteSwap(_CORBA_ULong l) {
+    return (((l & 0xff000000) >> 24) |
+	    ((l & 0x00ff0000) >> 8)  |
+	    ((l & 0x0000ff00) << 8)  |
+	    ((l & 0x000000ff) << 24));
+  }
+
+#ifdef HAS_LongLong
+  static inline _CORBA_LongLong byteSwap(_CORBA_LongLong l) {
+    return (((l & _CORBA_LONGLONG_CONST(0xff00000000000000)) >> 56) |
+	    ((l & _CORBA_LONGLONG_CONST(0x00ff000000000000)) >> 40) |
+	    ((l & _CORBA_LONGLONG_CONST(0x0000ff0000000000)) >> 24) |
+	    ((l & _CORBA_LONGLONG_CONST(0x000000ff00000000)) >> 8)  |
+	    ((l & _CORBA_LONGLONG_CONST(0x00000000ff000000)) << 8)  |
+	    ((l & _CORBA_LONGLONG_CONST(0x0000000000ff0000)) << 24) |
+	    ((l & _CORBA_LONGLONG_CONST(0x000000000000ff00)) << 40) |
+	    ((l & _CORBA_LONGLONG_CONST(0x00000000000000ff)) << 56));
+  }
+  static inline _CORBA_ULongLong byteSwap(_CORBA_ULongLong l) {
+    return (((l & _CORBA_LONGLONG_CONST(0xff00000000000000)) >> 56) |
+	    ((l & _CORBA_LONGLONG_CONST(0x00ff000000000000)) >> 40) |
+	    ((l & _CORBA_LONGLONG_CONST(0x0000ff0000000000)) >> 24) |
+	    ((l & _CORBA_LONGLONG_CONST(0x000000ff00000000)) >> 8)  |
+	    ((l & _CORBA_LONGLONG_CONST(0x00000000ff000000)) << 8)  |
+	    ((l & _CORBA_LONGLONG_CONST(0x0000000000ff0000)) << 24) |
+	    ((l & _CORBA_LONGLONG_CONST(0x000000000000ff00)) << 40) |
+	    ((l & _CORBA_LONGLONG_CONST(0x00000000000000ff)) << 56));
+  }
 #endif
 
-#ifndef CdrUnMarshal
-#define CdrUnMarshal(s,type,align,arg) do {\
-  again: \
-  omni::ptr_arith_t p1 = omni::align_to((omni::ptr_arith_t)s.pd_inb_mkr,align);\
-  omni::ptr_arith_t p2 = p1 + sizeof(type);\
-  if ((void *)p2 > s.pd_inb_end) {\
-    s.fetchInputData(align,sizeof(type));\
-    goto again;\
-  }\
-  s.pd_inb_mkr = (void*) p2;\
-  arg = *((type*)p1);\
-} while(0)
-#else
-#error "CdrUnMarshal has already been defined"
-#endif
 
-  // Macros to convert floats to integers or arrays of integers so they
-  // may be byte-swapped. The default version uses a union to do the
-  // conversion, but that fails for VMS which uses classes to represent
-  // float types. The version with reinterpret_cast<> fails on some
-  // platforms with strict aliasing.
-
-#ifndef USING_PROXY_FLOAT
-
-#define convertFromFloat(float_t, int_t) \
-  union { float_t a; int_t l; } u; \
-  u.a = a; \
-  int_t l = u.l
-
-#define convertToFloat(float_t, int_t) \
-  union { float_t a; int_t l; } u; \
-  u.l = l; \
-  a = u.a
-
-#else
-
-#define convertFromFloat(float_t, int_t) \
-  int_t l = OMNI_REINTERPRET_CAST(int_t, a)
-
-#define convertToFloat(float_t, int_t) \
-  a = OMNI_REINTERPRET_CAST(float_t, l)
-
-#endif
+  //
+  // Marshalling methods : char, wchar, bool, octet
 
   inline void marshalChar(_CORBA_Char a) {
     pd_ncs_c->marshalChar(*this,pd_tcs_c,a);
@@ -317,276 +122,333 @@ public:
 
   inline void marshalOctet(_CORBA_Octet a) {
     // No need to align here
-    do {
-    again:
-      omni::ptr_arith_t p1 = (omni::ptr_arith_t)pd_outb_mkr;
-      omni::ptr_arith_t p2 = p1 + 1;
-      if( (void*)p2 > pd_outb_end ) {
-	if (reserveOutputSpaceForPrimitiveType(omni::ALIGN_1, 1))
-	  goto again;
-	else {
-	  pd_outb_mkr = (void*) p2;
-	  break;
-	}
-      }
-      pd_outb_mkr = (void*) p2;
+    omni::ptr_arith_t p1 = outMkr();
+    omni::ptr_arith_t p2 = p1 + sizeof(_CORBA_Octet);
+    if ((void*)p2 <= pd_outb_end) {
+      pd_outb_mkr = (void*)p2;
       *((_CORBA_Octet*)p1) = a;
-    } while (0);
+    }
+    else {
+      reserveAndMarshalOctet(a);
+    }
   }
 
   inline _CORBA_Octet unmarshalOctet() {
     _CORBA_Octet a;
-    do {
-    again:
-      omni::ptr_arith_t p1 = (omni::ptr_arith_t)pd_inb_mkr;
-      omni::ptr_arith_t p2 = p1 + sizeof(_CORBA_Octet);
-      if ((void *)p2 > pd_inb_end) {
-	fetchInputData(omni::ALIGN_1,sizeof(_CORBA_Octet));
-	goto again;
-      }
-      pd_inb_mkr = (void*) p2;
+    omni::ptr_arith_t p1 = inMkr();
+    omni::ptr_arith_t p2 = p1 + sizeof(_CORBA_Octet);
+    if ((void*)p2 <= pd_inb_end) {
+      pd_inb_mkr = (void*)p2;
       a = *((_CORBA_Octet*)p1);
-    } while(0);
+    }
+    else {
+      a = fetchAndUnmarshalOctet();
+    }
     return a;
   }
 
   inline void marshalBoolean(_CORBA_Boolean b) {
-    _CORBA_Char c = b ? 1 : 0;
-    CdrMarshal((*this),_CORBA_Char,omni::ALIGN_1,c);
+    _CORBA_Octet o = b ? 1 : 0;
+    marshalOctet(o);
   }
 
   inline _CORBA_Boolean unmarshalBoolean() {
-    _CORBA_Char c;
-    CdrUnMarshal((*this),_CORBA_Char,omni::ALIGN_1,c);
+    _CORBA_Octet o = unmarshalOctet();
 #ifdef HAS_Cplusplus_Bool
-    return c ? true : false;
+    return o ? true : false;
 #else
-    return c;
+    return (_CORBA_Boolean)o;
 #endif
   }
 
-#ifndef OMNI_NO_INLINE_FRIENDS
-  friend inline void operator>>= (_CORBA_Short a, cdrStream& s) {
-    if (s.pd_marshal_byte_swap) {
-      _CORBA_Short t = Swap16(a);
-      a = t;
-    }
-    CdrMarshal(s,_CORBA_Short,omni::ALIGN_2,a);
+
+  //
+  // Marshalling methods : integer types
+
+#define intMarshalFns(type,align) \
+  inline void marshal ## type(_CORBA_ ## type arg) {\
+    omni::ptr_arith_t p1 = outMkr(omni::align);\
+    omni::ptr_arith_t p2 = p1 + sizeof(_CORBA_ ## type);\
+    if ((void*)p2 <= pd_outb_end) {\
+      pd_outb_mkr = (void*) p2;\
+      if (!pd_marshal_byte_swap) {\
+        *((_CORBA_ ## type*)p1) = arg;\
+      }\
+      else {\
+        *((_CORBA_ ## type*)p1) = byteSwap(arg);\
+      }\
+    }\
+    else {\
+      reserveAndMarshal ## type(arg);\
+    }\
+  } \
+  inline _CORBA_ ## type unmarshal ## type() { \
+    _CORBA_ ## type arg;\
+    omni::ptr_arith_t p1 = inMkr(omni::align);\
+    omni::ptr_arith_t p2 = p1 + sizeof(_CORBA_ ## type);\
+    if ((void*)p2 <= pd_inb_end) {\
+      pd_inb_mkr = (void*) p2;\
+      if (!pd_unmarshal_byte_swap) {\
+        arg = *((_CORBA_ ## type*)p1);\
+      }\
+      else {\
+        arg = byteSwap(*((_CORBA_ ## type*)p1));\
+      }\
+    }\
+    else {\
+      arg = fetchAndUnmarshal ## type();\
+    }\
+    return arg; \
   }
 
-  friend inline void operator<<= (_CORBA_Short& a, cdrStream& s) {
-    CdrUnMarshal(s,_CORBA_Short,omni::ALIGN_2,a);
-    if (s.pd_unmarshal_byte_swap) {
-      _CORBA_Short t = Swap16(a);
-      a = t;
-    }
-  }
+  intMarshalFns(Short,  ALIGN_2)
+  intMarshalFns(UShort, ALIGN_2)
+  intMarshalFns(Long,   ALIGN_4)
+  intMarshalFns(ULong,  ALIGN_4)  
 
-  friend inline void operator>>= (_CORBA_UShort a, cdrStream& s) {
-    if (s.pd_marshal_byte_swap) {
-      _CORBA_UShort t = Swap16(a);
-      a = t;
-    }
-    CdrMarshal(s,_CORBA_UShort,omni::ALIGN_2,a);
-  }
-
-  friend inline void operator<<= (_CORBA_UShort& a, cdrStream& s) {
-    CdrUnMarshal(s,_CORBA_UShort,omni::ALIGN_2,a);
-    if (s.pd_unmarshal_byte_swap) {
-      _CORBA_UShort t = Swap16(a);
-      a = t;
-    }
-  }
-
-  friend inline void operator>>= (_CORBA_Long a, cdrStream& s) {
-    if (s.pd_marshal_byte_swap) {
-      _CORBA_Long t = Swap32(a);
-      a = t;
-    }
-    CdrMarshal(s,_CORBA_Long,omni::ALIGN_4,a);
-  }
-
-  friend inline void operator<<= (_CORBA_Long& a, cdrStream& s) {
-    CdrUnMarshal(s,_CORBA_Long,omni::ALIGN_4,a);
-    if (s.pd_unmarshal_byte_swap) {
-      _CORBA_Long t = Swap32(a);
-      a = t;
-    }
-  }
-
-  friend inline void operator>>= (_CORBA_ULong a, cdrStream& s) {
-    if (s.pd_marshal_byte_swap) {
-      _CORBA_ULong t = Swap32(a);
-      a = t;
-    }
-    CdrMarshal(s,_CORBA_ULong,omni::ALIGN_4,a);
-  }
-
-  friend inline void operator<<= (_CORBA_ULong& a, cdrStream& s) {
-    CdrUnMarshal(s,_CORBA_ULong,omni::ALIGN_4,a);
-    if (s.pd_unmarshal_byte_swap) {
-      _CORBA_ULong t = Swap32(a);
-      a = t;
-    }
-  }
-
-#  ifdef HAS_LongLong
-  friend inline void operator>>= (_CORBA_LongLong a, cdrStream& s) {
-    if (s.pd_marshal_byte_swap) {
-      _CORBA_LongLong t = Swap64(a);
-      a = t;
-    }
-    CdrMarshal(s,_CORBA_LongLong,omni::ALIGN_8,a);
-  }
-
-  friend inline void operator<<= (_CORBA_LongLong& a, cdrStream& s) {
-    CdrUnMarshal(s,_CORBA_LongLong,omni::ALIGN_8,a);
-    if (s.pd_unmarshal_byte_swap) {
-      _CORBA_LongLong t = Swap64(a);
-      a = t;
-    }
-  }
-
-  friend inline void operator>>= (_CORBA_ULongLong a, cdrStream& s) {
-    if (s.pd_marshal_byte_swap) {
-      _CORBA_ULongLong t = Swap64(a);
-      a = t;
-    }
-    CdrMarshal(s,_CORBA_ULongLong,omni::ALIGN_8,a);
-  }
-
-  friend inline void operator<<= (_CORBA_ULongLong& a, cdrStream& s) {
-    CdrUnMarshal(s,_CORBA_ULongLong,omni::ALIGN_8,a);
-    if (s.pd_unmarshal_byte_swap) {
-      _CORBA_ULongLong t = Swap64(a);
-      a = t;
-    }
-  }
-#  endif
-#else
-  friend inline void operator>>= (_CORBA_Short      a, cdrStream& s);
-  friend inline void operator<<= (_CORBA_Short&     a, cdrStream& s);
-  friend inline void operator>>= (_CORBA_UShort     a, cdrStream& s);
-  friend inline void operator<<= (_CORBA_UShort&    a, cdrStream& s);
-  friend inline void operator>>= (_CORBA_Long       a, cdrStream& s);
-  friend inline void operator<<= (_CORBA_Long&      a, cdrStream& s);
-  friend inline void operator>>= (_CORBA_ULong      a, cdrStream& s);
-  friend inline void operator<<= (_CORBA_ULong&     a, cdrStream& s);
-#  ifdef HAS_LongLong
-  friend inline void operator>>= (_CORBA_LongLong   a, cdrStream& s);
-  friend inline void operator<<= (_CORBA_LongLong&  a, cdrStream& s);
-  friend inline void operator>>= (_CORBA_ULongLong  a, cdrStream& s);
-  friend inline void operator<<= (_CORBA_ULongLong& a, cdrStream& s);
-#  endif
+#ifdef HAS_LongLong
+  intMarshalFns(LongLong,  ALIGN_8)
+  intMarshalFns(ULongLong, ALIGN_8)  
 #endif
 
-#if !defined(NO_FLOAT)
+#undef intMarshalFns
 
-#ifndef OMNI_NO_INLINE_FRIENDS
-  friend inline void operator>>= (_CORBA_Float a, cdrStream& s) {
-    convertFromFloat(_CORBA_Float, _CORBA_ULong);
-    if (s.pd_marshal_byte_swap) {
-      l = Swap32(l);
-    }
-    CdrMarshal(s,_CORBA_ULong,omni::ALIGN_4,l);
+
+  //
+  // Marshalling methods : float types
+
+#ifndef NO_FLOAT
+
+#  ifndef USING_PROXY_FLOAT
+
+  inline void marshalFloat(_CORBA_Float a) {
+    union { _CORBA_Float a; _CORBA_ULong l; } u;
+    u.a = a;
+    marshalULong(u.l);
+  }
+  inline _CORBA_Float unmarshalFloat() {
+    union { _CORBA_Float a; _CORBA_ULong l; } u;
+    u.l = unmarshalULong();
+    return u.a;
   }
 
-  friend inline void operator<<= (_CORBA_Float& a, cdrStream& s) {
-    _CORBA_ULong l;
-    CdrUnMarshal(s,_CORBA_ULong,omni::ALIGN_4,l);
-    if (s.pd_unmarshal_byte_swap) {
-      l = Swap32(l);
-    }
-    convertToFloat(_CORBA_Float, _CORBA_ULong);
+#    if defined(HAS_LongLong) && !defined(OMNI_MIXED_ENDIAN_DOUBLE)
+
+  inline void marshalDouble(_CORBA_Double a) {
+    union { _CORBA_Double a; _CORBA_ULongLong l; } u;
+    u.a = a;
+    marshalULongLong(u.l);
+  }
+  inline _CORBA_Double unmarshalDouble() {
+    union { _CORBA_Double a; _CORBA_ULongLong l; } u;
+    u.l = unmarshalULongLong();
+    return u.a;
   }
 
-  friend inline void operator>>= (_CORBA_Double a, cdrStream& s) {
-    struct LongArray2 { _CORBA_ULong l[2]; };
-    convertFromFloat(_CORBA_Double, LongArray2);
-    if (s.pd_marshal_byte_swap) {
-      LongArray2 m;
-      m.l[0] = Swap32(l.l[1]);
-      m.l[1] = Swap32(l.l[0]);
-      l = m;
-    }
+#    else  // No longlong or mixed endian
+
+  inline void marshalDouble(_CORBA_Double a) {
+    omni::ptr_arith_t p1 = outMkr(omni::ALIGN_8);
+    omni::ptr_arith_t p2 = p1 + sizeof(_CORBA_Double);
+    if ((void*)p2 <= pd_outb_end) {
+      pd_outb_mkr = (void*) p2;
+
+      struct LongArray2 { _CORBA_ULong l[2]; };
+      union { _CORBA_Double a; LongArray2 l; } u;
+      u.a = a;
+
 #ifdef OMNI_MIXED_ENDIAN_DOUBLE
-    {
-      _CORBA_ULong v = l.l[0];
-      l.l[0] = l.l[1];
-      l.l[1] = v;
-    }
+      {
+	_CORBA_ULong v = u.l.l[0];
+	u.l.l[0] = u.l.l[1];
+	u.l.l[1] = v;
+      }
 #endif
-    CdrMarshal(s,LongArray2,omni::ALIGN_8,l);
+      if (!pd_marshal_byte_swap) {
+	*((LongArray2*)p1) = u.l;
+      }
+      else {
+	LongArray2 m;
+	m.l[0] = byteSwap(u.l.l[1]);
+	m.l[1] = byteSwap(u.l.l[0]);
+	*((LongArray2*)p1) = m;
+      }
+    }
+    else {
+      reserveAndMarshalDouble(a);
+    }
   }
 
-  friend inline void operator<<= (_CORBA_Double& a, cdrStream& s) {
-    struct LongArray2 { _CORBA_ULong l[2]; } l;
-    CdrUnMarshal(s,LongArray2,omni::ALIGN_8,l);
-    if (s.pd_unmarshal_byte_swap) {
-      LongArray2 m;
-      m.l[0] = Swap32(l.l[1]);
-      m.l[1] = Swap32(l.l[0]);
-      l = m;
-    }
+  inline _CORBA_Double unmarshalDouble() {
+    omni::ptr_arith_t p1 = inMkr(omni::ALIGN_8);
+    omni::ptr_arith_t p2 = p1 + sizeof(_CORBA_Double);
+    if ((void*)p2 <= pd_inb_end) {
+      pd_inb_mkr = (void*) p2;
+
+      struct LongArray2 { _CORBA_ULong l[2]; };
+      union { _CORBA_Double a; LongArray2 l; } u;
+
+      if (!pd_unmarshal_byte_swap) {
+	u.l = *((LongArray2*)p1);
+      }
+      else {
+	LongArray2 m = *((LongArray2*)p1);
+	u.l.l[0] = byteSwap(m.l[1]);
+	u.l.l[1] = byteSwap(m.l[0]);
+      }
+
 #ifdef OMNI_MIXED_ENDIAN_DOUBLE
-    {
-      _CORBA_ULong v = l.l[0];
-      l.l[0] = l.l[1];
-      l.l[1] = v;
+      {
+	_CORBA_ULong v = u.l.l[0];
+	u.l.l[0] = u.l.l[1];
+	u.l.l[1] = v;
+      }
+#endif
+      return u.a;
     }
-#endif
-    convertToFloat(_CORBA_Double, LongArray2);
-  }
-#else
-  friend inline void operator>>= (_CORBA_Float      a, cdrStream& s);
-  friend inline void operator<<= (_CORBA_Float&     a, cdrStream& s);
-  friend inline void operator>>= (_CORBA_Double     a, cdrStream& s);
-  friend inline void operator<<= (_CORBA_Double&    a, cdrStream& s);
-#endif
-#endif
-
-#ifdef HAS_LongDouble
-
-#if SIZEOF_LONG_DOUBLE == 16
-
-#ifndef OMNI_NO_INLINE_FRIENDS
-  friend inline void operator>>= (_CORBA_LongDouble a, cdrStream& s) {
-    struct LongArray4 { _CORBA_ULong l[4]; };
-    convertFromFloat(_CORBA_LongDouble, LongArray4);
-    if (s.pd_marshal_byte_swap) {
-      LongArray4 m;
-      m.l[0] = Swap32(l.l[3]);
-      m.l[1] = Swap32(l.l[2]);
-      m.l[2] = Swap32(l.l[1]);
-      m.l[3] = Swap32(l.l[0]);
-      l = m;
+    else {
+      return fetchAndUnmarshalDouble();
     }
-    CdrMarshal(s,LongArray4,omni::ALIGN_8,l);
   }
 
-  friend inline void operator<<= (_CORBA_LongDouble& a, cdrStream& s) {
-    struct LongArray4 { _CORBA_ULong l[4]; } l;
-    CdrUnMarshal(s,LongArray4,omni::ALIGN_8,l);
-    if (s.pd_unmarshal_byte_swap) {
-      LongArray4 m;
-      m.l[0] = Swap32(l.l[3]);
-      m.l[1] = Swap32(l.l[2]);
-      m.l[2] = Swap32(l.l[1]);
-      m.l[3] = Swap32(l.l[0]);
-      l = m;
-    }
-    convertToFloat(_CORBA_LongDouble, LongArray4);
+#    endif    // No longlong or mixed endian
+
+#  else  // USING_PROXY_FLOAT
+
+  // _CORBA_Float and _CORBA_Double are classes with constructors, so
+  // we cannot use a union to convert it to an array of ulong. We use
+  // reinterpret_cast instead.
+
+  inline void marshalFloat(_CORBA_Float a) {
+    _CORBA_ULong l = OMNI_REINTERPRET_CAST(_CORBA_ULong, a);
+    marshalULong(l);
   }
-#else
-  friend inline void operator>>= (_CORBA_LongDouble  a, cdrStream& s);
-  friend inline void operator<<= (_CORBA_LongDouble& a, cdrStream& s);
-#endif
-#else
+  inline _CORBA_Float unmarshalFloat() {
+    _CORBA_ULong l = unmarshalULong();
+    return OMNI_REINTERPRET_CAST(_CORBA_Float, l);
+  }
+
+  inline void marshalDouble(_CORBA_Double a) {
+    omni::ptr_arith_t p1 = outMkr(omni::ALIGN_8);
+    omni::ptr_arith_t p2 = p1 + sizeof(_CORBA_Double);
+    if ((void*)p2 <= pd_outb_end) {
+      pd_outb_mkr = (void*) p2;
+
+      struct LongArray2 { _CORBA_ULong l[2]; };
+
+      LongArray2 l = OMNI_REINTERPRET_CAST(LongArray2, a);
+      
+      if (!pd_marshal_byte_swap) {
+	*((LongArray2*)p1) = l;
+      }
+      else {
+	LongArray2 m;
+	m[0] = byteSwap(l[1]);
+	m[1] = byteSwap(l[0]);
+	*((LongArray2*)p1) = m;
+      }
+    }
+    else {
+      reserveAndMarshalDouble(a);
+    }
+  }
+
+  inline _CORBA_Double unmarshalDouble() {
+    omni::ptr_arith_t p1 = inMkr(omni::ALIGN_8);
+    omni::ptr_arith_t p2 = p1 + sizeof(_CORBA_Double);
+    if ((void*)p2 <= pd_inb_end) {
+      pd_inb_mkr = (void*) p2;
+
+      struct LongArray2 { _CORBA_ULong l[2]; };
+
+      LongArray2 l;
+
+      if (!pd_unmarshal_byte_swap) {
+	l = *((LongArray2*)p1);
+      }
+      else {
+	LongArray2 m = *((LongArray2*)p1);
+	l.l[0] = byteSwap(m.l[1]);
+	l.l[1] = byteSwap(m.l[0]);
+      }
+      return OMNI_REINTERPRET_CAST(_CORBA_Double, l);
+    }
+    else {
+      return fetchAndUnmarshalDouble();
+    }
+  }
+
+#  endif  // USING_PROXY_FLOAT
+
+
+#  if defined(HAS_LongDouble) && defined(HAS_LongLong)
+
+  // We only support LongDouble if we also have LongLong.
+
+#    if SIZEOF_LONG_DOUBLE == 16
+
+  inline void marshalLongDouble(_CORBA_LongDouble a) {
+    omni::ptr_arith_t p1 = outMkr(omni::ALIGN_8);
+    omni::ptr_arith_t p2 = p1 + sizeof(_CORBA_LongDouble);
+    if ((void*)p2 <= pd_outb_end) {
+      pd_outb_mkr = (void*) p2;
+
+      struct LongLongArray2 { _CORBA_ULongLong l[2]; };
+      union { _CORBA_LongDouble a; LongLongArray2 l; } u;
+      u.a = a;
+
+      if (!pd_marshal_byte_swap) {
+	*((LongLongArray2*)p1) = u.l;
+      }
+      else {
+	LongLongArray2 m;
+	m.l[0] = byteSwap(u.l.l[1]);
+	m.l[1] = byteSwap(u.l.l[0]);
+	*((LongLongArray2*)p1) = m;
+      }
+    }
+    else {
+      reserveAndMarshalLongDouble(a);
+    }
+  }
+
+  inline _CORBA_LongDouble unmarshalLongDouble() {
+    omni::ptr_arith_t p1 = inMkr(omni::ALIGN_8);
+    omni::ptr_arith_t p2 = p1 + sizeof(_CORBA_LongDouble);
+    if ((void*)p2 <= pd_inb_end) {
+      pd_inb_mkr = (void*) p2;
+
+      struct LongLongArray2 { _CORBA_ULongLong l[2]; };
+      union { _CORBA_LongDouble a; LongLongArray2 l; } u;
+
+      if (!pd_unmarshal_byte_swap) {
+	u.l = *((LongLongArray2*)p1);
+      }
+      else {
+	LongLongArray2 m = *((LongLongArray2*)p1);
+	u.l.l[0] = byteSwap(m.l[1]);
+	u.l.l[1] = byteSwap(m.l[0]);
+      }
+      return u.a;
+    }
+    else {
+      return fetchAndUnmarshalLongDouble();
+    }
+  }
+
+#    else
   // Code for long double < 16 bytes is too painful to put inline
-  friend void operator>>= (_CORBA_LongDouble  a, cdrStream& s);
-  friend void operator<<= (_CORBA_LongDouble& a, cdrStream& s);
-#endif
-#endif
+  void marshalLongDouble(_CORBA_LongDouble a);
+  _CORBA_LongDouble unmarshalLongDouble();
+#    endif
+
+#  endif  // HAS_LongDouble
+
+#endif // NO_FLOAT
+
+
+  //
+  // Marshalling methods : string types
 
   inline void marshalString(const char* s,int bounded=0) {
     OMNIORB_USER_CHECK(s);
@@ -617,12 +479,28 @@ public:
     return s;
   }
 
+
+  //
+  // Pure virtual functions
+
   virtual void put_octet_array(const _CORBA_Octet* b, int size,
 			       omni::alignment_t align=omni::ALIGN_1) = 0;
+  // Align output then put array of octets.
   // <size> must be a multiple of <align>.
   // For instance, if <align> == omni::ALIGN_8 then <size> % 8 == 0.
 
-  void put_small_octet_array(const _CORBA_Octet* b, int size);
+  inline void put_small_octet_array(const _CORBA_Octet* b, int size) {
+    omni::ptr_arith_t p1 = (omni::ptr_arith_t)pd_outb_mkr;
+    omni::ptr_arith_t p2 = p1 + size;
+
+    if ((void*)p2 <= pd_outb_end) {
+      memcpy(pd_outb_mkr, b, size);
+      pd_outb_mkr = (void*)p2;
+    }
+    else {
+      put_octet_array(b, size);
+    } 
+  }
   // Put a small octet array which must have ALIGN_1. Since it is
   // small, we expect it to fit in the stream's current buffer without
   // having to allocate more space.
@@ -671,44 +549,197 @@ public:
   // default.
 
 
-  inline
-  void alignInput(omni::alignment_t align)
+  inline void alignInput(omni::alignment_t align)
   // Align the buffer of the input stream to <align>.
-    {
-    again:
-      omni::ptr_arith_t p1 = omni::align_to((omni::ptr_arith_t)pd_inb_mkr,
-					    align);
-      if ((void*)p1 > pd_inb_end) {
-	fetchInputData(align,0);
-	goto again;
-      }
-      pd_inb_mkr = (void*)p1;
+  {
+  again:
+    omni::ptr_arith_t p1 = inMkr(align);
+    if ((void*)p1 > pd_inb_end) {
+      fetchInputData(align,0);
+      goto again;
     }
+    pd_inb_mkr = (void*)p1;
+  }
 
-  inline
-  void alignOutput(omni::alignment_t align)
+  inline void alignOutput(omni::alignment_t align)
   // Align the buffer of the output stream to <align>.
-    {
-    again:
-      omni::ptr_arith_t p1 = omni::align_to((omni::ptr_arith_t)pd_outb_mkr,
-					    align);
-      if ((void*)p1 > pd_outb_end) {
-	if (reserveOutputSpaceForPrimitiveType(align,0))
-	  goto again;
-      }
-      pd_outb_mkr = (void*)p1;
+  {
+  again:
+    omni::ptr_arith_t p1 = outMkr(align);
+    if ((void*)p1 > pd_outb_end) {
+      if (reserveOutputSpaceForPrimitiveType(align,0))
+	goto again;
     }
+    pd_outb_mkr = (void*)p1;
+  }
 
-  inline
-  _CORBA_Boolean unmarshal_byte_swap() const { return pd_unmarshal_byte_swap; }
+  inline _CORBA_Boolean
+  unmarshal_byte_swap() const { return pd_unmarshal_byte_swap; }
   // Return TRUE(1) if unmarshalled data have to be byte-swapped.
 
-  inline
-  _CORBA_Boolean marshal_byte_swap() const { return pd_marshal_byte_swap; }
+  inline _CORBA_Boolean
+  marshal_byte_swap() const { return pd_marshal_byte_swap; }
 
-  inline
-  void* PR_get_outb_mkr() { return pd_outb_mkr; }
-  // internal function used by cdrStream implementations
+
+  //
+  // Marshalling methods: array types
+
+  inline void
+  unmarshalArrayChar(_CORBA_Char* a, int length)
+  {
+    for (int i = 0; i < length; i++)
+      a[i] = unmarshalChar();
+  }
+
+  inline void
+  unmarshalArrayBoolean(_CORBA_Boolean* a, int length)
+  {
+#if !defined(HAS_Cplusplus_Bool) || (SIZEOF_BOOL == 1)
+    get_octet_array((_CORBA_Char*)a, length, omni::ALIGN_1);
+#else
+    for (int i = 0; i < length; i++)
+      a[i] = unmarshalBoolean();
+#endif
+  }
+
+  inline void
+  unmarshalArrayShort(_CORBA_Short* a, int length)
+  {
+    get_octet_array((_CORBA_Char*)a, length * 2, omni::ALIGN_2);
+
+    if (unmarshal_byte_swap())
+      for (int i = 0; i < length; i++)
+	a[i] = byteSwap(a[i]);
+  }
+
+
+  inline void
+  unmarshalArrayUShort(_CORBA_UShort* a, int length)
+  {
+    get_octet_array((_CORBA_Char*)a, length * 2, omni::ALIGN_2);
+
+    if (unmarshal_byte_swap())
+      for (int i = 0; i < length; i++)
+	a[i] = byteSwap(a[i]);
+  }
+
+  inline void
+  unmarshalArrayLong(_CORBA_Long* a, int length)
+  {
+    get_octet_array((_CORBA_Char*)a, length * 4, omni::ALIGN_4);
+
+    if (unmarshal_byte_swap())
+      for (int i = 0; i < length; i++)
+	a[i] = byteSwap(a[i]);
+  }
+
+  inline void
+  unmarshalArrayULong(_CORBA_ULong* a, int length)
+  {
+    get_octet_array((_CORBA_Char*)a, length * 4, omni::ALIGN_4);
+
+    if (unmarshal_byte_swap())
+      for (int i = 0; i < length; i++)
+	a[i] = byteSwap(a[i]);
+  }
+
+#ifdef HAS_LongLong
+  inline void
+  unmarshalArrayLongLong(_CORBA_LongLong* a, int length)
+  {
+    get_octet_array((_CORBA_Char*)a, length * 8, omni::ALIGN_8);
+
+    if (unmarshal_byte_swap())
+      for (int i = 0; i < length; i++)
+	a[i] = byteSwap(a[i]);
+  }
+
+  inline void
+  unmarshalArrayULongLong(_CORBA_ULongLong* a, int length)
+  {
+    get_octet_array((_CORBA_Char*)a, length * 8, omni::ALIGN_8);
+
+    if (unmarshal_byte_swap())
+      for (int i = 0; i < length; i++)
+	a[i] = byteSwap(a[i]);
+  }
+#endif
+
+#if !defined(NO_FLOAT)
+  inline void
+  unmarshalArrayFloat(_CORBA_Float* a, int length)
+  {
+    get_octet_array((_CORBA_Char*)a, length * 4, omni::ALIGN_4);
+
+    if (unmarshal_byte_swap()) {
+      _CORBA_ULong* p=(_CORBA_ULong*)a;
+      for( int i = 0; i < length; i++ ) {
+	p[i] = byteSwap(p[i]);
+      }
+    }
+  }
+
+
+  inline void
+  unmarshalArrayDouble(_CORBA_Double* a, int length)
+  {
+    get_octet_array((_CORBA_Char*) a, length * 8, omni::ALIGN_8);
+
+    if (unmarshal_byte_swap()) {
+
+#  if defined(HAS_Longlong) && !defined (OMNI_MIXED_ENDIAN_DOUBLE)
+      _CORBA_ULongLong* p=(_CORBA_ULongLong*)a;
+      for( int i = 0; i < length; i++ ) {
+	p[i] = byteSwap(p[i]);
+      }
+#  else
+      struct LongArray2 {
+        _CORBA_ULong l[2];
+      };
+      LongArray2* p=(LongArray2*)a;
+      for (int i = 0; i < length; i++) {
+        LongArray2 l;
+        l.l[0] = byteSwap(p[i].l[1]);
+        l.l[1] = byteSwap(p[i].l[0]);
+        p[i] = l;
+      }
+#  endif
+    }
+#  ifdef OMNI_MIXED_ENDIAN_DOUBLE
+    {
+      struct LongArray2 {
+        _CORBA_ULong l[2];
+      };
+      LongArray2* p=(LongArray2*)a;
+      for( int i = 0; i < length; i++ ) {
+        _CORBA_ULong v = p[i].l[0];
+	p[i].l[0] = p[i].l[1];
+	p[i].l[1] = v;
+      }
+    }
+#  endif
+  }
+#endif
+
+  inline void* inPtr()  const { return pd_inb_mkr;  }
+  inline void* outPtr() const { return pd_outb_mkr; }
+
+  inline void* inData(_CORBA_ULong size)
+  {
+    omni::ptr_arith_t p1 = inMkr();
+    omni::ptr_arith_t p2 = p1 + size;
+
+    if ((void*)p2 <= pd_inb_end) {
+      pd_inb_mkr = (void*)p2;
+      return (void*)p1;
+    }
+    else
+      return 0;
+  }
+  // If there is enough data in the buffer, return pointer to <size>
+  // bytes of input data, and skip the input pointer forwards
+  // accordingly. If there is insufficient data, return zero.
+
 
 protected:
 
@@ -716,7 +747,7 @@ protected:
   // TRUE(1) if unmarshalled data have to be byte-swapped.
 
   _CORBA_Boolean pd_marshal_byte_swap;
-  // TRUE(1) if marshalled data have to be byte-swapped. I.e. data are not
+  // TRUE(1) if marshalled data have to be byte-swapped. i.e. data are not
   // going into the stream with the host endian.
 
   //  Input buffer pointers, the region (*p) containing valid data
@@ -727,8 +758,15 @@ protected:
   void* pd_inb_end;
   void* pd_inb_mkr;
 
-  virtual void fetchInputData(omni::alignment_t align,
-			      size_t required)     = 0;
+  inline omni::ptr_arith_t inEnd() { return (omni::ptr_arith_t)pd_inb_end; }
+  inline omni::ptr_arith_t inMkr() { return (omni::ptr_arith_t)pd_inb_mkr; }
+
+  inline omni::ptr_arith_t inMkr(omni::alignment_t align)
+  {
+    return omni::align_to((omni::ptr_arith_t)pd_inb_mkr, align);
+  }
+
+  virtual void fetchInputData(omni::alignment_t align, size_t required) = 0;
   // Fetch at least <required> bytes into the input buffer.
   // <required> must be no more than 8 bytes && align == required!!
   // The data block should start at alignment <align>.
@@ -742,6 +780,14 @@ protected:
   //  calls to reserveOutputSpace().
   void* pd_outb_end;
   void* pd_outb_mkr;
+
+  inline omni::ptr_arith_t outEnd() { return (omni::ptr_arith_t)pd_outb_end; }
+  inline omni::ptr_arith_t outMkr() { return (omni::ptr_arith_t)pd_outb_mkr; }
+
+  inline omni::ptr_arith_t outMkr(omni::alignment_t align)
+  {
+    return omni::align_to((omni::ptr_arith_t)pd_outb_mkr, align);
+  }
 
   virtual
   _CORBA_Boolean reserveOutputSpaceForPrimitiveType(omni::alignment_t align,
@@ -779,6 +825,34 @@ protected:
   _OMNI_NS(ValueIndirectionTracker)* pd_valueTracker;
   // Object used to track offsets of indirections in valuetypes.
 
+
+private:
+  //
+  // Marshalling functions used when there is not enough buffer space
+  // for the inline versions.
+
+#define fetchReserveMarshalFns(type) \
+  void reserveAndMarshal ## type(_CORBA_ ## type a); \
+  _CORBA_ ## type fetchAndUnmarshal ## type()
+
+  fetchReserveMarshalFns(Octet);
+  fetchReserveMarshalFns(Short);
+  fetchReserveMarshalFns(UShort);
+  fetchReserveMarshalFns(Long);
+  fetchReserveMarshalFns(ULong);
+#ifdef HAS_LongLong
+  fetchReserveMarshalFns(LongLong);
+  fetchReserveMarshalFns(ULongLong);
+#endif
+#ifndef NO_FLOAT
+  fetchReserveMarshalFns(Double);
+#  if defined(HAS_LongDouble) && defined(HAS_LongLong)
+  fetchReserveMarshalFns(LongDouble);
+#  endif
+#endif
+
+#undef fetchReserveMarshalFns
+
 public:
 
   // Access functions to the char and wchar code set convertors
@@ -787,7 +861,10 @@ public:
   inline _OMNI_NS(omniCodeSet::TCS_W)* TCS_W() const { return pd_tcs_w; }
   inline void TCS_W(_OMNI_NS(omniCodeSet::TCS_W)* c) { pd_tcs_w = c; }
 
-  // Access functions to the value indirection tracker
+
+  //
+  // Valuetype related methods
+
   inline _OMNI_NS(ValueIndirectionTracker)* valueTracker() const {
     return pd_valueTracker;
   }
@@ -802,137 +879,11 @@ public:
   }
 
   virtual void declareArrayLength(omni::alignment_t align, size_t size);
-
-  inline void
-  unmarshalArrayChar(_CORBA_Short* a, int length)
-  {
-    for( int i = 0; i < length; i++ )
-      a[i] = unmarshalChar();
-  }
-
-  inline void
-  unmarshalArrayBoolean(_CORBA_Boolean* a, int length)
-  {
-#if !defined(HAS_Cplusplus_Bool) || (SIZEOF_BOOL == 1)
-    get_octet_array((_CORBA_Char*)a, length, omni::ALIGN_1);
-#else
-    for( int i = 0; i < length; i++ )
-      a[i] = unmarshalBoolean();
-#endif
-  }
-
-  inline void
-  unmarshalArrayShort(_CORBA_Short* a, int length)
-  {
-    get_octet_array((_CORBA_Char*) a, length * 2, omni::ALIGN_2);
-
-    if( unmarshal_byte_swap() )
-      for( int i = 0; i < length; i++ )
-	a[i] = Swap16(a[i]);
-  }
+  // Declare that an array of size <size> octets, alignment <align> is
+  // about to be marshalled. This allows chunked streams to
+  // pre-allocate a suitable sized chunk.
 
 
-  inline void
-  unmarshalArrayUShort(_CORBA_UShort* a, int length)
-  {
-    get_octet_array((_CORBA_Char*) a, length * 2, omni::ALIGN_2);
-
-    if( unmarshal_byte_swap() )
-      for( int i = 0; i < length; i++ )
-	a[i] = Swap16(a[i]);
-  }
-
-  inline void
-  unmarshalArrayLong(_CORBA_Long* a, int length)
-  {
-    get_octet_array((_CORBA_Char*) a, length * 4, omni::ALIGN_4);
-
-    if( unmarshal_byte_swap() )
-      for( int i = 0; i < length; i++ )
-	a[i] = Swap32(a[i]);
-  }
-
-  inline void
-  unmarshalArrayULong(_CORBA_ULong* a, int length)
-  {
-    get_octet_array((_CORBA_Char*) a, length * 4, omni::ALIGN_4);
-
-    if( unmarshal_byte_swap() )
-      for( int i = 0; i < length; i++ )
-	a[i] = Swap32(a[i]);
-  }
-
-#ifdef HAS_LongLong
-  inline void
-  unmarshalArrayLongLong(_CORBA_LongLong* a, int length)
-  {
-    get_octet_array((_CORBA_Char*) a, length * 8, omni::ALIGN_8);
-
-    if( unmarshal_byte_swap() )
-      for( int i = 0; i < length; i++ )
-	a[i] = Swap64(a[i]);
-  }
-
-  inline void
-  unmarshalArrayULongLong(_CORBA_ULongLong* a, int length)
-  {
-    get_octet_array((_CORBA_Char*) a, length * 8, omni::ALIGN_8);
-
-    if( unmarshal_byte_swap() )
-      for( int i = 0; i < length; i++ )
-	a[i] = Swap64(a[i]);
-  }
-#endif
-
-#if !defined(NO_FLOAT)
-  inline void
-  unmarshalArrayFloat(_CORBA_Float* a, int length)
-  {
-    get_octet_array((_CORBA_Char*) a, length * 4, omni::ALIGN_4);
-
-    if( unmarshal_byte_swap() ) {
-      _CORBA_ULong* p=(_CORBA_ULong*)a;
-      for( int i = 0; i < length; i++ ) {
-	p[i] = Swap32(p[i]);
-      }
-    }
-  }
-
-
-  inline void
-  unmarshalArrayDouble(_CORBA_Double* a, int length)
-  {
-    get_octet_array((_CORBA_Char*) a, length * 8, omni::ALIGN_8);
-
-    if( unmarshal_byte_swap() ) {
-      struct LongArray2 {
-        _CORBA_ULong l[2];
-      };
-      LongArray2* p=(LongArray2*)a;
-      for( int i = 0; i < length; i++ ) {
-        LongArray2 l;
-        l.l[0] = Swap32(p[i].l[1]);
-        l.l[1] = Swap32(p[i].l[0]);
-        p[i] = l;
-      }
-    }
-#ifdef OMNI_MIXED_ENDIAN_DOUBLE
-    {
-      struct LongArray2 {
-        _CORBA_ULong l[2];
-      };
-      LongArray2* p=(LongArray2*)a;
-      for( int i = 0; i < length; i++ ) {
-        _CORBA_ULong v = p[i].l[0];
-	p[i].l[0] = p[i].l[1];
-	p[i].l[1] = v;
-      }
-    }
-#endif
-  }
-#endif
-
-public:
   /////////////////////////////////////////////////////////////////////
   virtual _CORBA_ULong completion();
   // If an error occurs when a value is marshalled or unmarshalled, a
@@ -968,198 +919,56 @@ private:
   // pointers and virtual functions.
 };
 
-#ifdef OMNI_NO_INLINE_FRIENDS
 
-inline void operator>>= (_CORBA_Short a, cdrStream& s) {
-  if (s.pd_marshal_byte_swap) {
-    _CORBA_Short t = Swap16(a);
-    a = t;
-  }
-  CdrMarshal(s,_CORBA_Short,omni::ALIGN_2,a);
+//
+// Marshalling operators
+
+#define marshallingOperators(type) \
+inline void operator>>= (_CORBA_ ## type a, cdrStream& s) {\
+  s.marshal ## type(a);\
+} \
+inline void operator<<= (_CORBA_ ## type& a, cdrStream& s) {\
+  a = s.unmarshal ## type();\
 }
 
-inline void operator<<= (_CORBA_Short& a, cdrStream& s) {
-  CdrUnMarshal(s,_CORBA_Short,omni::ALIGN_2,a);
-  if (s.pd_unmarshal_byte_swap) {
-    _CORBA_Short t = Swap16(a);
-    a = t;
-  }
-}
-
-inline void operator>>= (_CORBA_UShort a, cdrStream& s) {
-  if (s.pd_marshal_byte_swap) {
-    _CORBA_UShort t = Swap16(a);
-    a = t;
-  }
-  CdrMarshal(s,_CORBA_UShort,omni::ALIGN_2,a);
-}
-
-inline void operator<<= (_CORBA_UShort& a, cdrStream& s) {
-  CdrUnMarshal(s,_CORBA_UShort,omni::ALIGN_2,a);
-  if (s.pd_unmarshal_byte_swap) {
-    _CORBA_UShort t = Swap16(a);
-    a = t;
-  }
-}
-
-inline void operator>>= (_CORBA_Long a, cdrStream& s) {
-  if (s.pd_marshal_byte_swap) {
-    _CORBA_Long t = Swap32(a);
-    a = t;
-  }
-  CdrMarshal(s,_CORBA_Long,omni::ALIGN_4,a);
-}
-
-inline void operator<<= (_CORBA_Long& a, cdrStream& s) {
-  CdrUnMarshal(s,_CORBA_Long,omni::ALIGN_4,a);
-  if (s.pd_unmarshal_byte_swap) {
-    _CORBA_Long t = Swap32(a);
-    a = t;
-  }
-}
-
-inline void operator>>= (_CORBA_ULong a, cdrStream& s) {
-  if (s.pd_marshal_byte_swap) {
-    _CORBA_ULong t = Swap32(a);
-    a = t;
-  }
-  CdrMarshal(s,_CORBA_ULong,omni::ALIGN_4,a);
-}
-
-inline void operator<<= (_CORBA_ULong& a, cdrStream& s) {
-  CdrUnMarshal(s,_CORBA_ULong,omni::ALIGN_4,a);
-  if (s.pd_unmarshal_byte_swap) {
-    _CORBA_ULong t = Swap32(a);
-    a = t;
-  }
-}
-
+marshallingOperators(Short)
+marshallingOperators(UShort)
+marshallingOperators(Long)
+marshallingOperators(ULong)
 #ifdef HAS_LongLong
-inline void operator>>= (_CORBA_LongLong a, cdrStream& s) {
-  if (s.pd_marshal_byte_swap) {
-    _CORBA_LongLong t = Swap64(a);
-    a = t;
-  }
-  CdrMarshal(s,_CORBA_LongLong,omni::ALIGN_8,a);
-}
-
-inline void operator<<= (_CORBA_LongLong& a, cdrStream& s) {
-  CdrUnMarshal(s,_CORBA_LongLong,omni::ALIGN_8,a);
-  if (s.pd_unmarshal_byte_swap) {
-    _CORBA_LongLong t = Swap64(a);
-    a = t;
-  }
-}
-
-inline void operator>>= (_CORBA_ULongLong a, cdrStream& s) {
-  if (s.pd_marshal_byte_swap) {
-    _CORBA_ULongLong t = Swap64(a);
-    a = t;
-  }
-  CdrMarshal(s,_CORBA_ULongLong,omni::ALIGN_8,a);
-}
-
-inline void operator<<= (_CORBA_ULongLong& a, cdrStream& s) {
-  CdrUnMarshal(s,_CORBA_ULongLong,omni::ALIGN_8,a);
-  if (s.pd_unmarshal_byte_swap) {
-    _CORBA_ULongLong t = Swap64(a);
-    a = t;
-  }
-}
+marshallingOperators(LongLong)
+marshallingOperators(ULongLong)
 #endif
-
 #if !defined(NO_FLOAT)
-
-inline void operator>>= (_CORBA_Float a, cdrStream& s) {
-  convertFromFloat(_CORBA_Float, _CORBA_ULong);
-  if (s.pd_marshal_byte_swap) {
-    l = Swap32(l);
-  }
-  CdrMarshal(s,_CORBA_ULong,omni::ALIGN_4,l);
-}
-
-inline void operator<<= (_CORBA_Float& a, cdrStream& s) {
-  _CORBA_ULong l;
-  CdrUnMarshal(s,_CORBA_ULong,omni::ALIGN_4,l);
-  if (s.pd_unmarshal_byte_swap) {
-    l = Swap32(l);
-  }
-  convertToFloat(_CORBA_Float, _CORBA_ULong);
-}
-
-inline void operator>>= (_CORBA_Double a, cdrStream& s) {
-  struct LongArray2 { _CORBA_ULong l[2]; };
-  convertFromFloat(_CORBA_Double, LongArray2);
-  if (s.pd_marshal_byte_swap) {
-    LongArray2 m;
-    m.l[0] = Swap32(l.l[1]);
-    m.l[1] = Swap32(l.l[0]);
-    l = m;
-  }
-#ifdef OMNI_MIXED_ENDIAN_DOUBLE
-  {
-    _CORBA_ULong v = l.l[0];
-    l.l[0] = l.l[1];
-    l.l[1] = v;
-  }
+marshallingOperators(Float)
+marshallingOperators(Double)
+#  if defined(HAS_LongDouble) && defined(HAS_LongLong)
+marshallingOperators(LongDouble)
+#  endif
 #endif
-  CdrMarshal(s,LongArray2,omni::ALIGN_8,l);
-}
 
-inline void operator<<= (_CORBA_Double& a, cdrStream& s) {
-  struct LongArray2 { _CORBA_ULong l[2]; } l;
-  CdrUnMarshal(s,LongArray2,omni::ALIGN_8,l);
-  if (s.pd_unmarshal_byte_swap) {
-    LongArray2 m;
-    m.l[0] = Swap32(l.l[1]);
-    m.l[1] = Swap32(l.l[0]);
-    l = m;
-  }
-#ifdef OMNI_MIXED_ENDIAN_DOUBLE
-  {
-    _CORBA_ULong v = l.l[0];
-    l.l[0] = l.l[1];
-    l.l[1] = v;
-  }
-#endif
-  convertToFloat(_CORBA_Double, LongArray2);
-}
+#undef marshallingOperators
+
+//
+// These are not implemented. They are here to cause linker errors in
+// code that accidentally tries to use them.
+
+void operator>>=(char  a, cdrStream& s);
+void operator<<=(char& a, cdrStream& s);
+
+void operator>>=(unsigned char  a, cdrStream& s);
+void operator<<=(unsigned char& a, cdrStream& s);
+
+#ifdef HAS_Cplusplus_Bool
+
+void operator>>=(bool  a, cdrStream& s);
+void operator<<=(bool& a, cdrStream& s);
 
 #endif
 
-#ifdef HAS_LongDouble
-#if SIZEOF_LONG_DOUBLE == 16
-inline void operator>>= (_CORBA_LongDouble a, cdrStream& s) {
-  struct LongArray4 { _CORBA_ULong l[4]; };
-  convertFromFloat(_CORBA_LongDouble, LongArray4);
-  if (s.pd_marshal_byte_swap) {
-    LongArray4 m;
-    m.l[0] = Swap32(l.l[3]);
-    m.l[1] = Swap32(l.l[2]);
-    m.l[2] = Swap32(l.l[1]);
-    m.l[3] = Swap32(l.l[0]);
-    l = m;
-  }
-  CdrMarshal(s,LongArray4,omni::ALIGN_8,l);
-}
 
-inline void operator<<= (_CORBA_LongDouble& a, cdrStream& s) {
-  struct LongArray4 { _CORBA_ULong l[4]; } l;
-  CdrUnMarshal(s,LongArray4,omni::ALIGN_8,l);
-  if (s.pd_unmarshal_byte_swap) {
-    LongArray4 m;
-    m.l[0] = Swap32(l.l[3]);
-    m.l[1] = Swap32(l.l[2]);
-    m.l[2] = Swap32(l.l[1]);
-    m.l[3] = Swap32(l.l[0]);
-    l = m;
-  }
-  convertToFloat(_CORBA_LongDouble, LongArray4);
-}
-#endif
-#endif
- 
-#endif
+//
+// Memory buffered stream
 
 class cdrMemoryStream : public cdrStream {
 public:
@@ -1167,17 +976,36 @@ public:
 		  _CORBA_Boolean clearMemory = 0);
   virtual ~cdrMemoryStream();
 
-  void rewindInputPtr();
+  inline void rewindInputPtr()
+  {
+    pd_inb_mkr = pd_bufp_8;
+    pd_inb_end = (pd_readonly_and_external_buffer) ? pd_inb_end : pd_outb_mkr;
+  }
   // Rewind the input pointer to the beginning of the buffer
 
-  void rewindPtrs();
+  inline void rewindPtrs()
+  {
+    if (!pd_readonly_and_external_buffer) {
+      pd_outb_mkr = pd_inb_mkr = pd_inb_end = pd_bufp_8;
+    }
+    else {
+      pd_outb_mkr = pd_outb_end = 0;
+      pd_inb_mkr  = pd_bufp;
+    }
+  }
   // Rewind the both input and output pointers to the beginning of the buffer
   // bufSize() returns 0 after this call.
 
-  _CORBA_ULong bufSize() const;
+  inline _CORBA_ULong bufSize() const
+  {
+    return (_CORBA_ULong)((omni::ptr_arith_t)pd_outb_mkr - 
+			  (omni::ptr_arith_t)pd_bufp_8);
+  }
   // Returns the size of the buffer containing valid data.
 
-  void* bufPtr() const;
+  inline void* bufPtr() const {
+    return pd_bufp_8;
+  }
   // Returns a pointer to the beginning of the buffer.
 
   void setByteSwapFlag(_CORBA_Boolean littleendian);
@@ -1241,6 +1069,12 @@ private:
   _CORBA_Boolean reserveOutputSpace(omni::alignment_t,size_t);
 };
 
+
+//
+// Specialisation of memory stream to handle CDR encapsulations
+
+class _CORBA_Unbounded_Sequence_Octet;
+
 class cdrEncapsulationStream : public cdrMemoryStream {
 public:
   cdrEncapsulationStream(_CORBA_ULong initialBufsize = 0,
@@ -1250,12 +1084,21 @@ public:
 			 _CORBA_ULong bufsize,
 			 _CORBA_Boolean allowAlign4 = 0);
 
+  cdrEncapsulationStream(const _CORBA_Unbounded_Sequence_Octet& seq,
+                         _CORBA_Boolean allowAlign4 = 0);
+
   cdrEncapsulationStream(cdrStream& s,_CORBA_ULong fetchsize);
   // copy from <s> <fetchsize> bytes of data.
 
 
-  void getOctetStream(_CORBA_Octet*& databuffer, _CORBA_ULong& max,
-		      _CORBA_ULong& len);
+  void getOctetStream(_CORBA_Octet*& databuffer,
+                      _CORBA_ULong&  max,
+                      _CORBA_ULong&  len);
+  // Return stream's buffer. Takes ownership of the buffer.
+
+  void setOctetSeq(_CORBA_Unbounded_Sequence_Octet& seq);
+  // Set octet sequence from the stream's buffer. Ownership of the
+  // buffer is passed to the sequence.
 
   virtual void* ptrToClass(int* cptr);
   static inline cdrEncapsulationStream* downcast(cdrStream* s) {
@@ -1263,6 +1106,10 @@ public:
   }
   static _core_attr int _classid;
 };
+
+
+//
+// Fake stream that counts how many octets are marshalled
 
 class cdrCountingStream : public cdrStream {
 public:
@@ -1320,6 +1167,9 @@ private:
   cdrCountingStream& operator=(const cdrCountingStream&);
 };
 
+
+//
+// Stream adapter
 
 // In some circumstances, for example in omniORBpy, it is necessary to
 // perform some extra work around operations which manage a
@@ -1406,6 +1256,9 @@ private:
   cdrStream& pd_actual;
 };
 
+
+//
+// Valuetype support
 
 // cdrValueChunkStream is similar to cdrStreamAdapter. It implements
 // chunked encoding of valuetypes by wrapping an existing stream.
@@ -1543,12 +1396,12 @@ private:
 
   inline void setLength(_CORBA_ULong len)
   {
-    *pd_lengthPtr = pd_marshal_byte_swap ? Swap32(len) : len;
+    *pd_lengthPtr = pd_marshal_byte_swap ? byteSwap(len) : len;
   }
 
   inline _CORBA_ULong getLength()
   {
-    return pd_unmarshal_byte_swap ? Swap32(*pd_lengthPtr) : *pd_lengthPtr;
+    return pd_unmarshal_byte_swap ? byteSwap(*pd_lengthPtr) : *pd_lengthPtr;
   }
 
   cdrStream&     pd_actual;    // Stream being wrapped
@@ -1567,10 +1420,5 @@ private:
 
 #undef CdrMarshal
 #undef CdrUnMarshal
-#undef convertFromFloat
-#undef convertToFloat
-#undef Swap16
-#undef Swap32
-#undef Swap64
 
 #endif /* __CDRSTREAM_H__ */

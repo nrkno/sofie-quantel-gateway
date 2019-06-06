@@ -3,99 +3,29 @@
 // IOP.h                      Created on: 8/2/96
 //                            Author    : Sai Lai Lo (sll)
 //
+//    Copyright (C) 2013 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //       C++ mapping of the OMG IOP module
 //       Reference: CORBA V2.0 10.6.2
 //	
-//	
-
-/*
-  $Log: IOP.h,v $
-  Revision 1.4.2.4  2007/11/28 12:24:26  dgrisby
-  Implement a tiny subset of CSIv2 to permit multiple SSL endpoints in IORs.
-
-  Revision 1.4.2.3  2006/07/18 16:21:24  dgrisby
-  New experimental connection management extension; ORB core support
-  for it.
-
-  Revision 1.4.2.2  2005/01/06 23:08:09  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.4.2.1  2003/03/23 21:04:20  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.2.2.8  2001/08/06 15:49:16  sll
-  Added IOP component TAG_OMNIORB_UNIX_TRANS for omniORB specific local
-  transport using the unix domain socket.
-
-  Revision 1.2.2.7  2001/07/31 16:10:39  sll
-  Added GIOP BiDir support.
-
-  Revision 1.2.2.6  2001/04/18 17:52:19  sll
-  Added FT specification constants.
-
-  Revision 1.2.2.5  2000/11/15 17:00:55  sll
-  Added marshalling operators for ServiceContext.
-
-  Revision 1.2.2.4  2000/11/03 18:58:46  sll
-  Unbounded sequence of octet got a new type name.
-
-  Revision 1.2.2.3  2000/10/04 16:52:04  sll
-  New helper function dumpComponent().
-
-  Revision 1.2.2.2  2000/09/27 17:06:09  sll
-  Updated to use the new cdrStream abstraction.
-  Updated to include the latest componentID, service context ID etc.
-
-  Revision 1.2.2.1  2000/07/17 10:35:34  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:26:05  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.1  1999/09/24 09:51:41  djr
-  Moved from omniORB2 + some new files.
-
-  Revision 1.7  1999/06/18 21:13:56  sll
-  Updated copyright notice.
-
-  Revision 1.6  1999/06/18 20:36:05  sll
-  Replaced _LC_attr with _core_attr.
-
-  Revision 1.5  1999/01/07 18:22:25  djr
-  Replaced _OMNIORB_NTDLL_IMPORT with _LC_attr.
-
-  Revision 1.4  1998/04/07 19:59:00  sll
-   Replace _OMNIORB2_NTDLL_ specification on class IOP with
-  _OMNIORB_NTDLL_IMPORT on static member constants.
-
-  Revision 1.3  1997/12/09 20:36:28  sll
-  Added TaggedProfileList_var class.
-
- * Revision 1.2  1997/05/06  16:07:17  sll
- * Public release.
- *
- */
 
 #ifndef __OMNIORB_IOP_H__
 #define __OMNIORB_IOP_H__

@@ -3,53 +3,28 @@
 // giopBiDir.h                Created on: 17/7/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2005 Apasphere Ltd
+//    Copyright (C) 2005-2013 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log: giopBiDir.h,v $
-  Revision 1.1.4.3  2009/05/06 16:16:09  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.1.4.2  2005/03/02 12:39:38  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.4.1  2003/03/23 21:03:49  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.3  2002/01/02 18:15:41  dpg1
-  Platform fixes/additions.
-
-  Revision 1.1.2.2  2001/08/03 17:43:19  sll
-  Make sure dll import spec for win32 is properly done.
-
-  Revision 1.1.2.1  2001/07/31 16:28:02  sll
-  Added GIOP BiDir support.
-
-  */
-
 
 #ifndef __GIOPBIDIR_H__
 #define __GIOPBIDIR_H__
@@ -71,7 +46,7 @@ OMNI_NAMESPACE_BEGIN(omni)
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 class BiDirInfo : public omniIOR::IORExtraInfo {
- public:
+public:
   BiDirInfo(char* s) :
     OMNIORB_BASE_CTOR(omniIOR::)IORExtraInfo(IOP::TAG_OMNIORB_BIDIR),
     sendfrom(s) {}
@@ -80,7 +55,7 @@ class BiDirInfo : public omniIOR::IORExtraInfo {
 
   ~BiDirInfo() {}
 
- private:
+private:
   BiDirInfo();
   BiDirInfo(const BiDirInfo&);
   BiDirInfo& operator=(const BiDirInfo&);
@@ -89,9 +64,9 @@ class BiDirInfo : public omniIOR::IORExtraInfo {
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 class BiDirServerRope : public giopRope {
- public:
+public:
 
-  static int selectRope(const giopAddressList&,omniIOR::IORInfo*,Rope*&);
+  static int selectRope(const giopAddressList&, omniIOR::IORInfo*, Rope*&);
   // Look into the IORInfo, if bidirectional giop is suitable for this ior
   // (i.e. the IOP component TAG_OMNIORB_BIDIR exists and its GIOP version
   // is >= 1.2), search the list and return the BiDirServerRope whose
@@ -102,7 +77,7 @@ class BiDirServerRope : public giopRope {
   // Thread Safety preconditions:
   //    Caller *must* hold omniTransportLock.
 
-  static BiDirServerRope* addRope(giopStrand*,const giopAddressList&);
+  static BiDirServerRope* addRope(giopStrand*, const giopAddressList&);
   // Add a BiDirServerRope for the bidirectional strand if one has not
   // been created already. Add the list of redirection addresses to 
   // this rope. Return the rope instance. Notice that the reference
@@ -129,7 +104,7 @@ class BiDirServerRope : public giopRope {
  protected:
   virtual void realIncrRefCount();
 
- private:
+private:
 
   CORBA::String_var pd_sendfrom;
   giopAddressList   pd_redirect_addresses;  
@@ -145,17 +120,18 @@ class BiDirServerRope : public giopRope {
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 class BiDirClientRope : public giopRope {
- public:
+public:
 
-  BiDirClientRope(const giopAddressList& addrlist,
-		  const omnivector<CORBA::ULong>& preferred);
+  BiDirClientRope(const giopAddressList& addrlist, omniIOR::IORInfo* info);
 
-  IOP_C* acquireClient(const omniIOR*,
+  IOP_C* acquireClient(const omniIOR*      ior,
 		       const CORBA::Octet* key,
-		       CORBA::ULong keysize,
-		       omniCallDescriptor*);  // override giopRope
- private:
+		       CORBA::ULong        keysize,
+		       omniCallDescriptor* cd); // override giopRope
+protected:
+  void filterAndSortAddressList();
 
+private:
   omni_tracedmutex pd_lock;
 
   BiDirClientRope();

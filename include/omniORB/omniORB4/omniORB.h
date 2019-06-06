@@ -3,207 +3,28 @@
 // omniORB.h                  Created on: 6/2/96
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2007 Apasphere Ltd
+//    Copyright (C) 2002-2014 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //      This is the public API of omniORB's extension to CORBA.
 //      The API is intended to be used in application code.
-
-/*
-  $Log: omniORB.h,v $
-  Revision 1.5.2.8  2009/05/06 16:16:12  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.5.2.7  2007/09/19 14:16:08  dgrisby
-  Avoid namespace clashes if IDL defines modules named CORBA.
-
-  Revision 1.5.2.6  2006/01/10 13:59:37  dgrisby
-  New clientConnectTimeOutPeriod configuration parameter.
-
-  Revision 1.5.2.5  2005/09/19 18:26:33  dgrisby
-  Merge from omni4_0_develop again.
-
-  Revision 1.5.2.4  2005/04/14 00:04:00  dgrisby
-  New traceInvocationReturns and traceTime options; remove logf function.
-
-  Revision 1.5.2.3  2005/03/30 23:36:15  dgrisby
-  Another merge from omni4_0_develop.
-
-  Revision 1.5.2.2  2005/01/06 23:08:10  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.5.2.1  2003/03/23 21:04:13  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.2.2.19  2002/10/14 20:06:03  dgrisby
-  Per objref / per thread timeouts.
-
-  Revision 1.2.2.18  2002/08/16 17:47:39  dgrisby
-  Documentation, message updates. ORB tweaks to match docs.
-
-  Revision 1.2.2.17  2002/01/09 11:39:22  dpg1
-  New omniORB::setLogFunction() function.
-
-  Revision 1.2.2.16  2001/09/19 17:30:04  dpg1
-  New traceThreadId option to add omni_thread id to log messages.
-
-  Revision 1.2.2.15  2001/09/12 19:42:35  sll
-  Added back function to report max. GIOP message size.
-
-  Revision 1.2.2.14  2001/08/17 17:03:23  sll
-  Moved configuration parameters to orbParameters. Move old compatibility API
-  to omniORBcompat.h.
-
-  Revision 1.2.2.13  2001/08/16 16:11:48  sll
-  Removed duplicate offerBidirectionalGIOP.
-
-  Revision 1.2.2.12  2001/08/08 15:57:11  sll
-  New options unixTransportDirectory & unixTransportPermission.
-
-  Revision 1.2.2.11  2001/08/03 17:45:08  sll
-  Moved OMNIORB_THROW so that it can be used in stub headers
-
-  Revision 1.2.2.10  2001/08/01 10:08:20  dpg1
-  Main thread policy.
-
-  Revision 1.2.2.9  2001/07/31 16:10:38  sll
-  Added GIOP BiDir support.
-
-  Revision 1.2.2.8  2001/07/13 15:16:56  sll
-  New configuration variables: oneCallPerConnection, threadPerConnectionPolicy,
-  maxServerThreadPerConnection, maxInterleavedCallsPerConnection,
-  maxServerThreadPoolSize, threadPerConnectionUpperLimit,
-  threadPerConnectionLowerLimit. Removed maxNumOfAsyncThreads.
-
-  Revision 1.2.2.7  2001/06/07 16:24:08  dpg1
-  PortableServer::Current support.
-
-  Revision 1.2.2.6  2001/05/11 14:25:54  sll
-  Added operator for omniORB::logger to report system exception status and
-  minor code.
-
-  Revision 1.2.2.5  2001/04/18 17:50:44  sll
-  Big checkin with the brand new internal APIs.
-  Scoped where appropriate with the omni namespace.
-
-  Revision 1.2.2.4  2000/11/20 11:59:43  dpg1
-  API to configure code sets.
-
-  Revision 1.2.2.3  2000/11/03 18:58:47  sll
-  Unbounded sequence of octet got a new type name.
-
-  Revision 1.2.2.2  2000/09/27 17:09:16  sll
-  New member maxGIOPVersion(), getInterceptors(), noFirewallNavigation,
-  giopTargetAddressMode.
-  LOCATION_FORWARD ctor takes an extra argument to indicate permanent
-  location forwarding.
-
-  Revision 1.2.2.1  2000/07/17 10:35:35  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:26:05  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.8  2000/05/24 17:11:18  dpg1
-  Comments clarified.
-
-  Revision 1.1.2.7  2000/03/07 18:07:32  djr
-  Fixed user-exceptions when can't catch by base class.
-
-  Revision 1.1.2.6  2000/03/03 14:29:17  djr
-  Improvement to BOA skeletons (less generated code).
-
-  Revision 1.1.2.5  1999/09/30 11:49:27  djr
-  Implemented catching user-exceptions in GIOP_S for all compilers.
-
-  Revision 1.1.2.4  1999/09/27 11:01:09  djr
-  Modifications to logging.
-
-  Revision 1.1.2.3  1999/09/24 17:11:10  djr
-  New option -ORBtraceInvocations and omniORB::traceInvocations.
-
-  Revision 1.1.2.2  1999/09/24 15:01:28  djr
-  Added module initialisers, and sll's new scavenger implementation.
-
-  Revision 1.1.2.1  1999/09/24 09:51:46  djr
-  Moved from omniORB2 + some new files.
-
-  Revision 1.21  1999/08/30 16:56:19  sll
-  New API members: omniORB::scanGranularity and omniORB::callTimeOutPeriod.
-
-  Revision 1.20  1999/06/26 17:56:39  sll
-  New configuration variables: abortOnInternalError, verifyObjectExistAndType.
-
-  Revision 1.19  1999/06/25 13:53:51  sll
-  Renamed copyStringInAnyExtraction to omniORB_27_CompatibleAnyExtraction.
-
-  Revision 1.18  1999/06/18 21:16:36  sll
-  Updated copyright notice.
-
-  Revision 1.17  1999/06/18 20:37:04  sll
-  Replaced _LC_attr with _core_attr and _dyn_attr.
-  New variable copyStringInAnyExtraction.
-
-  Revision 1.16  1999/03/19 15:17:44  djr
-  New option acceptMisalignedIndirections
-
-  Revision 1.15  1999/02/18 15:19:54  djr
-  New configuration function omniORB::enableLcdMode()
-
-  Revision 1.14  1999/01/07 18:38:34  djr
-  New configuration variable omniORB::diiThrowsSysExceptions.
-
-  Revision 1.13  1998/08/26 21:50:22  sll
-  Added omniORB::maxTcpConnectionPerServer to customise the maximum no. of
-  outgoing connections per server.
-
-  Revision 1.12  1998/04/07 19:52:31  sll
-  Updated to use namespace if available.
-  New class logStream to log all error messages.
-
-  Revision 1.11  1998/03/04 14:48:47  sll
-  Added omniORB::giopServerThreadWrapper.
-
- * Revision 1.10  1998/03/02  17:05:29  ewc
- * Removed scoping from objectKey in class loader (caused problems compiling
- * with MSVC++ 5.0)
- *
- * Revision 1.9  1998/02/25  20:34:59  sll
- * New omniORB::loader class for adding dynamic object loader.
- *
- * Revision 1.8  1998/01/27  16:07:58  ewc
- * Added -ORBtcAliasExpand flag
- *
-  Revision 1.7  1997/12/12 18:47:16  sll
-  New variable serverName.
-
-  Revision 1.6  1997/12/09 20:36:05  sll
-  Support for system exception handlers.
-  Support for incoming and outgoing rope scavenger threads.
-
- * Revision 1.5  1997/05/06  16:09:39  sll
- * Public release.
- *
- */
 
 #ifndef __OMNIORB_H__
 #define __OMNIORB_H__
@@ -290,6 +111,9 @@ _CORBA_MODULE_BEG
   //                                                                   //
   _CORBA_MODULE_VAR _core_attr _CORBA_Boolean traceTime;               //
   //     If true, logging messages will include the current time.      //
+  //                                                                   //
+  _CORBA_MODULE_VAR _core_attr _CORBA_Boolean traceLocking;            //
+  //     If true, all locking operations will be traced.               //
   ///////////////////////////////////////////////////////////////////////
 
   ////////////////////////////////////////////////////////////////////////
@@ -353,6 +177,12 @@ _CORBA_MODULE_BEG
                                                                         //
   _CORBA_MODULE_FN void setClientThreadCallDeadline(unsigned long secs, //
                                                     unsigned long ns);  //
+                                                                        //
+  _CORBA_MODULE_FN inline void                                          //
+  setClientThreadCallDeadline(const omni_time_t& tt)                    //
+  {                                                                     //
+    setClientThreadCallDeadline(tt.s, tt.ns);                           //
+  }                                                                     //
   _CORBA_MODULE_FN void setClientConnectTimeout(CORBA::ULong millisecs);//
                                                                         //
   ////////////////////////////////////////////////////////////////////////
@@ -538,19 +368,84 @@ _CORBA_MODULE_BEG
   // an addition argument <obj> to identify the target object reference.//
   // The argument <cookie> is an opaque pointer which will be passed 	//
   // on by the ORB when it calls the exception handler.			//
+
+  typedef CORBA::Boolean
+  (*transientExceptionHandler_t)(void*                   cookie,
+                                 CORBA::ULong            n_retries,
+                                 const CORBA::TRANSIENT& ex);
+
+  typedef CORBA::Boolean
+  (*transientExceptionHandlerExt_t)(void*                   cookie,
+                                    CORBA::ULong            n_retries,
+                                    const CORBA::TRANSIENT& ex,
+                                    CORBA::Object_ptr       obj,
+                                    const char*             op);
+
+  _CORBA_MODULE_FN void
+  installTransientExceptionHandler(void* cookie,
+                                   transientExceptionHandler_t fn);
+
+  _CORBA_MODULE_FN void
+  installTransientExceptionHandler(CORBA::Object_ptr           obj,
+                                   void*                       cookie,
+                                   transientExceptionHandler_t fn);
+
+  _CORBA_MODULE_FN void
+  installTransientExceptionHandlerExt(void* cookie,
+                                      transientExceptionHandlerExt_t fn);
+
+  _CORBA_MODULE_FN void
+  installTransientExceptionHandlerExt(CORBA::Object_ptr              obj,
+                                      void*                          cookie,
+                                      transientExceptionHandlerExt_t fn);
+
+  ////////////////////////////////////////////////////////////////////////
+
+
+  ////////////////////////////////////////////////////////////////////////
+  // When an operation is invoked via an object reference, a		//
+  // CORBA::TIMEOUT exception may be raised. 			        //
   //									//
-  typedef CORBA::Boolean (*transientExceptionHandler_t)(void* cookie,	//
-					CORBA::ULong n_retries, 	//
-					const CORBA::TRANSIENT& ex);    //
-  //								       	//
-  _CORBA_MODULE_FN void installTransientExceptionHandler(void* cookie,  //
-				 transientExceptionHandler_t fn);       //
+  // By default, the ORB will pass this exception on to the application.//
   //									//
-  _CORBA_MODULE_FN void installTransientExceptionHandler(               //
-				 CORBA::Object_ptr obj,                 //
-				 void* cookie,                          //
-				 transientExceptionHandler_t fn);       //
-    									//
+  // This behaviour can be overridden by installing an exception	//
+  // handler. The function signature of the handler should be the same 	//
+  // as omniORB::timeoutExceptionHandler_t. The handlers can be 	//
+  // installed using the overloaded functions				//
+  // omniORB::installTimeoutExceptionHandler. The use of these	        //
+  // functions is similar to those for the TRANSIENT exception. See 	//
+  // above for details.							//
+
+  typedef CORBA::Boolean
+  (*timeoutExceptionHandler_t)(void*                 cookie,
+                               CORBA::ULong          n_retries,
+                               const CORBA::TIMEOUT& ex);
+
+  typedef CORBA::Boolean
+  (*timeoutExceptionHandlerExt_t)(void*                 cookie,
+                                  CORBA::ULong          n_retries,
+                                  const CORBA::TIMEOUT& ex,
+                                  CORBA::Object_ptr     obj,
+                                  const char*           op);
+
+  _CORBA_MODULE_FN void
+  installTimeoutExceptionHandler(void* cookie,
+				 timeoutExceptionHandler_t fn);
+
+  _CORBA_MODULE_FN void
+  installTimeoutExceptionHandler(CORBA::Object_ptr         obj,
+                                 void*                     cookie,
+                                 timeoutExceptionHandler_t fn);
+
+  _CORBA_MODULE_FN void
+  installTimeoutExceptionHandlerExt(void* cookie,
+                                    timeoutExceptionHandlerExt_t fn);
+
+  _CORBA_MODULE_FN void
+  installTimeoutExceptionHandlerExt(CORBA::Object_ptr            obj,
+                                    void*                        cookie,
+                                    timeoutExceptionHandlerExt_t fn);
+
   ////////////////////////////////////////////////////////////////////////
 
 
@@ -567,18 +462,37 @@ _CORBA_MODULE_BEG
   // omniORB::installCommFailureExceptionHandler. The use of these	//
   // functions is similar to those for the TRANSIENT exception. See 	//
   // above for details.							//
-  //									//
-  typedef CORBA::Boolean (*commFailureExceptionHandler_t)(void* cookie,	//
-					CORBA::ULong n_retries,         //
-					const CORBA::COMM_FAILURE& ex); //
-  //									//
-  _CORBA_MODULE_FN void installCommFailureExceptionHandler(void* cookie,//
-				 commFailureExceptionHandler_t fn);     //
-  //									//
-  _CORBA_MODULE_FN void installCommFailureExceptionHandler(             //
-				   CORBA::Object_ptr obj,               //
-				   void* cookie,		        //
-				   commFailureExceptionHandler_t fn);   //
+
+  typedef CORBA::Boolean
+  (*commFailureExceptionHandler_t)(void*                      cookie,
+                                   CORBA::ULong               n_retries,
+                                   const CORBA::COMM_FAILURE& ex);
+
+  typedef CORBA::Boolean
+  (*commFailureExceptionHandlerExt_t)(void*                      cookie,
+                                      CORBA::ULong               n_retries,
+                                      const CORBA::COMM_FAILURE& ex,
+                                      CORBA::Object_ptr          obj,
+                                      const char*                op);
+
+  _CORBA_MODULE_FN void
+  installCommFailureExceptionHandler(void* cookie,
+                                     commFailureExceptionHandler_t fn);
+
+  _CORBA_MODULE_FN void
+  installCommFailureExceptionHandler(CORBA::Object_ptr             obj,
+                                     void*                         cookie,
+                                     commFailureExceptionHandler_t fn);
+
+  _CORBA_MODULE_FN void
+  installCommFailureExceptionHandlerExt(void* cookie,
+                                        commFailureExceptionHandlerExt_t fn);
+
+  _CORBA_MODULE_FN void
+  installCommFailureExceptionHandlerExt(CORBA::Object_ptr                obj,
+                                        void*                            cookie,
+                                        commFailureExceptionHandlerExt_t fn);
+
   ////////////////////////////////////////////////////////////////////////
 
   ////////////////////////////////////////////////////////////////////////
@@ -601,25 +515,44 @@ _CORBA_MODULE_BEG
   // exception. See above for details. Notice that the installed        //
   // exception handler will only be called when the system exception is //
   // neither CORBA::TRANSIENT nor CORBA::COMM_FAILURE.			//
-  //									//
-  typedef CORBA::Boolean (*systemExceptionHandler_t)(void* cookie,	//
-				   CORBA::ULong n_retries, 	        //
-				   const CORBA::SystemException& ex);   //
-  //									//
-  _CORBA_MODULE_FN void installSystemExceptionHandler(void* cookie,	//
-				    systemExceptionHandler_t fn);       //
-  //									//
-  _CORBA_MODULE_FN void installSystemExceptionHandler(                  //
-				    CORBA::Object_ptr obj,              //
-				    void* cookie,		        //
-				    systemExceptionHandler_t fn);       //
+
+  typedef CORBA::Boolean
+  (*systemExceptionHandler_t)(void*                         cookie,
+                              CORBA::ULong                  n_retries,
+                              const CORBA::SystemException& ex);
+
+  typedef CORBA::Boolean
+  (*systemExceptionHandlerExt_t)(void*                         cookie,
+                                 CORBA::ULong                  n_retries,
+                                 const CORBA::SystemException& ex,
+                                 CORBA::Object_ptr             obj,
+                                 const char*                   op);
+
+  _CORBA_MODULE_FN void
+  installSystemExceptionHandler(void* cookie,
+                                systemExceptionHandler_t fn);
+
+  _CORBA_MODULE_FN void
+  installSystemExceptionHandler(CORBA::Object_ptr        obj,
+                                void*                    cookie,
+                                systemExceptionHandler_t fn);
+
+  _CORBA_MODULE_FN void
+  installSystemExceptionHandlerExt(void* cookie,
+                                   systemExceptionHandlerExt_t fn);
+
+  _CORBA_MODULE_FN void
+  installSystemExceptionHandlerExt(CORBA::Object_ptr           obj,
+                                   void*                       cookie,
+                                   systemExceptionHandlerExt_t fn);
+
   ////////////////////////////////////////////////////////////////////////
 
 
   ////////////////////////////////////////////////////////////////////////
   // class fatalException                                               //
   //                                                                    //
-  // This exception is thrown if a bug inside the omniORB2 runtime is   //
+  // This exception is thrown if a bug inside the omniORB runtime is    //
   // detected. The exact location in the source where the exception is  //
   // thrown is indicated by file() and line().                          //
   //                                                                    //
@@ -628,7 +561,7 @@ _CORBA_MODULE_BEG
     fatalException(const char *file,int line,const char *errmsg);       //
     inline ~fatalException() {}                                         //
     inline const char *file() const   { return pd_file;   }             //
-    inline int line() const           { return pd_line;   }             //
+    inline int         line() const   { return pd_line;   }             //
     inline const char *errmsg() const { return pd_errmsg; }             //
   private:                                                              //
     const char *pd_file;                                                //
@@ -653,7 +586,7 @@ _CORBA_MODULE_BEG
   class LOCATION_FORWARD {                                              //
   public:                                                               //
     inline LOCATION_FORWARD(CORBA::Object_ptr objref,                   //
-			    CORBA::Boolean permanent)                   //
+			    CORBA::Boolean permanent=0)                 //
       : pd_objref(objref), pd_permanent(permanent) {}                   //
                                                                         //
     inline CORBA::Object_ptr get_obj() const { return pd_objref; }      //
@@ -680,7 +613,14 @@ _CORBA_MODULE_BEG
 private:
 #endif
 
-#ifndef HAS_Cplusplus_catch_exception_by_base
+#ifdef HAS_Cplusplus_catch_exception_by_base
+
+#  define _OMNIORB_EX_ONLY_CD(x)
+
+#else
+
+#  define _OMNIORB_EX_ONLY_CD(x) x
+
   // Internal omniORB class.  Used in the stubs to pass
   // user-defined exceptions to a lower level.
 
@@ -729,10 +669,12 @@ public:
 OMNI_NAMESPACE_END(omni)
 
 #define OMNIORB_THROW(name, minor, completion) \
-  _OMNI_NS(omniExHelper)::name(__FILE__, __LINE__, minor, completion)
+  do {\
+    _OMNI_NS(omniExHelper)::name(__FILE__, __LINE__, minor, completion); \
+    throw ::CORBA::name(minor, completion); \
+  } while(0)
 
 #else
-
 
 #define OMNIORB_THROW(name, minor, completion) \
   throw ::CORBA::name(minor, completion)

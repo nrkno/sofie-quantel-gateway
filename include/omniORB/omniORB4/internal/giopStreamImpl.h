@@ -9,44 +9,22 @@
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //	
-
-/*
-  $Log: giopStreamImpl.h,v $
-  Revision 1.1.6.3  2009/05/06 16:16:04  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.1.6.2  2008/08/08 16:52:56  dgrisby
-  Option to validate untransformed UTF-8; correct data conversion minor
-  codes; better logging for MessageErrors.
-
-  Revision 1.1.6.1  2003/03/23 21:03:46  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.1  2001/04/18 17:18:59  sll
-  Big checkin with the brand new internal APIs.
-
-  Revision 1.1.2.1  2001/02/23 16:47:03  sll
-  Added new files.
-
-*/
 
 #ifndef __GIOPSTREAMIMPL_H__
 #define __GIOPSTREAMIMPL_H__

@@ -1,68 +1,30 @@
 // -*- Mode: C++; -*-
 //                            Package   : omniORB
 // omniAsyncInvoker.h         Created on: 20 Dec 2000
-//                            Author    : Sai Lai Lo (sll)
+//                            Authors   : Duncan Grisby
+//                                        Sai Lai Lo
 //
-//    Copyright (C) 2006 Apasphere Ltd
+//    Copyright (C) 2006-2013 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
-//
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log: omniAsyncInvoker.h,v $
-  Revision 1.1.4.3  2009/05/06 16:16:13  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.1.4.2  2006/07/02 22:52:05  dgrisby
-  Store self thread in task objects to avoid calls to self(), speeding
-  up Current. Other minor performance tweaks.
-
-  Revision 1.1.4.1  2003/03/23 21:04:15  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.3  2002/11/08 17:31:51  dgrisby
-  Another AIX patch.
-
-  Revision 1.1.2.2  2002/11/06 11:58:28  dgrisby
-  Partial AIX patches.
-
-  Revision 1.1.2.1  2002/01/09 11:35:21  dpg1
-  Remove separate omniAsyncInvoker library to save library overhead.
-
-  Revision 1.1.4.3  2001/08/01 10:03:39  dpg1
-  AyncInvoker no longer maintains its own dedicated thread queue.
-  Derived classes must provide the implementation.
-
-  Revision 1.1.4.2  2001/06/13 20:06:17  sll
-  Minor fix to make the ORB compile with MSVC++.
-
-  Revision 1.1.4.1  2001/04/19 09:47:54  sll
-  New library omniAsyncInvoker.
-
-  Revision 1.1.2.1  2001/02/23 16:47:09  sll
-  Added new files.
-
-*/
 
 #ifndef __OMNIASYNCINVOKER_H__
 #define __OMNIASYNCINVOKER_H__
@@ -82,10 +44,11 @@
 //    Notice that the call to the execute() method is always done by
 //    another thread, hence giving the invoker its asynchronous nature.
 //
-//    Depend on the category of an omniTask, the invoker will choose a
-//    thread to execute the task in one of the following ways:
+//    Depending on the category of an omniTask, the invoker will
+//    choose a thread to execute the task in one of the following
+//    ways:
 //
-//       Anytime: the task will be executed by one of the threads in the
+//       AnyTime: the task will be executed by one of the threads in the
 //                pool. If no thread is available, the task may be queued
 //                indefinitely until a thread is available
 //
@@ -113,59 +76,88 @@
 //   about it. If the task object is heap allocated, it has to be garbage
 //   collected by some external means. The simplist approach is to delete
 //   the task object before the execute() method returns.
-//
-//   Once inserted, a task may be cancelled by calling the cancel() method.
-//   However, this call only has an effect if the task is still sitting in a
-//   queue waiting for its turn to be executed.
 
 
+class omniAsyncPool;
+class omniAsyncDedicated;
 class omniAsyncWorker;
 
 
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
+
 class omniTaskLink {
 public:
   omniTaskLink* next;
   omniTaskLink* prev;
 
-  omniTaskLink() { next = prev = this; }
+  inline omniTaskLink()
+  {
+    next = prev = this;
+  }
 
-  void enq(omniTaskLink& head);
-  void deq();
-  static unsigned int is_empty(omniTaskLink& head);
+  inline void enq(omniTaskLink& head)
+  {
+    next = head.prev->next;
+    head.prev->next = this;
+    prev = head.prev;
+    head.prev = this;
+  }
+
+  inline void deq()
+  {
+    prev->next = next;
+    next->prev = prev;
+  }
+
+  static inline unsigned int is_empty(omniTaskLink& head)
+  {
+    return (head.next == &head);
+  }
 
 private:
   omniTaskLink(const omniTaskLink&);
   omniTaskLink& operator=(const omniTaskLink&);
 };
 
+
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
+
 class omniTask : public omniTaskLink {
 public:
 
-  enum Category { AnyTime,
-		  ImmediateDispatch,
-		  DedicatedThread
+  // What sort of task dispatch?
+  enum Category { AnyTime,           // Run whenever a thread is free
+		  ImmediateDispatch, // Run immediately
+		  DedicatedThread    // Use the dedicated thread
+  };
+
+  // What is this task doing?
+  enum Purpose { General,            // General task
+                 ServerUpcall,       // Server-side upcall into application code
+                 ClientInvocation    // Client-side operation invocation
   };
 
   virtual void execute() = 0;
 
-  inline omniTask(Category cat = AnyTime)
-    : pd_category(cat), pd_selfThread(0) {}
+  inline omniTask(Category cat = AnyTime, Purpose pur = General)
+    : pd_category(cat), pd_purpose(pur), pd_self(0) {}
 
   virtual ~omniTask() {}
 
-  inline Category category() { return pd_category; }
-  inline void category(Category c) { pd_category = c; }
+  inline Category     category()           { return pd_category; }
+  inline void         category(Category c) { pd_category = c; }
+  inline Purpose      purpose()            { return pd_purpose; }
+  inline void         purpose(Purpose p)   { pd_purpose = p; }
 
-  inline omni_thread* selfThread() { return pd_selfThread; }
+  inline omni_thread* selfThread()         { return pd_self; }
   // The worker thread assigned to handle the task. Set by the worker.
 
 private:
   Category     pd_category;
-  omni_thread* pd_selfThread;
+  Purpose      pd_purpose;
+  omni_thread* pd_self;
 
   omniTask(const omniTask&);
   omniTask& operator=(const omniTask&);
@@ -178,71 +170,79 @@ private:
 
 class omniAsyncInvoker {
  public:
-  omniAsyncInvoker(unsigned int max=10000);
-  // <max> specifies the maximum number of threads the object should
-  // spawn to perform tasks in the Anytime category.
+  omniAsyncInvoker();
+  // Constructor.
 
   virtual ~omniAsyncInvoker();
   // Returns only when all the threads doing Anytime tasks have exited.
-  // Notice that any tasks still sitting on the pending queue will be
+  // Notice that any tasks still sitting on the pending queues will be
   // discarded quietly.
 
-  int insert(omniTask*);
-  // insert the task into the pending queue. The task will be
-  // dispatched according to its category. If the task is a
-  // DedicatedThread task, call insert_dedicated() to deal with it.
+  CORBA::Boolean insert(omniTask*);
+  // insert the task into the correct pending queue. The task will be
+  // dispatched according to its category.
   //
-  // returns 0 if the task cannot be inserted.
   // returns 1 if the task has been inserted successfully.
+  // returns 0 if the task cannot be inserted.
 
-  int cancel(omniTask*);
-  // Cancel a task on the pending queue. If the task is a
-  // DedicatedThread task, call cancel_dedicated() to deal with it.
-  //
-  // returns 0 if the task is not found in the pending queue
-  // returns 1 if the task is successfully removed from the pending queue.
-
-  virtual int work_pending();
+  CORBA::Boolean work_pending();
   // Return 1 if there are DedicatedThread tasks pending, 0 if none.
-  // Default implementation always returns 0.
 
-  virtual void perform(unsigned long secs = 0, unsigned long nanosecs = 0);
+  void perform(unsigned long secs = 0, unsigned long nanosecs = 0);
   // Loop performing dedicated thread tasks. If a timeout is
-  // specified, must return when the absolute time passes.
-  // Implementations may return in other circumstances.
-  //
-  // Default implementation aborts!  Don't call this unless you have
-  // overriden it.
+  // specified, returns when the absolute time passes; otherwise,
+  // blocks until shut down.
 
-  friend class omniAsyncWorker;
+  void shutdown();
+  // Release threads blocked in perform.
+
 
   static _core_attr unsigned int idle_timeout;
-                                    // No. of seconds before an idle thread
-                                    // has to wait before it exits.
-                                    // default is 10 seconds.
-protected:
-
-  virtual int insert_dedicated(omniTask*);
-  // Override this in derived classes to support DedicatedThread
-  // tasks. Default version always returns 0.
-
-  virtual int cancel_dedicated(omniTask*);
-  // Override this in derived classes to support DedicatedThread
-  // tasks. Default version always returns 0.
+  // No. of seconds an idle thread waits before it exits. default is
+  // 10 seconds.
 
 private:
 
-  unsigned int          pd_keep_working;// 0 means all threads should exit.
-  omni_tracedmutex*     pd_lock;
-  omni_tracedcondition* pd_cond;        // signal this conditional when all
-                                        // the threads serving Anytime tasks
-					// are exiting.
-  omniTaskLink          pd_anytime_tq;  // Anytime tasks
-  omniAsyncWorker*      pd_idle_threads;// idle threads ready for Anytime tasks
-  unsigned int          pd_nthreads;    // No. of threads serving Anytime tasks
-  unsigned int          pd_maxthreads;  // Max. no. of threads serving Anytime
-					// tasks
-  unsigned int          pd_totalthreads;// total no. of threads.
+  omniAsyncWorker* getWorker(omniAsyncPool* pool);
+
+  inline unsigned int workerStart()
+  {
+    omni_tracedmutex_lock l(pd_lock);
+    return ++pd_total_threads;
+  }
+
+  inline unsigned int workerStartLocked()
+  {
+    ASSERT_OMNI_TRACEDMUTEX_HELD(pd_lock, 1);
+    return ++pd_total_threads;
+  }
+
+  inline unsigned int workerStop()
+  {
+    omni_tracedmutex_lock l(pd_lock);
+    
+    if (--pd_total_threads == 0)
+      pd_idle_cond.broadcast();
+    
+    return pd_total_threads;
+  }
+
+  omni_tracedmutex     pd_lock;
+  omni_tracedcondition pd_idle_cond;
+  unsigned int         pd_total_threads;   // Total number of threads.
+  omniAsyncWorker*     pd_idle_threads;
+
+  omniAsyncPool*       pd_general;         // General threads/tasks
+  omniAsyncPool*       pd_server;          // Server threads/tasks
+  omniAsyncPool*       pd_client;          // Client threads/tasks
+  omniAsyncDedicated*  pd_dedicated;       // Dedicated tasks
+
+  CORBA::Boolean       pd_keep_working;
+
+
+  friend class omniAsyncWorker;
+  friend class omniAsyncPool;
+  friend class omniAsyncDedicated;
 };
 
 #endif // __OMNIASYNCINVOKER_H__

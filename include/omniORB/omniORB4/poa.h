@@ -3,139 +3,27 @@
 // poa.h                      Created on: 2/99
 //                            Author    : David Riddoch (djr)
 //
-//    Copyright (C) 2004-2009 Apasphere Ltd
+//    Copyright (C) 2004-2012 Apasphere Ltd
 //    Copyright (C) 1996-1999 AT&T Research Cambridge
 //
 //    This file is part of the omniORB library.
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //
-
-/*
-  $Log: poa.h,v $
-  Revision 1.4.2.13  2009/05/06 16:16:12  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.4.2.12  2009/04/20 11:08:26  dgrisby
-  Use class instead of typename to make Sun compiler happy. Thanks
-  Paul Parlett.
-
-  Revision 1.4.2.11  2007/02/26 12:41:00  dgrisby
-  Fix duplicated POA enum Any operators. Thanks Thomas Richter.
-
-  Revision 1.4.2.10  2006/10/23 15:08:31  dgrisby
-  Suppress GCC warnings about missing base class constructor calls.
-  Thanks Tamas Kerecsen. Somehow, this patch works on VC++ 6, where
-  before a similar change failed.
-
-  Revision 1.4.2.9  2006/03/22 15:55:14  dgrisby
-  VC++ 6 doesn't like explicit calls to default base constructors.
-
-  Revision 1.4.2.8  2005/11/09 12:22:18  dgrisby
-  Local interfaces support.
-
-  Revision 1.4.2.7  2005/08/02 09:41:13  dgrisby
-  Bug in Servant_var if assigning to itself.
-
-  Revision 1.4.2.6  2005/07/22 17:18:39  dgrisby
-  Another merge from omni4_0_develop.
-
-  Revision 1.4.2.5  2005/01/06 23:08:11  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.4.2.4  2004/10/13 17:58:18  dgrisby
-  Abstract interfaces support; values support interfaces; value bug fixes.
-
-  Revision 1.4.2.3  2004/07/23 10:29:57  dgrisby
-  Completely new, much simpler Any implementation.
-
-  Revision 1.4.2.2  2004/02/16 10:10:28  dgrisby
-  More valuetype, including value boxes. C++ mapping updates.
-
-  Revision 1.4.2.1  2003/03/23 21:04:06  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.2.2.12  2001/11/13 14:11:44  dpg1
-  Tweaks for CORBA 2.5 compliance.
-
-  Revision 1.2.2.11  2001/10/19 11:05:25  dpg1
-  ObjectId to/from wstring
-
-  Revision 1.2.2.10  2001/10/17 16:44:01  dpg1
-  Update DynAny to CORBA 2.5 spec, const Any exception extraction.
-
-  Revision 1.2.2.9  2001/08/01 10:08:20  dpg1
-  Main thread policy.
-
-  Revision 1.2.2.8  2001/07/31 16:04:07  sll
-  Added ORB::create_policy() and associated types and operators.
-
-  Revision 1.2.2.7  2001/06/07 16:24:08  dpg1
-  PortableServer::Current support.
-
-  Revision 1.2.2.6  2001/05/29 17:03:48  dpg1
-  In process identity.
-
-  Revision 1.2.2.5  2001/04/18 17:50:43  sll
-  Big checkin with the brand new internal APIs.
-  Scoped where appropriate with the omni namespace.
-
-  Revision 1.2.2.4  2000/11/09 12:27:50  dpg1
-  Huge merge from omni3_develop, plus full long long from omni3_1_develop.
-
-  Revision 1.2.2.3  2000/11/03 18:58:47  sll
-  Unbounded sequence of octet got a new type name.
-
-  Revision 1.2.2.2  2000/09/27 16:57:14  sll
-  Replaced marshalling operators for MemBufferedStream and NetBufferedStream
-  with just one type for cdrStream.
-
-  Revision 1.2.2.1  2000/07/17 10:35:35  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:26:04  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.7  2000/06/27 16:15:08  sll
-  New classes: _CORBA_String_element, _CORBA_ObjRef_Element,
-  _CORBA_ObjRef_tcDesc_arg to support assignment to an element of a
-  sequence of string and a sequence of object reference.
-
-  Revision 1.1.2.6  1999/11/23 10:48:07  djr
-  Added _ptr_type and _var_type to POA.
-
-  Revision 1.1.2.5  1999/10/21 11:29:45  djr
-  Added _core_attr to declaration of _PD_repoId in exceptions & interfaces.
-
-  Revision 1.1.2.4  1999/10/18 17:28:18  djr
-  Fixes for building MSVC dlls.
-
-  Revision 1.1.2.3  1999/10/16 13:22:51  djr
-  Changes to support compiling on MSVC.
-
-  Revision 1.1.2.2  1999/09/28 09:47:57  djr
-  Corrected declaration of ObjectId_to_string and string_to_ObjectId.
-
-  Revision 1.1.2.1  1999/09/24 09:51:49  djr
-  Moved from omniORB2 + some new files.
-
-*/
 
 #ifndef __OMNIPOA_H__
 #define __OMNIPOA_H__
@@ -692,7 +580,7 @@ _CORBA_MODULE_BEG
     virtual void* _downcast();
     // Overrides omniServant.
 
-    int _pd_refCount;
+    omni_refcount _pd_refCount;
   };
 
   //////////////////////////////////////////////////////////////////////
@@ -744,15 +632,20 @@ _CORBA_MODULE_BEG
 
     inline Servant_var& operator= (T* p) {
       if (pd_data != p) {
-	if (pd_data) pd_data->_remove_ref();
+	if (pd_data)
+          pd_data->_remove_ref();
 	pd_data = p;
       }
       return *this;
     }
     inline Servant_var& operator= (const Servant_var& v) {
       if (v.pd_data != pd_data) {
-	if (pd_data) pd_data->_remove_ref();
-	if ((pd_data = v.pd_data)) pd_data->_add_ref();
+	if (pd_data)
+          pd_data->_remove_ref();
+
+        pd_data = v.pd_data;
+        if (pd_data)
+          pd_data->_add_ref();
       }
       return *this;
     }

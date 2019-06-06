@@ -9,42 +9,23 @@
 //    This file is part of the omniORB library.
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //    Dummy singleton identity placed into object references when the
 //    ORB is shutting down.
 //
-
-/*
-  $Log: shutdownIdentity.h,v $
-  Revision 1.1.4.3  2009/05/06 16:16:01  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.1.4.2  2007/04/14 17:56:52  dgrisby
-  Identity downcasting mechanism was broken by VC++ 8's
-  over-enthusiastic optimiser.
-
-  Revision 1.1.4.1  2003/03/23 21:03:42  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.1  2001/09/19 17:26:47  dpg1
-  Full clean-up after orb->destroy().
-
-*/
 
 #ifndef __OMNIORB_SHUTDOWNIDENTITY_H__
 #define __OMNIORB_SHUTDOWNIDENTITY_H__

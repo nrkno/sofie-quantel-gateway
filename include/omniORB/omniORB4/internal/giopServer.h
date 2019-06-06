@@ -9,75 +9,22 @@
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log: giopServer.h,v $
-  Revision 1.1.6.6  2009/05/06 16:16:08  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.1.6.5  2006/10/09 09:47:12  dgrisby
-  Only delete giopServer if all threads are successfully shut down.
-
-  Revision 1.1.6.4  2006/06/22 13:53:49  dgrisby
-  Add flags to strand.
-
-  Revision 1.1.6.3  2006/04/09 19:52:31  dgrisby
-  More IPv6, endPointPublish parameter.
-
-  Revision 1.1.6.2  2005/11/17 17:03:26  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.6.1  2003/03/23 21:03:47  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.8  2002/02/13 16:02:38  dpg1
-  Stability fixes thanks to Bastiaan Bakker, plus threading
-  optimisations inspired by investigating Bastiaan's bug reports.
-
-  Revision 1.1.4.7  2001/12/03 18:48:14  dpg1
-  Clean up strange indentation.
-
-  Revision 1.1.4.6  2001/09/20 13:26:13  dpg1
-  Allow ORB_init() after orb->destroy().
-
-  Revision 1.1.4.5  2001/08/17 15:00:47  dpg1
-  Fixes for pre-historic compilers.
-
-  Revision 1.1.4.4  2001/07/31 16:28:01  sll
-  Added GIOP BiDir support.
-
-  Revision 1.1.4.3  2001/07/13 15:19:30  sll
-  Manage the state of each connection internally. Added new callback
-  functions.
-
-  Revision 1.1.4.2  2001/06/13 20:11:37  sll
-  Minor update to make the ORB compiles with MSVC++.
-
-  Revision 1.1.4.1  2001/04/18 17:19:00  sll
-  Big checkin with the brand new internal APIs.
-
-  Revision 1.1.2.1  2001/02/23 16:47:04  sll
-  Added new files.
-
-*/
 
 #ifndef __GIOPSERVER_H__
 #define __GIOPSERVER_H__

@@ -3,109 +3,28 @@
 // minorCode.h                Created on: 05/01/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2006 Apasphere Ltd
+//    Copyright (C) 2002-2012 Apasphere Ltd
 //    Copyright (C) 2001      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log: minorCode.h,v $
-  Revision 1.1.6.8  2009/05/06 16:16:13  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.1.6.7  2006/04/10 12:50:35  dgrisby
-  More endPointPublish; support for deprecated endPointNoListen,
-  endPointPublishAllIFs.
-
-  Revision 1.1.6.6  2005/09/19 18:26:33  dgrisby
-  Merge from omni4_0_develop again.
-
-  Revision 1.1.6.5  2005/09/19 15:36:35  dgrisby
-  Refcount shortcut now throws INV_OBJREF when the servant is
-  deactivated, rather than deactivating the shortcut, which could lead
-  to a race condition.
-
-  Revision 1.1.6.4  2005/01/06 23:08:09  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.6.3  2004/07/23 10:29:56  dgrisby
-  Completely new, much simpler Any implementation.
-
-  Revision 1.1.6.2  2003/05/20 16:53:12  dgrisby
-  Valuetype marshalling support.
-
-  Revision 1.1.6.1  2003/03/23 21:04:16  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.15  2003/03/10 11:13:17  dgrisby
-  BAD_PARAM with invalid fixed limits.
-
-  Revision 1.1.4.14  2002/11/22 18:11:58  dgrisby
-  Correct COMM_FAILURE minor code check.
-
-  Revision 1.1.4.13  2002/02/26 14:08:34  dpg1
-  Minor codes for omniORBpy.
-
-  Revision 1.1.4.12  2002/01/21 11:51:52  dpg1
-  Add TRANSIENT minor code for Python exception.
-
-  Revision 1.1.4.11  2001/10/29 17:42:35  dpg1
-  Support forward-declared structs/unions, ORB::create_recursive_tc().
-
-  Revision 1.1.4.10  2001/10/17 16:47:07  dpg1
-  New minor codes
-
-  Revision 1.1.4.9  2001/09/24 10:41:07  dpg1
-  Minor codes for Dynamic library and omniORBpy.
-
-  Revision 1.1.4.8  2001/09/12 19:44:27  sll
-  Added back MARSHAL_MessageSizeExceedLimit to report the error when it is
-  not possible to tell whether this is the client or the server side.
-
-  Revision 1.1.4.7  2001/08/15 10:15:45  dpg1
-  New minor codes for POA and DSI errors.
-
-  Revision 1.1.4.6  2001/08/03 17:49:33  sll
-  New minor code and lookup table for translating a minor code to its memonic
-  names.
-
-  Revision 1.1.4.5  2001/07/31 16:38:43  sll
-  Added GIOP BiDir related error code.
-
-  Revision 1.1.4.4  2001/06/11 17:59:21  sll
-  New minor code to indicate error in initialising a transport.
-
-  Revision 1.1.4.3  2001/06/08 17:12:08  dpg1
-  Merge all the bug fixes from omni3_develop.
-
-  Revision 1.1.4.2  2001/05/11 14:28:14  sll
-  Separate  minor code MARSHAL_MessageSizeExceedLimit into distinct client and
-  server side codes.
-
-  Revision 1.1.4.1  2001/04/18 17:26:29  sll
-  Big checkin with the brand new internal APIs.
-
-  */
 
 #ifndef __MINORCODE__
 #define __MINORCODE__
@@ -237,6 +156,18 @@ OMNI_NAMESPACE_BEGIN(omni)
 #define OMNIORBMinorCode_117 OMNIORBMinorCode(117)
 #define OMNIORBMinorCode_118 OMNIORBMinorCode(118)
 #define OMNIORBMinorCode_119 OMNIORBMinorCode(119)
+#define OMNIORBMinorCode_120 OMNIORBMinorCode(120)
+#define OMNIORBMinorCode_121 OMNIORBMinorCode(121)
+#define OMNIORBMinorCode_122 OMNIORBMinorCode(122)
+#define OMNIORBMinorCode_123 OMNIORBMinorCode(123)
+#define OMNIORBMinorCode_124 OMNIORBMinorCode(124)
+#define OMNIORBMinorCode_125 OMNIORBMinorCode(125)
+#define OMNIORBMinorCode_126 OMNIORBMinorCode(126)
+#define OMNIORBMinorCode_127 OMNIORBMinorCode(127)
+#define OMNIORBMinorCode_128 OMNIORBMinorCode(128)
+#define OMNIORBMinorCode_129 OMNIORBMinorCode(129)
+#define OMNIORBMinorCode_130 OMNIORBMinorCode(130)
+#define OMNIORBMinorCode_131 OMNIORBMinorCode(131)
 
 #define OMNI_COMMA ,
 #define DeclareValue(name,value) name = value
@@ -246,13 +177,15 @@ OMNI_NAMESPACE_BEGIN(omni)
 //  UNKNOWN
 #define DECLARE_UNKNOWN_minors(code,sep) \
 \
-code( UNKNOWN_UserException,   OMGMinorCode(1) ) sep \
-code( UNKNOWN_SystemException, OMGMinorCode(2) ) sep \
-code( UNKNOWN_PythonException, OMNIORBMinorCode_98 )
+code( UNKNOWN_UserException,   	   OMGMinorCode(1) ) sep \
+code( UNKNOWN_SystemException, 	   OMGMinorCode(2) ) sep \
+code( UNKNOWN_PythonException, 	   OMNIORBMinorCode_98 ) sep \
+code( UNKNOWN_OmniThreadException, OMNIORBMinorCode_123 )
 
 enum UNKNOWN_minor {
   DECLARE_UNKNOWN_minors(DeclareValue,OMNI_COMMA)
 };
+
 
 // BAD_PARAM
 #define DECLARE_BAD_PARAM_minors(code,sep) \
@@ -287,6 +220,8 @@ code( BAD_PARAM_RegisterNilObject            , OMGMinorCode(27) ) sep \
 code( BAD_PARAM_InvalidComponentId           , OMGMinorCode(28) ) sep \
 code( BAD_PARAM_InvalidProfileId             , OMGMinorCode(29) ) sep \
 code( BAD_PARAM_DuplicatePolicyType          , OMGMinorCode(30) ) sep \
+code( BAD_PARAM_PollableAlreadyInPollableSet , OMGMinorCode(43) ) sep \
+code( BAD_PARAM_InvalidCompressionLevel      , OMGMinorCode(44) ) sep \
 code( BAD_PARAM_IndexOutOfRange      	     , OMNIORBMinorCode_21 ) sep \
 code( BAD_PARAM_InvalidUnionDiscValue	     , OMNIORBMinorCode_27 ) sep \
 code( BAD_PARAM_InvalidInitialSize   	     , OMNIORBMinorCode_29 ) sep \
@@ -321,12 +256,24 @@ code( BAD_PARAM_StringIsTooLong              , OMNIORBMinorCode_100 ) sep \
 code( BAD_PARAM_SequenceIsTooLong            , OMNIORBMinorCode_101 ) sep \
 code( BAD_PARAM_WrongUnionMemberSelected     , OMNIORBMinorCode_107 ) sep \
 code( BAD_PARAM_InvalidFixedPointLimits      , OMNIORBMinorCode_109 ) sep \
-code( BAD_PARAM_AttemptToMarshalAbstractValue, OMNIORBMinorCode_115 )
-
+code( BAD_PARAM_AttemptToMarshalAbstractValue, OMNIORBMinorCode_115 ) sep \
+code( BAD_PARAM_InvalidPollerType            , OMNIORBMinorCode_127 ) sep \
+code( BAD_PARAM_PerThreadTimeoutWithNoCurrent, OMNIORBMinorCode_131 )
 
 enum BAD_PARAM_minor {
   DECLARE_BAD_PARAM_minors(DeclareValue,OMNI_COMMA)
 };
+
+
+// NO_MEMORY
+#define DECLARE_NO_MEMORY_minors(code,sep) \
+\
+code( NO_MEMORY_BadAlloc, OMNIORBMinorCode_121 )
+
+enum NO_MEMORY_minor {
+  DECLARE_NO_MEMORY_minors(DeclareValue,OMNI_COMMA)
+};
+
 
 // IMP_LIMIT
 #define DECLARE_IMP_LIMIT_minors(code,sep) \
@@ -336,6 +283,21 @@ code( IMP_LIMIT_NoUsableProfile      , OMGMinorCode(1) )
 enum IMP_LIMIT_minor {
   DECLARE_IMP_LIMIT_minors(DeclareValue,OMNI_COMMA)
 };
+
+
+// COMM_FAILURE
+#define DECLARE_COMM_FAILURE_minors(code,sep) \
+\
+code( COMM_FAILURE_MarshalArguments   , OMNIORBMinorCode_3 ) sep \
+code( COMM_FAILURE_UnMarshalArguments , OMNIORBMinorCode_4 ) sep \
+code( COMM_FAILURE_MarshalResults     , OMNIORBMinorCode_5 ) sep \
+code( COMM_FAILURE_UnMarshalResults   , OMNIORBMinorCode_6 ) sep \
+code( COMM_FAILURE_WaitingForReply    , OMNIORBMinorCode_7 )
+
+enum COMM_FAILURE_minor {
+  DECLARE_COMM_FAILURE_minors(DeclareValue,OMNI_COMMA)  
+};
+
 
 // INV_OBJREF
 #define DECLARE_INV_OBJREF_minors(code,sep) \
@@ -347,13 +309,15 @@ code( INV_OBJREF_InvokeOnNilObjRef  	  , OMNIORBMinorCode_48 ) sep \
 code( INV_OBJREF_CorruptedObjRef    	  , OMNIORBMinorCode_54 ) sep \
 code( INV_OBJREF_InterfaceMisMatch  	  , OMNIORBMinorCode_55 ) sep \
 code( INV_OBJREF_NoPythonTypeForPseudoObj , OMNIORBMinorCode_104 ) sep \
-code( INV_OBJREF_ShortcutServantDeactivated,OMNIORBMinorCode_117 )
+code( INV_OBJREF_ShortcutServantDeactivated,OMNIORBMinorCode_117 ) sep \
+code( INV_OBJREF_IncorrectReplyHandler    , OMNIORBMinorCode_125 ) sep \
+code( INV_OBJREF_InvalidPseudoObject      , OMNIORBMinorCode_129 ) sep \
+code( INV_OBJREF_UnsuitableGIOPVersion    , OMNIORBMinorCode_130 )
 
-
- 
 enum INV_OBJREF_minor {
   DECLARE_INV_OBJREF_minors(DeclareValue,OMNI_COMMA)
 };
+
 
 // MARSHAL
 #define DECLARE_MARSHAL_minors(code,sep) \
@@ -387,13 +351,47 @@ code( MARSHAL_CannotReserveOutputSpace        , OMNIORBMinorCode_110 ) sep \
 code( MARSHAL_InvalidChunkedEncoding          , OMNIORBMinorCode_111 ) sep \
 code( MARSHAL_InvalidValueTag                 , OMNIORBMinorCode_112 ) sep \
 code( MARSHAL_NoRepoIdInValueType             , OMNIORBMinorCode_113 ) sep \
-code( MARSHAL_TypeIsNotAValueType             , OMNIORBMinorCode_114 )
-
-
+code( MARSHAL_TypeIsNotAValueType             , OMNIORBMinorCode_114 ) sep \
+code( MARSHAL_InvalidCompressedData           , OMNIORBMinorCode_128 )
 
 enum MARSHAL_minor {
   DECLARE_MARSHAL_minors(DeclareValue,OMNI_COMMA)
 };
+
+
+// INITIALIZE
+#define DECLARE_INITIALIZE_minors(code,sep) \
+\
+code( INITIALIZE_TransportError        , OMNIORBMinorCode_13 ) sep \
+code( INITIALIZE_InvalidORBInitArgs    , OMNIORBMinorCode_30 ) sep \
+code( INITIALIZE_FailedBOAInit         , OMNIORBMinorCode_31 ) sep \
+code( INITIALIZE_FailedPOAInit         , OMNIORBMinorCode_32 ) sep \
+code( INITIALIZE_FailedORBInit         , OMNIORBMinorCode_44 ) sep \
+code( INITIALIZE_FailedLoadLibrary     , OMNIORBMinorCode_45 ) sep \
+code( INITIALIZE_ConfigFileError       , OMNIORBMinorCode_50 ) sep \
+code( INITIALIZE_NotOmniThread         , OMNIORBMinorCode_56 ) sep \
+code( INITIALIZE_CannotOpenLogFile     , OMNIORBMinorCode_118 ) sep \
+code( INITIALIZE_EndpointPublishFailure, OMNIORBMinorCode_119 )
+
+enum INITIALIZE_minor {
+  DECLARE_INITIALIZE_minors(DeclareValue,OMNI_COMMA)  
+};
+
+
+// NO_IMPLEMENT
+#define DECLARE_NO_IMPLEMENT_minors(code,sep) \
+\
+code( NO_IMPLEMENT_NoValueImpl        , OMGMinorCode(1) ) sep \
+code( NO_IMPLEMENT_IncompatibleVersion, OMGMinorCode(2) ) sep \
+code( NO_IMPLEMENT_NoUsableProfile    , OMGMinorCode(3) ) sep \
+code( NO_IMPLEMENT_DIIOnLocalObject   , OMGMinorCode(4) ) sep \
+code( NO_IMPLEMENT_Unsupported        , OMNIORBMinorCode_36 ) sep \
+code( NO_IMPLEMENT_NoPythonMethod     , OMNIORBMinorCode_99 )
+
+enum NO_IMPLEMENT_minor {
+  DECLARE_NO_IMPLEMENT_minors(DeclareValue,OMNI_COMMA)  
+};
+
 
 // BAD_TYPECODE
 #define DECLARE_BAD_TYPECODE_minors(code,sep) \
@@ -411,30 +409,40 @@ enum BAD_TYPECODE_minor {
   DECLARE_BAD_TYPECODE_minors(DeclareValue,OMNI_COMMA)  
 };
 
-// NO_IMPLEMENT
-#define DECLARE_NO_IMPLEMENT_minors(code,sep) \
-\
-code( NO_IMPLEMENT_NoValueImpl        , OMGMinorCode(1) ) sep \
-code( NO_IMPLEMENT_IncompatibleVersion, OMGMinorCode(2) ) sep \
-code( NO_IMPLEMENT_NoUsableProfile    , OMGMinorCode(3) ) sep \
-code( NO_IMPLEMENT_DIIOnLocalObject   , OMGMinorCode(4) ) sep \
-code( NO_IMPLEMENT_Unsupported        , OMNIORBMinorCode_36 ) sep \
-code( NO_IMPLEMENT_NoPythonMethod     , OMNIORBMinorCode_99 )
 
-enum NO_IMPLEMENT_minor {
-  DECLARE_NO_IMPLEMENT_minors(DeclareValue,OMNI_COMMA)  
+// BAD_OPERATION
+#define DECLARE_BAD_OPERATION_minors(code,sep) \
+\
+code( BAD_OPERATION_UnRecognisedOperationName, OMNIORBMinorCode_38 ) sep \
+code( BAD_OPERATION_WrongPollerOperation,      OMNIORBMinorCode_126 )
+
+enum BAD_OPERATION_minor {
+  DECLARE_BAD_OPERATION_minors(DeclareValue,OMNI_COMMA)  
 };
+
 
 // NO_RESOURCES
 #define DECLARE_NO_RESOURCES_minors(code,sep) \
 \
 code ( NO_RESOURCES_PIOperationNotSupported, OMGMinorCode(1) ) sep \
 code ( NO_RESOURCES_CodeSetNotSupported    , OMNIORBMinorCode_25 ) sep \
-code ( NO_RESOURCES_InitialRefNotFound     , OMNIORBMinorCode_51 )
+code ( NO_RESOURCES_InitialRefNotFound     , OMNIORBMinorCode_51 ) sep \
+code ( NO_RESOURCES_UnableToStartThread    , OMNIORBMinorCode_122 )
 
 enum NO_RESOURCES_minor {
   DECLARE_NO_RESOURCES_minors(DeclareValue,OMNI_COMMA)  
 };
+
+
+// NO_RESPONSE
+#define DECLARE_NO_RESPONSE_minors(code,sep) \
+\
+code ( NO_RESPONSE_ReplyNotAvailableYet, OMGMinorCode(1) )
+
+enum NO_RESPONSE_minor {
+  DECLARE_NO_RESPONSE_minors(DeclareValue,OMNI_COMMA)  
+};
+
 
 // BAD_INV_ORDER
 #define DECLARE_BAD_INV_ORDER_minors(code,sep) \
@@ -456,15 +464,18 @@ code( BAD_INV_ORDER_InvalidPortableInterceptorCall, OMGMinorCode(14) ) sep \
 code( BAD_INV_ORDER_ServiceContextIdAlreadyExists , OMGMinorCode(15) ) sep \
 code( BAD_INV_ORDER_PolicyFactoryTypeAlreadyExists, OMGMinorCode(16) ) sep \
 code( BAD_INV_ORDER_POACreationDuringDestruction  , OMGMinorCode(17) ) sep \
+code( BAD_INV_ORDER_NoPollerResponseYet           , OMGMinorCode(22) ) sep \
 code( BAD_INV_ORDER_CodeSetNotKnownYet	     	  , OMNIORBMinorCode_24 ) sep \
 code( BAD_INV_ORDER_ArgumentsNotCalled            , OMNIORBMinorCode_65 ) sep \
 code( BAD_INV_ORDER_ErrorInDynamicImplementation  , OMNIORBMinorCode_66 ) sep \
 code( BAD_INV_ORDER_RequestConfiguredOutOfOrder   , OMNIORBMinorCode_86 ) sep \
-code( BAD_INV_ORDER_DynAnyNotInitialised          , OMNIORBMinorCode_103 )
+code( BAD_INV_ORDER_DynAnyNotInitialised          , OMNIORBMinorCode_103 ) sep \
+code( BAD_INV_ORDER_ORBNotInitialised             , OMNIORBMinorCode_120 )
 
 enum BAD_INV_ORDER_minor {
   DECLARE_BAD_INV_ORDER_minors(DeclareValue,OMNI_COMMA)  
 };
+
 
 // TRANSIENT
 #define DECLARE_TRANSIENT_minors(code,sep) \
@@ -486,6 +497,7 @@ enum TRANSIENT_minor {
   DECLARE_TRANSIENT_minors(DeclareValue,OMNI_COMMA)  
 };
 
+
 // OBJ_ADAPTER
 #define DECLARE_OBJ_ADAPTER_minors(code,sep) \
 \
@@ -504,6 +516,7 @@ enum OBJ_ADAPTER_minor {
   DECLARE_OBJ_ADAPTER_minors(DeclareValue,OMNI_COMMA)  
 };
 
+
 // DATA_CONVERSION
 #define DECLARE_DATA_CONVERSION_minors(code,sep) \
 \
@@ -515,18 +528,21 @@ enum DATA_CONVERSION_minor {
   DECLARE_DATA_CONVERSION_minors(DeclareValue,OMNI_COMMA)  
 };
 
+
 // OBJECT_NOT_EXIST
 #define DECLARE_OBJECT_NOT_EXIST_minors(code,sep) \
 \
-code( OBJECT_NOT_EXIST_NoMatch           , OMGMinorCode(1) ) sep \
-code( OBJECT_NOT_EXIST_IncarnateFailed   , OMGMinorCode(2) ) sep \
-code( OBJECT_NOT_EXIST_BOANotInitialised , OMNIORBMinorCode_34 ) sep \
-code( OBJECT_NOT_EXIST_POANotInitialised , OMNIORBMinorCode_58 ) sep \
-code( OBJECT_NOT_EXIST_DynAnyDestroyed   , OMNIORBMinorCode_102 )
+code( OBJECT_NOT_EXIST_NoMatch           	  , OMGMinorCode(1) ) sep \
+code( OBJECT_NOT_EXIST_IncarnateFailed   	  , OMGMinorCode(2) ) sep \
+code( OBJECT_NOT_EXIST_PollerAlreadyDeliveredReply, OMGMinorCode(5) ) sep \
+code( OBJECT_NOT_EXIST_BOANotInitialised 	  , OMNIORBMinorCode_34 ) sep \
+code( OBJECT_NOT_EXIST_POANotInitialised 	  , OMNIORBMinorCode_58 ) sep \
+code( OBJECT_NOT_EXIST_DynAnyDestroyed   	  , OMNIORBMinorCode_102 )
 
 enum OBJECT_NOT_EXIST_minor {
   DECLARE_OBJECT_NOT_EXIST_minors(DeclareValue,OMNI_COMMA)  
 };
+
 
 // INV_POLICY
 #define DECLARE_INV_POLICY_minors(code,sep) \
@@ -540,29 +556,6 @@ enum INV_POLICY_minor {
 };
 
 
-// BAD_OPERATION
-#define DECLARE_BAD_OPERATION_minors(code,sep) \
-\
-code( BAD_OPERATION_UnRecognisedOperationName, OMNIORBMinorCode_38 )
-
-enum BAD_OPERATION_minor {
-  DECLARE_BAD_OPERATION_minors(DeclareValue,OMNI_COMMA)  
-};
-
-
-// COMM_FAILURE
-#define DECLARE_COMM_FAILURE_minors(code,sep) \
-\
-code( COMM_FAILURE_MarshalArguments   , OMNIORBMinorCode_3 ) sep \
-code( COMM_FAILURE_UnMarshalArguments , OMNIORBMinorCode_4 ) sep \
-code( COMM_FAILURE_MarshalResults     , OMNIORBMinorCode_5 ) sep \
-code( COMM_FAILURE_UnMarshalResults   , OMNIORBMinorCode_6 ) sep \
-code( COMM_FAILURE_WaitingForReply    , OMNIORBMinorCode_7 )
-
-enum COMM_FAILURE_minor {
-  DECLARE_COMM_FAILURE_minors(DeclareValue,OMNI_COMMA)  
-};
-
 // INTF_REPOS
 #define DECLARE_INTF_REPOS_minors(code,sep) \
 \
@@ -573,24 +566,6 @@ enum INTF_REPOS_minor {
   DECLARE_INTF_REPOS_minors(DeclareValue,OMNI_COMMA)  
 };
 
-// INITIALIZE
-#define DECLARE_INITIALIZE_minors(code,sep) \
-\
-code( INITIALIZE_TransportError        , OMNIORBMinorCode_13 ) sep \
-code( INITIALIZE_InvalidORBInitArgs    , OMNIORBMinorCode_30 ) sep \
-code( INITIALIZE_FailedBOAInit         , OMNIORBMinorCode_31 ) sep \
-code( INITIALIZE_FailedPOAInit         , OMNIORBMinorCode_32 ) sep \
-code( INITIALIZE_FailedORBInit         , OMNIORBMinorCode_44 ) sep \
-code( INITIALIZE_FailedLoadLibrary     , OMNIORBMinorCode_45 ) sep \
-code( INITIALIZE_ConfigFileError       , OMNIORBMinorCode_50 ) sep \
-code( INITIALIZE_NotOmniThread         , OMNIORBMinorCode_56 ) sep \
-code( INITIALIZE_CannotOpenLogFile     , OMNIORBMinorCode_118 ) sep \
-code( INITIALIZE_EndpointPublishFailure, OMNIORBMinorCode_119 )
-
-
-enum INITIALIZE_minor {
-  DECLARE_INITIALIZE_minors(DeclareValue,OMNI_COMMA)  
-};
 
 // BAD_CONTEXT
 #define DECLARE_BAD_CONTEXT_minors(code,sep) \
@@ -602,6 +577,24 @@ code( BAD_CONTEXT_StartingScopeNotFound , OMNIORBMinorCode_76 )
 enum BAD_CONTEXT_minor {
   DECLARE_BAD_CONTEXT_minors(DeclareValue,OMNI_COMMA)
 };
+
+
+// TIMEOUT
+// Note that TIMEOUT_CallTimedOutOnClient is the same code as
+// TRANSIENT_CallTimedout
+#define DECLARE_TIMEOUT_minors(code,sep) \
+\
+code( TIMEOUT_NoPollerResponseInTime, OMGMinorCode(1) )    sep \
+code( TIMEOUT_CallTimedOutOnClient  , OMNIORBMinorCode_8 ) sep \
+code( TIMEOUT_CallTimedOutOnServer  , OMNIORBMinorCode_124 )
+
+enum TIMEOUT_minor {
+  DECLARE_TIMEOUT_minors(DeclareValue,OMNI_COMMA)
+};
+
+
+//
+// Exception access / lookup
 
 inline CORBA::Boolean is_COMM_FAILURE_minor(CORBA::ULong w) {
   return (w >= COMM_FAILURE_MarshalArguments &&

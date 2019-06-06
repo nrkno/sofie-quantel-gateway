@@ -8,47 +8,23 @@
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //    Representation of an object key.
 //      
  
-/*
-  $Log: omniObjKey.h,v $
-  Revision 1.4.2.1  2003/03/23 21:04:13  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.2.2.3  2003/01/14 11:48:15  dgrisby
-  Remove warnings from gcc -Wshadow. Thanks Pablo Mejia.
-
-  Revision 1.2.2.2  2000/09/27 17:11:40  sll
-  Removed reference to the obsoluted MemBufferedStream and NetBufferedStream.
-
-  Revision 1.2.2.1  2000/07/17 10:35:35  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:26:05  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.1  1999/09/24 09:51:47  djr
-  Moved from omniORB2 + some new files.
-
-*/
-
 #ifndef __OMNIOBJKEY_H__
 #define __OMNIOBJKEY_H__
 

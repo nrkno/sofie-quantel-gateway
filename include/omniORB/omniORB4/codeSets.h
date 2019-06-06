@@ -9,67 +9,22 @@
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log: codeSets.h,v $
-  Revision 1.1.4.4  2009/05/06 16:16:13  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.1.4.3  2008/08/08 18:45:49  dgrisby
-  Add missing ISO-8859 and Windows code sets.
-
-  Revision 1.1.4.2  2005/12/08 14:22:31  dgrisby
-  Better string marshalling performance; other minor optimisations.
-
-  Revision 1.1.4.1  2003/03/23 21:04:17  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.9  2003/03/03 12:32:32  dgrisby
-  EBCDIC code sets. Thanks Coleman Corrigan.
-
-  Revision 1.1.2.8  2003/01/14 11:48:15  dgrisby
-  Remove warnings from gcc -Wshadow. Thanks Pablo Mejia.
-
-  Revision 1.1.2.7  2002/12/19 13:56:58  dgrisby
-  New Windows 1251 code set. (Thanks Vasily Tchekalkin).
-
-  Revision 1.1.2.6  2001/06/13 20:06:18  sll
-  Minor fix to make the ORB compile with MSVC++.
-
-  Revision 1.1.2.5  2000/11/22 14:37:58  dpg1
-  Code set marshalling functions now take a string length argument.
-
-  Revision 1.1.2.4  2000/11/16 12:33:43  dpg1
-  Minor fixes to permit use of UShort as WChar.
-
-  Revision 1.1.2.3  2000/11/15 17:15:42  sll
-  Added definition for the TAG_CODE_SETS component.
-
-  Revision 1.1.2.2  2000/11/09 12:23:04  dpg1
-  Update to compile on Solaris
-
-  Revision 1.1.2.1  2000/10/27 15:42:03  dpg1
-  Initial code set conversion support. Not yet enabled or fully tested.
-
-*/
 
 #ifndef __CODESETS_H__
 #define __CODESETS_H__

@@ -8,42 +8,21 @@
 //    This file is part of the omniORB library.
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //    DynamicAny module
-
-/*
-  $Log: dynAny.h,v $
-  Revision 1.1.4.3  2005/01/06 23:08:09  dgrisby
-  Big merge from omni4_0_develop.
-
-  Revision 1.1.4.2  2005/01/06 16:39:23  dgrisby
-  DynValue and DynValueBox implementations; misc small fixes.
-
-  Revision 1.1.4.1  2003/03/23 21:04:16  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.2  2003/01/16 11:08:26  dgrisby
-  Patches to support Digital Mars C++. Thanks Christof Meerwald.
-
-  Revision 1.1.2.1  2001/10/17 16:44:01  dpg1
-  Update DynAny to CORBA 2.5 spec, const Any exception extraction.
-
-*/
 
 #ifndef __OMNIDYNANY_H__
 #define __OMNIDYNANY_H__

@@ -1,76 +1,30 @@
 // -*- Mode: C++; -*-
-//                            Package   : omniORB2
-// giopRope.h               Created on: 05/01/2001
+//                            Package   : omniORB
+// giopRope.h                 Created on: 05/01/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2003-2009 Apasphere Ltd
+//    Copyright (C) 2003-2013 Apasphere Ltd
 //    Copyright (C) 2001      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log: giopRope.h,v $
-  Revision 1.1.6.4  2009/05/06 16:16:09  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.1.6.3  2009/05/05 14:44:39  dgrisby
-  Ropes rememeber the bidir configuration set at the time of their
-  creation, meaning it can safely be changed at run time.
-
-  Revision 1.1.6.2  2006/03/26 20:59:28  dgrisby
-  Merge from omni4_0_develop.
-
-  Revision 1.1.6.1  2003/03/23 21:03:48  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.7  2002/08/21 06:23:15  dgrisby
-  Properly clean up bidir connections and ropes. Other small tweaks.
-
-  Revision 1.1.4.6  2001/09/19 17:26:46  dpg1
-  Full clean-up after orb->destroy().
-
-  Revision 1.1.4.5  2001/09/04 14:38:09  sll
-  Added the boolean argument to notifyCommFailure to indicate if
-  omniTransportLock is held by the caller.
-
-  Revision 1.1.4.4  2001/08/03 17:43:19  sll
-  Make sure dll import spec for win32 is properly done.
-
-  Revision 1.1.4.3  2001/07/31 16:24:23  sll
-  Moved filtering and sorting of available addresses into a separate
-  function. Make acquireClient, decrRefCount and notifyCommFailure virtual.
-
-  Revision 1.1.4.2  2001/06/13 20:11:37  sll
-  Minor update to make the ORB compiles with MSVC++.
-
-  Revision 1.1.4.1  2001/04/18 17:19:00  sll
-  Big checkin with the brand new internal APIs.
-
-  Revision 1.1.2.1  2001/02/23 16:47:04  sll
-  Added new files.
-
-  */
-
 
 #ifndef __GIOPROPE_H__
 #define __GIOPROPE_H__
@@ -97,47 +51,45 @@ class giopStrand;
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 class giopRope : public Rope, public RopeLink {
- public:
+public:
 
-  static int selectRope(const giopAddressList&,
-			omniIOR::IORInfo*,
-			Rope*&,
-			CORBA::Boolean& is_local);
+  static int selectRope(const giopAddressList& addrlist,
+			omniIOR::IORInfo*      info,
+			Rope*&                 rope,
+			CORBA::Boolean&        is_local);
   // Given an address list, return a rope that can be used to talk to
   // remote objects in that address space. If the address list is in fact
-  // points to ourselves, set <is_local> to TRUE(1).
-  // Returns TRUE(1) if either the addresses are local or the rope is found.
-  // Returns FALSE(0) if no suitable rope is find.
+  // pointing to ourselves, set <is_local> to true.
+  // Returns true if either the addresses are local or the rope is found.
+  // Returns false if no suitable rope is found.
   // If a rope is returned, the reference count on the rope is already
   // incremented by 1.
   //
   // This is normally the entry function that causes a rope to be created
   // in the first place.
   //
-  //
   // Thread Safety preconditions:
   //    Caller must not hold omniTransportLock, it is used internally for
   //    synchronisation.
 
-  giopRope(const giopAddressList& addrlist, 
-	   const omnivector<CORBA::ULong>& preferred);
-  // <list> & <preferred> are copied.
+  giopRope(const giopAddressList& addrlist, omniIOR::IORInfo* info);
+  // <addrlist> is copied.
   // Reference count is initialised to 0.
   // No thread safety precondition
 
-  giopRope(giopAddress* addr, int i = 0);
+  giopRope(giopAddress* addr);
+  // Construct with a single address. Used for server-side bidir.
   // <addr> is consumed by this instance.
-  // Reference count is initialised to <i>
   // No thread safety precondition
 
   virtual ~giopRope();
   // No thread safety precondition
 
 
-  virtual IOP_C* acquireClient(const omniIOR*,
+  virtual IOP_C* acquireClient(const omniIOR*      ior,
 			       const CORBA::Octet* key,
-			       CORBA::ULong keysize,
-			       omniCallDescriptor*);
+			       CORBA::ULong        keysize,
+			       omniCallDescriptor* cd);
   // Acquire a GIOP_C from this rope.
   //
   // Thread Safety preconditions:
@@ -169,6 +121,13 @@ class giopRope : public Rope, public RopeLink {
   //    Caller must not hold omniTransportLock, it is used internally for
   //    synchronisation.
 
+  void disconnect();
+  // Forcibly disconnect all strands.
+  //
+  // Thread Safety preconditions:
+  //    Caller must not hold omniTransportLock, it is used internally for
+  //    synchronisation.
+
   CORBA::Boolean hasAddress(const giopAddress*);
   // Returns true if the address is in this rope's address list; false
   // otherwise.
@@ -193,8 +152,33 @@ class giopRope : public Rope, public RopeLink {
   //
   // Thread Safety preconditions:
   //    Internally, omniTransportLock is used for synchronisation, if
-  //    <heldlock> is TRUE(1), the caller already hold the lock.
+  //    <heldlock> is true, the caller already holds the lock.
 
+  void resetAddressOrder(CORBA::Boolean heldlock, giopStrand* strand);
+  // If the retainAddressOrder parameter is not set true, reset the
+  // address order to ensure the next connection attempt uses the
+  // highest priority address. If names were resolved to addresses,
+  // clears the resolved names so they are re-resolved next call.
+  //
+  // strand is a pointer to the strand that encountered an error
+  // leading to this call, or null in the case of an idle rope.
+  //
+  // Thread Safety preconditions:
+  //    Internally, omniTransportLock is used for synchronisation, if
+  //    <heldlock> is true, the caller already holds the lock.
+
+
+  static void resetIdleRopeAddresses();
+  // If the retainAddressOrder parameter is not set true, reset the
+  // address order in any idle ropes, to ensure the next connection
+  // attempt uses the highest priority address. If names were resolved
+  // to addresses, clears the resolved names so they are re-resolved
+  // next call.
+  //
+  // Thread Safety preconditions:
+  //    Caller must not hold omniTransportLock.
+  
+  
   // Access functions to change the rope parameters. Notice that these
   // functions does not perform any mutual exclusion internally. It is
   // however safe to change the parameters while the rope is in use.  The
@@ -213,7 +197,7 @@ class giopRope : public Rope, public RopeLink {
   }
 
   void oneCallPerConnection(CORBA::Boolean yes) {
-  // No thread safety precondition, use with extreme care
+    // No thread safety precondition, use with extreme care
     pd_oneCallPerConnection = yes;
   }
 
@@ -236,16 +220,21 @@ class giopRope : public Rope, public RopeLink {
   friend class omni_giopbidir_initialiser;
 
  protected:
-  int                  pd_refcount;  // reference count
-  giopAddressList      pd_addresses; // Addresses of the remote address space
-  omnivector<CORBA::ULong>              pd_addresses_order;
-  omnivector<CORBA::ULong>::size_type   pd_address_in_use;
-  CORBA::ULong         pd_maxStrands;
-  CORBA::Boolean       pd_oneCallPerConnection;
-  int                  pd_nwaiting;
-  omni_tracedcondition pd_cond;
-  CORBA::Boolean       pd_offerBiDir; // State of orbParameters::offerBiDir...
-				      // at time of creation.
+  int                      pd_refcount;
+  giopAddressList          pd_addresses;     // Addresses of the remote server
+  size_t                   pd_ior_addr_size; // Number of addresses in IOR
+  omnivector<CORBA::ULong> pd_addresses_order;
+  size_t                   pd_address_in_use;
+  CORBA::ULong             pd_maxStrands;
+  CORBA::Boolean           pd_oneCallPerConnection;
+  int                      pd_nwaiting;
+  omni_tracedcondition     pd_cond;
+  CORBA::ULong             pd_flags;      // Selected flags in use
+  CORBA::ULong             pd_ior_flags;  // Flags requested in IOR
+  CORBA::Boolean           pd_offerBiDir; // State of orbParameters::
+                                          // offerBiDir... at time of creation.
+  CORBA::Boolean           pd_addrs_filtered;
+  CORBA::Boolean           pd_filtering;
 
   static _core_attr RopeLink ropes;
   // All ropes created by selectRope are linked together by this list.
@@ -256,18 +245,20 @@ class giopRope : public Rope, public RopeLink {
   // Thread Safety preconditions:
   //    Caller must hold omniTransportLock.
 
-  CORBA::Boolean match(const giopAddressList&) const;
-  // Return TRUE(1) if the address list matches EXACTLY those of this rope.
+  virtual CORBA::Boolean match(const giopAddressList&,
+                               omniIOR::IORInfo* info) const;
+  // Return true if the address list matches EXACTLY those of this
+  // rope, and the IORInfo policies match.
   // No thread safety precondition
 
-  static void filterAndSortAddressList(const giopAddressList& list,
-				       omnivector<CORBA::ULong>& ordered_list,
-				       CORBA::Boolean& use_bidir);
-  // Consult the configuration table, filter out the addresses in <list> that
-  // should not be used. Sort the remaining ones in the order of preference.
-  // Write out the *index* of the sorted addresses into <ordered_list>.
-  // Set use_bidir to 1 if bidirection GIOP is to be used for the sorted
-  // addresses.
+  virtual void filterAndSortAddressList();
+  // Use the clientTransportRules to filter and sort the address list
+  // in pd_addresses, storing the resulting order in
+  // pd_addresses_order, and set pd_flags appropriately. Any names in
+  // pd_addresses are resolved and the resulting addresses are added
+  // to pd_addresses.
+  //
+  // Caller holds omniTransportLock.
 
  private:
   giopRope();

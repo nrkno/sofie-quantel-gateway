@@ -3,91 +3,34 @@
 // giopStrand.h               Created on: 05/01/2001
 //                            Author    : Sai Lai Lo (sll)
 //
-//    Copyright (C) 2002-2006 Apasphere Ltd
+//    Copyright (C) 2002-2012 Apasphere Ltd
 //    Copyright (C) 2001      AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
-//	*** PROPRIETORY INTERFACE ***
+//	*** PROPRIETARY INTERFACE ***
 //
-
-/*
-  $Log: giopStrand.h,v $
-  Revision 1.1.6.5  2009/05/06 16:16:04  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.1.6.4  2006/07/18 16:21:23  dgrisby
-  New experimental connection management extension; ORB core support
-  for it.
-
-  Revision 1.1.6.3  2006/07/02 22:52:05  dgrisby
-  Store self thread in task objects to avoid calls to self(), speeding
-  up Current. Other minor performance tweaks.
-
-  Revision 1.1.6.2  2006/06/22 13:53:49  dgrisby
-  Add flags to strand.
-
-  Revision 1.1.6.1  2003/03/23 21:03:46  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.10  2002/08/21 06:23:15  dgrisby
-  Properly clean up bidir connections and ropes. Other small tweaks.
-
-  Revision 1.1.4.9  2001/09/19 17:26:46  dpg1
-  Full clean-up after orb->destroy().
-
-  Revision 1.1.4.8  2001/09/10 17:43:11  sll
-  Replaced the non-thread safe resetIdleCounter with startIdleCounter and
-  stopIdleCounter. Added orderly_closed to indicate that a stand is orderly
-  closed because a GIOP CloseConnection message has been received.
-
-  Revision 1.1.4.7  2001/08/29 17:51:06  sll
-  Updated description for gatekeeper_checked.
-
-  Revision 1.1.4.6  2001/08/17 17:10:05  sll
-  Modularise ORB configuration parameters.
-
-  Revision 1.1.4.5  2001/08/03 17:43:19  sll
-  Make sure dll import spec for win32 is properly done.
-
-  Revision 1.1.4.4  2001/07/31 16:28:01  sll
-  Added GIOP BiDir support.
-
-  Revision 1.1.4.3  2001/07/13 15:20:56  sll
-  New member safeDelete is now the only method to delete a strand.
-
-  Revision 1.1.4.2  2001/06/13 20:11:37  sll
-  Minor update to make the ORB compiles with MSVC++.
-
-  Revision 1.1.4.1  2001/04/18 17:19:00  sll
-  Big checkin with the brand new internal APIs.
-
-  Revision 1.1.2.1  2001/02/23 16:47:04  sll
-  Added new files.
-
-  */
 
 #ifndef __GIOPSTRAND_H__
 #define __GIOPSTRAND_H__
 
 #include <omniORB4/omniTransport.h>
+#include "giopStrandFlags.h"
 
 #ifdef _core_attr
 # error "A local CPP macro _core_attr has already been defined."
@@ -106,8 +49,10 @@ class giopStream;
 class giopStreamImpl;
 class giopWorker;
 class giopServer;
+class giopCompressor;
 class GIOP_S;
 struct giopStream_Buffer;
+
 
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
@@ -163,8 +108,6 @@ public:
   //
   // No thread safety precondition
 
-
-public:
 
   CORBA::Boolean safeDelete(CORBA::Boolean forced = 0);
   // This should be the *ONLY* method to call to delete a strand.
@@ -243,7 +186,7 @@ public:
 	                // convenient time.
 
 	       TIMEDOUT // This strand can still be used when required but
-       	                // it can also be removed if resources is scarce.
+       	                // it can also be removed if resources are scarce.
   };
 
   State state() const { return pd_state; }
@@ -281,7 +224,7 @@ public:
 
   giopStreamList      servers;
   giopStreamList      clients;
-  // a strand may have more than one giopStream instances associated with
+  // a strand may have more than one giopStream instance associated with
   // it. Mostly this is because from GIOP 1.2 onwards, requests can be
   // interleaved on associated connection. Each of these request is
   // represented by a giopStream instance. They are linked together by
@@ -292,12 +235,15 @@ public:
   // Except when a strand is used to support bidirectional GIOP, only one of
   // the list will be populated (because plain GIOP is asymetric and one
   // end is either a client or a server but not both). With bidirectional GIOP,
-  // both list may be populated.
+  // both lists may be populated.
 
   inline CORBA::Boolean isClient() { return (address != 0); }
   // Return TRUE if this is an active strand on the client side. Unless
   // biDir is TRUE, only those messages expected by a GIOP client can be
   // received from this connection.
+
+  inline CORBA::Boolean isBiDir() { return (flags & GIOPSTRAND_BIDIR) ? 1 : 0; }
+  // Return TRUE if this is a bidirectional strand.
 
   const giopAddress*  address;
   // address is provided as ctor arg if this is a active strand, otherwise
@@ -315,9 +261,6 @@ public:
   // Flags for use by interceptors. See giopStrandFlags.h for
   // allocated flags values.
   // Initialised to 0 in the constructor.
-
-  CORBA::Boolean      biDir;
-  // Indicate if the strand is used for bidirectional GIOP.
 
   CORBA::Boolean      gatekeeper_checked;
   // only applies to passive strand. TRUE(1) means that the serverTransportRule
@@ -355,11 +298,13 @@ public:
   // This flag is initialised to 0 by ctor and set to 1 by 
   // omniObjRef::_marshal.
 
+
   ////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////
   // The following are data structures used by the giopStream instances
   // associated with this strand AND SHOULD NOT BE manipulated by the Strand
   // class!!!
+
   CORBA::Boolean      tcs_selected;
   omniCodeSet::TCS_C* tcs_c;
   omniCodeSet::TCS_W* tcs_w;
@@ -373,8 +318,10 @@ public:
   //   <tcs_c>, <tcs_w> and <version> records the chosen code set convertors
   //   and the GIOP version for which the convertors apply.
 
+  giopCompressor*     compressor;
+  // Compressor used for ZIOP.
 
-  // conditional variables and counters to implement giopStream locking
+  // Condition variables and counters to implement giopStream locking
   // functions.
   omni_tracedcondition rdcond;
   int                  rd_nwaiting;

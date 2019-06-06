@@ -8,42 +8,23 @@
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //	*** PROPRIETARY INTERFACE ***
 //
 //      Define various symbols based on things detected by autoconf
-
-/*
- $Log: CORBA_sysdep_auto.h,v $
- Revision 1.1.4.2  2005/01/06 23:08:08  dgrisby
- Big merge from omni4_0_develop.
-
- Revision 1.1.4.1  2003/03/23 21:04:21  dgrisby
- Start of omniORB 4.1.x development branch.
-
- Revision 1.1.2.2  2002/02/18 11:59:12  dpg1
- Full autoconf support.
-
- Revision 1.1.2.1  2002/01/15 16:38:10  dpg1
- On the road to autoconf. Dependencies refactored, configure.ac
- written. No makefiles yet.
-
-*/
 
 #ifndef __CORBA_SYSDEP_AUTO_H__
 #define __CORBA_SYSDEP_AUTO_H__
@@ -85,16 +66,17 @@
 #endif
 
 
-#if defined(SIZEOF_LONG_DOUBLE) && (SIZEOF_LONG_DOUBLE == 16)
-#  define HAS_LongDouble
-#  define _CORBA_LONGDOUBLE_DECL long double
-#endif
+#if !defined(OMNIORB_DISABLE_LONGDOUBLE)
+#  if defined(SIZEOF_LONG_DOUBLE) && (SIZEOF_LONG_DOUBLE == 16)
+#    define HAS_LongDouble
+#    define _CORBA_LONGDOUBLE_DECL long double
+#  endif
 
-#if defined(SIZEOF_LONG_DOUBLE) && (SIZEOF_LONG_DOUBLE == 12) && defined(__i386__)
-#  define HAS_LongDouble
-#  define _CORBA_LONGDOUBLE_DECL long double
+#  if defined(SIZEOF_LONG_DOUBLE) && (SIZEOF_LONG_DOUBLE == 12) && defined(__i386__)
+#    define HAS_LongDouble
+#    define _CORBA_LONGDOUBLE_DECL long double
+#  endif
 #endif
-
 
 #ifndef _CORBA_WCHAR_DECL
 #  if defined(SIZEOF_WCHAR_T) && (SIZEOF_WCHAR_T > 0)

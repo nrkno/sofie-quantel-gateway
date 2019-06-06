@@ -9,39 +9,6 @@
 %% Description: OMNI thread implementation classes for VxWorks threads
 %% Notes:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% $Log: VxThread.h,v $
-%% Revision 1.1.4.5  2008/09/19 09:29:03  dgrisby
-%% omni_mutex trylock method. Thanks Luke Deller and Alex Tingle.
-%%
-%% Revision 1.1.4.4  2006/12/11 10:39:37  dgrisby
-%% Silly duplicated member in vxWorks omnithread.
-%%
-%% Revision 1.1.4.3  2006/10/29 15:09:08  dgrisby
-%% omni_condition broken on VxWorks. Thanks Aleksander Matveyev.
-%%
-%% Revision 1.1.4.2  2005/01/06 23:08:27  dgrisby
-%% Big merge from omni4_0_develop.
-%%
-%% Revision 1.1.4.1  2003/03/23 21:03:40  dgrisby
-%% Start of omniORB 4.1.x development branch.
-%%
-%% Revision 1.1.2.1  2003/02/17 02:03:07  dgrisby
-%% vxWorks port. (Thanks Michael Sturm / Acterna Eningen GmbH).
-%%
-%% Revision 1.1.1.1  2002/11/19 14:55:21  sokcevti
-%% OmniOrb4.0.0 VxWorks port
-%%
-%% Revision 1.2  2002/06/14 12:45:50  engeln
-%% unnecessary members in condition removed.
-%% ---
-%%
-%% Revision 1.1.1.1  2002/04/02 10:08:49  sokcevti
-%% omniORB4 initial realease
-%%
-%% Revision 1.1  2001/03/23 16:50:23  hartmut
-%% Initial Version 2.8
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
 
 

@@ -9,62 +9,22 @@
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //      Parsing for object reference URIs
 //	*** PROPRIETARY INTERFACE ***
-//
-
-// $Log: omniURI.h,v $
-// Revision 1.4.2.4  2009/05/06 16:16:12  dgrisby
-// Update lots of copyright notices.
-//
-// Revision 1.4.2.3  2006/03/25 18:54:04  dgrisby
-// Initial IPv6 support.
-//
-// Revision 1.4.2.2  2005/07/22 17:18:40  dgrisby
-// Another merge from omni4_0_develop.
-//
-// Revision 1.4.2.1  2003/03/23 21:04:07  dgrisby
-// Start of omniORB 4.1.x development branch.
-//
-// Revision 1.2.2.5  2001/08/17 17:03:53  sll
-// Remove addURIHandler.
-//
-// Revision 1.2.2.4  2001/04/18 17:50:43  sll
-// Big checkin with the brand new internal APIs.
-// Scoped where appropriate with the omni namespace.
-//
-// Revision 1.2.2.3  2000/11/09 12:27:50  dpg1
-// Huge merge from omni3_develop, plus full long long from omni3_1_develop.
-//
-// Revision 1.2.2.2  2000/09/27 17:12:03  sll
-// Updated to include from include/omniORB4.
-//
-// Revision 1.2.2.1  2000/07/17 10:35:35  sll
-// Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-//
-// Revision 1.3  2000/07/13 15:26:05  dpg1
-// Merge from omni3_develop for 3.0 release.
-//
-// Revision 1.1.2.1  2000/04/27 10:37:12  dpg1
-// Interoperable Naming Service
-//
-// All URI related function definitions.
 //
 
 #ifndef _omniURI_h_
@@ -93,11 +53,22 @@ public:
 			       const char**   rest = 0);
   // Extract host and port from the part of a URI containing the
   // address. If rest is non-zero, the pointer is set to the address
-  // of the character following the port number. Returns zero if the
-  // address is invalid.
+  // of the character following the port number, otherwise anything
+  // after the port number renders the URI invalid. Returns zero if
+  // the address is invalid.
+
+  static char* extractHostPortRange(const char*    addr,
+				    CORBA::UShort& port_min,
+				    CORBA::UShort& port_max);
+  // Extract host and port range from the part of a URI containing the
+  // address. Accepts a port range in the form min-max. Returns zero
+  // if the address is invalid.
 
   static CORBA::Boolean validHostPort(const char* addr);
   // True if addr is a valid host:port; false otherwise.
+
+  static CORBA::Boolean validHostPortRange(const char* addr);
+  // True if addr is a valid host:port_min-port_max; false otherwise.
 
 
   static char* objectToString(CORBA::Object_ptr obj);

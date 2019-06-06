@@ -8,61 +8,22 @@
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //    Implementation of the BOA interface, built upon the POA interface.
 //	
-
-/*
-  $Log: corbaBoa.h,v $
-  Revision 1.1.6.2  2006/07/18 16:21:23  dgrisby
-  New experimental connection management extension; ORB core support
-  for it.
-
-  Revision 1.1.6.1  2003/03/23 21:03:52  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.3  2001/08/15 10:26:09  dpg1
-  New object table behaviour, correct POA semantics.
-
-  Revision 1.1.4.2  2001/05/29 17:03:49  dpg1
-  In process identity.
-
-  Revision 1.1.4.1  2001/04/18 17:18:18  sll
-  Big checkin with the brand new internal APIs.
-  These files were relocated and scoped with the omni namespace.
-
-  Revision 1.2.2.1  2000/07/17 10:35:51  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:25:58  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.3  2000/06/02 14:20:15  dpg1
-  Using boa_lock for the nil BOA's condition variable caused an
-  assertion failure on exit.
-
-  Revision 1.1.2.2  1999/09/28 10:54:33  djr
-  Removed pretty-printing of object keys from object adapters.
-
-  Revision 1.1.2.1  1999/09/22 14:26:45  djr
-  Major rewrite of orbcore to support POA.
-
-*/
 
 #ifndef __CORBABOA_H__
 #define __CORBABOA_H__
@@ -86,7 +47,7 @@ OMNI_NAMESPACE_BEGIN(omni)
 class omniOrbBOA : public CORBA::BOA, public omniObjAdapter
 {
 public:
-  omniOrbBOA(int nil);
+  omniOrbBOA(int is_nil);
   virtual ~omniOrbBOA();
 
   ////////////////

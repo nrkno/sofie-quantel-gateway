@@ -105,6 +105,9 @@
 /* Define to 1 if you have the `poll' function. */
 #undef HAVE_POLL
 
+/* Define to 1 if you have the `rand_r' function. */
+#undef HAVE_RAND_R
+
 /* define if the compiler supports reinterpret_cast<> */
 #undef HAVE_REINTERPRET_CAST
 
@@ -171,10 +174,10 @@
 /* Define to 1 if the system has the type `struct sockaddr_in6'. */
 #undef HAVE_STRUCT_SOCKADDR_IN6
 
-/* Define to 1 if `sin_len' is member of `struct sockaddr_in'. */
+/* Define to 1 if `sin_len' is a member of `struct sockaddr_in'. */
 #undef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
 
-/* Define to 1 if `sin_zero' is member of `struct sockaddr_in'. */
+/* Define to 1 if `sin_zero' is a member of `struct sockaddr_in'. */
 #undef HAVE_STRUCT_SOCKADDR_IN_SIN_ZERO
 
 /* Define to 1 if the system has the type `struct sockaddr_storage'. */
@@ -216,14 +219,23 @@
 /* define if you want to avoid use of alloca */
 #undef OMNIORB_DISABLE_ALLOCA
 
+/* define if you want to disable long double support */
+#undef OMNIORB_DISABLE_LONGDOUBLE
+
 /* define if you want mutexes to be traced */
 #undef OMNIORB_ENABLE_LOCK_TRACES
+
+/* define if you want to disable atomic operations */
+#undef OMNI_DISABLE_ATOMIC_OPS
 
 /* define if you want to disable IPv6 support */
 #undef OMNI_DISABLE_IPV6
 
 /* define if the compiler supports covariant return types */
 #undef OMNI_HAVE_COVARIANT_RETURNS
+
+/* define if __sync_add_and_fetch and __sync_sub_and_fetch are available */
+#undef OMNI_HAVE_SYNC_ADD_AND_FETCH
 
 /* define if long is the same type as int */
 #undef OMNI_LONG_IS_INT
@@ -233,6 +245,9 @@
 
 /* Define to the type of getsockname's third argument */
 #undef OMNI_SOCKNAME_SIZE_T
+
+/* define if you want to use CFNetwork */
+#undef OMNI_USE_CFNETWORK_CONNECT
 
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
@@ -245,6 +260,9 @@
 
 /* Define to the one symbol short name of this package. */
 #undef PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
@@ -310,3 +328,6 @@
 #  undef WORDS_BIGENDIAN
 # endif
 #endif
+
+/* Define to `unsigned int' if <sys/types.h> does not define. */
+#undef size_t

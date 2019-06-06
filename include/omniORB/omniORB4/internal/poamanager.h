@@ -8,60 +8,22 @@
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //    Internal implementation of the PortableServer::POAManager.
 //
-
-/*
-  $Log: poamanager.h,v $
-  Revision 1.1.6.1  2003/03/23 21:03:43  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.4.2  2001/11/13 14:11:44  dpg1
-  Tweaks for CORBA 2.5 compliance.
-
-  Revision 1.1.4.1  2001/04/18 17:18:15  sll
-  Big checkin with the brand new internal APIs.
-  These files were relocated and scoped with the omni namespace.
-
-  Revision 1.2.2.2  2000/09/27 17:41:41  sll
-  Updated include/omniORB3 to include/omniORB4
-
-  Revision 1.2.2.1  2000/07/17 10:35:57  sll
-  Merged from omni3_develop the diff between omni3_0_0_pre3 and omni3_0_0.
-
-  Revision 1.3  2000/07/13 15:25:56  dpg1
-  Merge from omni3_develop for 3.0 release.
-
-  Revision 1.1.2.4  2000/01/27 10:55:47  djr
-  Mods needed for powerpc_aix.  New macro OMNIORB_BASE_CTOR to provide
-  fqname for base class constructor for some compilers.
-
-  Revision 1.1.2.3  1999/10/04 17:08:34  djr
-  Some more fixes/MSVC work-arounds.
-
-  Revision 1.1.2.2  1999/09/30 11:52:33  djr
-  Implemented use of AdapterActivators in POAs.
-
-  Revision 1.1.2.1  1999/09/22 14:27:02  djr
-  Major rewrite of orbcore to support POA.
-
-*/
 
 #ifndef __POAMANAGER_H__
 #define __POAMANAGER_H__

@@ -9,46 +9,22 @@
 //    This file is part of the omniORB library
 //
 //    The omniORB library is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Library General Public
+//    modify it under the terms of the GNU Lesser General Public
 //    License as published by the Free Software Foundation; either
-//    version 2 of the License, or (at your option) any later version.
+//    version 2.1 of the License, or (at your option) any later version.
 //
 //    This library is distributed in the hope that it will be useful,
 //    but WITHOUT ANY WARRANTY; without even the implied warranty of
 //    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//    Library General Public License for more details.
+//    Lesser General Public License for more details.
 //
-//    You should have received a copy of the GNU Library General Public
-//    License along with this library; if not, write to the Free
-//    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//    02111-1307, USA
+//    You should have received a copy of the GNU Lesser General Public
+//    License along with this library. If not, see http://www.gnu.org/licenses/
 //
 //
 // Description:
 //    CORBA::Context, ContextList
 //
-
-/*
-  $Log: CORBA_Context.h,v $
-  Revision 1.1.4.3  2009/05/06 16:16:15  dgrisby
-  Update lots of copyright notices.
-
-  Revision 1.1.4.2  2004/07/23 10:29:56  dgrisby
-  Completely new, much simpler Any implementation.
-
-  Revision 1.1.4.1  2003/03/23 21:04:24  dgrisby
-  Start of omniORB 4.1.x development branch.
-
-  Revision 1.1.2.3  2001/11/27 14:35:07  dpg1
-  Context, DII fixes.
-
-  Revision 1.1.2.2  2001/11/06 15:41:34  dpg1
-  Reimplement Context. Remove CORBA::Status. Tidying up.
-
-  Revision 1.1.2.1  2001/08/17 13:39:44  dpg1
-  Split CORBA.h into separate bits.
-
-*/
 
 #ifndef INSIDE_OMNIORB_CORBA_MODULE
 #  error "Must only be #included by CORBA.h"
@@ -131,6 +107,9 @@ typedef _CORBA_PseudoObj_Out<ContextList,ContextList_var> ContextList_out;
 
 class ContextList {
 public:
+  typedef ContextList_ptr _ptr_type;
+  typedef ContextList_var _var_type;
+
   virtual ~ContextList();
 
   virtual ULong count() const = 0;
