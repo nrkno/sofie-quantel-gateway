@@ -563,7 +563,7 @@ _CORBA_MODULE_BEG
       if( _s._pd_seq )  _pd_seq = new WStrings(*_s._pd_seq);
       else              _pd_seq = 0;
     }
-    inline ~WStrings_var() { printf("_pd_seq is %p\n", _pd_seq); if( _pd_seq )  delete _pd_seq;  }
+    inline ~WStrings_var() { if ( _pd_seq )  delete _pd_seq;  }
 
     inline WStrings_var& operator = (WStrings* _s) {
       if( _pd_seq )  delete _pd_seq;

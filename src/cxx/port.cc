@@ -240,7 +240,7 @@ void getPlayPortExecute(napi_env env, void* data) {
 		Quentin::Port_var port = server->getPort(wportName.data(), 0);
 
 	 	Quentin::PortListener::PlayPortStatus_var gps;
-		gps = &port->getStatus().playStatus();
+		gps = port->getStatus().playStatus();
 
 		c->refTime = formatTimecode(gps->refTime);
 		c->portTime = formatTimecode(gps->portTime);

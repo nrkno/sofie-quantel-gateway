@@ -169,7 +169,7 @@ router.get('/default/clip', async (ctx) => {
 		ctx.status = 400
 		ctx.body = {
 			status: 400,
-			message: 'Bad requests. Missing search query parameter, e.g. \'?Title=...\'',
+			message: 'Bad request. Missing search query parameter, e.g. \'?Title=...\'',
 			stack: ''
 		} as JSONError
 	} else {
