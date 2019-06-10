@@ -224,8 +224,6 @@ To load the fragments onto a port, POST the fragments to the port reference, add
 
     /:zoneID/server/:serverID/port/:portID/fragments(?offset=:offset)
 
-If fragments need to be cloned from one server to another, an asynchronous clone process is initiated. Although it is possible for servers to play material while it is cloning, clients should allow a couple of seconds between starting to load fragments and setting the jump (see below) before triggering start to allow the clone to progress around about the play head.
-
 Information about the status of the port is returned.
 
 ## Controlling the port
@@ -234,7 +232,7 @@ To control the PORT, POST trigger messages:
 
     /:zoneID/server/:serverID/port/:portID/trigger/:trigger(?offset=:offset)
 
-The `:trigger` is one of `START`, `STOP` or `JUMP`. Note that `STOP` is equivalent to CasparCG _pause_. To _resume_, use `START`. The optional `:offset` is a frame at which to trigger the action, for example `.../trigger/STOP/345` signals that the playing of the clip should stop at frame 345 on the ports timeline.
+The `:trigger` is one of `START`, `STOP` or `JUMP`. Note that `STOP` is equivalent to CasparCG _pause_. To _resume_, use `START`. The optional `:offset` is a frame at which to trigger the action, for example `.../trigger/STOP?offset=345` signals that the playing of the clip should stop at frame 345 on the ports timeline.
 
 ### Hard jump
 
