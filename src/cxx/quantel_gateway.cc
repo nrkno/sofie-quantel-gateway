@@ -4,6 +4,7 @@
 #include "port.h"
 #include "control.h"
 #include "thumbs.h"
+#include "test_server.h"
 
 napi_value timecodeFromBCD(napi_env env, napi_callback_info info) {
 	napi_status status;
@@ -84,12 +85,13 @@ napi_value Init(napi_env env, napi_value exports) {
 		DECLARE_NAPI_METHOD("deleteClip", deleteClip),
 		DECLARE_NAPI_METHOD("timecodeFromBCD", timecodeFromBCD),
 		DECLARE_NAPI_METHOD("timecodeToBCD", timecodeToBCD),
+		DECLARE_NAPI_METHOD("runServer", runServer),
     { "START", nullptr, nullptr, nullptr, nullptr, start, napi_enumerable, nullptr },
     { "STOP", nullptr, nullptr, nullptr, nullptr, stop, napi_enumerable, nullptr },
     { "JUMP", nullptr, nullptr, nullptr, nullptr, jump, napi_enumerable, nullptr },
     { "TRANSITION", nullptr, nullptr, nullptr, nullptr, transition, napi_enumerable, nullptr },
   };
-  status = napi_define_properties(env, exports, 23, desc);
+  status = napi_define_properties(env, exports, 24, desc);
 	CHECK_STATUS;
 
   return exports;

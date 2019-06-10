@@ -9,7 +9,8 @@
 	  "src/cxx/clip.cc",
 	  "src/cxx/port.cc",
 	  "src/cxx/control.cc",
-	  "src/cxx/thumbs.cc"
+	  "src/cxx/thumbs.cc",
+	  "src/cxx/test_server.cc"
 	],
     "conditions": [
       ['OS=="win"', {
