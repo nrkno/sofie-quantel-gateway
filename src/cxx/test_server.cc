@@ -1,5 +1,27 @@
 #include "test_server.h"
 
+class Server_i: public POA_Quentin::Server,
+        public PortableServer::RefCountServantBase
+{
+public:
+  inline Server_i() {}
+  virtual ~Server_i() {}
+	virtual Quentin::ServerInfo* getServerInfo() { return nullptr; }
+	virtual Quentin::Port_ptr getPort(const ::CORBA::WChar* ident, ::CORBA::Long number) { return nullptr; }
+	virtual Quentin::WStrings* getPortNames() { return nullptr; }
+	virtual Quentin::WStrings* getChanPorts() { return nullptr; }
+	virtual ::CORBA::LongLong getFreeProtons(::CORBA::Long poolIdent) { return 0; }
+	virtual Quentin::Longs* getPools() { return nullptr; }
+	virtual Quentin::Timecode getRefTime() { return Quentin::Timecode(); }
+	virtual Quentin::ConfigDescriptionList* getConfigurations(::CORBA::Long channel, ::Quentin::FragmentType type, ::CORBA::Boolean forPlay) { return nullptr; }
+	virtual Quentin::Longs* getDefaultConfigurations(::CORBA::Long channel) { return nullptr; }
+	virtual Quentin::Longs* getCurrentConfigurations(::CORBA::Long channel) { return nullptr; }
+	virtual Quentin::ServerCapabilities* getServerCapabilities() { return nullptr; }
+
+	virtual ::CORBA::WChar* getProperty(const ::CORBA::WChar* propertyName) { return nullptr; }
+	virtual Quentin::WStrings* getPropertyList() { return nullptr; }
+};
+
 class ZonePortal_i : public POA_Quentin::ZonePortal,
         public PortableServer::RefCountServantBase
 {
@@ -7,8 +29,8 @@ public:
   inline ZonePortal_i() {}
   virtual ~ZonePortal_i() {}
 	virtual ::CORBA::Long majorIDLVersion() { return 0; }
-	virtual Quentin::Longs* getServers(::CORBA::Boolean negateIfDown) { return nullptr; }
-	virtual Quentin::Server_ptr getServer(::CORBA::Long serverID) { return nullptr; }
+	virtual Quentin::Longs* getServers(::CORBA::Boolean negateIfDown);
+	virtual Quentin::Server_ptr getServer(::CORBA::Long serverID);
 	virtual Quentin::Longs* getPools() { return nullptr; }
 	virtual ::CORBA::LongLong getPoolSpace(::CORBA::Long mode, ::CORBA::Long poolID) { return 0; }
 	virtual Quentin::Server_ptr getPoolServer(::CORBA::Long poolID) { return nullptr; }
@@ -113,11 +135,10 @@ CORBA::Long ZonePortal_i::getZoneNumber()
   return 1000;
 }
 
-//FIXME this does not work
 Quentin::Longs* ZonePortal_i::getZones(::CORBA::Boolean upOnly) {
 	Quentin::Longs* zones = new Quentin::Longs;
 	zones->length(1);
-	zones[0] = 2000;
+	(*zones)[0] = 2000;
 	return zones;
 }
 
@@ -129,6 +150,21 @@ CORBA::WChar* ZonePortal_i::getZoneName(::CORBA::Long zoneID) {
 	CORBA::WChar* name = (CORBA::WChar*) malloc(25 * sizeof(CORBA::WChar));
 	swprintf(name, 25, L"Zone %i", zoneID);
 	return name;
+}
+
+Quentin::Longs* ZonePortal_i::getServers(::CORBA::Boolean negateIfDown) {
+	Quentin::Longs* servers = new Quentin::Longs;
+	servers->length(3);
+	(*servers)[0] = 1100;
+	(*servers)[1] = 1200;
+	(*servers)[2] = 1300;
+	return servers;
+}
+
+Quentin::Server_ptr ZonePortal_i::getServer(::CORBA::Long serverID) {
+	Server_i* myServer = new Server_i;
+	Quentin::Server_var server = myServer->_this();
+	return server._retn();
 }
 
 napi_value runServer(napi_env env, napi_callback_info info) {

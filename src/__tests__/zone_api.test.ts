@@ -28,11 +28,15 @@ describe('Test framework', () => {
 			zoneNumber: 1000,
 			zoneName: 'Zone 1000',
 			isRemote: false
-		} /*, { FIXME
+		}, {
 			type: 'ZonePortal',
 			zoneNumber: 2000,
 			zoneName: 'Zone 2000',
-		isRemote: true } */] as Quantel.ZoneInfo[])
+			isRemote: true } ] as Quantel.ZoneInfo[])
+	})
+
+	test('Get servers', async () => {
+		await expect(Quantel.getServers()).resolves.toHaveLength(3)
 	})
 
 	afterAll(async () => {
