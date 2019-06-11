@@ -88,7 +88,7 @@ void listZonesExecute(napi_env env, void* data) {
 	try {
 		resolveZonePortal(c->isaIOR, &orb, &zp);
 
-		c->zoneIDs = zp->getZones(false);
+		c->zoneIDs =zp->getZones(false);
 		c->zoneIDs->length(c->zoneIDs->length() + 1);
 		for ( int x = c->zoneIDs->length() - 1 ; x > 0 ; x-- ) {
 			c->zoneIDs[x] = c->zoneIDs[x - 1];

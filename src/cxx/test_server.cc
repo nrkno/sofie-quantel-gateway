@@ -92,10 +92,10 @@ public:
 	virtual ::CORBA::LongLong getFreeProtons(::CORBA::Long poolIdent) { return 0; }
 	virtual ::CORBA::Long getFreeFrames(::CORBA::Long poolIdent, const ::Quentin::FormatCodes& formats) { return 0; }
 	virtual ::CORBA::Long getZoneNumber();
-	virtual Quentin::Longs* getZones(::CORBA::Boolean upOnly) { return nullptr; }
+	virtual Quentin::Longs* getZones(::CORBA::Boolean upOnly);
 	virtual Quentin::ZonePortal_ptr getZonePortal(::CORBA::Long zoneID) { return nullptr; }
-	virtual ::CORBA::WChar* getZoneName(::CORBA::Long zoneID) { return nullptr; }
-	virtual ::CORBA::Boolean zoneIsRemote(::CORBA::Long zoneID) { return nullptr; }
+	virtual ::CORBA::WChar* getZoneName(::CORBA::Long zoneID);
+	virtual ::CORBA::Boolean zoneIsRemote(::CORBA::Long zoneID);
 	virtual ::CORBA::Long maxAAFRecord() { return 0; }
 	virtual void putAAF(::CORBA::Long clipID, ::CORBA::Long record, const ::Quentin::RawData& data) { }
 	virtual ::CORBA::Long aafRecordLength(::CORBA::Long clipId) { return 0; }
@@ -110,7 +110,25 @@ public:
 
 CORBA::Long ZonePortal_i::getZoneNumber()
 {
-  return 42;
+  return 1000;
+}
+
+//FIXME this does not work
+Quentin::Longs* ZonePortal_i::getZones(::CORBA::Boolean upOnly) {
+	Quentin::Longs* zones = new Quentin::Longs;
+	zones->length(1);
+	zones[0] = 2000;
+	return zones;
+}
+
+CORBA::Boolean ZonePortal_i::zoneIsRemote(::CORBA::Long zoneID) {
+	return (zoneID < 2000) ? CORBA::Boolean(false) : CORBA::Boolean(true);
+}
+
+CORBA::WChar* ZonePortal_i::getZoneName(::CORBA::Long zoneID) {
+	CORBA::WChar* name = (CORBA::WChar*) malloc(25 * sizeof(CORBA::WChar));
+	swprintf(name, 25, L"Zone %i", zoneID);
+	return name;
 }
 
 napi_value runServer(napi_env env, napi_callback_info info) {

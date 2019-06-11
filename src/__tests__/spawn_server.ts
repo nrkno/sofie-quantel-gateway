@@ -11,6 +11,10 @@ export async function start (): Promise<string> {
 		let isaIOR = ''
 
 		mockServer.stdout.on('data', (data) => {
+			if (resolved) {
+				console.log(data.toString())
+				return
+			}
 			isaIOR = data.toString().trim()
 			app = http.createServer((_request, response) => {
 				response.writeHead(200, { 'Content-Type': 'text/plain' })

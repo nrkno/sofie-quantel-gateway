@@ -5,6 +5,9 @@ module.exports = {
 			diagnostics: false
 		}
 	},
+	"roots": [
+    "<rootDir>/src"
+  ],
 	moduleFileExtensions: [
 		'ts',
 		'js',
