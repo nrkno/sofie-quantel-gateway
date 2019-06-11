@@ -9,7 +9,7 @@ interface JSONError {
 	stack: string,
 }
 
-const app = new Koa()
+export const app = new Koa()
 const router = new Router()
 
 app.use(bodyParser({
@@ -454,6 +454,7 @@ app.use(async (ctx, next) => {
 
 app.use(router.routes())
 
-app.listen(3000)
-
-console.log('Server running on port 3000')
+if (!module.parent) {
+	app.listen(3000)
+	console.log('Server running on port 3000')
+}

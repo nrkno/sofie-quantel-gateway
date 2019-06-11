@@ -102,6 +102,7 @@
   "devDependencies": {
     "@types/jest": "^24.0.11",
     "@types/node": "^8.0.4",
+    "@types/request-promise-native": "^1.0.16",
     "codecov": "^3.3.0",
     "gh-pages": "^2.0.1",
     "jest": "^24.7.1",
@@ -113,6 +114,7 @@
     "npm-scripts-info": "^0.3.9",
     "nyc": "^13.3.0",
     "opn-cli": "^4.1.0",
+    "request-promise-native": "^1.0.7",
     "sleep-ms": "^2.0.1",
     "standard-version": "^5.0.2",
     "trash-cli": "^1.4.0",
