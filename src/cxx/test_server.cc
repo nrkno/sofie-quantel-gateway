@@ -5,11 +5,12 @@ class Server_i: public POA_Quentin::Server,
 {
 public:
   inline Server_i() {}
+	inline Server_i(int32_t id) { serverID = id; }
   virtual ~Server_i() {}
-	virtual Quentin::ServerInfo* getServerInfo() { return nullptr; }
+	virtual Quentin::ServerInfo* getServerInfo();
 	virtual Quentin::Port_ptr getPort(const ::CORBA::WChar* ident, ::CORBA::Long number) { return nullptr; }
-	virtual Quentin::WStrings* getPortNames() { return nullptr; }
-	virtual Quentin::WStrings* getChanPorts() { return nullptr; }
+	virtual Quentin::WStrings* getPortNames();
+	virtual Quentin::WStrings* getChanPorts();
 	virtual ::CORBA::LongLong getFreeProtons(::CORBA::Long poolIdent) { return 0; }
 	virtual Quentin::Longs* getPools() { return nullptr; }
 	virtual Quentin::Timecode getRefTime() { return Quentin::Timecode(); }
@@ -20,7 +21,69 @@ public:
 
 	virtual ::CORBA::WChar* getProperty(const ::CORBA::WChar* propertyName) { return nullptr; }
 	virtual Quentin::WStrings* getPropertyList() { return nullptr; }
+private:
+	int32_t serverID = 0;
 };
+
+Quentin::ServerInfo* Server_i::getServerInfo() {
+	Quentin::ServerInfo* serverInfo = new Quentin::ServerInfo;
+	serverInfo->ident = serverID;
+	CORBA::WChar* name = (CORBA::WChar*) malloc(25 * sizeof(CORBA::WChar));
+	swprintf(name, 25, L"Server %i", serverID);
+	serverInfo->name = name;
+	serverInfo->down = (serverID == 1200);
+	switch (serverID) {
+		case 1100: serverInfo->numChannels = (CORBA::Long) 4; break;
+		case 1200: serverInfo->numChannels = (CORBA::Long) 2; break;
+		case 1300: serverInfo->numChannels = (CORBA::Long) 3; break;
+		default: serverInfo->numChannels = (CORBA::Long) 1; break;
+	}
+	serverInfo->pools.length(1);
+	serverInfo->pools[0] = serverID / 100;
+	return serverInfo;
+}
+
+Quentin::WStrings* Server_i::getPortNames() {
+	Quentin::WStrings* portNames = new Quentin::WStrings;
+	CORBA::Long numPorts = 0;
+	switch (serverID) {
+		case 1100: numPorts = (CORBA::Long) 2; break;
+		case 1200: numPorts = (CORBA::Long) 1; break;
+		case 1300: numPorts = (CORBA::Long) 2; break;
+		default: numPorts = (CORBA::Long) 1; break;
+	}
+
+	portNames->length(numPorts);
+	for ( int32_t x = 0 ; x < numPorts ; x++ ) {
+		(*portNames)[x] = (CORBA::WChar*) malloc(10 * sizeof(CORBA::WChar));
+		swprintf((*portNames)[x], 10, L"Port %i", x+1);
+	}
+	return portNames;
+}
+
+Quentin::WStrings* Server_i::getChanPorts() {
+	Quentin::WStrings* portNames = new Quentin::WStrings;
+	CORBA::Long numPorts = 0;
+	CORBA::Long numChannels = 0;
+	switch (serverID) {
+		case 1100: numChannels = (CORBA::Long) 4; numPorts = (CORBA::Long) 2; break;
+		case 1200: numChannels = (CORBA::Long) 2; numPorts = (CORBA::Long) 1; break;
+		case 1300: numChannels = (CORBA::Long) 3; numPorts = (CORBA::Long) 2; break;
+		default: numChannels = (CORBA::Long) 1; numPorts = (CORBA::Long) 1; break;
+	}
+
+	portNames->length(numChannels);
+	for ( int32_t x = 0 ; x < numChannels ; x++ ) {
+		(*portNames)[x] = (CORBA::WChar*) malloc(10 * sizeof(CORBA::WChar));
+		if (x < numPorts) {
+			swprintf((*portNames)[x], 10, L"Port %i", x+1);
+		} else {
+			swprintf((*portNames)[x], 10, L"");
+		}
+	}
+	return portNames;
+	return nullptr;
+}
 
 class ZonePortal_i : public POA_Quentin::ZonePortal,
         public PortableServer::RefCountServantBase
@@ -159,10 +222,16 @@ Quentin::Longs* ZonePortal_i::getServers(::CORBA::Boolean negateIfDown) {
 	(*servers)[1] = 1200;
 	(*servers)[2] = 1300;
 	return servers;
+	/* Quentin::Longs_var servers;
+	servers->length(3);
+	servers[0] = 1100;
+	servers[1] = 1200;
+	servers[2] = 1300;
+	return servers._retn(); */
 }
 
 Quentin::Server_ptr ZonePortal_i::getServer(::CORBA::Long serverID) {
-	Server_i* myServer = new Server_i;
+	Server_i* myServer = new Server_i(serverID);
 	Quentin::Server_var server = myServer->_this();
 	return server._retn();
 }

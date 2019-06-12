@@ -456,5 +456,9 @@ app.use(router.routes())
 
 if (!module.parent) {
 	app.listen(3000)
-	console.log('Server running on port 3000')
+	console.log('Server running on port wibble 3000')
+	app.on('error', console.error)
+	app.on('listening', () => {
+		console.log('RUNNING!!!')
+	})
 }
