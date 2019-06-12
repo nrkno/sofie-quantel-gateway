@@ -117,7 +117,7 @@ public:
 	virtual Quentin::RushTagList* getTags(const ::Quentin::RushIdent& rushID, const ::Quentin::WStrings& tagsWanted, ::CORBA::Long start, ::CORBA::Long finish) { return nullptr; }
 	virtual Quentin::RushTimecodeList* getTimecodes(const ::Quentin::RushIdent& rushID, ::CORBA::Long start, ::CORBA::Long finish) { return nullptr; }
 	virtual void refresh(::CORBA::Long mode, ::CORBA::Long param) { }
-	virtual Quentin::ColumnDescList* getColumnDescriptions() { return nullptr; }
+	virtual Quentin::ColumnDescList* getColumnDescriptions();
 	virtual ::CORBA::Long createClip(const ::Quentin::ClipPropertyList& props, const ::Quentin::ServerFragments& frags) { return 0; }
 	virtual ::CORBA::Long createPlacedClip(const ::Quentin::ClipPropertyList& props, const ::Quentin::ServerFragments& frags, ::CORBA::Long poolIdent, ::CORBA::Long ticket, ::CORBA::Long priority) { return 0; }
 	virtual Quentin::Longs* findFragsOnPools(const ::Quentin::ServerFragments& frags, const ::Quentin::Longs& pools) { return nullptr; }
@@ -131,7 +131,7 @@ public:
 	virtual Quentin::ServerFragments* getSubTrackFragments(::CORBA::Long clipID, ::CORBA::Long trackType, ::CORBA::Long trackNum, ::CORBA::Long start, ::CORBA::Long finish) { return nullptr; }
 	virtual Quentin::ServerFragments* getSourceTimecode(::CORBA::Long clipID, ::CORBA::Long start, ::CORBA::Long finish) { return nullptr; }
 	virtual Quentin::ServerFragments* getRefTimecode(::CORBA::Long clipID, ::CORBA::Long start, ::CORBA::Long finish) { return nullptr; }
-	virtual Quentin::WStrings* getClipData(::CORBA::Long clipID, const ::Quentin::WStrings& colsWanted) { return nullptr; }
+	virtual Quentin::WStrings* getClipData(::CORBA::Long clipID, const ::Quentin::WStrings& colsWanted);
 	virtual void updateClip(::CORBA::Long clipID, const ::Quentin::ClipPropertyList& newColumns) { }
 	virtual void setClipProtection(::CORBA::Long clipID, const ::CORBA::WChar* userID, ::Quentin::ProtectMode mode) { }
 	virtual ::CORBA::Boolean deleteClip(::CORBA::Long clipID) { return nullptr; }
@@ -236,8 +236,34 @@ Quentin::Server_ptr ZonePortal_i::getServer(::CORBA::Long serverID) {
 	return server._retn();
 }
 
+Quentin::ColumnDescList* ZonePortal_i::getColumnDescriptions() {
+	Quentin::ColumnDescList* cols = new Quentin::ColumnDescList;
+	cols->length(4);
+	(*cols)[0] = { L"ClipID", L"Number", L"AltClipID", false, false, true, false };
+	(*cols)[1] = { L"Created", L"Date", L"AltCreated", false, false, true, true };
+	(*cols)[2] = { L"PlaceHolder", L"Boolean", L"", false, false, true, true };
+	(*cols)[3] = { L"Title", L"String", L"AltTitle", true, true, true, true };
+	return cols;
+}
+
+Quentin::WStrings* ZonePortal_i::getClipData(CORBA::Long clipID, const Quentin::WStrings& colsWanted) {
+	Quentin::WStrings* clipInfo = new Quentin::WStrings;
+	Quentin::WStrings_var wanted = Quentin::WStrings_var((Quentin::WStrings*) &colsWanted);
+	// wprintf(L"Here I am, walking down the clip. Wanted %i, first %ws\n", wanted->length(), (CORBA::WChar*) wanted[0]);
+	// fflush(stdout);
+	if (clipID != 2) {
+		throw Quentin::BadIdent(Quentin::BadIdentReason::clipNotKnown, clipID);
+	}
+	clipInfo->length(4);
+	(*clipInfo)[0] = L"2";
+	(*clipInfo)[1] = L"1560366960000";
+	(*clipInfo)[2] = L"false";
+	(*clipInfo)[3] = L"Once upon a time in Quantel";
+	return clipInfo;
+}
+
 napi_value runServer(napi_env env, napi_callback_info info) {
-	napi_status status;
+	// napi_status status;
 
 	int argc = 0;
 	CORBA::ORB_var orb = CORBA::ORB_init(argc, nullptr);
