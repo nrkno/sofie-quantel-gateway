@@ -154,7 +154,7 @@ public:
 	virtual ::CORBA::Long createDeltaFromClips(::CORBA::Long originalClipID, ::CORBA::Long laterClipID, const ::Quentin::ClipPropertyList& props) { return 0; }
 	virtual ::CORBA::Long createDeltaFromFragments(const ::Quentin::ServerFragments& originalFragments, const ::Quentin::ServerFragments& laterFragments, const ::Quentin::ClipPropertyList& props) { return 0; }
 	virtual ::CORBA::Long getPoolNumberedClip(::CORBA::Long number, ::CORBA::Long pool) { return 0; }
-	virtual Quentin::WStrings* searchClips(const ::Quentin::ClipPropertyList& props, const ::Quentin::WStrings& columns, ::CORBA::Long max) { return nullptr; }
+	virtual Quentin::WStrings* searchClips(const ::Quentin::ClipPropertyList& props, const ::Quentin::WStrings& columns, ::CORBA::Long max);
 	virtual ::CORBA::Long countClips(const ::Quentin::ClipPropertyList& props) { return 0; }
 	virtual Quentin::WStrings* searchClipsWithOffset(const ::Quentin::ClipPropertyList& props, const ::Quentin::WStrings& columns, ::CORBA::Long offset, ::CORBA::Long max) { return nullptr; }
 	virtual Quentin::WStrings* orderedSearchClips(const ::Quentin::ClipPropertyList& props, const ::Quentin::WStrings& columns, const ::Quentin::SortOrderList& order, ::CORBA::Long offset, ::CORBA::Long max) { return nullptr; }
@@ -261,6 +261,49 @@ Quentin::WStrings* ZonePortal_i::getClipData(CORBA::Long clipID, const Quentin::
 	(*clipInfo)[3] = L"Once upon a time in Quantel";
 	return clipInfo;
 }
+
+Quentin::WStrings* ZonePortal_i::searchClips(const Quentin::ClipPropertyList& properties, const Quentin::WStrings& columns, CORBA::Long max) {
+	Quentin::ClipPropertyList_var props = Quentin::ClipPropertyList_var((Quentin::ClipPropertyList*) &properties);
+	Quentin::WStrings_var cols = Quentin::WStrings_var((Quentin::WStrings*) &columns);
+	Quentin::WStrings* result = new Quentin::WStrings;
+	Quentin::ClipProperty theProp = props[0];
+	if (std::wstring(theProp.value) != std::wstring(L"Once upon*")) {
+		return result;
+	}
+	result->length(cols->length());
+	for ( uint32_t x = 0 ; x < result->length() ; x++ ) {
+		if (std::wstring(cols[x]) == L"ClipID") {
+			(*result)[x] = L"2"; continue;
+		}
+		if (std::wstring(cols[x]) == L"CloneID") {
+			(*result)[x] = L"2"; continue;
+		}
+		if (std::wstring(cols[x]) == L"Completed") {
+			(*result)[x] = L"1560366960000"; continue;
+		}
+		if (std::wstring(cols[x]) == L"Created") {
+			(*result)[x] = L"1560366960000"; continue;
+		}
+		if (std::wstring(cols[x]) == L"Description") {
+			(*result)[x] = L"This is the best programme ever to be produced."; continue;
+		}
+		if (std::wstring(cols[x]) == L"Frames") {
+			(*result)[x] = L"1234"; continue;
+		}
+		if (std::wstring(cols[x]) == L"Owner") {
+			(*result)[x] = L"Mine Hands Off"; continue;
+		}
+		if (std::wstring(cols[x]) == L"PoolID") {
+			(*result)[x] = L"11"; continue;
+		}
+		if (std::wstring(cols[x]) == L"Title") {
+			(*result)[x] = L"Once upon a time in Quantel"; continue;
+		}
+		throw Quentin::BadColumnData(cols[x], cols[x]);
+	}
+	return result;
+}
+
 
 napi_value runServer(napi_env env, napi_callback_info info) {
 	// napi_status status;
