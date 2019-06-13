@@ -416,6 +416,9 @@ export namespace Quantel {
 
 	export async function getFragments (options: FragmentRef): Promise<ServerFragments> {
 		await getISAReference()
+		if (options.start && options.finish && options.start >= options.finish) {
+			throw new RangeError(`Finish point ${options.finish} cannot be before start point ${options.start}.`)
+		}
 		try {
 			return await quantel.getFragments(await isaIOR, options)
 		} catch (err) {

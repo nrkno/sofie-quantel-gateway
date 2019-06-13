@@ -379,7 +379,7 @@ void getFragmentsComplete(napi_env env, napi_status asyncStatus, void* data) {
 
 	c->status = napi_create_object(env, &result);
 	REJECT_STATUS;
-	c->status = napi_create_string_utf8(env, "ServerFramgments", NAPI_AUTO_LENGTH, &prop);
+	c->status = napi_create_string_utf8(env, "ServerFragments", NAPI_AUTO_LENGTH, &prop);
 	REJECT_STATUS;
 	c->status = napi_set_named_property(env, result, "type", prop);
 	REJECT_STATUS;

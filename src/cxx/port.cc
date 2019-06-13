@@ -820,7 +820,6 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
       vfd.rushID = {
         (CORBA::LongLong) strtoull(rushIDStr.substr(0, 16).c_str(), nullptr, 16),
         (CORBA::LongLong) strtoull(rushIDStr.substr(16, 32).c_str(), nullptr, 16) };
-      vfd.rushFrame = 0;
 
       if (typeName[0] == 'V') {
         sfd.videoFragmentData(vfd);

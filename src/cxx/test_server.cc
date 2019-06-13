@@ -122,8 +122,8 @@ public:
 	virtual ::CORBA::Long createPlacedClip(const ::Quentin::ClipPropertyList& props, const ::Quentin::ServerFragments& frags, ::CORBA::Long poolIdent, ::CORBA::Long ticket, ::CORBA::Long priority) { return 0; }
 	virtual Quentin::Longs* findFragsOnPools(const ::Quentin::ServerFragments& frags, const ::Quentin::Longs& pools) { return nullptr; }
 	virtual Quentin::Longs* findClipOnPools(::CORBA::Long clipID, const ::Quentin::Longs& pools) { return nullptr; }
-	virtual Quentin::ServerFragments* getAllFragments(::CORBA::Long clipID) { return nullptr; }
-	virtual Quentin::ServerFragments* getFragments(::CORBA::Long clipID, ::CORBA::Long start, ::CORBA::Long finish) { return nullptr; }
+	virtual Quentin::ServerFragments* getAllFragments(::CORBA::Long clipID);
+	virtual Quentin::ServerFragments* getFragments(::CORBA::Long clipID, ::CORBA::Long start, ::CORBA::Long finish);
 	virtual Quentin::ServerFragments* getFragmentsWithMode(::CORBA::Long clipID, ::CORBA::Long start, ::CORBA::Long finish, ::CORBA::Long playMode) { return nullptr; }
 	virtual Quentin::ServerFragments* getTypeFragments(::CORBA::Long clipID, ::CORBA::Long trackType) { return nullptr; }
 	virtual Quentin::ServerFragments* getSubTypeFragments(::CORBA::Long clipID, ::CORBA::Long trackType, ::CORBA::Long start, ::CORBA::Long finish) { return nullptr; }
@@ -268,6 +268,8 @@ Quentin::WStrings* ZonePortal_i::searchClips(const Quentin::ClipPropertyList& pr
 	Quentin::WStrings* result = new Quentin::WStrings;
 	Quentin::ClipProperty theProp = props[0];
 	if (std::wstring(theProp.value) != std::wstring(L"Once upon*")) {
+		result->length(0);
+		// printf("Got into here.\n"); fflush(stdout);
 		return result;
 	}
 	result->length(cols->length());
@@ -302,6 +304,109 @@ Quentin::WStrings* ZonePortal_i::searchClips(const Quentin::ClipPropertyList& pr
 		throw Quentin::BadColumnData(cols[x], cols[x]);
 	}
 	return result;
+}
+
+Quentin::ServerFragments* ZonePortal_i::getAllFragments(CORBA::Long clipID) {
+	if (clipID != 2) {
+		throw Quentin::BadIdent(Quentin::BadIdentReason::clipNotKnown, clipID);
+	}
+	Quentin::ServerFragments* frags = new Quentin::ServerFragments;
+	frags->length(2);
+
+  // VideoFragment
+	Quentin::ServerFragment sfv = {};
+	Quentin::PositionData vfd = {};
+	Quentin::ServerFragmentData sfvd;
+
+	sfv.trackNum = 0;
+	sfv.start = 0;
+	sfv.finish = 1000;
+	vfd.format = 90;
+	vfd.poolID = 11;
+	vfd.poolFrame = 123;
+	vfd.skew = 42;
+	vfd.rushFrame = 543210;
+	vfd.rushID = {
+		(CORBA::LongLong) 0x0123456789abcdef,
+		(CORBA::LongLong) 0xfedcba9876543210 };
+	sfvd.videoFragmentData(vfd);
+	sfv.fragmentData = sfvd;
+	(*frags)[0] = sfv;
+
+  // AudioFragment
+	Quentin::ServerFragment sfa = {};
+	Quentin::PositionData afd = {};
+	Quentin::ServerFragmentData sfad;
+
+	sfa.trackNum = 0;
+	sfa.start = 0;
+	sfa.finish = 1000;
+	afd.format = 73;
+	afd.poolID = 11;
+	afd.poolFrame = 321;
+	afd.skew = 24;
+	afd.rushFrame = 123456;
+	afd.rushID = {
+		(CORBA::LongLong) 0xfedcba9876543210,
+		(CORBA::LongLong) 0x0123456789abcdef };
+	sfad.audioFragmentData(afd);
+	sfa.fragmentData = sfad;
+	(*frags)[1] = sfa;
+
+	// TODO other fragment types
+
+	return frags;
+}
+
+Quentin::ServerFragments* ZonePortal_i::getFragments(::CORBA::Long clipID, ::CORBA::Long start, ::CORBA::Long finish) {
+	if (clipID != 2) {
+		throw Quentin::BadIdent(Quentin::BadIdentReason::clipNotKnown, clipID);
+	}
+	Quentin::ServerFragments* frags = new Quentin::ServerFragments;
+	frags->length(2);
+
+  // VideoFragment
+	Quentin::ServerFragment sfv = {};
+	Quentin::PositionData vfd = {};
+	Quentin::ServerFragmentData sfvd;
+
+	sfv.trackNum = 0;
+	sfv.start = start;
+	sfv.finish = finish;
+	vfd.format = 90;
+	vfd.poolID = 11;
+	vfd.poolFrame = 123;
+	vfd.skew = 42;
+	vfd.rushFrame = 543345;
+	vfd.rushID = {
+		(CORBA::LongLong) 0x0123456789abcdef,
+		(CORBA::LongLong) 0xfedcba9876543210 };
+	sfvd.videoFragmentData(vfd);
+	sfv.fragmentData = sfvd;
+	(*frags)[0] = sfv;
+
+  // AudioFragment
+	Quentin::ServerFragment sfa = {};
+	Quentin::PositionData afd = {};
+	Quentin::ServerFragmentData sfad;
+
+	sfa.trackNum = 0;
+	sfa.start = start;
+	sfa.finish = finish;
+	afd.format = 73;
+	afd.poolID = 11;
+	afd.poolFrame = 321;
+	afd.skew = 24;
+	afd.rushFrame = 123654;
+	afd.rushID = {
+		(CORBA::LongLong) 0xfedcba9876543210,
+		(CORBA::LongLong) 0x0123456789abcdef };
+	sfad.audioFragmentData(afd);
+	sfa.fragmentData = sfad;
+	(*frags)[1] = sfa;
+
+	// TODO other fragment types
+	return frags;
 }
 
 

@@ -35,6 +35,10 @@ export async function start (): Promise<string> {
 			})
 		})
 
+		mockServer.stderr.on('data', (data) => {
+			console.error(data.toString())
+		})
+
 		mockServer.on('error', e => {
 			if (!resolved) {
 				reject(e)

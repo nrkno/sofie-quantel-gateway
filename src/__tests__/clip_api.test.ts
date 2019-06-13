@@ -10,6 +10,12 @@ describe('Test framework', () => {
 		isaIOR = isaIOR
 	})
 
+	/* afterEach(async () => {
+		return new Promise((resolve) => {
+			setTimeout(() => { resolve() }, 50)
+		})
+	}) */
+
 	test('Test CORBA connection', async () => {
 		await expect(Quantel.testConnection()).resolves.toEqual('PONG!')
 	})
@@ -30,6 +36,7 @@ describe('Test framework', () => {
 	})
 
 	test('Search for clip by title', async () => {
+		await expect(Quantel.searchClips({ Title: 'Once upon*' })).resolves.toHaveLength(1)
 		await expect(Quantel.searchClips({ Title: 'Once upon*' })).resolves.toMatchObject([{
 			type: 'ClipDataSummary',
 			ClipID: 2,
@@ -46,6 +53,78 @@ describe('Test framework', () => {
 
 	test('Search for non-existant clip by title', async () => {
 		await expect(Quantel.searchClips({ Title: 'Once under*' })).resolves.toHaveLength(0)
+	})
+
+	test('Get all fragments for a clip', async () => {
+		await expect(Quantel.getFragments({ clipID: 2 })).resolves.toMatchObject({
+			type: 'ServerFragments',
+			clipID: 2,
+			fragments: [ {
+				type: 'VideoFragment',
+				start: 0,
+				finish: 1000,
+				format: 90,
+				poolID: 11,
+				rushFrame: 543210,
+				rushID: '0123456789abcdeffedcba9876543210',
+				skew: 42,
+				trackNum: 0
+			}, {
+				type: 'AudioFragment',
+				start: 0,
+				finish: 1000,
+				format: 73,
+				poolID: 11,
+				rushFrame: 123456,
+				rushID: 'fedcba98765432100123456789abcdef',
+				skew: 24,
+				trackNum: 0
+			}]
+		})
+	})
+
+	test('Get fragments for a non-existant clip', async () => {
+		expect.assertions(1)
+		await expect(Quantel.getFragments({ clipID: 42 })).rejects.toThrow('BadIdent')
+	})
+
+	test('Get fragments with range', async () => {
+		await expect(Quantel.getFragments({ clipID: 2, start: 10, finish: 20 })).resolves.toMatchObject({
+			type: 'ServerFragments',
+			clipID: 2,
+			fragments: [ {
+				type: 'VideoFragment',
+				start: 10,
+				finish: 20,
+				format: 90,
+				poolID: 11,
+				rushFrame: 543345,
+				rushID: '0123456789abcdeffedcba9876543210',
+				skew: 42,
+				trackNum: 0
+			}, {
+				type: 'AudioFragment',
+				start: 10,
+				finish: 20,
+				format: 73,
+				poolID: 11,
+				rushFrame: 123654,
+				rushID: 'fedcba98765432100123456789abcdef',
+				skew: 24,
+				trackNum: 0
+			}]
+		})
+	})
+
+	test('Get fragments with range non-existant clip', async () => {
+		expect.assertions(1)
+		await expect(Quantel.getFragments({ clipID: 42, start: 10, finish: 20 })).rejects.toThrow('BadIdent')
+	})
+
+	// CORBA API does no inverse range check - gateway now does one
+	test('Get fragments with bad range ', async () => {
+		expect.assertions(1)
+		await expect(Quantel.getFragments({ clipID: 2, start: 20, finish: 10 })).rejects.toThrow('cannot be before')
 	})
 
 	afterAll(async () => {
