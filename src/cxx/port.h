@@ -9,6 +9,7 @@ extern int32_t portCounter;
 napi_value createPlayPort(napi_env env, napi_callback_info info);
 napi_value getPlayPortStatus(napi_env env, napi_callback_info info);
 napi_value releasePort(napi_env env, napi_callback_info info);
+napi_value wipe(napi_env env, napi_callback_info info);
 
 napi_value loadPlayPort(napi_env env, napi_callback_info info);
 
@@ -51,6 +52,18 @@ struct releasePortCarrier : carrier {
 	int32_t serverID;
 	std::string portName;
 	~releasePortCarrier() { }
+};
+
+void wipeExecute(napi_env env, void* data);
+void wipeComplete(napi_env env, napi_status asyncStatus, void* data);
+
+struct wipeCarrier : carrier {
+	int32_t serverID;
+	std::string portName;
+	int32_t start = 0;
+	int32_t frames = 0x7fffffff;
+	bool wiped = false;
+	~wipeCarrier() { }
 };
 
 void loadPlayPortExecute(napi_env env, void* data);

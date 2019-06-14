@@ -342,6 +342,48 @@ router.post('/default/server/:serverID/port/:portID/fragments/', async (ctx) => 
 	}
 })
 
+router.delete('/default/server/:serverID/port/:portID/fragments/', async (ctx) => {
+	try {
+		let options: Quantel.WipeInfo = {
+			serverID: ctx.param.serverID,
+			portName: ctx.params.portID
+		}
+		if (ctx.query.start) {
+			if (ctx.query.start && (isNaN(+ctx.query.start) || +ctx.query.offset < 0)) {
+				ctx.status = 400
+				ctx.body = {
+					status: 400,
+					message: 'Wipe parameter \'start\' must be non-negative integer.',
+					stack: ''
+				} as JSONError
+				return
+			}
+			options.start = +ctx.query.start
+		}
+		if (ctx.query.frames) {
+			if (ctx.query.frames === 'MAX') {
+				ctx.query.frames = `${0x7fffffff}`
+			}
+			if (ctx.query.frames && (isNaN(+ctx.query.frames) || +ctx.query.frames < 0)) {
+				ctx.status = 400
+				ctx.body = {
+					status: 400,
+					message: 'Wipe parameter \'frames\' must be non-negative integer.',
+					stack: ''
+				} as JSONError
+				return
+			}
+			options.frames = +ctx.query.frames
+			if (options.start && options.frames) {
+				options.frames = options.frames - options.start
+			}
+		}
+		ctx.body = Quantel.wipe(options)
+	} catch (err) {
+		throw err
+	}
+})
+
 router.post('/default/server/:serverID/port/:portID/trigger/:trigger', async (ctx) => {
 	try {
 		let trigger: Quantel.Trigger
@@ -455,10 +497,9 @@ app.use(async (ctx, next) => {
 app.use(router.routes())
 
 if (!module.parent) {
-	app.listen(3000)
-	console.log('Server running on port wibble 3000')
-	app.on('error', console.error)
-	app.on('listening', () => {
-		console.log('RUNNING!!!')
+	let server = app.listen(3000)
+	server.on('error', console.error)
+	server.on('listening', () => {
+		console.log('Quantel gateway HTTP API - server running on port 3000')
 	})
 }
