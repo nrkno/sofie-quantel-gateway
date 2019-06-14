@@ -428,6 +428,8 @@ router.put('/default/server/:serverID/port/:portID/jump', async (ctx) => {
 // Make the default error handler use JSON
 app.use(async (ctx, next) => {
 	try {
+		console.log(`Received command: ${ctx.request.method} ${ctx.URL.pathname}${ctx.request.querystring ? `?${ctx.request.querystring}` : ''}`)
+
 		await next()
 		if (ctx.status === 404) {
 			if (!ctx.body) {
