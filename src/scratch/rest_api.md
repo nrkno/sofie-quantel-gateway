@@ -226,6 +226,12 @@ To load the fragments onto a port, POST the fragments to the port reference, add
 
 Information about the status of the port is returned.
 
+All fragments can be cleared from the port by sending a DELETE request to the port's fragments resource. By default, this will clear (_wipe_ is the Quantel CORBA API term) all fragments from the port. To provided a time range for this operation, use the `start` and `frames` query parameters.
+
+    /:zoneID/server/:serverID/port/:portID/fragments(?start=:start&frames=:frames)
+
+The `:start` parameter is the first frame in the port's timeline to wipe from and `:frames` is the count of frames to wipe. If frames is omitted, all frames to the end of the port timeline will be wiped.
+
 ## Controlling the port
 
 To control the PORT, POST trigger messages:

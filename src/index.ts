@@ -208,6 +208,16 @@ export namespace Quantel {
 		highPriority?: boolean
 	}
 
+	export interface WipeInfo extends PortRef {
+		start?: number,
+		frames?: number,
+	}
+
+	export interface WipeResult extends WipeInfo {
+		type: 'WipeResult',
+		wiped: boolean,
+	}
+
 	export class ConnectError extends Error {
 		public statusCode: number
 		constructor (message?: string | undefined, statusCode?: number) {
@@ -557,6 +567,19 @@ export namespace Quantel {
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
 				return deleteClip(options)
+			}
+			throw err
+		}
+	}
+
+	export async function wipe (options: WipeInfo): Promise<WipeResult> {
+		await getISAReference()
+		try {
+			return await quantel.wipe(await isaIOR, options)
+		} catch (err) {
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return wipe(options)
 			}
 			throw err
 		}

@@ -941,5 +941,4 @@ napi_value deleteClip(napi_env env, napi_callback_info info) {
 	REJECT_RETURN;
 
 	return promise;
-
 }

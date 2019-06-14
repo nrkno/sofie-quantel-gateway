@@ -589,6 +589,171 @@ napi_value releasePort(napi_env env, napi_callback_info info) {
   return promise;
 }
 
+void wipeExecute(napi_env env, void* data) {
+	wipeCarrier* c = (wipeCarrier*) data;
+	CORBA::ORB_var orb;
+	Quentin::ZonePortal::_ptr_type zp;
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+
+	try {
+		resolveZonePortal(c->isaIOR, &orb, &zp);
+
+		Quentin::Server_ptr server = zp->getServer(c->serverID);
+    Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(c->portName).data(), 0);
+
+		c->wiped = port->wipe(c->start, c->frames);
+	}
+	catch(CORBA::SystemException& ex) {
+		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
+	}
+	catch(CORBA::Exception& ex) {
+		NAPI_REJECT_CORBA_EXCEPTION(ex);
+	}
+	catch(omniORB::fatalException& fe) {
+		NAPI_REJECT_FATAL_EXCEPTION(fe);
+	}
+
+	orb->destroy();
+}
+
+void wipeComplete(napi_env env, napi_status asyncStatus, void* data) {
+	wipeCarrier* c = (wipeCarrier*) data;
+	napi_value result, prop;
+
+	if (asyncStatus != napi_ok) {
+		c->status = asyncStatus;
+		c->errorMsg = "Wipe failed to complete.";
+	}
+	REJECT_STATUS;
+
+	c->status = napi_create_object(env, &result);
+	REJECT_STATUS;
+
+	c->status = napi_create_string_utf8(env, "WipeResult", NAPI_AUTO_LENGTH, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "type", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, c->serverID, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "serverID", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_string_utf8(env, c->portName.c_str(), NAPI_AUTO_LENGTH, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "portName", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, c->start, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "start", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, c->frames, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "frames", prop);
+	REJECT_STATUS;
+
+	c->status = napi_get_boolean(env, c->wiped, &prop);
+  REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "wiped", prop);
+	REJECT_STATUS;
+
+	napi_status status;
+	status = napi_resolve_deferred(env, c->_deferred, result);
+	FLOATING_STATUS;
+
+	tidyCarrier(env, c);
+}
+
+napi_value wipe(napi_env env, napi_callback_info info) {
+	wipeCarrier* c = new wipeCarrier;
+	napi_value promise, resourceName, options, prop;
+  napi_valuetype type;
+  bool isArray;
+  char* portName;
+  size_t portNameLen;
+	char* isaIOR = nullptr;
+	size_t iorLen = 0;
+
+  c->status = napi_create_promise(env, &c->_deferred, &promise);
+  REJECT_RETURN;
+
+	size_t argc = 2;
+	napi_value argv[2];
+	c->status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+	REJECT_RETURN;
+
+	if (argc < 1) {
+		REJECT_ERROR_RETURN("Wipe must be provided with a IOR reference to an ISA server.",
+	    QGW_INVALID_ARGS);
+	}
+	c->status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &iorLen);
+	REJECT_RETURN;
+	isaIOR = (char*) malloc((iorLen + 1) * sizeof(char));
+	c->status = napi_get_value_string_utf8(env, argv[0], isaIOR, iorLen + 1, &iorLen);
+	REJECT_RETURN;
+
+	c->isaIOR = isaIOR;
+
+	if (argc < 2) {
+		REJECT_ERROR_RETURN("Options object with server ID and port name must be provided.",
+	    QGW_INVALID_ARGS);
+	}
+	c->status = napi_typeof(env, argv[1], &type);
+	REJECT_RETURN;
+	c->status = napi_is_array(env, argv[1], &isArray);
+	REJECT_RETURN;
+	if (isArray || type != napi_object) {
+		REJECT_ERROR_RETURN("Argument must be an options object with server ID and port name.",
+	    QGW_INVALID_ARGS);
+	}
+
+	options = argv[1];
+	c->status = napi_get_named_property(env, options, "serverID", &prop);
+	REJECT_RETURN;
+	c->status = napi_get_value_int32(env, prop, &c->serverID);
+	REJECT_RETURN;
+
+	c->status = napi_get_named_property(env, options, "portName", &prop);
+	REJECT_RETURN;
+	c->status = napi_get_value_string_utf8(env, prop, nullptr, 0, &portNameLen);
+	REJECT_RETURN;
+	portName = (char*) malloc((portNameLen + 1) * sizeof(char));
+	c->status = napi_get_value_string_utf8(env, prop, portName, portNameLen + 1, &portNameLen);
+	REJECT_RETURN;
+	c->portName = std::string(portName);
+	free(portName);
+
+	c->status = napi_get_named_property(env, options, "start", &prop);
+	REJECT_RETURN;
+	c->status = napi_typeof(env, prop, &type);
+	REJECT_RETURN;
+	if (type == napi_number) {
+		c->status = napi_get_value_int32(env, prop, &c->start);
+		REJECT_RETURN;
+	}
+
+	c->status = napi_get_named_property(env, options, "frames", &prop);
+	REJECT_RETURN;
+	c->status = napi_typeof(env, prop, &type);
+	REJECT_RETURN;
+	if (type == napi_number) {
+		c->status = napi_get_value_int32(env, prop, &c->frames);
+		REJECT_RETURN;
+	}
+
+	c->status = napi_create_string_utf8(env, "Wipe", NAPI_AUTO_LENGTH, &resourceName);
+  REJECT_RETURN;
+  c->status = napi_create_async_work(env, nullptr, resourceName, wipeExecute,
+    wipeComplete, c, &c->_request);
+  REJECT_RETURN;
+  c->status = napi_queue_async_work(env, c->_request);
+  REJECT_RETURN;
+
+  return promise;
+}
+
 void loadPlayPortExecute(napi_env env, void* data) {
 	loadPlayPortCarrier* c = (loadPlayPortCarrier*) data;
 	CORBA::ORB_var orb;
