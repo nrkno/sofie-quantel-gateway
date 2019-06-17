@@ -1,7 +1,7 @@
 import { Quantel } from '../index'
 import * as spawn from './spawn_server'
 
-describe('Port-level Quantel gateway level tests', () => {
+describe('Port-level Quantel gateway tests', () => {
 
 	let isaIOR: string
 

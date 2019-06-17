@@ -16,7 +16,7 @@ public:
 	virtual void setTrackLimits(::CORBA::Long startFrame, ::CORBA::Long endFrame) { return; }
 	virtual Quentin::Port::GeneralPortStatus getStatus();
 	virtual void reportStatus(::Quentin::PortListener_ptr listener, ::CORBA::Long interval, ::CORBA::Long noteMask) { return; }
-	virtual ::CORBA::Boolean setTrigger(::CORBA::Long trigger, ::Quentin::Port::TriggerMode mode, ::CORBA::Long param) { return false; }
+	virtual ::CORBA::Boolean setTrigger(::CORBA::Long trigger, ::Quentin::Port::TriggerMode mode, ::CORBA::Long param);
 	virtual ::CORBA::Boolean actionAtTrigger(::CORBA::Long trigger, ::Quentin::Port::TriggerAction action);
 	virtual Quentin::Port::TriggerState getTrigger(::CORBA::Long trigger) { return {}; }
 	virtual Quentin::Port::TriggerStates* getTriggers() { return nullptr; }
@@ -166,6 +166,16 @@ Quentin::ServerFragments* Port_i::getPortFragments(CORBA::Long start, CORBA::Lon
 	return frags;
 }
 
+CORBA::Boolean Port_i::setTrigger(CORBA::Long trigger, Quentin::Port::TriggerMode mode, CORBA::Long param) {
+	switch (trigger) {
+		case START:
+		case STOP:
+		case JUMP:
+			return true;
+		default:
+			return false;
+	}
+}
 
 class Server_i: public POA_Quentin::Server,
         public PortableServer::RefCountServantBase
