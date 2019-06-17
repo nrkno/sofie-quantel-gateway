@@ -12,14 +12,14 @@ export namespace Quantel {
 	let stickyRef: string = 'http://localhost:2096'
 
 	export interface ZoneInfo {
-		type: string,
+		type: 'ZonePortal',
 		zoneNumber: number,
 		zoneName: string,
 		isRemote: boolean
 	}
 
 	export interface ServerInfo {
-		type: string,
+		type: 'Server',
 		ident: number,
 		down: boolean,
 		name?: string,
@@ -35,7 +35,7 @@ export namespace Quantel {
 	}
 
 	export interface PortInfo extends PortRef {
-		type?: string,
+		type?: 'PortInfo',
 		channelNo: number,
 		portID?: number,
 		audioOnly?: boolean,
@@ -43,7 +43,7 @@ export namespace Quantel {
 	}
 
 	export interface PortStatus extends PortRef {
-		type: string,
+		type: 'PortStatus',
 		portID: number,
 		refTime: string,
 		portTime: string,
@@ -57,7 +57,7 @@ export namespace Quantel {
 	}
 
 	export interface ReleaseStatus extends PortRef {
-		type: string,
+		type: 'ReleaseStatus',
 		released: boolean
 	}
 
@@ -80,7 +80,7 @@ export namespace Quantel {
 	}
 
 	export interface ClipDataSummary {
-		type: string,
+		type: 'ClipDataSummary' | 'ClipData',
 		ClipID: number,
 		CloneID: number | null,
 		Completed: Date | null,
@@ -93,6 +93,7 @@ export namespace Quantel {
 	}
 
 	export interface ClipData extends ClipDataSummary {
+		type: 'ClipData',
 		Category: string,
 		CloneZone: number | null,
 		Destination: number | null,
@@ -130,7 +131,7 @@ export namespace Quantel {
 		end: number,
 	}
 
-	export interface VideoFragment extends ServerFragment {
+	interface PositionData extends ServerFragment {
 		rushID: string,
 		format: number,
 		poolID: number,
@@ -139,20 +140,38 @@ export namespace Quantel {
 		rushFrame: number,
 	}
 
-	export interface AudioFragment extends VideoFragment { }
-	export interface AUXFragment extends VideoFragment { }
+	export interface VideoFragment extends PositionData {
+		type: 'VideoFragment'
+	}
+
+	export interface AudioFragment extends PositionData {
+		type: 'AudioFragment'
+	}
+
+	export interface AUXFragment extends PositionData {
+		type: 'AUXFragment'
+	}
 
 	export interface CCFragment extends ServerFragment {
+		type: 'CCFragment',
 		ccID: string,
 		ccType: number,
 		effectID: number,
 	}
 
+	export interface TimecodeFragment extends ServerFragment {
+		startTimecode: string,
+		userBits: number,
+	}
+
 	// TODO extend with the different types
 	export interface ServerFragments extends ClipRef {
-		type: string,
-		clipID: -1, // Signals that the clip details are not knwon on the server
+		type: 'ServerFragments',
 		fragments: ServerFragment[]
+	}
+
+	export interface PortServerFragments extends ServerFragments {
+		clipID: -1
 	}
 
 	export interface PortLoadInfo extends PortRef {
@@ -161,7 +180,7 @@ export namespace Quantel {
 	}
 
 	export interface PortLoadStatus extends PortRef {
-		type: string,
+		type: 'PortLoadStatus',
 		fragmentCount: number,
 		offset: number,
 	}
@@ -179,7 +198,7 @@ export namespace Quantel {
 	}
 
 	export interface TriggerResult extends TriggerInfo {
-		type: string,
+		type: 'TriggerResult',
 		success: boolean,
 	}
 
@@ -188,7 +207,7 @@ export namespace Quantel {
 	}
 
 	export interface JumpResult extends JumpInfo {
-		type: string,
+		type: 'HardJumpResult' | 'TriggeredJumpResult',
 		success: boolean,
 	}
 
@@ -460,7 +479,7 @@ export namespace Quantel {
 		}
 	}
 
-	export async function getPortFragments (options: PortFragmentRef): Promise<ServerFragments> {
+	export async function getPortFragments (options: PortFragmentRef): Promise<PortServerFragments> {
 		await getISAReference()
 		try {
 			return await quantel.getPortFragments(await isaIOR, options)
