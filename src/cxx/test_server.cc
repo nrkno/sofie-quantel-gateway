@@ -1,14 +1,110 @@
 #include "test_server.h"
 
+class Port_i: public POA_Quentin::Port,
+				public PortableServer::RefCountServantBase
+{
+public:
+	inline Port_i() { }
+	inline Port_i(const CORBA::WChar* ident, CORBA::Long number, CORBA::Long serverID):
+	 	ident(ident), number(number), serverID(serverID) { }
+	virtual ~Port_i() { }
+	virtual void changeFlags(::CORBA::Long mask, ::CORBA::Long newFlags) { return; }
+	virtual ::CORBA::Boolean setMode(::Quentin::Port::PortMode newMode);
+	virtual void reset() { return; }
+	virtual void resetTriggers() { return; }
+	virtual void resetTracks() { return; }
+	virtual void setTrackLimits(::CORBA::Long startFrame, ::CORBA::Long endFrame) { return; }
+	virtual Quentin::Port::GeneralPortStatus getStatus() { return {}; }
+	virtual void reportStatus(::Quentin::PortListener_ptr listener, ::CORBA::Long interval, ::CORBA::Long noteMask) { return; }
+	virtual ::CORBA::Boolean setTrigger(::CORBA::Long trigger, ::Quentin::Port::TriggerMode mode, ::CORBA::Long param) { return false; }
+	virtual ::CORBA::Boolean actionAtTrigger(::CORBA::Long trigger, ::Quentin::Port::TriggerAction action);
+	virtual Quentin::Port::TriggerState getTrigger(::CORBA::Long trigger) { return {}; }
+	virtual Quentin::Port::TriggerStates* getTriggers() { return nullptr; }
+	virtual Quentin::ServerFragments* getPortFragments(::CORBA::Long start, ::CORBA::Long finish) { return nullptr; }
+	virtual Quentin::ServerFragments* getPortTypeFragments(::CORBA::Long start, ::CORBA::Long finish, ::CORBA::Long fragType) { return nullptr; }
+	virtual Quentin::ServerFragments* getPortTrackFragments(::CORBA::Long start, ::CORBA::Long finish, ::CORBA::Long fragType, ::CORBA::Long trackNum) { return nullptr; }
+	virtual void getThumbnailSize(::CORBA::Long mode, ::CORBA::Long& width, ::CORBA::Long& height) { return; }
+	virtual void setThumbnailListener(::CORBA::Long mode, ::CORBA::Long chanNum, ::CORBA::Long ident, ::Quentin::ThumbnailListener_ptr listener, ::CORBA::Long minInterval) { return; }
+	virtual ::CORBA::Long requestThumbnails(::CORBA::Long mode, ::CORBA::Long chanNum, ::CORBA::Long offset, ::CORBA::Long stride, ::CORBA::Long count, ::CORBA::Long ident, ::Quentin::ThumbnailListener_ptr listener) { return 0; }
+	virtual void abortThumbnails(::CORBA::Long abortID) { return; }
+	virtual Quentin::WStrings* controllerNames() { return nullptr; }
+	virtual Quentin::EffectController_ptr getController(::CORBA::Long trackNum) { return nullptr; }
+	virtual Quentin::PortInfo* getPortInfo() { return nullptr; }
+	virtual Quentin::DirectoryViewer_ptr getDirViewer(::CORBA::Long timeoutSecs, const ::CORBA::WChar* viewerName) { return nullptr; }
+	virtual Quentin::DirectoryViewer_ptr getPoolDirViewer(::CORBA::Long poolID, ::CORBA::Long timeoutSecs, const ::CORBA::WChar* viewerName) { return nullptr; }
+	virtual Quentin::ConfigDescriptionList* getConfigurations(::CORBA::Long channel, ::Quentin::FragmentType type, ::CORBA::Boolean forPlay) { return nullptr; }
+	virtual Quentin::Longs* getDefaultConfigurations(::CORBA::Long channel) { return nullptr; }
+	virtual Quentin::Longs* getCurrentConfigurations(::CORBA::Long channel) { return nullptr; }
+	virtual void configure(::CORBA::Long channel, const ::Quentin::Longs& configurations) { return; }
+	virtual ::CORBA::Boolean assignChannel(::CORBA::Long chanNum, ::CORBA::Long flags);
+	virtual void assignTransitionPort(::Quentin::Port_ptr transitionPort) { return; }
+	virtual Quentin::Port_ptr getTransitionPort() { return nullptr; }
+	virtual Quentin::Longs* getChannels() { return nullptr; }
+	virtual void release() { return; }
+	virtual void load(::CORBA::Long offset, const ::Quentin::ServerFragments& fragments) { return; }
+	virtual void insertBlank(::CORBA::Long start, ::CORBA::Long frames) { return; }
+	virtual ::CORBA::Boolean remove(::CORBA::Long start, ::CORBA::Long frames) { return nullptr; }
+	virtual ::CORBA::Boolean wipe(::CORBA::Long start, ::CORBA::Long frames) { return nullptr; }
+	virtual void jump(::CORBA::Long offset, ::CORBA::Boolean disablePreload) { return; }
+	virtual void jumpRelative(::CORBA::Long offset) { return; }
+	virtual void setJump(::CORBA::Long offset) { return; }
+	virtual void setTransition(::Quentin::Port::TransitionType type, ::CORBA::Long frames, ::CORBA::Boolean autoPlay) { return; }
+	virtual void setSpeed(::CORBA::Float newSpeed) { return; }
+	virtual ::CORBA::Long jogAudio(::CORBA::Long frames) { return 0; }
+	virtual void jogSubFrames(::CORBA::Long subFrameTicks) { return; }
+	virtual void setInputAudioPatch(const ::Quentin::AudioPatchInfoList& patches, ::CORBA::Boolean preview) { return; }
+	virtual void setOutputAudioPatch(::CORBA::Long startFrame, ::CORBA::Long endFrame, const ::Quentin::AudioPatchInfoList& patches) { return; }
+	virtual ::CORBA::Long extendSpace(::CORBA::Long poolID, ::CORBA::Long totalFrames) { return 0; }
+	virtual ::CORBA::Long forget(::CORBA::Long offset) { return 0; }
+	virtual void setFlags(::CORBA::Long track, ::CORBA::Long newFlags) { return; }
+	virtual void setCrop(::CORBA::Long track, ::CORBA::Long cropLeft, ::CORBA::Long cropTop, ::CORBA::Long cropWidth, ::CORBA::Long cropHeight) { return; }
+	virtual void setAspect(::CORBA::Long track, ::CORBA::Long width, ::CORBA::Long height) { return; }
+	virtual void setOriginator(const ::CORBA::WChar* originator) { return; }
+	virtual void setRecordTimecodes(const ::Quentin::RushTimecodeList& timecodes) { return; }
+	virtual Quentin::RushIdent getRushRecording(::Quentin::FragmentType type, ::CORBA::Long track) { return {}; }
+	virtual void setOverlayClipTitle(const ::CORBA::WChar* clipname, ::Quentin::Port::OverlayTextColour colour) { return; }
+	virtual void setOverlayIndicator(const ::CORBA::WChar* indicator, ::CORBA::Boolean active) { return; }
+	virtual void setOverlayTallyID(::CORBA::Long id, ::CORBA::Boolean numeric) { return; }
+
+	virtual ::CORBA::WChar* getProperty(const ::CORBA::WChar* propertyName) { return nullptr; }
+	virtual Quentin::WStrings* getPropertyList() { return nullptr; }
+
+private:
+	const ::CORBA::WChar* ident;
+	::CORBA::Long number;
+	::CORBA::Long serverID;
+};
+
+CORBA::Boolean Port_i::assignChannel(CORBA::Long chanNum, CORBA::Long flags) {
+	return CORBA::Boolean(chanNum >= 2);
+}
+
+CORBA::Boolean Port_i::setMode(::Quentin::Port::PortMode newMode) {
+	return (newMode != Quentin::Port::PortMode::recording);
+}
+
+CORBA::Boolean Port_i::actionAtTrigger(CORBA::Long trigger, Quentin::Port::TriggerAction action) {
+	switch (trigger) {
+		case START:
+			return (action == Quentin::Port::trActStart);
+		case STOP:
+			return (action == Quentin::Port::trActStop);
+		case JUMP:
+			return (action == Quentin::Port::trActJump);
+		default:
+			return false;
+	}
+}
+
 class Server_i: public POA_Quentin::Server,
         public PortableServer::RefCountServantBase
 {
 public:
   inline Server_i() {}
-	inline Server_i(int32_t id) { serverID = id; }
+	inline Server_i(int32_t id): serverID(id) { };
   virtual ~Server_i() {}
 	virtual Quentin::ServerInfo* getServerInfo();
-	virtual Quentin::Port_ptr getPort(const ::CORBA::WChar* ident, ::CORBA::Long number) { return nullptr; }
+	virtual Quentin::Port_ptr getPort(const ::CORBA::WChar* ident, ::CORBA::Long number);
 	virtual Quentin::WStrings* getPortNames();
 	virtual Quentin::WStrings* getChanPorts();
 	virtual ::CORBA::LongLong getFreeProtons(::CORBA::Long poolIdent) { return 0; }
@@ -83,6 +179,12 @@ Quentin::WStrings* Server_i::getChanPorts() {
 	}
 	return portNames;
 	return nullptr;
+}
+
+Quentin::Port_ptr Server_i::getPort(const CORBA::WChar* ident, CORBA::Long number) {
+	Port_i* myPort = new Port_i(ident, number, serverID);
+	Quentin::Port_var port = myPort->_this();
+	return port._retn();
 }
 
 class ZonePortal_i : public POA_Quentin::ZonePortal,

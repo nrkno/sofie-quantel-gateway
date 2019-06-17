@@ -54,7 +54,7 @@ void createPlayPortExecute(napi_env env, void* data) {
 			c->errorMsg = "Unable set set up JUMP trigger action for new port.";
 			return;
 		};
-		/* TODO enable when needed
+		/* TODO enable when or if needed
 		if (!port->actionAtTrigger(TRANSITION, Quentin::Port::trActTransition)) {
 			NAPI_THROW_ORB_DESTROY("Failed to enable transition trigger on port.");
 		}; */
