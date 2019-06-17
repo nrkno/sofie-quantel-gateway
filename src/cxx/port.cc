@@ -962,7 +962,7 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
 
       c->status = napi_get_named_property(env, prop, "poolFrame", &subprop);
       REJECT_RETURN;
-      c->status = napi_get_value_int32(env, subprop, (int32_t *) &vfd.poolFrame);
+      c->status = napi_get_value_int64(env, subprop, (int64_t *) &vfd.poolFrame);
       REJECT_RETURN;
 
       c->status = napi_get_named_property(env, prop, "skew", &subprop);
@@ -1071,6 +1071,16 @@ void getPortFragmentsComplete(napi_env env, napi_status asyncStatus, void* data)
 	c->status = napi_create_string_utf8(env, "ServerFragments", NAPI_AUTO_LENGTH, &prop);
 	REJECT_STATUS;
 	c->status = napi_set_named_property(env, result, "type", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, c->serverID, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "serverID", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_string_utf8(env, c->portName.c_str(), NAPI_AUTO_LENGTH, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "portName", prop);
 	REJECT_STATUS;
 
 	c->status = napi_create_int32(env, -1, &prop);

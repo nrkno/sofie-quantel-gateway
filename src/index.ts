@@ -128,7 +128,7 @@ export namespace Quantel {
 		type: string,
 		trackNum: number,
 		start: number,
-		end: number,
+		finish: number,
 	}
 
 	interface PositionData extends ServerFragment {
@@ -170,7 +170,7 @@ export namespace Quantel {
 		fragments: ServerFragment[]
 	}
 
-	export interface PortServerFragments extends ServerFragments {
+	export interface PortServerFragments extends ServerFragments, PortRef {
 		clipID: -1
 	}
 

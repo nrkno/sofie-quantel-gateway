@@ -14,13 +14,13 @@ public:
 	virtual void resetTriggers() { return; }
 	virtual void resetTracks() { return; }
 	virtual void setTrackLimits(::CORBA::Long startFrame, ::CORBA::Long endFrame) { return; }
-	virtual Quentin::Port::GeneralPortStatus getStatus() { return {}; }
+	virtual Quentin::Port::GeneralPortStatus getStatus();
 	virtual void reportStatus(::Quentin::PortListener_ptr listener, ::CORBA::Long interval, ::CORBA::Long noteMask) { return; }
 	virtual ::CORBA::Boolean setTrigger(::CORBA::Long trigger, ::Quentin::Port::TriggerMode mode, ::CORBA::Long param) { return false; }
 	virtual ::CORBA::Boolean actionAtTrigger(::CORBA::Long trigger, ::Quentin::Port::TriggerAction action);
 	virtual Quentin::Port::TriggerState getTrigger(::CORBA::Long trigger) { return {}; }
 	virtual Quentin::Port::TriggerStates* getTriggers() { return nullptr; }
-	virtual Quentin::ServerFragments* getPortFragments(::CORBA::Long start, ::CORBA::Long finish) { return nullptr; }
+	virtual Quentin::ServerFragments* getPortFragments(::CORBA::Long start, ::CORBA::Long finish);
 	virtual Quentin::ServerFragments* getPortTypeFragments(::CORBA::Long start, ::CORBA::Long finish, ::CORBA::Long fragType) { return nullptr; }
 	virtual Quentin::ServerFragments* getPortTrackFragments(::CORBA::Long start, ::CORBA::Long finish, ::CORBA::Long fragType, ::CORBA::Long trackNum) { return nullptr; }
 	virtual void getThumbnailSize(::CORBA::Long mode, ::CORBA::Long& width, ::CORBA::Long& height) { return; }
@@ -39,12 +39,12 @@ public:
 	virtual ::CORBA::Boolean assignChannel(::CORBA::Long chanNum, ::CORBA::Long flags);
 	virtual void assignTransitionPort(::Quentin::Port_ptr transitionPort) { return; }
 	virtual Quentin::Port_ptr getTransitionPort() { return nullptr; }
-	virtual Quentin::Longs* getChannels() { return nullptr; }
+	virtual Quentin::Longs* getChannels();
 	virtual void release() { return; }
 	virtual void load(::CORBA::Long offset, const ::Quentin::ServerFragments& fragments) { return; }
 	virtual void insertBlank(::CORBA::Long start, ::CORBA::Long frames) { return; }
 	virtual ::CORBA::Boolean remove(::CORBA::Long start, ::CORBA::Long frames) { return nullptr; }
-	virtual ::CORBA::Boolean wipe(::CORBA::Long start, ::CORBA::Long frames) { return nullptr; }
+	virtual ::CORBA::Boolean wipe(::CORBA::Long start, ::CORBA::Long frames) { return ::CORBA::Boolean(true); }
 	virtual void jump(::CORBA::Long offset, ::CORBA::Boolean disablePreload) { return; }
 	virtual void jumpRelative(::CORBA::Long offset) { return; }
 	virtual void setJump(::CORBA::Long offset) { return; }
@@ -95,6 +95,77 @@ CORBA::Boolean Port_i::actionAtTrigger(CORBA::Long trigger, Quentin::Port::Trigg
 			return false;
 	}
 }
+
+Quentin::Port::GeneralPortStatus Port_i::getStatus() {
+	Quentin::PortListener::PlayPortStatus_var pps;
+	pps->portNumber = 42;
+	pps->flags = 3;
+	pps->refTime = 0x10111213;
+	pps->portTime = 0x13121110;
+	pps->framesUnused = 43;
+	pps->offset = 44;
+	pps->endOfData = 45;
+	pps->speed = 0.5;
+	pps->outputTime = 0x23595924;
+	Quentin::Port::GeneralPortStatus_var gps = {};
+	gps->playStatus(pps);
+	return gps._retn();
+}
+
+Quentin::Longs* Port_i::getChannels() {
+	Quentin::Longs* channels = new Quentin::Longs;
+	channels->length(1);
+	(*channels)[0] = 1;
+	return channels;
+}
+
+Quentin::ServerFragments* Port_i::getPortFragments(CORBA::Long start, CORBA::Long finish) {
+	Quentin::ServerFragments* frags = new Quentin::ServerFragments;
+	frags->length(2);
+
+	// VideoFragment
+	Quentin::ServerFragment sfv = {};
+	Quentin::PositionData vfd = {};
+	Quentin::ServerFragmentData sfvd;
+
+	sfv.trackNum = 0;
+	sfv.start = 0;
+	sfv.finish = 1000;
+	vfd.format = 90;
+	vfd.poolID = 11;
+	vfd.poolFrame = 123;
+	vfd.skew = 42;
+	vfd.rushFrame = 543210;
+	vfd.rushID = {
+		(CORBA::LongLong) 0x0123456789abcdef,
+		(CORBA::LongLong) 0xfedcba9876543210 };
+	sfvd.videoFragmentData(vfd);
+	sfv.fragmentData = sfvd;
+	(*frags)[0] = sfv;
+
+	// AudioFragment
+	Quentin::ServerFragment sfa = {};
+	Quentin::PositionData afd = {};
+	Quentin::ServerFragmentData sfad;
+
+	sfa.trackNum = 0;
+	sfa.start = 0;
+	sfa.finish = 1000;
+	afd.format = 73;
+	afd.poolID = 11;
+	afd.poolFrame = 321;
+	afd.skew = 24;
+	afd.rushFrame = 123456;
+	afd.rushID = {
+		(CORBA::LongLong) 0xfedcba9876543210,
+		(CORBA::LongLong) 0x0123456789abcdef };
+	sfad.audioFragmentData(afd);
+	sfa.fragmentData = sfad;
+	(*frags)[1] = sfa;
+
+	return frags;
+}
+
 
 class Server_i: public POA_Quentin::Server,
         public PortableServer::RefCountServantBase
