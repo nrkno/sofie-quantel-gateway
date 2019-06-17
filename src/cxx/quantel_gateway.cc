@@ -77,6 +77,7 @@ napi_value Init(napi_env env, napi_value exports) {
     DECLARE_NAPI_METHOD("getFragments", getFragments),
 		DECLARE_NAPI_METHOD("searchClips", searchClips), // 10
     DECLARE_NAPI_METHOD("loadPlayPort", loadPlayPort),
+		DECLARE_NAPI_METHOD("getPortFragments", getPortFragments),
     DECLARE_NAPI_METHOD("trigger", trigger),
     DECLARE_NAPI_METHOD("jump", qJump),
     DECLARE_NAPI_METHOD("setJump", setJump),
@@ -84,15 +85,15 @@ napi_value Init(napi_env env, napi_value exports) {
 		DECLARE_NAPI_METHOD("requestThumbnails", requestThumbnails),
 		DECLARE_NAPI_METHOD("cloneIfNeeded", cloneIfNeeded),
 		DECLARE_NAPI_METHOD("deleteClip", deleteClip),
-		DECLARE_NAPI_METHOD("timecodeFromBCD", timecodeFromBCD),
-		DECLARE_NAPI_METHOD("timecodeToBCD", timecodeToBCD), // 20
+		DECLARE_NAPI_METHOD("timecodeFromBCD", timecodeFromBCD), // 20
+		DECLARE_NAPI_METHOD("timecodeToBCD", timecodeToBCD),
 		DECLARE_NAPI_METHOD("runServer", runServer),
     { "START", nullptr, nullptr, nullptr, nullptr, start, napi_enumerable, nullptr },
     { "STOP", nullptr, nullptr, nullptr, nullptr, stop, napi_enumerable, nullptr },
     { "JUMP", nullptr, nullptr, nullptr, nullptr, jump, napi_enumerable, nullptr },
     { "TRANSITION", nullptr, nullptr, nullptr, nullptr, transition, napi_enumerable, nullptr },
   };
-  status = napi_define_properties(env, exports, 25, desc);
+  status = napi_define_properties(env, exports, 26, desc);
 	CHECK_STATUS;
 
   return exports;

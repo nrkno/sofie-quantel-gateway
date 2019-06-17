@@ -226,11 +226,19 @@ To load the fragments onto a port, POST the fragments to the port reference, add
 
 Information about the status of the port is returned.
 
+The fragments that are loaded onto a port can be queried with a GET request to:
+
+    /:zoneID/server/:serverID/port/:portID/fragments(?start=:start&finish=:finish)
+
+If the optional `:start` and/or `:finish` query parameters is/are provided, the search will be bounded to include only fragments loaded onto the port between those bounds. The `:start` parameter is inclusive and the `:finish` parameter is one frame beyond the end of the range. Note that once loaded onto a port/server, the fragments are no longer associated with a clip and so the `clipID` property is set to `-1`.
+
 All fragments can be cleared from the port by sending a DELETE request to the port's fragments resource. By default, this will clear (_wipe_ is the Quantel CORBA API term) all fragments from the port. To provided a time range for this operation, use the `start` and `frames` query parameters.
 
-    /:zoneID/server/:serverID/port/:portID/fragments(?start=:start&frames=:frames)
+    /:zoneID/server/:serverID/port/:portID/fragments(?start=:start&finish=:finish)
 
-The `:start` parameter is the first frame in the port's timeline to wipe from and `:frames` is the count of frames to wipe. If frames is omitted, all frames to the end of the port timeline will be wiped.
+The `start` and `finish` frames, measured relative to the timeline of the port, are optional. When not present, all fragments will be returned. The result is as above, except that instead of a `clipID` property you have `serverID` and `portName`.
+
+The `:start` parameter is the first frame in the port's timeline to wipe from and `:frames` is the count of frames to wipe. If frames is omitted, all frames from the start offset to the end of the port timeline will be wiped.
 
 ## Controlling the port
 

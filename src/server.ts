@@ -310,6 +310,54 @@ router.get('/default/clip/:clipID/fragments/:in-:out', async (ctx) => {
 	}
 })
 
+router.get('/default/server/:serverID/port/:portID/fragments/', async (ctx) => {
+	try {
+		let options: Quantel.PortFragmentRef = {
+			serverID: +ctx.params.serverID,
+			portName: ctx.params.portID
+		}
+		if (ctx.query.start) {
+			if (ctx.query.start && (isNaN(+ctx.query.start) || +ctx.query.offset < 0)) {
+				ctx.status = 400
+				ctx.body = {
+					status: 400,
+					message: 'Get port fragments parameter \'start\' must be non-negative integer.',
+					stack: ''
+				} as JSONError
+				return
+			}
+			options.start = +ctx.query.start
+		}
+		if (ctx.query.finish) {
+			if (ctx.query.frames && (isNaN(+ctx.query.frames) || +ctx.query.frames < 0)) {
+				ctx.status = 400
+				ctx.body = {
+					status: 400,
+					message: 'Get port framgments parameter \'finish\' must be non-negative integer.',
+					stack: ''
+				} as JSONError
+				return
+			}
+			options.finish = +ctx.query.finish
+			if (options.start && options.finish + options.start > 0x7fffffff) {
+				options.finish = 0x7fffffff - options.start
+			}
+			if (options.finish && options.start && options.finish <= options.start) {
+				ctx.status = 400
+				ctx.body = {
+					status: 400,
+					message: 'Get port fragments \'finish\' must be after \'start\'.',
+					stack: ''
+				} as JSONError
+				return
+			}
+		}
+		ctx.body = await Quantel.getPortFragments(options)
+	} catch (err) {
+		throw err
+	}
+})
+
 router.post('/default/server/:serverID/port/:portID/fragments/', async (ctx) => {
 	try {
 		if (ctx.body && ctx.status === 400) return
@@ -345,7 +393,7 @@ router.post('/default/server/:serverID/port/:portID/fragments/', async (ctx) => 
 router.delete('/default/server/:serverID/port/:portID/fragments/', async (ctx) => {
 	try {
 		let options: Quantel.WipeInfo = {
-			serverID: ctx.param.serverID,
+			serverID: +ctx.params.serverID,
 			portName: ctx.params.portID
 		}
 		if (ctx.query.start) {
@@ -374,11 +422,11 @@ router.delete('/default/server/:serverID/port/:portID/fragments/', async (ctx) =
 				return
 			}
 			options.frames = +ctx.query.frames
-			if (options.start && options.frames) {
-				options.frames = options.frames - options.start
+			if (options.start && options.frames + options.start > 0x7fffffff) {
+				options.frames = 0x7fffffff - options.start
 			}
 		}
-		ctx.body = Quantel.wipe(options)
+		ctx.body = await Quantel.wipe(options)
 	} catch (err) {
 		throw err
 	}

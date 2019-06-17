@@ -70,6 +70,11 @@ export namespace Quantel {
 		finish?: number,
 	}
 
+	export interface PortFragmentRef extends PortRef {
+		start?: number,
+		finish?: number,
+	}
+
 	export interface ClipPropertyList {
 		[ name: string ]: string
 	}
@@ -146,6 +151,7 @@ export namespace Quantel {
 	// TODO extend with the different types
 	export interface ServerFragments extends ClipRef {
 		type: string,
+		clipID: -1, // Signals that the clip details are not knwon on the server
 		fragments: ServerFragment[]
 	}
 
@@ -157,7 +163,7 @@ export namespace Quantel {
 	export interface PortLoadStatus extends PortRef {
 		type: string,
 		fragmentCount: number,
-		offset: number
+		offset: number,
 	}
 
 	export enum Trigger {
@@ -449,6 +455,19 @@ export namespace Quantel {
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
 				return loadPlayPort(options)
+			}
+			throw err
+		}
+	}
+
+	export async function getPortFragments (options: PortFragmentRef): Promise<ServerFragments> {
+		await getISAReference()
+		try {
+			return await quantel.getPortFragments(await isaIOR, options)
+		} catch (err) {
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return getPortFragments(options)
 			}
 			throw err
 		}
