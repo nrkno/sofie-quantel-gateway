@@ -946,8 +946,6 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
     c->status = napi_get_value_string_utf8(env, subprop, typeName, 32, nullptr);
     REJECT_RETURN;
 
-    printf("Processing fragment of type: %s\n", typeName);
-
     switch (typeName[0]) {
     case 'V': // VideoFragment
     case 'A': // AudioFragment & AUXFragment
@@ -1023,6 +1021,171 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
   REJECT_RETURN;
   c->status = napi_create_async_work(env, nullptr, resourceName, loadPlayPortExecute,
     loadPlayPortComplete, c, &c->_request);
+  REJECT_RETURN;
+  c->status = napi_queue_async_work(env, c->_request);
+  REJECT_RETURN;
+
+  return promise;
+}
+
+void getPortFragmentsExecute(napi_env env, void* data) {
+	portFragmentsCarrier* c = (portFragmentsCarrier*) data;
+	CORBA::ORB_var orb;
+	Quentin::ZonePortal::_ptr_type zp;
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+
+	try {
+		resolveZonePortal(c->isaIOR, &orb, &zp);
+
+		Quentin::Server_ptr server = zp->getServer(c->serverID);
+		Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(c->portName).data(), 0);
+
+		c->fragments = port->getPortFragments(c->start, c->finish);
+	}
+	catch(CORBA::SystemException& ex) {
+		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
+	}
+	catch(CORBA::Exception& ex) {
+		NAPI_REJECT_CORBA_EXCEPTION(ex);
+	}
+	catch(omniORB::fatalException& fe) {
+		NAPI_REJECT_FATAL_EXCEPTION(fe);
+	}
+
+	orb->destroy();
+}
+
+void getPortFragmentsComplete(napi_env env, napi_status asyncStatus, void* data) {
+	portFragmentsCarrier* c = (portFragmentsCarrier*) data;
+	napi_value result, prop;
+	// char rushID[33];
+
+	if (asyncStatus != napi_ok) {
+		c->status = asyncStatus;
+		c->errorMsg = "Get fragments failed to complete.";
+	}
+	REJECT_STATUS;
+
+	c->status = napi_create_object(env, &result);
+	REJECT_STATUS;
+	c->status = napi_create_string_utf8(env, "ServerFragments", NAPI_AUTO_LENGTH, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "type", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, -1, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "clipID", prop);
+	REJECT_STATUS;
+
+	if (c->start >= 0) {
+		c->status = napi_create_int32(env, c->start, &prop);
+		REJECT_STATUS;
+		c->status = napi_set_named_property(env, result, "start", prop);
+		REJECT_STATUS;
+	}
+
+	if (c->finish >= 0) {
+		c->status = napi_create_int32(env, c->finish, &prop);
+		REJECT_STATUS;
+		c->status = napi_set_named_property(env, result, "finish", prop);
+		REJECT_STATUS;
+	}
+
+	c->status = fragmentsToJS(env, c->fragments, &prop);
+	REJECT_STATUS;
+	c->status =  napi_set_named_property(env, result, "fragments", prop);
+	REJECT_STATUS;
+
+	napi_status status;
+	status = napi_resolve_deferred(env, c->_deferred, result);
+	FLOATING_STATUS;
+
+	tidyCarrier(env, c);
+
+}
+
+napi_value getPortFragments(napi_env env, napi_callback_info info) {
+	portFragmentsCarrier* c = new portFragmentsCarrier;
+	napi_value promise, prop, options, resourceName;
+  napi_valuetype type;
+  bool isArray;
+	char* portName;
+	size_t portNameLen;
+	char* isaIOR = nullptr;
+	size_t iorLen = 0;
+
+	c->status = napi_create_promise(env, &c->_deferred, &promise);
+	REJECT_RETURN;
+
+	size_t argc = 2;
+	napi_value argv[2];
+	c->status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+	REJECT_RETURN;
+
+	if (argc < 1) {
+		REJECT_ERROR_RETURN("Get port fragments must be provided with a IOR reference to an ISA server.",
+	    QGW_INVALID_ARGS);
+	}
+	c->status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &iorLen);
+	REJECT_RETURN;
+	isaIOR = (char*) malloc((iorLen + 1) * sizeof(char));
+	c->status = napi_get_value_string_utf8(env, argv[0], isaIOR, iorLen + 1, &iorLen);
+	REJECT_RETURN;
+
+	c->isaIOR = isaIOR;
+
+  if (argc < 2) {
+    REJECT_ERROR_RETURN("Options object with serverID and port name must be provided.",
+			QGW_INVALID_ARGS);
+  }
+  c->status = napi_typeof(env, argv[1], &type);
+  REJECT_RETURN;
+  c->status = napi_is_array(env, argv[1], &isArray);
+  REJECT_RETURN;
+  if (isArray || type != napi_object) {
+    REJECT_ERROR_RETURN("Argument must be an options object with a server ID and port name.",
+			QGW_INVALID_ARGS);
+  }
+
+	options = argv[1];
+  c->status = napi_get_named_property(env, options, "serverID", &prop);
+  REJECT_RETURN;
+  c->status = napi_get_value_int32(env, prop, &c->serverID);
+  REJECT_RETURN;
+
+  c->status = napi_get_named_property(env, options, "portName", &prop);
+  REJECT_RETURN;
+  c->status = napi_get_value_string_utf8(env, prop, nullptr, 0, &portNameLen);
+  REJECT_RETURN;
+  portName = (char*) malloc((portNameLen + 1) * sizeof(char));
+  c->status = napi_get_value_string_utf8(env, prop, portName, portNameLen + 1, &portNameLen);
+  REJECT_RETURN;
+	c->portName = std::string(portName);
+	free(portName);
+
+	c->status = napi_get_named_property(env, options, "start", &prop);
+	REJECT_RETURN;
+	c->status = napi_typeof(env, prop, &type);
+	REJECT_RETURN;
+	if (type == napi_number) {
+		c->status = napi_get_value_int32(env, prop, &c->start);
+		REJECT_RETURN;
+	}
+
+	c->status = napi_get_named_property(env, options, "finish", &prop);
+	REJECT_RETURN;
+	c->status = napi_typeof(env, prop, &type);
+	REJECT_RETURN;
+	if (type == napi_number) {
+		c->status = napi_get_value_int32(env, prop, &c->finish);
+		REJECT_RETURN;
+	}
+
+	c->status = napi_create_string_utf8(env, "GetPortFragments", NAPI_AUTO_LENGTH, &resourceName);
+  REJECT_RETURN;
+  c->status = napi_create_async_work(env, nullptr, resourceName, getPortFragmentsExecute,
+    getPortFragmentsComplete, c, &c->_request);
   REJECT_RETURN;
   c->status = napi_queue_async_work(env, c->_request);
   REJECT_RETURN;

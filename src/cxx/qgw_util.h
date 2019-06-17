@@ -154,4 +154,6 @@ std::string formatTimecode(Quentin::Timecode tc);
 Quentin::Timecode timecodeFromString(std::string tcs);
 napi_status convertToDate(napi_env env, std::string date, napi_value *nodeDate);
 
+napi_status fragmentsToJS(napi_env env, Quentin::ServerFragments_var fragments, napi_value* prop);
+
 #endif // QGW_UTIL

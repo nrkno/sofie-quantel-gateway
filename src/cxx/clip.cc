@@ -368,8 +368,8 @@ void getFragmentsExecute(napi_env env, void* data) {
 
 void getFragmentsComplete(napi_env env, napi_status asyncStatus, void* data) {
 	getFragmentsCarrier* c = (getFragmentsCarrier*) data;
-	napi_value result, frag, prop, fragprop;
-	char rushID[33];
+	napi_value result, prop;
+	// char rushID[33];
 
 	if (asyncStatus != napi_ok) {
 		c->status = asyncStatus;
@@ -403,239 +403,8 @@ void getFragmentsComplete(napi_env env, napi_status asyncStatus, void* data) {
 		REJECT_STATUS;
 	}
 
-	c->status = napi_create_array(env, &prop);
-  REJECT_STATUS;
-
-  for ( uint32_t x = 0 ; x < c->fragments->length() ; x++ ) {
-    c->status =  napi_create_object(env, &frag);
-    REJECT_STATUS;
-
-    switch (c->fragments[x].fragmentData._d()) {
-    case Quentin::FragmentType::videoFragment:
-      c->status =  napi_create_string_utf8(env, "VideoFragment", NAPI_AUTO_LENGTH, &fragprop);
-      REJECT_STATUS;
-      break;
-    case Quentin::FragmentType::audioFragment:
-      c->status =  napi_create_string_utf8(env, "AudioFragment", NAPI_AUTO_LENGTH, &fragprop);
-      REJECT_STATUS;
-      break;
-    case Quentin::FragmentType::auxFragment:
-      c->status =  napi_create_string_utf8(env, "AUXFragment", NAPI_AUTO_LENGTH, &fragprop);
-      REJECT_STATUS;
-      break;
-    case Quentin::FragmentType::flagsFragment:
-      c->status =  napi_create_string_utf8(env, "FlagsFragment", NAPI_AUTO_LENGTH, &fragprop);
-      REJECT_STATUS;
-      break;
-    case Quentin::FragmentType::timecodeFragment:
-      c->status =  napi_create_string_utf8(env, "TimecodeFragment", NAPI_AUTO_LENGTH, &fragprop);
-      REJECT_STATUS;
-      break;
-    case Quentin::FragmentType::cropFragment:
-      c->status =  napi_create_string_utf8(env, "CropFragment", NAPI_AUTO_LENGTH, &fragprop);
-      REJECT_STATUS;
-      break;
-    case Quentin::FragmentType::panZoomFragment:
-      c->status =  napi_create_string_utf8(env, "PanZoomFragment", NAPI_AUTO_LENGTH, &fragprop);
-      REJECT_STATUS;
-      break;
-    case Quentin::FragmentType::speedFragment:
-      c->status =  napi_create_string_utf8(env, "SpeedFragment", NAPI_AUTO_LENGTH, &fragprop);
-      REJECT_STATUS;
-      break;
-    case Quentin::FragmentType::multiCamFragment:
-      c->status =  napi_create_string_utf8(env, "MultiCamFragment", NAPI_AUTO_LENGTH, &fragprop);
-      REJECT_STATUS;
-      break;
-    case Quentin::FragmentType::ccFragment:
-      c->status =  napi_create_string_utf8(env, "CCFragment", NAPI_AUTO_LENGTH, &fragprop);
-      REJECT_STATUS;
-      break;
-    case Quentin::FragmentType::effectFragment:
-      c->status =  napi_create_string_utf8(env, "EffectFragment", NAPI_AUTO_LENGTH, &fragprop);
-      REJECT_STATUS;
-      break;
-    default:
-      c->status =  napi_create_string_utf8(env, "ServerFragment", NAPI_AUTO_LENGTH, &fragprop);
-      REJECT_STATUS;
-      break;
-    }
-    c->status =  napi_set_named_property(env, frag, "type", fragprop);
-    REJECT_STATUS;
-
-    c->status =  napi_create_int32(env, c->fragments[x].trackNum, &fragprop);
-    REJECT_STATUS;
-    c->status =  napi_set_named_property(env, frag, "trackNum", fragprop);
-    REJECT_STATUS;
-
-    c->status =  napi_create_int32(env, c->fragments[x].start, &fragprop);
-    REJECT_STATUS;
-    c->status =  napi_set_named_property(env, frag, "start", fragprop);
-    REJECT_STATUS;
-
-    c->status =  napi_create_int32(env, c->fragments[x].finish, &fragprop);
-    REJECT_STATUS;
-    c->status =  napi_set_named_property(env, frag, "finish", fragprop);
-    REJECT_STATUS;
-
-    switch (c->fragments[x].fragmentData._d()) {
-    case Quentin::FragmentType::videoFragment:
-      sprintf(rushID, "%016" PRIx64 "%016" PRIx64,// "%016llx%016llx",
-        c->fragments[x].fragmentData.videoFragmentData().rushID.first,
-        c->fragments[x].fragmentData.videoFragmentData().rushID.second);
-      c->status =  napi_create_string_utf8(env, rushID, 32, &fragprop);
-      REJECT_STATUS;
-      c->status =  napi_set_named_property(env, frag, "rushID", fragprop);
-      REJECT_STATUS;
-
-      c->status =  napi_create_int32(env, c->fragments[x].fragmentData.videoFragmentData().format, &fragprop);
-      REJECT_STATUS;
-      c->status =  napi_set_named_property(env, frag, "format", fragprop);
-      REJECT_STATUS;
-
-      c->status =  napi_create_int32(env, c->fragments[x].fragmentData.videoFragmentData().poolID, &fragprop);
-      REJECT_STATUS;
-      c->status =  napi_set_named_property(env, frag, "poolID", fragprop);
-      REJECT_STATUS;
-
-      c->status =  napi_create_int64(env, c->fragments[x].fragmentData.videoFragmentData().poolFrame, &fragprop);
-      REJECT_STATUS;
-      c->status =  napi_set_named_property(env, frag, "poolFrame", fragprop);
-      REJECT_STATUS;
-
-      c->status =  napi_create_int32(env, c->fragments[x].fragmentData.videoFragmentData().skew, &fragprop);
-      REJECT_STATUS;
-      c->status =  napi_set_named_property(env, frag, "skew", fragprop);
-      REJECT_STATUS;
-
-      c->status =  napi_create_int32(env, c->fragments[x].fragmentData.videoFragmentData().rushFrame, &fragprop);
-      REJECT_STATUS;
-      c->status =  napi_set_named_property(env, frag, "rushFrame", fragprop);
-      REJECT_STATUS;
-      break;
-    case Quentin::FragmentType::audioFragment:
-      sprintf(rushID, "%016" PRIx64 "%016" PRIx64,// "%016llx%016llx",
-        c->fragments[x].fragmentData.audioFragmentData().rushID.first,
-        c->fragments[x].fragmentData.audioFragmentData().rushID.second);
-      c->status =  napi_create_string_utf8(env, rushID, 32, &fragprop);
-      REJECT_STATUS;
-      c->status =  napi_set_named_property(env, frag, "rushID", fragprop);
-      REJECT_STATUS;
-
-      c->status =  napi_create_int32(env, c->fragments[x].fragmentData.audioFragmentData().format, &fragprop);
-      REJECT_STATUS;
-      c->status =  napi_set_named_property(env, frag, "format", fragprop);
-      REJECT_STATUS;
-
-      c->status =  napi_create_int32(env, c->fragments[x].fragmentData.audioFragmentData().poolID, &fragprop);
-      REJECT_STATUS;
-      c->status =  napi_set_named_property(env, frag, "poolID", fragprop);
-      REJECT_STATUS;
-
-      c->status =  napi_create_int64(env, c->fragments[x].fragmentData.audioFragmentData().poolFrame, &fragprop);
-      REJECT_STATUS;
-      c->status =  napi_set_named_property(env, frag, "poolFrame", fragprop);
-      REJECT_STATUS;
-
-      c->status =  napi_create_int32(env, c->fragments[x].fragmentData.audioFragmentData().skew, &fragprop);
-      REJECT_STATUS;
-      c->status =  napi_set_named_property(env, frag, "skew", fragprop);
-      REJECT_STATUS;
-
-      c->status =  napi_create_int32(env, c->fragments[x].fragmentData.audioFragmentData().rushFrame, &fragprop);
-      REJECT_STATUS;
-      c->status =  napi_set_named_property(env, frag, "rushFrame", fragprop);
-      REJECT_STATUS;
-      break;
-    case Quentin::FragmentType::auxFragment:
-      sprintf(rushID, "%016" PRIx64 "%016" PRIx64, // "%016llx%016llx",
-        c->fragments[x].fragmentData.auxFragmentData().rushID.first,
-        c->fragments[x].fragmentData.auxFragmentData().rushID.second);
-      c->status =  napi_create_string_utf8(env, rushID, 32, &fragprop);
-      REJECT_STATUS;
-      c->status =  napi_set_named_property(env, frag, "rushID", fragprop);
-      REJECT_STATUS;
-
-      c->status =  napi_create_int32(env, c->fragments[x].fragmentData.auxFragmentData().format, &fragprop);
-      REJECT_STATUS;
-      c->status =  napi_set_named_property(env, frag, "format", fragprop);
-      REJECT_STATUS;
-
-      c->status =  napi_create_int32(env, c->fragments[x].fragmentData.auxFragmentData().poolID, &fragprop);
-      REJECT_STATUS;
-      c->status =  napi_set_named_property(env, frag, "poolID", fragprop);
-      REJECT_STATUS;
-
-      c->status =  napi_create_int64(env, c->fragments[x].fragmentData.auxFragmentData().poolFrame, &fragprop);
-      REJECT_STATUS;
-      c->status =  napi_set_named_property(env, frag, "poolFrame", fragprop);
-      REJECT_STATUS;
-
-      c->status =  napi_create_int32(env, c->fragments[x].fragmentData.auxFragmentData().skew, &fragprop);
-      REJECT_STATUS;
-      c->status =  napi_set_named_property(env, frag, "skew", fragprop);
-      REJECT_STATUS;
-
-      c->status =  napi_create_int32(env, c->fragments[x].fragmentData.auxFragmentData().rushFrame, &fragprop);
-      REJECT_STATUS;
-      c->status =  napi_set_named_property(env, frag, "rushFrame", fragprop);
-      REJECT_STATUS;
-      break;
-    case Quentin::FragmentType::flagsFragment:
-      // TODO
-      break;
-    case Quentin::FragmentType::timecodeFragment:
-      c->status = napi_create_string_utf8(env,
-				formatTimecode(c->fragments[x].fragmentData.timecodeFragmentData().startTimecode).c_str(),
-				NAPI_AUTO_LENGTH, &fragprop);
-			REJECT_STATUS;
-			c->status = napi_set_named_property(env, frag, "startTimecode", fragprop);
-			REJECT_STATUS;
-
-			c->status = napi_create_int32(env, c->fragments[x].fragmentData.timecodeFragmentData().userBits, &fragprop);
-			REJECT_STATUS;
-			c->status = napi_set_named_property(env, frag, "userBits", fragprop);
-			REJECT_STATUS;
-      break;
-    case Quentin::FragmentType::cropFragment:
-      // TODO
-      break;
-    case Quentin::FragmentType::panZoomFragment:
-      // TODO
-      break;
-    case Quentin::FragmentType::speedFragment:
-      // TODO
-      break;
-    case Quentin::FragmentType::multiCamFragment:
-      // TODO
-      break;
-    case Quentin::FragmentType::ccFragment:
-      sprintf(rushID, "%016" PRIx64 "%016" PRIx64, // "%016llx%016llx",
-        c->fragments[x].fragmentData.ccFragmentData().ccID.first,
-        c->fragments[x].fragmentData.ccFragmentData().ccID.second);
-      c->status =  napi_create_string_utf8(env, rushID, 32, &fragprop);
-      REJECT_STATUS;
-      c->status =  napi_set_named_property(env, frag, "ccID", fragprop);
-      REJECT_STATUS;
-
-      c->status =  napi_create_int32(env, c->fragments[x].fragmentData.ccFragmentData().ccType, &fragprop);
-      REJECT_STATUS;
-      c->status =  napi_set_named_property(env, frag, "ccType", fragprop);
-      REJECT_STATUS;
-      break;
-    case Quentin::FragmentType::effectFragment:
-      c->status =  napi_create_int32(env, c->fragments[x].fragmentData.effectFragmentData().effectID, &fragprop);
-      REJECT_STATUS;
-      c->status =  napi_set_named_property(env, frag, "effectID", fragprop);
-      REJECT_STATUS;
-      break;
-    default:
-      break;
-    }
-
-    c->status =  napi_set_element(env, prop, x, frag);
-    REJECT_STATUS;
-  }
+	c->status = fragmentsToJS(env, c->fragments, &prop);
+	REJECT_STATUS;
   c->status =  napi_set_named_property(env, result, "fragments", prop);
   REJECT_STATUS;
 
@@ -664,7 +433,7 @@ napi_value getFragments(napi_env env, napi_callback_info info) {
 	REJECT_RETURN;
 
 	if (argc < 1) {
-		REJECT_ERROR_RETURN("Get Fragments must be provided with a IOR reference to an ISA server.",
+		REJECT_ERROR_RETURN("Get fragments must be provided with a IOR reference to an ISA server.",
 	    QGW_INVALID_ARGS);
 	}
 	c->status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &iorLen);
@@ -676,7 +445,7 @@ napi_value getFragments(napi_env env, napi_callback_info info) {
 	c->isaIOR = isaIOR;
 
   if (argc < 2) {
-    REJECT_ERROR_RETURN("Options object with clip ID and optional start and end must be provided.",
+    REJECT_ERROR_RETURN("Options object with clip ID and optional start and finish must be provided.",
 			QGW_INVALID_ARGS);
   }
   c->status = napi_typeof(env, argv[1], &type);
@@ -684,7 +453,7 @@ napi_value getFragments(napi_env env, napi_callback_info info) {
   c->status = napi_is_array(env, argv[1], &isArray);
   REJECT_RETURN;
   if (isArray || type != napi_object) {
-    REJECT_ERROR_RETURN("Argument must be an options object with a clip ID and options start/end.",
+    REJECT_ERROR_RETURN("Argument must be an options object with a clip ID and optional start/finish.",
 			QGW_INVALID_ARGS);
   }
 

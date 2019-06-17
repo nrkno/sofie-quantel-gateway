@@ -12,6 +12,7 @@ napi_value releasePort(napi_env env, napi_callback_info info);
 napi_value wipe(napi_env env, napi_callback_info info);
 
 napi_value loadPlayPort(napi_env env, napi_callback_info info);
+napi_value getPortFragments(napi_env env, napi_callback_info info);
 
 void createPlayPortExecute(napi_env env, void* data);
 void createPlayPortComplete(napi_env env, napi_status asyncStatus, void* data);
@@ -75,6 +76,18 @@ struct loadPlayPortCarrier : carrier {
 	int32_t offset = 0;
 	Quentin::ServerFragments fragments = {};
 	~loadPlayPortCarrier() { }
+};
+
+void getPortFragmentsExecute(napi_env env, void* data);
+void getPortFragmentsComplete(napi_env env, napi_status asyncStatus, void* data);
+
+struct portFragmentsCarrier : carrier {
+	int32_t serverID;
+	std::string portName;
+	int32_t start = 0;
+	int32_t finish = 0x7fffffff;
+	Quentin::ServerFragments_var fragments = {};
+	~portFragmentsCarrier() { }
 };
 
 #endif // QGW_PORT
