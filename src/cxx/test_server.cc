@@ -43,7 +43,7 @@ public:
 	virtual void release() { return; }
 	virtual void load(::CORBA::Long offset, const ::Quentin::ServerFragments& fragments) { return; }
 	virtual void insertBlank(::CORBA::Long start, ::CORBA::Long frames) { return; }
-	virtual ::CORBA::Boolean remove(::CORBA::Long start, ::CORBA::Long frames) { return nullptr; }
+	virtual ::CORBA::Boolean remove(::CORBA::Long start, ::CORBA::Long frames) { return false; }
 	virtual ::CORBA::Boolean wipe(::CORBA::Long start, ::CORBA::Long frames) { return ::CORBA::Boolean(true); }
 	virtual void jump(::CORBA::Long offset, ::CORBA::Boolean disablePreload) { return; }
 	virtual void jumpRelative(::CORBA::Long offset) { return; }
@@ -284,16 +284,16 @@ public:
 	virtual Quentin::PoolInfo* getPoolInfo(::CORBA::Long poolID) { return nullptr; }
 	virtual Quentin::DirectoryViewer_ptr getDirViewer(::CORBA::Long timeoutSecs, const ::CORBA::WChar* viewerName) { return nullptr; }
 	virtual Quentin::DirectoryViewer_ptr getPoolDirViewer(::CORBA::Long poolID, ::CORBA::Long timeoutSecs, const ::CORBA::WChar* viewerName) { return nullptr; }
-	virtual ::CORBA::Boolean addStateChangeListener(::Quentin::StateChangeListener_ptr listener, ::CORBA::Long flags) { return nullptr; }
-	virtual ::CORBA::Boolean addNamedStateChangeListener(const ::CORBA::WChar* listenerName, ::Quentin::StateChangeListener_ptr listener, ::CORBA::Long flags, ::CORBA::Long interval) { return nullptr; }
-	virtual ::CORBA::Boolean removeStateChangeListener(::Quentin::StateChangeListener_ptr listener) { return nullptr; }
+	virtual ::CORBA::Boolean addStateChangeListener(::Quentin::StateChangeListener_ptr listener, ::CORBA::Long flags) { return false; }
+	virtual ::CORBA::Boolean addNamedStateChangeListener(const ::CORBA::WChar* listenerName, ::Quentin::StateChangeListener_ptr listener, ::CORBA::Long flags, ::CORBA::Long interval) { return false; }
+	virtual ::CORBA::Boolean removeStateChangeListener(::Quentin::StateChangeListener_ptr listener) { return false; }
 	virtual Quentin::StateChangeList* getStateChanges(::CORBA::Long changeNum) { return nullptr; }
 	virtual Quentin::CopyProgress getCopyRemaining(::CORBA::Long clipID) { return { }; }
 	virtual Quentin::CopyProgressList* getCopiesRemaining() { return nullptr; }
 	virtual Quentin::CopyMapList* getCopyMap(::CORBA::Long clipID, ::Quentin::FragmentType type, ::CORBA::Long track) { return nullptr; }
-	virtual ::CORBA::Boolean deleteCopy(::CORBA::Long clipID) { return nullptr; }
-	virtual ::CORBA::Boolean ticketCopy(::CORBA::Long clipID, ::CORBA::Long ticket) { return nullptr; }
-	virtual ::CORBA::Boolean tryToTicketCopy(::CORBA::Long clipID) { return nullptr; }
+	virtual ::CORBA::Boolean deleteCopy(::CORBA::Long clipID) { return false; }
+	virtual ::CORBA::Boolean ticketCopy(::CORBA::Long clipID, ::CORBA::Long ticket) { return false; }
+	virtual ::CORBA::Boolean tryToTicketCopy(::CORBA::Long clipID) { return false; }
 	virtual void unticketCopy(::CORBA::Long clipID) { }
 	virtual void addTag(const ::Quentin::RushTag& tagToAdd) { }
 	virtual void removeTag(const ::Quentin::RushTag& tagToRemove) { }
@@ -317,7 +317,7 @@ public:
 	virtual Quentin::WStrings* getClipData(::CORBA::Long clipID, const ::Quentin::WStrings& colsWanted);
 	virtual void updateClip(::CORBA::Long clipID, const ::Quentin::ClipPropertyList& newColumns) { }
 	virtual void setClipProtection(::CORBA::Long clipID, const ::CORBA::WChar* userID, ::Quentin::ProtectMode mode) { }
-	virtual ::CORBA::Boolean deleteClip(::CORBA::Long clipID) { return nullptr; }
+	virtual ::CORBA::Boolean deleteClip(::CORBA::Long clipID) { return false; }
 	virtual ::CORBA::Long trimUnrecorded(::CORBA::Long clipID) { return 0; }
 	virtual ::CORBA::Long numberClip(::CORBA::Long clipID, ::CORBA::Long number, ::Quentin::ConflictMode confMode) { return 0; }
 	virtual ::CORBA::Long scanNumbers(::CORBA::Long poolID, ::CORBA::Long number, ::Quentin::FindMode mode) { return 0; }
@@ -422,69 +422,96 @@ Quentin::Server_ptr ZonePortal_i::getServer(::CORBA::Long serverID) {
 Quentin::ColumnDescList* ZonePortal_i::getColumnDescriptions() {
 	Quentin::ColumnDescList* cols = new Quentin::ColumnDescList;
 	cols->length(4);
-	(*cols)[0] = { L"ClipID", L"Number", L"AltClipID", false, false, true, false };
-	(*cols)[1] = { L"Created", L"Date", L"AltCreated", false, false, true, true };
-	(*cols)[2] = { L"PlaceHolder", L"Boolean", L"", false, false, true, true };
-	(*cols)[3] = { L"Title", L"String", L"AltTitle", true, true, true, true };
+	// (*cols)[0] = Quentin::ColumnDesc_var();
+	(*cols)[0].columnName = CORBA::WString_var(L"ClipID");
+	(*cols)[0].columnType = CORBA::WString_var(L"Number");
+	(*cols)[0].alias = CORBA::WString_var(L"AltClipID");
+	(*cols)[0].alterable = false;
+	(*cols)[0].creatable = false;
+	(*cols)[0].searchable = true;
+	(*cols)[0].clones = false;
+
+	// (*cols)[1] = Quentin::ColumnDesc_var();
+	(*cols)[1].columnName = CORBA::WString_var(L"Created");
+	(*cols)[1].columnType = CORBA::WString_var(L"Date");
+	(*cols)[1].alias = CORBA::WString_var(L"AltCreated");
+	(*cols)[1].alterable = false;
+	(*cols)[1].creatable = false;
+	(*cols)[1].searchable = true;
+	(*cols)[1].clones = true;
+
+	// (*cols)[2] = Quentin::ColumnDesc_var();
+	(*cols)[2].columnName = CORBA::WString_var(L"PlaceHolder");
+	(*cols)[2].columnType = CORBA::WString_var(L"Boolean");
+	(*cols)[2].alias = CORBA::WString_var(L"");
+	(*cols)[2].alterable = false;
+	(*cols)[2].creatable = false;
+	(*cols)[2].searchable = true;
+	(*cols)[2].clones = true;
+
+	// (*cols)[3] = Quentin::ColumnDesc_var();
+	(*cols)[3].columnName = CORBA::WString_var(L"Title");
+	(*cols)[3].columnType = CORBA::WString_var(L"String");
+	(*cols)[3].alias = CORBA::WString_var(L"AltTitle");
+	(*cols)[3].alterable = true;
+	(*cols)[3].creatable = true;
+	(*cols)[3].searchable = true;
+	(*cols)[3].clones = true;
+
 	return cols;
 }
 
 Quentin::WStrings* ZonePortal_i::getClipData(CORBA::Long clipID, const Quentin::WStrings& colsWanted) {
 	Quentin::WStrings* clipInfo = new Quentin::WStrings;
-	Quentin::WStrings_var wanted = Quentin::WStrings_var((Quentin::WStrings*) &colsWanted);
-	// wprintf(L"Here I am, walking down the clip. Wanted %i, first %ws\n", wanted->length(), (CORBA::WChar*) wanted[0]);
-	// fflush(stdout);
 	if (clipID != 2) {
 		throw Quentin::BadIdent(Quentin::BadIdentReason::clipNotKnown, clipID);
 	}
 	clipInfo->length(4);
-	(*clipInfo)[0] = L"2";
-	(*clipInfo)[1] = L"1560366960000";
-	(*clipInfo)[2] = L"false";
-	(*clipInfo)[3] = L"Once upon a time in Quantel";
+	(*clipInfo)[0] = CORBA::WString_var(L"2");
+	(*clipInfo)[1] = CORBA::WString_var(L"1560366960000");
+	(*clipInfo)[2] = CORBA::WString_var(L"false");
+	(*clipInfo)[3] = CORBA::WString_var(L"Once upon a time in Quantel");
 	return clipInfo;
 }
 
 Quentin::WStrings* ZonePortal_i::searchClips(const Quentin::ClipPropertyList& properties, const Quentin::WStrings& columns, CORBA::Long max) {
-	Quentin::ClipPropertyList_var props = Quentin::ClipPropertyList_var((Quentin::ClipPropertyList*) &properties);
-	Quentin::WStrings_var cols = Quentin::WStrings_var((Quentin::WStrings*) &columns);
 	Quentin::WStrings* result = new Quentin::WStrings;
-	Quentin::ClipProperty theProp = props[0];
-	if (std::wstring(theProp.value) != std::wstring(L"Once upon*")) {
+	Quentin::ClipProperty theProp = properties[0];
+	if (std::wstring(theProp.value) != L"Once upon*") {
 		result->length(0);
 		// printf("Got into here.\n"); fflush(stdout);
 		return result;
 	}
-	result->length(cols->length());
+	result->length(columns.length());
 	for ( uint32_t x = 0 ; x < result->length() ; x++ ) {
-		if (std::wstring(cols[x]) == L"ClipID") {
-			(*result)[x] = L"2"; continue;
+		if (std::wstring(columns[x]) == L"ClipID") {
+			(*result)[x] = CORBA::WString_var(L"2"); continue;
 		}
-		if (std::wstring(cols[x]) == L"CloneID") {
-			(*result)[x] = L"2"; continue;
+		if (std::wstring(columns[x]) == L"CloneID") {
+			(*result)[x] = CORBA::WString_var(L"2"); continue;
 		}
-		if (std::wstring(cols[x]) == L"Completed") {
-			(*result)[x] = L"1560366960000"; continue;
+		if (std::wstring(columns[x]) == L"Completed") {
+			(*result)[x] = CORBA::WString_var(L"1560366960000"); continue;
 		}
-		if (std::wstring(cols[x]) == L"Created") {
-			(*result)[x] = L"1560366960000"; continue;
+		if (std::wstring(columns[x]) == L"Created") {
+			(*result)[x] = CORBA::WString_var(L"1560366960000"); continue;
 		}
-		if (std::wstring(cols[x]) == L"Description") {
-			(*result)[x] = L"This is the best programme ever to be produced."; continue;
+		if (std::wstring(columns[x]) == L"Description") {
+			(*result)[x] = CORBA::WString_var(L"This is the best programme ever to be produced."); continue;
 		}
-		if (std::wstring(cols[x]) == L"Frames") {
-			(*result)[x] = L"1234"; continue;
+		if (std::wstring(columns[x]) == L"Frames") {
+			(*result)[x] = CORBA::WString_var(L"1234"); continue;
 		}
-		if (std::wstring(cols[x]) == L"Owner") {
-			(*result)[x] = L"Mine Hands Off"; continue;
+		if (std::wstring(columns[x]) == L"Owner") {
+			(*result)[x] = CORBA::WString_var(L"Mine Hands Off"); continue;
 		}
-		if (std::wstring(cols[x]) == L"PoolID") {
-			(*result)[x] = L"11"; continue;
+		if (std::wstring(columns[x]) == L"PoolID") {
+			(*result)[x] = CORBA::WString_var(L"11"); continue;
 		}
-		if (std::wstring(cols[x]) == L"Title") {
-			(*result)[x] = L"Once upon a time in Quantel"; continue;
+		if (std::wstring(columns[x]) == L"Title") {
+			(*result)[x] = CORBA::WString_var(L"Once upon a time in Quantel"); continue;
 		}
-		throw Quentin::BadColumnData(cols[x], cols[x]);
+		throw Quentin::BadColumnData(columns[x], columns[x]);
 	}
 	return result;
 }
@@ -591,7 +618,6 @@ Quentin::ServerFragments* ZonePortal_i::getFragments(::CORBA::Long clipID, ::COR
 	// TODO other fragment types
 	return frags;
 }
-
 
 napi_value runServer(napi_env env, napi_callback_info info) {
 	// napi_status status;
