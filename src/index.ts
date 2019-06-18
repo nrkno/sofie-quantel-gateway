@@ -243,6 +243,28 @@ export namespace Quantel {
 		wiped: boolean,
 	}
 
+	export interface FormatRef {
+		formatNumber: number,
+	}
+
+	export interface FormatInfo extends FormatRef {
+		type: 'FormatInfo',
+		essenceType: 'VideoFragment' | 'AudioFragment' | 'AUXFragment' | 'FlagsFragment' |
+			'TimecodeFragment' | 'AspectFragment' | 'CropFragment' | 'PanZoomFragment' |
+			'MultiCamFragment' | 'CCFragment' | 'NoteFragment' | 'EffectFragment' | 'Unknown',
+		frameRate: number,
+		height: number,
+		width: number,
+		samples: number,
+		compressionFamily: number,
+		protonsPerAtom: number,
+		framesPerAtom: number,
+		quark: number,
+		formatName: string,
+		layoutName: string,
+		compressionName: string,
+	}
+
 	export class ConnectError extends Error {
 		public statusCode: number
 		constructor (message?: string | undefined, statusCode?: number) {
@@ -343,6 +365,20 @@ export namespace Quantel {
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
 				return getServers()
+			}
+			throw err
+		}
+	}
+
+	export async function getFormatInfo (options: FormatRef): Promise<FormatInfo> {
+		try {
+			await getISAReference()
+			return await quantel.getFormatInfo(await isaIOR, options)
+		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return getFormatInfo(options)
 			}
 			throw err
 		}

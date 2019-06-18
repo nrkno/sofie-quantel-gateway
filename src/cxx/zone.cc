@@ -185,7 +185,7 @@ napi_value listZones(napi_env env, napi_callback_info info) {
 	REJECT_RETURN;
 
 	if (argc < 1) {
-		REJECT_ERROR_RETURN("Connection test must be provided with a IOR reference to an ISA server.",
+		REJECT_ERROR_RETURN("List zones must be provided with a IOR reference to an ISA server.",
 	    QGW_INVALID_ARGS);
 	}
 	c->status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &iorLen);
@@ -395,4 +395,215 @@ napi_value getServers(napi_env env, napi_callback_info info) {
   REJECT_RETURN;
 
   return promise;
+}
+
+void getFormatInfoExecute(napi_env env, void* data) {
+	formatInfoCarrier* c = (formatInfoCarrier*) data;
+	CORBA::ORB_var orb;
+	Quentin::ZonePortal::_ptr_type zp;
+
+	try {
+		resolveZonePortal(c->isaIOR, &orb, &zp);
+
+		c->info = zp->getFormatInfo(c->formatNumber);
+	}
+	catch(CORBA::SystemException& ex) {
+		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
+	}
+	catch(CORBA::Exception& ex) {
+		NAPI_REJECT_CORBA_EXCEPTION(ex);
+	}
+	catch(omniORB::fatalException& fe) {
+		NAPI_REJECT_FATAL_EXCEPTION(fe);
+	}
+
+	orb->destroy();
+}
+
+void getFormatInfoComplete(napi_env env, napi_status asyncStatus, void* data) {
+	formatInfoCarrier* c = (formatInfoCarrier*) data;
+	napi_value result, prop;
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+
+	if (asyncStatus != napi_ok) {
+		c->status = asyncStatus;
+		c->errorMsg = "Get format info failed to complete.";
+	}
+	REJECT_STATUS;
+
+	c->status = napi_create_object(env, &result);
+	REJECT_STATUS;
+
+	c->status = napi_create_string_utf8(env, "FormatInfo", NAPI_AUTO_LENGTH, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "type", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, c->info->formatNumber, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "formatNumber", prop);
+	REJECT_STATUS;
+
+	switch (c->info->essenceType) {
+	case Quentin::FragmentType::videoFragment:
+		c->status = napi_create_string_utf8(env, "VideoFragment", NAPI_AUTO_LENGTH, &prop);
+		REJECT_STATUS; break;
+	case Quentin::FragmentType::audioFragment:
+		c->status = napi_create_string_utf8(env, "AudioFragment", NAPI_AUTO_LENGTH, &prop);
+		REJECT_STATUS; break;
+	case Quentin::FragmentType::auxFragment:
+		c->status = napi_create_string_utf8(env, "AUXFragment", NAPI_AUTO_LENGTH, &prop);
+		REJECT_STATUS; break;
+	case Quentin::FragmentType::flagsFragment:
+		c->status = napi_create_string_utf8(env, "FlagsFragment", NAPI_AUTO_LENGTH, &prop);
+		REJECT_STATUS; break;
+	case Quentin::FragmentType::timecodeFragment:
+		c->status = napi_create_string_utf8(env, "TimecodeFragment", NAPI_AUTO_LENGTH, &prop);
+		REJECT_STATUS; break;
+	case Quentin::FragmentType::aspectFragment:
+		c->status = napi_create_string_utf8(env, "AspectFragment", NAPI_AUTO_LENGTH, &prop);
+		REJECT_STATUS; break;
+	case Quentin::FragmentType::cropFragment:
+		c->status = napi_create_string_utf8(env, "CropFragment", NAPI_AUTO_LENGTH, &prop);
+		REJECT_STATUS; break;
+	case Quentin::FragmentType::panZoomFragment:
+		c->status = napi_create_string_utf8(env, "PanZoomFragment", NAPI_AUTO_LENGTH, &prop);
+		REJECT_STATUS; break;
+	case Quentin::FragmentType::multiCamFragment:
+		c->status = napi_create_string_utf8(env, "MultiCamFragment", NAPI_AUTO_LENGTH, &prop);
+		REJECT_STATUS; break;
+	case Quentin::FragmentType::ccFragment:
+		c->status = napi_create_string_utf8(env, "CCFragment", NAPI_AUTO_LENGTH, &prop);
+		REJECT_STATUS; break;
+	case Quentin::FragmentType::noteFragment:
+		c->status = napi_create_string_utf8(env, "NoteFragment", NAPI_AUTO_LENGTH, &prop);
+		REJECT_STATUS; break;
+	case Quentin::FragmentType::effectFragment:
+		c->status = napi_create_string_utf8(env, "EffectFragment", NAPI_AUTO_LENGTH, &prop);
+		REJECT_STATUS; break;
+	default:
+	  c->status = napi_create_string_utf8(env, "Unknown", NAPI_AUTO_LENGTH, &prop);
+		REJECT_STATUS; break;
+	}
+	c->status = napi_set_named_property(env, result, "essenceType", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, c->info->frameRate, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "frameRate", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, c->info->height, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "height", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, c->info->width, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "width", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, c->info->samples, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "samples", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, c->info->compressionFamily, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "compressionFamily", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, c->info->protonsPerAtom, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "protonsPerAtom", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, c->info->framesPerAtom, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "framesPerAtom", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, c->info->quark, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "quark", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_string_utf8(env, utf8_conv.to_bytes(c->info->formatName).c_str(), NAPI_AUTO_LENGTH, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "formatName", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_string_utf8(env, utf8_conv.to_bytes(c->info->layoutName).c_str(), NAPI_AUTO_LENGTH, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "layoutName", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_string_utf8(env, utf8_conv.to_bytes(c->info->compressionName).c_str(), NAPI_AUTO_LENGTH, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "compressionName", prop);
+	REJECT_STATUS;
+
+	napi_status status;
+	status = napi_resolve_deferred(env, c->_deferred, result);
+	FLOATING_STATUS;
+
+	tidyCarrier(env, c);
+}
+
+napi_value getFormatInfo(napi_env env, napi_callback_info info) {
+	formatInfoCarrier* c = new formatInfoCarrier;
+	napi_value promise, resourceName, prop, options;
+	napi_valuetype type;
+	bool isArray;
+	char* isaIOR = nullptr;
+	size_t iorLen = 0;
+
+	c->status = napi_create_promise(env, &c->_deferred, &promise);
+	REJECT_RETURN;
+
+	size_t argc = 2;
+	napi_value argv[2];
+	c->status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+	REJECT_RETURN;
+
+	if (argc < 1) {
+		REJECT_ERROR_RETURN("Get format info must be provided with a IOR reference to an ISA server.",
+			QGW_INVALID_ARGS);
+	}
+	c->status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &iorLen);
+	REJECT_RETURN;
+	isaIOR = (char*) malloc((iorLen + 1) * sizeof(char));
+	c->status = napi_get_value_string_utf8(env, argv[0], isaIOR, iorLen + 1, &iorLen);
+	REJECT_RETURN;
+
+	c->isaIOR = isaIOR;
+
+	if (argc < 2) {
+		REJECT_ERROR_RETURN("Get format info must be provided with an options object containing a format number.",
+			QGW_INVALID_ARGS);
+	}
+	c->status = napi_typeof(env, argv[1], &type);
+	REJECT_RETURN;
+	c->status = napi_is_array(env, argv[1], &isArray);
+	REJECT_RETURN;
+	if (isArray || type != napi_object) {
+		REJECT_ERROR_RETURN("Argument must be an options object with a foramt number.",
+			QGW_INVALID_ARGS);
+	}
+
+	options = argv[1];
+  c->status = napi_get_named_property(env, options, "formatNumber", &prop);
+  REJECT_RETURN;
+  c->status = napi_get_value_int32(env, prop, (int32_t*) &c->formatNumber);
+  REJECT_RETURN;
+
+	c->status = napi_create_string_utf8(env, "GetFormatInfo", NAPI_AUTO_LENGTH, &resourceName);
+	REJECT_RETURN;
+	c->status = napi_create_async_work(env, nullptr, resourceName, getFormatInfoExecute,
+		getFormatInfoComplete, c, &c->_request);
+	REJECT_RETURN;
+	c->status = napi_queue_async_work(env, c->_request);
+	REJECT_RETURN;
+
+	return promise;
 }

@@ -7,6 +7,7 @@
 napi_value testConnection(napi_env env, napi_callback_info info);
 napi_value listZones(napi_env env, napi_callback_info info);
 napi_value getServers(napi_env env, napi_callback_info info);
+napi_value getFormatInfo(napi_env env, napi_callback_info info);
 
 void testConnectionExecute(napi_env env, void* data);
 void testConnectionComplete(napi_env env, napi_status asyncStatus, void* data);
@@ -58,6 +59,15 @@ struct getServersCarrier : carrier {
 		}
 		servers.clear();
 	}
+};
+
+void getFormatInfoExecute(napi_env env, void* data);
+void getFormatInfoComplete(napi_env env, napi_status asyncStatus, void* data);
+
+struct formatInfoCarrier : carrier {
+	Quentin::FormatCode formatNumber;
+	Quentin::FormatInfo_var info;
+	~formatInfoCarrier() { }
 };
 
 #endif // QGW_ZONE
