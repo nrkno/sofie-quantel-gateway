@@ -1,4 +1,4 @@
-import * as request from 'request'
+import * as request from 'request-promise-native'
 // import { writeFileSync } from 'fs'
 //
 const quantel = require('../build/Release/quantel_gateway')
@@ -258,20 +258,21 @@ export namespace Quantel {
 		if (isaIOR === null || ref) isaIOR = Promise.reject()
 		if (ref) { stickyRef = ref }
 		isaIOR = isaIOR.then(x => x, () => new Promise((resolve, reject) => {
-			if (ref && ref.endsWith('/')) ref = ref.slice(0, -1)
-			if (ref && ref.indexOf(':') < 0) ref = ref + ':2096'
-			request(stickyRef + '/ZoneManager.ior', (err, res, body) => {
-				if (err) {
-					reject(err)
+			if (stickyRef.endsWith('/')) { stickyRef = stickyRef.slice(0, -1) }
+			if (stickyRef.indexOf(':') < 0) { stickyRef = stickyRef + ':2096' }
+			request({
+				uri: stickyRef + '/ZoneManager.ior',
+				resolveWithFullResponse: true
+			}).then(res => {
+				if (res.statusCode === 200) {
+					resolve(res.body)
 				} else {
-					if (res.statusCode === 200) {
-						resolve(body)
-					} else {
-						reject(new ConnectError(
-							`HTTP request for ISA IOR failed with status ${res.statusCode}: ${res.statusMessage}`,
-							res.statusCode))
-					}
+					reject(new ConnectError(
+						`HTTP request for ISA IOR failed with status ${res.statusCode}: ${res.statusMessage}`,
+						res.statusCode))
 				}
+			}, err => {
+				reject(err)
 			})
 		}))
 		return {
@@ -291,10 +292,11 @@ export namespace Quantel {
 
 	// Resolves to 'PONG!' on success, otherwise rejects with a connection error
 	export async function testConnection (): Promise<string> {
-		await getISAReference()
 		try {
+			await getISAReference()
 			return await quantel.testConnection(await isaIOR)
 		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
 				return testConnection()
@@ -304,10 +306,11 @@ export namespace Quantel {
 	}
 
 	export async function listZones (): Promise<ZoneInfo[]> {
-		await getISAReference()
 		try {
+			await getISAReference()
 			return await quantel.listZones(await isaIOR)
 		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
 				return listZones()
@@ -317,11 +320,12 @@ export namespace Quantel {
 	}
 
 	export async function getDefaultZoneInfo (): Promise<ZoneInfo> {
-		await getISAReference()
 		try {
+			await getISAReference()
 			let zones = await quantel.listZones(await isaIOR)
 			return zones[0]
 		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
 				return getDefaultZoneInfo()
@@ -331,10 +335,11 @@ export namespace Quantel {
 	}
 
 	export async function getServers (): Promise<ServerInfo[]> {
-		await getISAReference()
 		try {
+			await getISAReference()
 			return await quantel.getServers(await isaIOR)
 		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
 				return getServers()
@@ -357,8 +362,8 @@ export namespace Quantel {
 	// TODO: allow assignment of more than one channel
 	// FIXME: warn on attempt to steal a channel
 	export async function createPlayPort (options: PortInfo): Promise<PortInfo> {
-		await getISAReference()
 		try {
+			await getISAReference()
 			let server = await checkServer(options)
 			if (server.portNames && server.portNames.indexOf(options.portName) >= 0) {
 				let portStatus: PortStatus = quantel.getPlayPortStatus(await isaIOR, options)
@@ -379,6 +384,7 @@ export namespace Quantel {
 			}
 			return await quantel.createPlayPort(await isaIOR, options)
 		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
 				return createPlayPort(options)
@@ -396,11 +402,12 @@ export namespace Quantel {
 	}
 
 	export async function getPlayPortStatus (options: PortRef): Promise<PortStatus> {
-		await getISAReference()
 		try {
+			await getISAReference()
 			await checkServerPort(options)
 			return await quantel.getPlayPortStatus(await isaIOR, options)
 		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
 				return getPlayPortStatus(options)
@@ -410,11 +417,12 @@ export namespace Quantel {
 	}
 
 	export async function releasePort (options: PortRef): Promise<ReleaseStatus> {
-		await getISAReference()
 		try {
+			await getISAReference()
 			await checkServerPort(options)
 			return await quantel.releasePort(await isaIOR, options)
 		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
 				return releasePort(options)
@@ -424,10 +432,11 @@ export namespace Quantel {
 	}
 
 	export async function getClipData (options: ClipRef): Promise<ClipData> {
-		await getISAReference()
 		try {
+			await getISAReference()
 			return await quantel.getClipData(await isaIOR, options)
 		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
 				return getClipData(options)
@@ -437,10 +446,11 @@ export namespace Quantel {
 	}
 
 	export async function searchClips (options: ClipPropertyList): Promise<ClipDataSummary[]> {
-		await getISAReference()
 		try {
+			await getISAReference()
 			return await quantel.searchClips(await isaIOR, options)
 		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
 				return searchClips(options)
@@ -450,13 +460,14 @@ export namespace Quantel {
 	}
 
 	export async function getFragments (options: FragmentRef): Promise<ServerFragments> {
-		await getISAReference()
-		if (options.start && options.finish && options.start >= options.finish) {
-			throw new RangeError(`Finish point ${options.finish} cannot be before start point ${options.start}.`)
-		}
 		try {
+			await getISAReference()
+			if (options.start && options.finish && options.start >= options.finish) {
+				throw new RangeError(`Finish point ${options.finish} cannot be before start point ${options.start}.`)
+			}
 			return await quantel.getFragments(await isaIOR, options)
 		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
 				return getFragments(options)
@@ -466,11 +477,12 @@ export namespace Quantel {
 	}
 
 	export async function loadPlayPort (options: PortLoadInfo): Promise<PortLoadStatus> {
-		await getISAReference()
 		try {
+			await getISAReference()
 			await checkServerPort(options)
 			return await quantel.loadPlayPort(await isaIOR, options)
 		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
 				return loadPlayPort(options)
@@ -480,10 +492,11 @@ export namespace Quantel {
 	}
 
 	export async function getPortFragments (options: PortFragmentRef): Promise<PortServerFragments> {
-		await getISAReference()
 		try {
+			await getISAReference()
 			return await quantel.getPortFragments(await isaIOR, options)
 		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
 				return getPortFragments(options)
@@ -493,8 +506,8 @@ export namespace Quantel {
 	}
 
 	export async function trigger (options: TriggerInfo): Promise<TriggerResult> {
-		await getISAReference()
 		try {
+			await getISAReference()
 			await checkServerPort(options)
 			return {
 				type: 'TriggerResult',
@@ -505,6 +518,7 @@ export namespace Quantel {
 				success: await quantel.trigger(await isaIOR, options)
 			}
 		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
 				return trigger(options)
@@ -514,8 +528,8 @@ export namespace Quantel {
 	}
 
 	export async function jump (options: JumpInfo): Promise<JumpResult> {
-		await getISAReference()
 		try {
+			await getISAReference()
 			await checkServerPort(options)
 			return {
 				type: 'HardJumpResult',
@@ -525,6 +539,7 @@ export namespace Quantel {
 				success: await quantel.jump(await isaIOR, options)
 			}
 		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
 				return jump(options)
@@ -534,8 +549,8 @@ export namespace Quantel {
 	}
 
 	export async function setJump (options: JumpInfo): Promise<JumpResult> {
-		await getISAReference()
 		try {
+			await getISAReference()
 			await checkServerPort(options)
 			return {
 				type: 'TriggeredJumpResult',
@@ -545,6 +560,7 @@ export namespace Quantel {
 				success: await quantel.setJump(await isaIOR, options)
 			}
 		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
 				return setJump(options)
@@ -554,10 +570,11 @@ export namespace Quantel {
 	}
 
 	export async function getThumbnailSize (): Promise<ThumbnailSize> {
-		await getISAReference()
 		try {
+			await getISAReference()
 			return quantel.getThumbnailSize(await isaIOR)
 		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
 				return getThumbnailSize()
@@ -585,10 +602,11 @@ export namespace Quantel {
 	Plan is to hide this behind the REST API
 	*/
 	export async function cloneIfNeeded (options: CloneRequest): Promise<boolean> {
-		await getISAReference()
 		try {
+			await getISAReference()
 			return await quantel.cloneIfNeeded(await isaIOR, options)
 		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
 				return cloneIfNeeded(options)
@@ -598,10 +616,11 @@ export namespace Quantel {
 	}
 
 	export async function deleteClip (options: ClipRef): Promise<boolean> {
-		await getISAReference()
 		try {
+			await getISAReference()
 			return await quantel.deleteClip(await isaIOR, options)
 		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
 				return deleteClip(options)
@@ -611,10 +630,11 @@ export namespace Quantel {
 	}
 
 	export async function wipe (options: WipeInfo): Promise<WipeResult> {
-		await getISAReference()
 		try {
+			await getISAReference()
 			return await quantel.wipe(await isaIOR, options)
 		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
 				return wipe(options)

@@ -41,6 +41,7 @@ describe('Test framework', () => {
 		expect(Quantel.timecodeFromBCD(0x10111213)).toBe('10:11:12:13')
 		expect(Quantel.timecodeFromBCD(0)).toBe('00:00:00:00')
 		expect(Quantel.timecodeFromBCD(0x23595924)).toBe('23:59:59:24')
+		expect(Quantel.timecodeFromBCD(0x23595929 | 0x40000000)).toBe('23:59:59;29')
 	})
 
 	test('Convert string timecode to BCD', () => {
@@ -58,6 +59,67 @@ describe('Test framework', () => {
 				} else { resolve() }
 			})
 		})
+		await spawn.stop()
+	})
+})
+
+describe('Error handling when no server running', () => {
+
+	test('Test failed IOR HTTP connection', async () => {
+		expect.assertions(1)
+		await expect(Quantel.testConnection()).rejects.toThrow('CORBA subsystem: TRANSIENT')
+	})
+
+	test('Test fail to get servers 1', async () => {
+		expect.assertions(1)
+		await expect(Quantel.getServers()).rejects.toThrow('ECONNREFUSED')
+	})
+})
+
+describe('Error handling when server has failed', () => {
+
+	let isaIOR: string
+
+	beforeAll(async () => {
+		isaIOR = await spawn.start()
+	})
+
+	test('Default get connection reference and close', async () => {
+		await expect(Quantel.getISAReference()).resolves.toStrictEqual({
+			type: 'ConnectionDetails',
+			href: 'http://127.0.0.1:2096',
+			isaIOR } as Quantel.ConnectionDetails)
+	})
+
+	test('Stopping server', async () => {
+		await expect(spawn.stop()).resolves.toBeUndefined()
+	})
+
+	test('Test fail to get servers 1', async () => {
+		expect.assertions(1)
+		await expect(Quantel.getServers()).rejects.toThrow('CORBA subsystem: TRANSIENT')
+	})
+
+	test('Test the failed CORBA connection', async () => {
+		expect.assertions(1)
+		await expect(Quantel.testConnection()).rejects.toThrow('ECONNREFUSED')
+	})
+
+	test('Restart server and get details', async () => {
+		isaIOR = await spawn.start()
+		// await new Promise((resolve) => setTimeout(() => resolve(), 1000))
+		await expect(Quantel.testConnection()).resolves.toBe('PONG!')
+		await expect(Quantel.getISAReference()).resolves.toStrictEqual({
+			type: 'ConnectionDetails',
+			href: 'http://127.0.0.1:2096',
+			isaIOR } as Quantel.ConnectionDetails)
+	})
+
+	test('Check that get servers now works', async () => {
+		await expect(Quantel.getServers()).resolves.toBeTruthy()
+	})
+
+	afterAll(async () => {
 		await spawn.stop()
 	})
 })

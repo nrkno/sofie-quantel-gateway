@@ -58,10 +58,13 @@ export async function stop (): Promise<undefined> {
 					app.close(() => {
 						resolve()
 					})
+				} else {
+					resolve()
 				}
 			})
 		} else {
 			if (app) app.close(() => resolve())
+			else { resolve() }
 		}
 	})
 }
