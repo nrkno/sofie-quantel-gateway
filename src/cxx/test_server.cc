@@ -487,7 +487,7 @@ Quentin::WStrings* ZonePortal_i::searchClips(const Quentin::ClipPropertyList& pr
 		if (std::wstring(columns[x]) == L"ClipID") {
 			(*result)[x] = CORBA::WString_var(L"2"); continue;
 		}
-		if (std::wstring(columns[x]) == L"CloneID") {
+		if (std::wstring(columns[x]) == L"CloneId") {
 			(*result)[x] = CORBA::WString_var(L"2"); continue;
 		}
 		if (std::wstring(columns[x]) == L"Completed") {

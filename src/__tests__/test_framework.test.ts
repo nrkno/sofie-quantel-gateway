@@ -37,6 +37,17 @@ describe('Test framework', () => {
 		await expect(request.post('http://localhost:3000/connect/127.0.0.1')).resolves.toBeTruthy()
 	})
 
+	test('Bad route', async () => {
+		await expect(request.get('http://localhost:3000/default/wrong', { json: true }).then(x => x, x => JSON.parse(x.message.slice(6))))
+		.resolves.toEqual({
+			status: 404,
+			message: 'Not found. Request GET /default/wrong',
+			stack: ''
+		})
+		await expect(request.get('http://localhost:3000/default/wrong'))
+		.rejects.toThrow('Not found. Request GET /default/wrong')
+	})
+
 	test('Convert BCD timecode to string', () => {
 		expect(Quantel.timecodeFromBCD(0x10111213)).toBe('10:11:12:13')
 		expect(Quantel.timecodeFromBCD(0)).toBe('00:00:00:00')

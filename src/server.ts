@@ -560,6 +560,7 @@ app.use(async (ctx, next) => {
 					message: `Not found. Request ${ctx.method} ${ctx.path}`,
 					stack: ''
 				} as JSONError
+				ctx.status = 404
 			}
 		}
 	} catch (err) {

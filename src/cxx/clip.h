@@ -31,6 +31,7 @@ void searchClipsComplete(napi_env env, napi_status asyncStatus, void* data);
 
 const std::vector<std::string> columnNames = {
 	"ClipID",
+	// "ClipGuid",
 	"CloneID",
 	"Completed",
 	"Created",
