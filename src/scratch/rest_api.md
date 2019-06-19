@@ -180,6 +180,31 @@ If it is necessary to search for the clip by, say, title, a query interface can 
 
 A GET request to this path should return a JSON array listing documents matching the query and each element  contains a _clipID_. A wildcard character `*` can be used to match zero of more characters.
 
+## Formats
+
+To query information about format of a clip, including framerate and dimensions, use the format resource.
+
+    /:zoneID/format/:formatID
+
+The format ID can be found in the `AudioFormats` and `VideoFormats` property of a clip. Omit the `:formatID` to list all of the formats available in a zone (may take a couple of seconds). For example, to find out the details of video format `90`:
+
+    /default/format/90
+
+```JSON
+{
+	"type": "FormatInfo",
+	"formatNumber": 90,
+	"essenceType": "VideoFragment",
+	"frameRate": 25,
+	"height": 576,
+	"width": 720,
+	"samples": 0,
+	"formatName": "Legacy 9E Mpeg 40 576i25",
+	"layoutName": "720x576i25",
+	"compressionName": "Mpeg-2"
+}
+```
+
 ## Loading clips
 
 Clips consist of _fragments_. To play a _clip_, or a sub-clip of a clip, it is necessary to load fragments onto a port. To query all fragments:

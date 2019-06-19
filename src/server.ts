@@ -73,12 +73,12 @@ router.get('/:zoneID.json', async (ctx) => {
 
 router.get('/:zoneID/', async (ctx) => {
 	if (ctx.params.zoneID === 'default') {
-		ctx.body = [ 'server/', 'clip/' ]
+		ctx.body = [ 'server/', 'clip/', 'format/' ]
 	} else {
 		let zones = await Quantel.listZones()
 		let inTheZone = zones.find(z => z.zoneName === ctx.params.zoneID || z.zoneNumber.toString() === ctx.params.zoneID)
 		if (inTheZone) {
-			ctx.body = [ 'server/', 'clip/' ]
+			ctx.body = [ 'server/', 'clip/', 'format/' ]
 		} else {
 			ctx.status = 404
 			ctx.body = {
@@ -86,6 +86,38 @@ router.get('/:zoneID/', async (ctx) => {
 				message: `Not found. Could not find a zone called '${ctx.params.zoneID}'.`,
 				stack: ''
 			} as JSONError
+		}
+	}
+})
+
+router.get('/default/format/', async (ctx) => {
+	ctx.body = await Quantel.getFormats()
+})
+
+router.get('/default/format/:formatID', async (ctx) => {
+	if (isNaN(+ctx.params.formatID) || +ctx.params.formatID < 0 || +ctx.params.formatID > 65535) {
+		ctx.status = 400
+		ctx.body = {
+			status: 400,
+			message: 'Bad request. Format ID must be a non-negative short number.',
+			stack: ''
+		} as JSONError
+		return
+	}
+	try {
+		ctx.body = await Quantel.getFormatInfo({
+			formatNumber: +ctx.params.formatID
+		})
+	} catch (err) {
+		if (err.message.indexOf('BadIdent') >= 0) {
+			ctx.status = 404
+			ctx.body = {
+				status: 404,
+				message: `Not found. A format with identifier '${ctx.params.formatID}' was not found.`,
+				stack: ''
+			}
+		} else {
+			throw err
 		}
 	}
 })

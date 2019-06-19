@@ -384,6 +384,33 @@ export namespace Quantel {
 		}
 	}
 
+	export interface Formats {
+		[key: number]: FormatInfo,
+	}
+
+	export async function getFormats (): Promise<Formats> {
+		try {
+			await getISAReference()
+			let isaRef = await isaIOR
+			let formats: Formats = {}
+			for (let x = 0 ; x < 255 ; x++) {
+				let format: FormatInfo | null =
+					await quantel.getFormatInfo(isaRef, { formatNumber: x }).then((x: FormatInfo) => x, () => null)
+				if (format) {
+					formats[format.formatNumber] = format
+				}
+			}
+			return formats
+		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return getFormats()
+			}
+			throw err
+		}
+	}
+
 	async function checkServer (options: PortRef): Promise<ServerInfo> {
 		let servers = await quantel.getServers(await isaIOR)
 		let server = servers.find((x: ServerInfo) =>
