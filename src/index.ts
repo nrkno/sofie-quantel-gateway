@@ -393,7 +393,7 @@ export namespace Quantel {
 			await getISAReference()
 			let isaRef = await isaIOR
 			let formats: Formats = {}
-			for (let x = 0 ; x < 255 ; x++) {
+			for (let x = 0 ; x < 900 ; x++) {
 				let format: FormatInfo | null =
 					await quantel.getFormatInfo(isaRef, { formatNumber: x }).then((x: FormatInfo) => x, () => null)
 				if (format) {

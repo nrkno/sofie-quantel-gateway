@@ -182,7 +182,7 @@ A GET request to this path should return a JSON array listing documents matching
 
 ## Formats
 
-To query information about format of a clip, including framerate and dimensions, use the format resource.
+To query information about format of a clip, including framerate, compression and dimensions, use the format resource.
 
     /:zoneID/format/:formatID
 

@@ -266,25 +266,44 @@ void getPlayPortExecute(napi_env env, void* data) {
 			c->statusFlags = std::string("fading"); break;
 		default:
 			c->statusFlags = std::string("unknown"); break;
-	 }
-	 c->endOfData = gps->endOfData;
-	 c->framesUnused = gps->framesUnused;
-	 c->outputTime = formatTimecode(gps->outputTime);
+	 	}
+	 	c->endOfData = gps->endOfData;
+	 	c->framesUnused = gps->framesUnused;
+	 	c->outputTime = formatTimecode(gps->outputTime);
 
-	 channels = port->getChannels();
-	 for ( uint32_t x = 0 ; x < channels->length() ; x++ ) {
-		 c->channels.push_back(channels[x]);
-	 }
- }
- catch(CORBA::SystemException& ex) {
+	 	channels = port->getChannels();
+	 	for ( uint32_t x = 0 ; x < channels->length() ; x++ ) {
+		 	c->channels.push_back(channels[x]);
+	 	}
+
+		for ( int32_t y = 0 ; y < Quentin::FragmentType::numFragmentTypes ; y++ ) {
+	 		Quentin::ConfigDescriptionList_var cdl = server->getConfigurations(c->channels.at(0), (Quentin::FragmentType) y, true);
+	 		for ( uint32_t x = 0 ; x < cdl->length() ; x++ ) {
+	 			wprintf(L"Configuration %i has description %ws\n", cdl[x].configNumber, cdl[x].description);
+	 		}
+		}
+		Quentin::Longs_var defaults = server->getDefaultConfigurations(c->channels.at(0));
+		for ( uint32_t x = 0 ; x < defaults->length() ; x++ ) {
+			printf("Default config %i\n", defaults[x]);
+		}
+		printf("The channel is %i\n", c->channels.at(0));
+		defaults->length(1);
+		defaults[0] = defaults[0] + 1;
+		port->configure(0, defaults.in());
+		Quentin::Longs_var currents = server->getCurrentConfigurations(4);
+		for ( uint32_t x = 0 ; x < currents->length() ; x++ ) {
+			printf("Current config %i\n", currents[x]);
+		}
+ 	}
+ 	catch(CORBA::SystemException& ex) {
 	 NAPI_REJECT_SYSTEM_EXCEPTION(ex);
- }
- catch(CORBA::Exception& ex) {
-	 NAPI_REJECT_CORBA_EXCEPTION(ex);
- }
- catch(omniORB::fatalException& fe) {
-	 NAPI_REJECT_FATAL_EXCEPTION(fe);
- }
+ 	}
+ 	catch(CORBA::Exception& ex) {
+	 	NAPI_REJECT_CORBA_EXCEPTION(ex);
+	}
+ 	catch(omniORB::fatalException& fe) {
+	 	NAPI_REJECT_FATAL_EXCEPTION(fe);
+ 	}
 
   orb->destroy();
 }
