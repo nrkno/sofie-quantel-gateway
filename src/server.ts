@@ -361,7 +361,7 @@ router.get('/default/server/:serverID/port/:portID/fragments/', async (ctx) => {
 router.post('/default/server/:serverID/port/:portID/fragments/', async (ctx) => {
 	try {
 		if (ctx.body && ctx.status === 400) return
-		let fragments: Quantel.ServerFragment[] = ctx.request.body
+		let fragments: Quantel.ServerFragmentTypes[] = ctx.request.body
 		if (!Array.isArray(fragments) || fragments.length === 0 || ctx.request.type !== 'application/json') {
 			ctx.status = 400
 			ctx.body = {
