@@ -276,7 +276,8 @@ void getPlayPortExecute(napi_env env, void* data) {
 		 	c->channels.push_back(channels[x]);
 	 	}
 
-		for ( int32_t y = 0 ; y < Quentin::FragmentType::numFragmentTypes ; y++ ) {
+		// TODO
+		/* for ( int32_t y = 0 ; y < Quentin::FragmentType::numFragmentTypes ; y++ ) {
 	 		Quentin::ConfigDescriptionList_var cdl = server->getConfigurations(c->channels.at(0), (Quentin::FragmentType) y, true);
 	 		for ( uint32_t x = 0 ; x < cdl->length() ; x++ ) {
 	 			wprintf(L"Configuration %i has description %ws\n", cdl[x].configNumber, cdl[x].description);
@@ -293,7 +294,7 @@ void getPlayPortExecute(napi_env env, void* data) {
 		Quentin::Longs_var currents = server->getCurrentConfigurations(4);
 		for ( uint32_t x = 0 ; x < currents->length() ; x++ ) {
 			printf("Current config %i\n", currents[x]);
-		}
+		} */
  	}
  	catch(CORBA::SystemException& ex) {
 	 NAPI_REJECT_SYSTEM_EXCEPTION(ex);
