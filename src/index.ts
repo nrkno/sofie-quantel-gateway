@@ -130,6 +130,13 @@ export namespace Quantel {
 		start: number,
 		finish: number,
 	}
+	export type ServerFragmentTypes =
+		VideoFragment |
+		AudioFragment |
+		AUXFragment |
+		CCFragment |
+		TimecodeFragment |
+		EffectFragment
 
 	interface PositionData extends ServerFragment {
 		rushID: string,
@@ -171,7 +178,7 @@ export namespace Quantel {
 	// TODO extend with the different types
 	export interface ServerFragments extends ClipRef {
 		type: 'ServerFragments',
-		fragments: ServerFragment[]
+		fragments: ServerFragmentTypes[]
 	}
 
 	export interface PortServerFragments extends ServerFragments, PortRef {
@@ -179,7 +186,7 @@ export namespace Quantel {
 	}
 
 	export interface PortLoadInfo extends PortRef {
-		fragments: ServerFragment[],
+		fragments: ServerFragmentTypes[],
 		offset?: number
 	}
 
