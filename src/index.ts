@@ -158,6 +158,10 @@ export namespace Quantel {
 		ccType: number,
 		effectID: number,
 	}
+	export interface EffectFragment extends ServerFragment {
+		type: 'EffectFragment'
+		effectID: number
+	}
 
 	export interface TimecodeFragment extends ServerFragment {
 		startTimecode: string,
