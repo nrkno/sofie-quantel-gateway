@@ -358,7 +358,7 @@ router.get('/default/clip/:clipID/fragments/:in-:out', async (ctx) => {
 router.get('/default/server/:serverID/port/:portID/fragments/', async (ctx) => {
 	try {
 		let options: Quantel.PortFragmentRef = {
-			serverID: +ctx.params.serverID,
+			serverID: ctx.params.serverID,
 			portName: ctx.params.portID
 		}
 		if (ctx.query.start) {
@@ -431,14 +431,23 @@ router.post('/default/server/:serverID/port/:portID/fragments/', async (ctx) => 
 			offset: ctx.query.offset ? +ctx.query.offset : 0
 		})
 	} catch (err) {
-		throw err
+		if (err.message.indexOf('was expected')) {
+			ctx.status = 400
+			ctx.body = {
+				status: 400,
+				message: 'A parsing error prevented converting JSON representations of fragments into internal values.',
+				stack: err.stack
+			}
+		} else {
+			throw err
+		}
 	}
 })
 
 router.delete('/default/server/:serverID/port/:portID/fragments/', async (ctx) => {
 	try {
 		let options: Quantel.WipeInfo = {
-			serverID: +ctx.params.serverID,
+			serverID: ctx.params.serverID,
 			portName: ctx.params.portID
 		}
 		if (ctx.query.start) {

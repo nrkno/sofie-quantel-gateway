@@ -24,7 +24,6 @@ describe('Port-level Quantel gateway tests', () => {
  				assigned: true,
 				audioOnly: false,
 				channelNo: 2,
-				portID: 1,
 				portName: 'ginger',
 				serverID: 1100 } as Quantel.PortInfo)
 	})

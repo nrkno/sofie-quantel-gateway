@@ -423,13 +423,12 @@ export namespace Quantel {
 	}
 
 	// TODO: allow assignment of more than one channel
-	// FIXME: warn on attempt to steal a channel
 	export async function createPlayPort (options: PortInfo): Promise<PortInfo> {
 		try {
 			await getISAReference()
 			let server = await checkServer(options)
 			if (server.portNames && server.portNames.indexOf(options.portName) >= 0) {
-				let portStatus: PortStatus = quantel.getPlayPortStatus(await isaIOR, options)
+				let portStatus: PortStatus = await quantel.getPlayPortStatus(await isaIOR, options)
 				if (portStatus.channels.indexOf(options.channelNo) < 0) {
 					throw new ConnectError(`Conflict. Port '${options.portName}' on server '${options.serverID}' is already assigned to channels '[${portStatus.channels}]' and cannot be assigned to channel '${options.channelNo}'.`, 409)
 				}
@@ -442,9 +441,16 @@ export namespace Quantel {
 					assigned: false
 				} as PortInfo
 			}
+			if (isNaN(+options.channelNo) || +options.channelNo < 0) {
+				throw new ConnectError('Bad request. Channel number must be a non-negative integer.', 400)
+			}
+			if (server.chanPorts && options.channelNo >= server.chanPorts.length) {
+				throw new ConnectError(`Bad request. Channel number of '${options.channelNo}' exceeds maximum index for server of '${ server.chanPorts.length - 1}'.`, 400)
+			}
 			if (server.chanPorts && server.chanPorts[options.channelNo].length !== 0) {
 				throw new ConnectError(`Bad request. Cannot assign channel '${options.channelNo}' to port '${options.portName}' on server '${options.serverID}' as it is already assigned to port '${server.chanPorts[options.channelNo]}'.`, 400)
 			}
+
 			return await quantel.createPlayPort(await isaIOR, options)
 		} catch (err) {
 			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
@@ -557,6 +563,8 @@ export namespace Quantel {
 	export async function getPortFragments (options: PortFragmentRef): Promise<PortServerFragments> {
 		try {
 			await getISAReference()
+			await checkServerPort(options)
+			console.log(options)
 			return await quantel.getPortFragments(await isaIOR, options)
 		} catch (err) {
 			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
@@ -695,6 +703,7 @@ export namespace Quantel {
 	export async function wipe (options: WipeInfo): Promise<WipeResult> {
 		try {
 			await getISAReference()
+			await checkServerPort(options)
 			return await quantel.wipe(await isaIOR, options)
 		} catch (err) {
 			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
