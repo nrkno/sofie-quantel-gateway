@@ -81,7 +81,7 @@ describe('Clip-level Quantel gateway tests for fragments', () => {
 	})
 
 	// CORBA API does no inverse range check - gateway now does one
-	test('Get fragments with bad range ', async () => {
+	test('Get fragments with bad range', async () => {
 		expect.assertions(1)
 		await expect(Quantel.getFragments({ clipID: 2, start: 20, finish: 10 })).rejects.toThrow('cannot be before')
 	})
