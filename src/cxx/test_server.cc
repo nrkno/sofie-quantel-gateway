@@ -477,7 +477,12 @@ Quentin::WStrings* ZonePortal_i::getClipData(CORBA::Long clipID, const Quentin::
 Quentin::WStrings* ZonePortal_i::searchClips(const Quentin::ClipPropertyList& properties, const Quentin::WStrings& columns, CORBA::Long max) {
 	Quentin::WStrings* result = new Quentin::WStrings;
 	Quentin::ClipProperty theProp = properties[0];
-	if (std::wstring(theProp.value) != L"Once upon*") {
+	if (std::wstring(theProp.name) == L"Fred") {
+		throw Quentin::BadColumnData(theProp.name, theProp.value);
+	}
+	if (std::wstring(theProp.name) == L"PoolID") { theProp = properties[1]; }
+	if (std::wstring(theProp.value) != L"Once upon*" &&
+			std::wstring(theProp.value) != L"e977435806f24b37aed871bf15a2eef9") {
 		result->length(0);
 		// printf("Got into here.\n"); fflush(stdout);
 		return result;
@@ -486,6 +491,9 @@ Quentin::WStrings* ZonePortal_i::searchClips(const Quentin::ClipPropertyList& pr
 	for ( uint32_t x = 0 ; x < result->length() ; x++ ) {
 		if (std::wstring(columns[x]) == L"ClipID") {
 			(*result)[x] = CORBA::WString_var(L"2"); continue;
+		}
+		if (std::wstring(columns[x]) == L"ClipGUID") {
+			(*result)[x] = CORBA::WString_var(L"e977435806f24b37aed871bf15a2eef9"); continue;
 		}
 		if (std::wstring(columns[x]) == L"CloneId") {
 			(*result)[x] = CORBA::WString_var(L"2"); continue;

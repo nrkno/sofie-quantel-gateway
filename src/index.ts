@@ -82,6 +82,7 @@ export namespace Quantel {
 	export interface ClipDataSummary {
 		type: 'ClipDataSummary' | 'ClipData',
 		ClipID: number,
+		ClipGUID: string,
 		CloneId: number | null,
 		Completed: Date | null,
 		Created: Date, // ISO-formatted date
@@ -118,7 +119,6 @@ export namespace Quantel {
 		Division: string,
 		AudioFormats: string,
 		VideoFormats: string,
-		ClipGUID: string,
 		Protection: string,
 		VDCPID: string,
 		PublishCompleted: Date | null, // ISO-formatted date

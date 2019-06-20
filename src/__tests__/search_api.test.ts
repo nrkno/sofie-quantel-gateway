@@ -15,7 +15,8 @@ describe('Clip-level Quantel gateway tests for searching', () => {
 		await expect(Quantel.searchClips({ Title: 'Once upon*' })).resolves.toMatchObject([{
 			type: 'ClipDataSummary',
 			ClipID: 2,
-			CloneID: 2,
+			ClipGUID: 'e977435806f24b37aed871bf15a2eef9',
+			CloneId: 2,
 			Completed: new Date('2019-06-12T19:16:00.000Z'),
 			Created: new Date('2019-06-12T19:16:00.000Z'),
 			Description: 'This is the best programme ever to be produced.',

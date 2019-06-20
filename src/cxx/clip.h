@@ -31,15 +31,15 @@ void searchClipsComplete(napi_env env, napi_status asyncStatus, void* data);
 
 const std::vector<std::string> columnNames = {
 	"ClipID",
-	// "ClipGuid",
-	"CloneID",
+	"ClipGUID",
+	"CloneId",
 	"Completed",
 	"Created",
 	"Description",
 	"Frames",
 	"Owner",
 	"PoolID",
-	"Title"
+	"Title",
 };
 
 struct searchClipsCarrier : carrier {

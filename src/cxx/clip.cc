@@ -220,7 +220,7 @@ void searchClipsComplete(napi_env env, napi_status asyncStatus, void* data) {
 		std::string value = c->values.at(x);
 		std::string key = columnNames.at(x % columnNames.size());
 
-		if ((key == "ClipID") || (key == "CloneID") || (key == "PoolID")) {
+		if ((key == "ClipID") || (key == "CloneId") || (key == "PoolID")) {
 			c->status = napi_create_int32(env, std::stol(value), &prop);
 			REJECT_STATUS;
 		} else if ((key == "Completed") || (key == "Created")) {

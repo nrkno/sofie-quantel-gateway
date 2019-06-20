@@ -205,7 +205,20 @@ router.get('/default/clip', async (ctx) => {
 			stack: ''
 		} as JSONError
 	} else {
-		ctx.body = await Quantel.searchClips(ctx.query)
+		try {
+			ctx.body = await Quantel.searchClips(ctx.query)
+		} catch (err) {
+			if (err.message.indexOf('BadColumnData') >= 0) {
+				ctx.status = 400
+				ctx.body = {
+					status: 400,
+					message: `Bad request. Unknown search parameter name '${Object.keys(ctx.query)}'.`,
+					stack: ''
+				} as JSONError
+			} else {
+				throw err
+			}
+		}
 	}
 })
 
