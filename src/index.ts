@@ -564,7 +564,6 @@ export namespace Quantel {
 		try {
 			await getISAReference()
 			await checkServerPort(options)
-			console.log(options)
 			return await quantel.getPortFragments(await isaIOR, options)
 		} catch (err) {
 			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }

@@ -129,8 +129,8 @@ Quentin::ServerFragments* Port_i::getPortFragments(CORBA::Long start, CORBA::Lon
 	Quentin::ServerFragmentData sfvd;
 
 	sfv.trackNum = 0;
-	sfv.start = 0;
-	sfv.finish = 1000;
+	sfv.start = start;
+	sfv.finish = finish > 1000 ? 1000 : finish;
 	vfd.format = 90;
 	vfd.poolID = 11;
 	vfd.poolFrame = 123;
@@ -149,8 +149,8 @@ Quentin::ServerFragments* Port_i::getPortFragments(CORBA::Long start, CORBA::Lon
 	Quentin::ServerFragmentData sfad;
 
 	sfa.trackNum = 0;
-	sfa.start = 0;
-	sfa.finish = 1000;
+	sfa.start = start;
+	sfa.finish = finish > 1000 ? 1000 : finish;
 	afd.format = 73;
 	afd.poolID = 11;
 	afd.poolFrame = 321;
@@ -342,7 +342,7 @@ public:
 	virtual Quentin::WStrings* searchClipsWithOffset(const ::Quentin::ClipPropertyList& props, const ::Quentin::WStrings& columns, ::CORBA::Long offset, ::CORBA::Long max) { return nullptr; }
 	virtual Quentin::WStrings* orderedSearchClips(const ::Quentin::ClipPropertyList& props, const ::Quentin::WStrings& columns, const ::Quentin::SortOrderList& order, ::CORBA::Long offset, ::CORBA::Long max) { return nullptr; }
 	virtual Quentin::Longs* getTaggedClips(const ::CORBA::WChar* tag, const ::CORBA::WChar* keys) { return nullptr; }
-	virtual Quentin::FormatInfo* getFormatInfo(::Quentin::FormatCode format) { return nullptr; }
+	virtual Quentin::FormatInfo* getFormatInfo(::Quentin::FormatCode format);
 	virtual void getThumbnailSize(::CORBA::Long mode, ::CORBA::Long& width, ::CORBA::Long& height) { }
 	virtual ::CORBA::Long requestThumbnails(::CORBA::Long mode, const ::Quentin::PositionData& fragment, ::CORBA::Long offset, ::CORBA::Long stride, ::CORBA::Long count, ::CORBA::Long ident, ::Quentin::ThumbnailListener_ptr listener) { return 0; }
 	virtual void abortThumbnails(::CORBA::Long abortID) { }
@@ -625,6 +625,23 @@ Quentin::ServerFragments* ZonePortal_i::getFragments(::CORBA::Long clipID, ::COR
 
 	// TODO other fragment types
 	return frags;
+}
+
+Quentin::FormatInfo* ZonePortal_i::getFormatInfo(Quentin::FormatCode format) {
+	if (format != 90) {
+			throw Quentin::BadIdent(Quentin::BadIdentReason::formatNotKnown, format);
+	}
+	Quentin::FormatInfo* fi = new Quentin::FormatInfo;
+	fi->formatNumber = 90;
+	fi->essenceType = (Quentin::FragmentType) 0;
+	fi->frameRate = 25;
+	fi->height = 576;
+	fi->width = 720;
+	fi->samples = 0;
+	fi->formatName = L"Legacy 9E Mpeg 40 576i25";
+	fi->layoutName = L"720x576i25";
+	fi->compressionName = L"Mpeg-2";
+	return fi;
 }
 
 napi_value runServer(napi_env env, napi_callback_info info) {

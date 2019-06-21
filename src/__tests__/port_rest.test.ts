@@ -251,7 +251,72 @@ describe('Port-level REST API tests', () => {
 		.rejects.toThrow('404')
 	})
 
-	// TODO get fragments with range
+	test('Get play port fragments with range', async () => {
+		await expect(request.get('http://localhost:3000/default/server/1100/port/Port 1/fragments?start=10&finish=20').then(JSON.parse))
+		.resolves.toMatchObject({
+			type: 'ServerFragments',
+			serverID: 1100,
+			portName: 'Port 1',
+			clipID: -1,
+			fragments: [{
+				type: 'VideoFragment',
+				start: 10,
+				finish: 20,
+				format: 90,
+				poolID: 11,
+				rushFrame: 543210,
+				poolFrame: 123,
+				rushID: '0123456789abcdeffedcba9876543210',
+				skew: 42,
+				trackNum: 0
+			} as Quantel.VideoFragment, {
+				type: 'AudioFragment',
+				start: 10,
+				finish: 20,
+				format: 73,
+				poolID: 11,
+				rushFrame: 123456,
+				poolFrame: 321,
+				rushID: 'fedcba98765432100123456789abcdef',
+				skew: 24,
+				trackNum: 0
+			}] })
+	})
+
+	test('Attempt to get play port fragments with bad start', async () => {
+		await expect(request.get('http://localhost:3000/default/server/1100/port/Port 1/fragments?start=wtf'))
+		.rejects.toThrow('Get port fragments parameter \'start\' must be non-negative integer')
+		await expect(request.get('http://localhost:3000/default/server/1100/port/Port 1/fragments?start=wtf'))
+		.rejects.toThrow('400')
+	})
+
+	test('Attempt to get play port fragments with negative start', async () => {
+		await expect(request.get('http://localhost:3000/default/server/1100/port/Port 1/fragments?start=-1'))
+		.rejects.toThrow('Get port fragments parameter \'start\' must be non-negative integer')
+		await expect(request.get('http://localhost:3000/default/server/1100/port/Port 1/fragments?start=-1'))
+		.rejects.toThrow('400')
+	})
+
+	test('Attempt to get play port fragments with bad finish', async () => {
+		await expect(request.get('http://localhost:3000/default/server/1100/port/Port 1/fragments?finish=wtf'))
+		.rejects.toThrow('Get port fragments parameter \'finish\' must be non-negative integer')
+		await expect(request.get('http://localhost:3000/default/server/1100/port/Port 1/fragments?finish=wtf'))
+		.rejects.toThrow('400')
+	})
+
+	test('Attempt to get play port fragments with negative finish', async () => {
+		await expect(request.get('http://localhost:3000/default/server/1100/port/Port 1/fragments?finish=-1'))
+		.rejects.toThrow('Get port fragments parameter \'finish\' must be non-negative integer')
+		await expect(request.get('http://localhost:3000/default/server/1100/port/Port 1/fragments?finish=-1'))
+		.rejects.toThrow('400')
+	})
+
+	test('Attempt to get play port fragments with bad range', async () => {
+		await expect(request.get('http://localhost:3000/default/server/1100/port/Port 1/fragments?start=10&finish=10'))
+		.rejects.toThrow('Get port fragments \'finish\' must be after \'start\'')
+		await expect(request.get('http://localhost:3000/default/server/1100/port/Port 1/fragments?start=10&finish=10'))
+		.rejects.toThrow('400')
+	})
 
 	test('Load play port fragments with server number', async () => {
 		await expect(request({
@@ -456,7 +521,81 @@ describe('Port-level REST API tests', () => {
 		.rejects.toThrow('404')
 	})
 
-	// TODO range tests for wipe
+	test('Wipe fragments with a range', async () => {
+		await expect(request.delete('http://localhost:3000/default/server/1100/port/Port 1/fragments?start=123&frames=321').then(JSON.parse))
+		.resolves.toMatchObject({
+			type: 'WipeResult',
+			portName: 'Port 1',
+			frames: 321,
+			serverID: 1100,
+			start: 123,
+			wiped: true
+		})
+	})
+
+	test('Wipe fragments with a range, start only', async () => {
+		await expect(request.delete('http://localhost:3000/default/server/1100/port/Port 1/fragments?start=123').then(JSON.parse))
+		.resolves.toMatchObject({
+			type: 'WipeResult',
+			portName: 'Port 1',
+			frames: 0x7fffffff - 123,
+			serverID: 1100,
+			start: 123,
+			wiped: true
+		})
+	})
+
+	test('Wipe fragments with a range, finish set to MAX', async () => {
+		await expect(request.delete('http://localhost:3000/default/server/1100/port/Port 1/fragments?start=123&frames=MAX').then(JSON.parse))
+		.resolves.toMatchObject({
+			type: 'WipeResult',
+			portName: 'Port 1',
+			frames: 0x7fffffff - 123,
+			serverID: 1100,
+			start: 123,
+			wiped: true
+		})
+	})
+
+	test('Wipe fragments with a range, finish only', async () => {
+		await expect(request.delete('http://localhost:3000/default/server/1100/port/Port 1/fragments?frames=321').then(JSON.parse))
+		.resolves.toMatchObject({
+			type: 'WipeResult',
+			portName: 'Port 1',
+			frames: 321,
+			serverID: 1100,
+			start: 0,
+			wiped: true
+		})
+	})
+
+	test('Attempt to wipe fragments with a range and bad start', async () => {
+		await expect(request.delete('http://localhost:3000/default/server/1100/port/Port 1/fragments?start=wtf').then(JSON.parse))
+		.rejects.toThrow('Wipe parameter \'start\' must be non-negative integer.')
+		await expect(request.delete('http://localhost:3000/default/server/1100/port/Port 1/fragments?start=wtf').then(JSON.parse))
+		.rejects.toThrow('400')
+	})
+
+	test('Attempt to wipe fragments with a range and negative start', async () => {
+		await expect(request.delete('http://localhost:3000/default/server/1100/port/Port 1/fragments?start=-1').then(JSON.parse))
+		.rejects.toThrow('Wipe parameter \'start\' must be non-negative integer.')
+		await expect(request.delete('http://localhost:3000/default/server/1100/port/Port 1/fragments?start=-1').then(JSON.parse))
+		.rejects.toThrow('400')
+	})
+
+	test('Attempt to wipe fragments with a range and bad frames', async () => {
+		await expect(request.delete('http://localhost:3000/default/server/1100/port/Port 1/fragments?frames=wtf').then(JSON.parse))
+		.rejects.toThrow('Wipe parameter \'frames\' must be non-negative integer.')
+		await expect(request.delete('http://localhost:3000/default/server/1100/port/Port 1/fragments?frames=wtf').then(JSON.parse))
+		.rejects.toThrow('400')
+	})
+
+	test('Attempt to wipe fragments with a range and negative frames', async () => {
+		await expect(request.delete('http://localhost:3000/default/server/1100/port/Port 1/fragments?frames=-1').then(JSON.parse))
+		.rejects.toThrow('Wipe parameter \'frames\' must be non-negative integer.')
+		await expect(request.delete('http://localhost:3000/default/server/1100/port/Port 1/fragments?frames=-1').then(JSON.parse))
+		.rejects.toThrow('400')
+	})
 
 	afterAll(async () => {
 		await new Promise((resolve, reject) => {

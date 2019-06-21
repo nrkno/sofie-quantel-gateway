@@ -74,6 +74,21 @@ describe('Port-level Quantel gateway tests', () => {
 		} as Quantel.WipeResult)
 	})
 
+	test('Wipe a port between two points', async () => {
+		await expect(Quantel.wipe({
+			serverID: 1100,
+			portName: 'Port 1',
+			start: 123,
+			frames: 321
+		})).resolves.toMatchObject({
+			type: 'WipeResult',
+			portName: 'Port 1',
+			frames: 321,
+			start: 123,
+			wiped: true
+		})
+	})
+
 	test('Load play port with fragments', async () => {
 		await expect(Quantel.loadPlayPort({
 			serverID: 1100,

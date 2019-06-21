@@ -141,6 +141,42 @@ describe('Zone-level REST API tests', () => {
 		.rejects.toThrow('404')
 	})
 
+	test('Get a format', async () => {
+		await expect(request.get('http://localhost:3000/default/format/90').then(JSON.parse))
+		.resolves.toMatchObject({
+			type: 'FormatInfo',
+			formatNumber: 90,
+			frameRate: 25,
+			height: 576,
+			width: 720,
+			samples: 0,
+			compressionName: 'Mpeg-2',
+			formatName: 'Legacy 9E Mpeg 40 576i25',
+			layoutName: '720x576i25'
+		})
+	})
+
+	test('Attempt to get a non-existant format', async () => {
+		await expect(request.get('http://localhost:3000/default/format/42'))
+		.rejects.toThrow('A format with identifier \'42\' was not found')
+		await expect(request.get('http://localhost:3000/default/format/42'))
+		.rejects.toThrow('404')
+	})
+
+	test('Attempt to get a format by name', async () => {
+		await expect(request.get('http://localhost:3000/default/format/whoami'))
+		.rejects.toThrow('Format ID must be a non-negative short number')
+		await expect(request.get('http://localhost:3000/default/format/whoami'))
+		.rejects.toThrow('400')
+	})
+
+	test('Attempt to get a format by negative number', async () => {
+		await expect(request.get('http://localhost:3000/default/format/-1'))
+		.rejects.toThrow('Format ID must be a non-negative short number')
+		await expect(request.get('http://localhost:3000/default/format/-1'))
+		.rejects.toThrow('400')
+	})
+
 	afterAll(async () => {
 		await new Promise((resolve, reject) => {
 			server.close(e => {

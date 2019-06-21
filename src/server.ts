@@ -362,7 +362,7 @@ router.get('/default/server/:serverID/port/:portID/fragments/', async (ctx) => {
 			portName: ctx.params.portID
 		}
 		if (ctx.query.start) {
-			if (ctx.query.start && (isNaN(+ctx.query.start) || +ctx.query.offset < 0)) {
+			if (ctx.query.start && (isNaN(+ctx.query.start) || +ctx.query.start < 0)) {
 				ctx.status = 400
 				ctx.body = {
 					status: 400,
@@ -374,11 +374,11 @@ router.get('/default/server/:serverID/port/:portID/fragments/', async (ctx) => {
 			options.start = +ctx.query.start
 		}
 		if (ctx.query.finish) {
-			if (ctx.query.frames && (isNaN(+ctx.query.frames) || +ctx.query.frames < 0)) {
+			if (ctx.query.finish && (isNaN(+ctx.query.finish) || +ctx.query.finish < 0)) {
 				ctx.status = 400
 				ctx.body = {
 					status: 400,
-					message: 'Get port framgments parameter \'finish\' must be non-negative integer.',
+					message: 'Get port fragments parameter \'finish\' must be non-negative integer.',
 					stack: ''
 				} as JSONError
 				return
@@ -451,7 +451,7 @@ router.delete('/default/server/:serverID/port/:portID/fragments/', async (ctx) =
 			portName: ctx.params.portID
 		}
 		if (ctx.query.start) {
-			if (ctx.query.start && (isNaN(+ctx.query.start) || +ctx.query.offset < 0)) {
+			if (ctx.query.start && (isNaN(+ctx.query.start) || +ctx.query.start < 0)) {
 				ctx.status = 400
 				ctx.body = {
 					status: 400,
@@ -476,9 +476,11 @@ router.delete('/default/server/:serverID/port/:portID/fragments/', async (ctx) =
 				return
 			}
 			options.frames = +ctx.query.frames
-			if (options.start && options.frames + options.start > 0x7fffffff) {
-				options.frames = 0x7fffffff - options.start
-			}
+		} else {
+			options.frames = 0x7fffffff
+		}
+		if (options.start && options.frames + options.start > 0x7fffffff) {
+			options.frames = 0x7fffffff - options.start
 		}
 		ctx.body = await Quantel.wipe(options)
 	} catch (err) {

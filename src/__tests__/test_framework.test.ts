@@ -53,6 +53,7 @@ describe('Test framework', () => {
 		expect(Quantel.timecodeFromBCD(0)).toBe('00:00:00:00')
 		expect(Quantel.timecodeFromBCD(0x23595924)).toBe('23:59:59:24')
 		expect(Quantel.timecodeFromBCD(0x23595929 | 0x40000000)).toBe('23:59:59;29')
+		expect(() => Quantel.timecodeFromBCD(11)).toThrow('Given number does not map to a valid timecode')
 	})
 
 	test('Convert string timecode to BCD', () => {
@@ -60,6 +61,7 @@ describe('Test framework', () => {
 		expect(Quantel.timecodeToBCD('00:00:00:00')).toBe(0)
 		expect(Quantel.timecodeToBCD('23:59:59:24')).toBe(0x23595924)
 		expect(Quantel.timecodeToBCD('23:59:59;29')).toBe(0x23595929 | 0x40000000)
+		expect(() => Quantel.timecodeToBCD('00:61:00:00')).toThrow('Timecode string does not match an accceptable pattern for conversion')
 	})
 
 	afterAll(async () => {
