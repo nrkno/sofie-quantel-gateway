@@ -23,6 +23,8 @@ TBD:
 
 * The output of the Quantel is via a vision mixer under automation control and so capabilities of the sQ server to do transitions and other effects are not used.
 
+**The following text describing the HTTP API is an old version. Please see the main `README.md` of the project.**
+
 ## Connecting to an ISA
 
 By default, the gateway tries to connect to an ISA at on the localhost.

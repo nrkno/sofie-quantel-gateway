@@ -370,3 +370,5 @@ All error responses are in JSON format and includes properties for a numerical `
 Unless otherwise called out in the header of a file, the files of this project are licensed under the GPL V2 or later, as detailed in the [`LICENSE`](./LICENSE) file. This project links to [omniORB](http://omniorb.sourceforge.net/) that is similarly GPL v2.
 
 Please also note the specific terms of the [`Quentin.idl`](./include/quantel/Quentin.idl) file.
+
+Copyright (c) 2019 Norsk rikskringkasting AS (NRK)
