@@ -12,67 +12,67 @@ export namespace Quantel {
 	let stickyRef: string = 'http://localhost:2096'
 
 	export interface ZoneInfo {
-		type: 'ZonePortal',
-		zoneNumber: number,
-		zoneName: string,
+		type: 'ZonePortal'
+		zoneNumber: number
+		zoneName: string
 		isRemote: boolean
 	}
 
 	export interface ServerInfo {
-		type: 'Server',
-		ident: number,
-		down: boolean,
-		name?: string,
-		numChannels?: number,
-		pools?: number[],
-		portNames?: string[],
+		type: 'Server'
+		ident: number
+		down: boolean
+		name?: string
+		numChannels?: number
+		pools?: number[]
+		portNames?: string[]
 		chanPorts?: string[]
 	}
 
 	export interface PortRef {
-		serverID: number | string,
-		portName: string,
+		serverID: number | string
+		portName: string
 	}
 
 	export interface PortInfo extends PortRef {
-		type?: 'PortInfo',
-		channelNo: number,
-		portID?: number,
-		audioOnly?: boolean,
-		assigned?: boolean,
+		type?: 'PortInfo'
+		channelNo: number
+		portID?: number
+		audioOnly?: boolean
+		assigned?: boolean
 	}
 
 	export interface PortStatus extends PortRef {
-		type: 'PortStatus',
-		portID: number,
-		refTime: string,
-		portTime: string,
-		speed: number,
-		offset: number,
-		status: string,
-		endOfData: number,
-		framesUnused: number,
-		outputTime: string,
+		type: 'PortStatus'
+		portID: number
+		refTime: string
+		portTime: string
+		speed: number
+		offset: number
+		status: string
+		endOfData: number
+		framesUnused: number
+		outputTime: string
 		channels: number[],
 	}
 
 	export interface ReleaseStatus extends PortRef {
-		type: 'ReleaseStatus',
+		type: 'ReleaseStatus'
 		released: boolean
 	}
 
 	export interface ClipRef {
-		clipID: number,
+		clipID: number
 	}
 
 	export interface FragmentRef extends ClipRef {
-		start?: number,
-		finish?: number,
+		start?: number
+		finish?: number
 	}
 
 	export interface PortFragmentRef extends PortRef {
-		start?: number,
-		finish?: number,
+		start?: number
+		finish?: number
 	}
 
 	export interface ClipPropertyList {
@@ -80,56 +80,57 @@ export namespace Quantel {
 	}
 
 	export interface ClipDataSummary {
-		type: 'ClipDataSummary' | 'ClipData',
-		ClipID: number,
-		ClipGUID: string,
-		CloneId: number | null,
-		Completed: Date | null,
-		Created: Date, // ISO-formatted date
-		Description: string,
-		Frames: string, // TODO ISA type is None ... not sure whether to convert to number
-		Owner: string,
-		PoolID: number | null,
-		Title: string,
+		type: 'ClipDataSummary' | 'ClipData'
+		ClipID: number
+		ClipGUID: string
+		CloneId: number | null
+		Completed: Date | null
+		Created: Date // ISO-formatted date
+		Description: string
+		Frames: string // TODO ISA type is None ... not sure whether to convert to number
+		Owner: string
+		PoolID: number | null
+		Title: string
 	}
 
 	export interface ClipData extends ClipDataSummary {
-		type: 'ClipData',
-		Category: string,
-		CloneZone: number | null,
-		Destination: number | null,
-		Expiry: Date | null, // ISO-formatted date
-	 	HasEditData: number | null,
-		Inpoint: number | null,
-		JobID: number | null,
-		Modified: string | null,
-		NumAudTracks: number | null,
-		Number: number | null,
-		NumVidTracks: number | null,
-		Outpoint: number | null,
-		PlaceHolder: boolean,
-		PlayAspect: string,
-		PublishedBy: string,
-		Register: string,
-		Tape: string,
-		Template: number | null,
-		UnEdited: number | null,
-		PlayMode: string,
-		MosActive: boolean,
-		Division: string,
-		AudioFormats: string,
-		VideoFormats: string,
-		Protection: string,
-		VDCPID: string,
-		PublishCompleted: Date | null, // ISO-formatted date
+		type: 'ClipData'
+		Category: string
+		CloneZone: number | null
+		Destination: number | null
+		Expiry: Date | null // ISO-formatted date
+	 	HasEditData: number | null
+		Inpoint: number | null
+		JobID: number | null
+		Modified: string | null
+		NumAudTracks: number | null
+		Number: number | null
+		NumVidTracks: number | null
+		Outpoint: number | null
+		PlaceHolder: boolean
+		PlayAspect: string
+		PublishedBy: string
+		Register: string
+		Tape: string
+		Template: number | null
+		UnEdited: number | null
+		PlayMode: string
+		MosActive: boolean
+		Division: string
+		AudioFormats: string
+		VideoFormats: string
+		Protection: string
+		VDCPID: string
+		PublishCompleted: Date | null // ISO-formatted date
 	}
 
 	export interface ServerFragment {
-		type: string,
-		trackNum: number,
-		start: number,
-		finish: number,
+		type: string
+		trackNum: number
+		start: number
+		finish: number
 	}
+
 	export type ServerFragmentTypes =
 		VideoFragment |
 		AudioFragment |
@@ -139,12 +140,12 @@ export namespace Quantel {
 		EffectFragment
 
 	interface PositionData extends ServerFragment {
-		rushID: string,
-		format: number,
-		poolID: number,
-		poolFrame: number,
-		skew: number,
-		rushFrame: number,
+		rushID: string
+		format: number
+		poolID: number
+		poolFrame: number
+		skew: number
+		rushFrame: number
 	}
 
 	export interface VideoFragment extends PositionData {
@@ -160,10 +161,10 @@ export namespace Quantel {
 	}
 
 	export interface CCFragment extends ServerFragment {
-		type: 'CCFragment',
-		ccID: string,
-		ccType: number,
-		effectID: number,
+		type: 'CCFragment'
+		ccID: string
+		ccType: number
+		effectID: number
 	}
 	export interface EffectFragment extends ServerFragment {
 		type: 'EffectFragment'
@@ -171,13 +172,13 @@ export namespace Quantel {
 	}
 
 	export interface TimecodeFragment extends ServerFragment {
-		startTimecode: string,
-		userBits: number,
+		startTimecode: string
+		userBits: number
 	}
 
 	// TODO extend with the different types
 	export interface ServerFragments extends ClipRef {
-		type: 'ServerFragments',
+		type: 'ServerFragments'
 		fragments: ServerFragmentTypes[]
 	}
 
@@ -186,14 +187,14 @@ export namespace Quantel {
 	}
 
 	export interface PortLoadInfo extends PortRef {
-		fragments: ServerFragmentTypes[],
+		fragments: ServerFragmentTypes[]
 		offset?: number
 	}
 
 	export interface PortLoadStatus extends PortRef {
-		type: 'PortLoadStatus',
-		fragmentCount: number,
-		offset: number,
+		type: 'PortLoadStatus'
+		fragmentCount: number
+		offset: number
 	}
 
 	export enum Trigger {
@@ -204,13 +205,13 @@ export namespace Quantel {
 	}
 
 	export interface TriggerInfo extends PortRef {
-		trigger: Trigger,
+		trigger: Trigger
 		offset?: number
 	}
 
 	export interface TriggerResult extends TriggerInfo {
-		type: 'TriggerResult',
-		success: boolean,
+		type: 'TriggerResult'
+		success: boolean
 	}
 
 	export interface JumpInfo extends PortRef {
@@ -218,62 +219,62 @@ export namespace Quantel {
 	}
 
 	export interface JumpResult extends JumpInfo {
-		type: 'HardJumpResult' | 'TriggeredJumpResult',
-		success: boolean,
+		type: 'HardJumpResult' | 'TriggeredJumpResult'
+		success: boolean
 	}
 
 	export interface ThumbnailSize {
-		width: number,
+		width: number
 		height: number
 	}
 
 	export interface ThumbnailOrder extends ClipRef {
-		offset: number,
-		stride: number,
-		count: number,
+		offset: number
+		stride: number
+		count: number
 	}
 
 	export interface ConnectionDetails {
-		type: string,
-		isaIOR: string | null,
-		href: string,
+		type: string
+		isaIOR: string | null
+		href: string
 	}
 
 	export interface CloneRequest extends ClipRef {
-		poolID: number,
+		poolID: number
 		highPriority?: boolean
 	}
 
 	export interface WipeInfo extends PortRef {
-		start?: number,
-		frames?: number,
+		start?: number
+		frames?: number
 	}
 
 	export interface WipeResult extends WipeInfo {
-		type: 'WipeResult',
-		wiped: boolean,
+		type: 'WipeResult'
+		wiped: boolean
 	}
 
 	export interface FormatRef {
-		formatNumber: number,
+		formatNumber: number
 	}
 
 	export interface FormatInfo extends FormatRef {
-		type: 'FormatInfo',
+		type: 'FormatInfo'
 		essenceType: 'VideoFragment' | 'AudioFragment' | 'AUXFragment' | 'FlagsFragment' |
 			'TimecodeFragment' | 'AspectFragment' | 'CropFragment' | 'PanZoomFragment' |
 			'MultiCamFragment' | 'CCFragment' | 'NoteFragment' | 'EffectFragment' | 'Unknown',
-		frameRate: number,
-		height: number,
-		width: number,
-		samples: number,
-		compressionFamily: number,
-		protonsPerAtom: number,
-		framesPerAtom: number,
-		quark: number,
-		formatName: string,
-		layoutName: string,
-		compressionName: string,
+		frameRate: number
+		height: number
+		width: number
+		samples: number
+		compressionFamily: number
+		protonsPerAtom: number
+		framesPerAtom: number
+		quark: number
+		formatName: string
+		layoutName: string
+		compressionName: string
 	}
 
 	export class ConnectError extends Error {

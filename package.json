@@ -9,14 +9,14 @@
     "unlink:all": "yarn unlink atem-connection & yarn unlink atem-state & yarn unlink casparcg-connection & yarn unlink casparcg-state & yarn unlink superfly-timeline",
     "installclean": "yarn unlink:all & yarn cleancache && yarn --check-files",
     "buildclean": "yarn installclean && yarn build",
-    "build": "trash dist && yarn build:main",
+    "build": "trash dist && node-gyp build && yarn build:main",
     "buildtest": "yarn build && jest",
     "build:main": "tsc -p tsconfig.json",
     "lint": "tslint --project tsconfig.jest.json --config tslint.json",
     "unitci": "jest --runInBand",
     "unit": "jest --runInBand",
     "testci": "yarn test",
-    "test": "yarn lint && yarn build && node-gyp build && yarn unit",
+    "test": "yarn lint && yarn build && yarn unit",
     "test:integration": "yarn lint && jest --config=jest-integration.config.js",
     "watch": "jest --runInBand --watch",
     "cov": "jest --runInBand --coverage; opn coverage/lcov-report/index.html",
@@ -37,7 +37,8 @@
     "types-install": "cd src/types && yarn install && cd ../..",
     "types-test": "cd src/types && yarn lint && yarn unitci && cd ../..",
     "types-ci": "cd src/types && yarn lint && yarn unitci && cd ../..",
-    "watch-server": "nodemon --watch src -e ts,tsx --exec ts-node ./src/server.ts"
+    "watch-server": "nodemon --watch src -e ts,tsx --exec ts-node ./src/server.ts",
+		"server": "ts-node ./src/server.ts"
   },
   "repository": {
     "type": "git",

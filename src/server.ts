@@ -4,9 +4,9 @@ import * as bodyParser from 'koa-bodyparser'
 import { Quantel } from '.'
 
 interface JSONError {
-	status: number,
-	message: string,
-	stack: string,
+	status: number
+	message: string
+	stack: string
 }
 
 export const app = new Koa()
