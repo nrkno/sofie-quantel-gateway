@@ -1,6 +1,6 @@
 defaults: &defaults
   docker:
-    - image: circleci/node:8
+    - image: circleci/node:8.15.1-stretch
   working_directory: ~/project
 
 version: 2
