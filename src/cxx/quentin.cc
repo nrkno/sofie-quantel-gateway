@@ -31,7 +31,7 @@
 
 OMNI_USING_NAMESPACE(omni)
 
-static const char* _0RL_library_version = omniORB_4_2;
+static const char* _0RL_library_version = omniORB_4_1;
 
 
 _init_in_def_( const ::CORBA::Long Quentin::maxNumber = 9999; )
