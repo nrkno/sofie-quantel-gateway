@@ -155,8 +155,15 @@ export namespace Quantel {
 		VideoFragment |
 		AudioFragment |
 		AUXFragment |
-		CCFragment |
+		FlagsFragment |
 		TimecodeFragment |
+		AspectFragment |
+		CropFragment |
+		PanZoomFragment |
+		SpeedFragment |
+		MultiCamFragment |
+		CCFragment |
+		NoteFragment |
 		EffectFragment
 
 	interface PositionData extends ServerFragment {
@@ -180,15 +187,9 @@ export namespace Quantel {
 		type: 'AUXFragment'
 	}
 
-	export interface CCFragment extends ServerFragment {
-		type: 'CCFragment'
-		ccID: string
-		ccType: number
-		effectID: number
-	}
-	export interface EffectFragment extends ServerFragment {
-		type: 'EffectFragment'
-		effectID: number
+	export interface FlagsFragment extends ServerFragment {
+		type: 'FlagsFragment'
+		flags: number
 	}
 
 	export interface TimecodeFragment extends ServerFragment {
@@ -196,7 +197,59 @@ export namespace Quantel {
 		userBits: number
 	}
 
-	// TODO extend with the different types
+	export interface AspectFragment extends ServerFragment {
+		type: 'AspectFragment'
+		width: number
+		height: number
+	}
+
+	export interface CropFragment extends ServerFragment {
+		type: 'CropFragment'
+		x: number
+		y: number
+		width: number
+		height: number
+	}
+
+	export interface PanZoomFragment extends ServerFragment {
+		type: 'PanZoomFragment'
+		x: number
+		y: number
+		hZoom: number
+		vZoon: number
+	}
+
+	export interface SpeedFragment extends ServerFragment {
+		type: 'SpeedFragment'
+		speed: number
+		profile: number
+	}
+
+	export interface MultiCamFragment extends ServerFragment {
+		type: 'MultiCamFragment'
+		stream: number
+	}
+
+	export interface CCFragment extends ServerFragment {
+		type: 'CCFragment'
+		ccID: string
+		ccType: number
+		effectID: number
+	}
+
+	export interface NoteFragment extends ServerFragment {
+		type: 'NoteFragment'
+		noteID: number
+		aux: number
+		mask: number
+		note: string | null
+	}
+
+	export interface EffectFragment extends ServerFragment {
+		type: 'EffectFragment'
+		effectID: number
+	}
+
 	export interface ServerFragments extends ClipRef {
 		type: 'ServerFragments'
 		fragments: ServerFragmentTypes[]
