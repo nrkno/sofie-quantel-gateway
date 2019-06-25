@@ -30,7 +30,7 @@
     "changelog": "standard-version",
     "release": "yarn reset && yarn testci && yarn docs:publish && yarn changelog",
     "reset": "git clean -dfx && git reset --hard && yarn",
-    "ci": "yarn testci && yarn docs:test",
+    "ci": "yarn testci",
     "validate:dependencies": "yarn audit && yarn license-validate",
     "license-validate": "node-license-validator -p -d --allow-licenses MIT BSD BSD-2-Clause BSD-3-Clause ISC Apache Unlicense WTFPL --allow-packages cycle",
     "types-build": "cd src/types && trash dist && yarn build:main && cd ../..",

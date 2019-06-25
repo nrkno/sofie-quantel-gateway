@@ -1,6 +1,6 @@
 defaults: &defaults
   docker:
-    - image: superflytv/node8-omniorb4
+    - image: circleci/node:8
   working_directory: ~/project
 
 version: 2
