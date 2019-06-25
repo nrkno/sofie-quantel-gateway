@@ -989,8 +989,11 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
 
     switch (typeName[0]) {
     case 'V': // VideoFragment
-    case 'A': // AudioFragment & AUXFragment
-
+    case 'A': // AudioFragment & AUXFragment & Aspect Fragment
+			if (typeName[1] == 's') {
+				// TODO process AspectFragment if present
+				break;
+			}
       c->status = napi_get_named_property(env, prop, "format", &subprop);
       REJECT_RETURN;
       c->status = napi_get_value_int32(env, subprop, (int32_t *) &vfd.format);

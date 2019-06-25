@@ -231,6 +231,10 @@ napi_status fragmentsToJS(napi_env env, Quentin::ServerFragments_var fragments, 
 			status = napi_create_string_utf8(env, "TimecodeFragment", NAPI_AUTO_LENGTH, &fragprop);
 			PASS_STATUS;
 			break;
+		case Quentin::FragmentType::aspectFragment:
+			status = napi_create_string_utf8(env, "AspectFragment", NAPI_AUTO_LENGTH, &fragprop);
+			PASS_STATUS;
+			break;
 		case Quentin::FragmentType::cropFragment:
 			status = napi_create_string_utf8(env, "CropFragment", NAPI_AUTO_LENGTH, &fragprop);
 			PASS_STATUS;
@@ -249,6 +253,10 @@ napi_status fragmentsToJS(napi_env env, Quentin::ServerFragments_var fragments, 
 			break;
 		case Quentin::FragmentType::ccFragment:
 			status = napi_create_string_utf8(env, "CCFragment", NAPI_AUTO_LENGTH, &fragprop);
+			PASS_STATUS;
+			break;
+		case Quentin::FragmentType::noteFragment:
+			status = napi_create_string_utf8(env, "NoteFragment", NAPI_AUTO_LENGTH, &fragprop);
 			PASS_STATUS;
 			break;
 		case Quentin::FragmentType::effectFragment:
