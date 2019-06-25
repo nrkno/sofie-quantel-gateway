@@ -299,6 +299,7 @@ void getPlayPortExecute(napi_env env, void* data) {
 
 		// TODO
 		for ( int32_t y = 0 ; y < Quentin::FragmentType::numFragmentTypes ; y++ ) {
+			printf("Fragment type %i\n", y);
 	 		Quentin::ConfigDescriptionList_var cdl = port->getConfigurations(c->channels.at(0), (Quentin::FragmentType) y, true);
 	 		for ( uint32_t x = 0 ; x < cdl->length() ; x++ ) {
 	 			wprintf(L"Configuration %i has description %ws\n", cdl[x].configNumber, cdl[x].description);
