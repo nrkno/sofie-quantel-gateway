@@ -299,12 +299,12 @@ void getPlayPortExecute(napi_env env, void* data) {
 
 		// TODO
 		for ( int32_t y = 0 ; y < Quentin::FragmentType::numFragmentTypes ; y++ ) {
-	 		Quentin::ConfigDescriptionList_var cdl = server->getConfigurations(c->channels.at(0), (Quentin::FragmentType) y, true);
+	 		Quentin::ConfigDescriptionList_var cdl = port->getConfigurations(c->channels.at(0), (Quentin::FragmentType) y, true);
 	 		for ( uint32_t x = 0 ; x < cdl->length() ; x++ ) {
 	 			wprintf(L"Configuration %i has description %ws\n", cdl[x].configNumber, cdl[x].description);
 	 		}
 		}
-		Quentin::Longs_var defaults = server->getDefaultConfigurations(c->channels.at(0));
+		Quentin::Longs_var defaults = port->getDefaultConfigurations(c->channels.at(0));
 		for ( uint32_t x = 0 ; x < defaults->length() ; x++ ) {
 			printf("Default config %i\n", defaults[x]);
 		}
@@ -312,7 +312,7 @@ void getPlayPortExecute(napi_env env, void* data) {
 		// defaults->length(1);
 		// defaults[0] = defaults[0] + 1;
 		// //port->configure(0, defaults.in());
-		Quentin::Longs_var currents = server->getCurrentConfigurations(c->channels.at(0));
+		Quentin::Longs_var currents = port->getCurrentConfigurations(c->channels.at(0));
 		for ( uint32_t x = 0 ; x < currents->length() ; x++ ) {
 			printf("Current config %i\n", currents[x]);
 		}
