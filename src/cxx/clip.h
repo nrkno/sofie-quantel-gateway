@@ -31,6 +31,7 @@ napi_value searchClips(napi_env env, napi_callback_info info);
 napi_value getFragments(napi_env env, napi_callback_info info);
 napi_value cloneIfNeeded(napi_env env, napi_callback_info info);
 napi_value deleteClip(napi_env env, napi_callback_info info);
+napi_value findClipOnPools(napi_env env, napi_callback_info info);
 
 void getClipDataExecute(napi_env env, void* data);
 void getClipDataComplete(napi_env env, napi_status asyncStatus, void* data);
@@ -99,5 +100,14 @@ struct deleteClipCarrier : carrier {
 	bool deleted;
 	~deleteClipCarrier() { }
 };
+
+void findClipOnPoolsExecute(napi_env env, void* data);
+void findClipOnPoolsComplete(napi_env env, napi_status asyncStatus, void* data);
+
+struct findClipCarrier : carrier {
+	std::vector<int32_t> poolIDs;
+	std::vector<int32_t> clipIDs;
+	~findClipCarrier() { }
+}
 
 #endif // QGW_CLIP

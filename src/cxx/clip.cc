@@ -732,3 +732,37 @@ napi_value deleteClip(napi_env env, napi_callback_info info) {
 
 	return promise;
 }
+
+void findClipOnPoolsExecute(napi_env env, void* data) {
+	findClipCarrier* c = (findClipCarrier*) data;
+	CORBA::ORB_var orb;
+	Quentin::ZonePortal::_ptr_type zp;
+	Quentin::WStrings columns;
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+
+	try {
+		resolveZonePortal(c->isaIOR, &orb, &zp);
+		// TODO this method does not do what it says ... really messed up docs in Quantin land
+		Quentin::Longs_var clipList = zp->findClipOnPools();
+
+	}
+	catch(CORBA::SystemException& ex) {
+		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
+	}
+	catch(CORBA::Exception& ex) {
+		NAPI_REJECT_CORBA_EXCEPTION(ex);
+	}
+	catch(omniORB::fatalException& fe) {
+		NAPI_REJECT_FATAL_EXCEPTION(fe);
+	}
+
+	orb->destroy();
+}
+
+void findClipOnPoolsComplete(napi_env env, napi_status asyncStatus, void* data) {
+	findClipCarrier* c = (findClipCarrier*) data;
+}
+
+napi_value findClipOnPools(napi_env env, napi_callback_info info) {
+	findClipCarrier* c = new findClipCarrier;
+}
