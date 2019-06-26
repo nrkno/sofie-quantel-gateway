@@ -373,6 +373,8 @@ void getFragmentsExecute(napi_env env, void* data) {
 
 		c->fragments = (c->start >= 0) && (c->finish >= 0) ?
 		  zp->getFragments(c->clipID, c->start, c->finish) : zp->getAllFragments(c->clipID);
+		c->sourceTCs = zp->getSourceTimecode(c->clipID, c->start, c->finish);
+		c->refTCs = zp->getSourceTimecode(c->clipID, c->start, c->finish);
 	}
 	catch(CORBA::SystemException& ex) {
 		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
@@ -424,7 +426,7 @@ void getFragmentsComplete(napi_env env, napi_status asyncStatus, void* data) {
 		REJECT_STATUS;
 	}
 
-	c->status = fragmentsToJS(env, c->fragments, &prop);
+	c->status = fragmentsToJS(env, c->sourceTCs, &prop);
 	REJECT_STATUS;
   c->status =  napi_set_named_property(env, result, "fragments", prop);
   REJECT_STATUS;

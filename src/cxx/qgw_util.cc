@@ -202,6 +202,7 @@ napi_status fragmentsToJS(napi_env env, Quentin::ServerFragments_var fragments, 
 	napi_status status;
 	napi_value frag, fragprop;
 	char rushID[33];
+	bool isArray = false;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
 	status = napi_create_array(env, prop);

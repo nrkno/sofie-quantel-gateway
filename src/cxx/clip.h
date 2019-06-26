@@ -77,6 +77,8 @@ struct getFragmentsCarrier : carrier {
 	int32_t start = -1;
 	int32_t finish = -1;
 	Quentin::ServerFragments_var fragments = {};
+	Quentin::ServerFragments_var sourceTCs = {};
+	Quentin::ServerFragments_var refTCs = {};
 	~getFragmentsCarrier() { }
 };
 
