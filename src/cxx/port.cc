@@ -308,6 +308,10 @@ void getPlayPortExecute(napi_env env, void* data) {
 				}
 			}
 		}
+
+		Quentin::WStrings_var properties = port->getPropertyList();
+
+
  	}
  	catch(CORBA::SystemException& ex) {
 	 NAPI_REJECT_SYSTEM_EXCEPTION(ex);
@@ -1153,7 +1157,6 @@ void getPortFragmentsComplete(napi_env env, napi_status asyncStatus, void* data)
 	FLOATING_STATUS;
 
 	tidyCarrier(env, c);
-
 }
 
 napi_value getPortFragments(napi_env env, napi_callback_info info) {
@@ -1242,4 +1245,140 @@ napi_value getPortFragments(napi_env env, napi_callback_info info) {
   REJECT_RETURN;
 
   return promise;
+}
+
+void getPortPropertiesExecute(napi_env env, void* data) {
+	portPropertiesCarrier* c = (portPropertiesCarrier*) data;
+	CORBA::ORB_var orb;
+	Quentin::ZonePortal::_ptr_type zp;
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+
+	try {
+		resolveZonePortal(c->isaIOR, &orb, &zp);
+
+		Quentin::Server_ptr server = zp->getServer(c->serverID);
+		Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(c->portName).data(), 0);
+
+		Quentin::WStrings_var propList = port->getPropertyList();
+		printf("Port properties length is %i\n", propList->length());
+		for ( uint32_t x = 0 ; x < propList->length() ; x++ ) {
+			CORBA::WChar* value = port->getProperty(propList[x]);
+			c->properties.emplace(
+				utf8_conv.to_bytes(propList[x]),
+				utf8_conv.to_bytes(value));
+		}
+	}
+	catch(CORBA::SystemException& ex) {
+		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
+	}
+	catch(CORBA::Exception& ex) {
+		NAPI_REJECT_CORBA_EXCEPTION(ex);
+	}
+	catch(omniORB::fatalException& fe) {
+		NAPI_REJECT_FATAL_EXCEPTION(fe);
+	}
+
+	orb->destroy();
+}
+
+void getPortPropertiesComplete(napi_env env, napi_status asyncStatus, void* data) {
+	portPropertiesCarrier* c = (portPropertiesCarrier*) data;
+	napi_value result, prop;
+	// char rushID[33];
+
+	if (asyncStatus != napi_ok) {
+		c->status = asyncStatus;
+		c->errorMsg = "Port properties failed to complete.";
+	}
+	REJECT_STATUS;
+
+	c->status = napi_create_object(env, &result);
+	REJECT_STATUS;
+	c->status = napi_create_string_utf8(env, "PortProperties", NAPI_AUTO_LENGTH, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "type", prop);
+	REJECT_STATUS;
+
+	for ( auto it = c->properties.begin(); it != c->properties.end() ; ++it ) {
+		c->status = napi_create_string_utf8(env, it->first.c_str(), NAPI_AUTO_LENGTH, &prop);
+		REJECT_STATUS;
+		c->status = napi_set_named_property(env, result, it->second.c_str(), prop);
+		REJECT_STATUS;
+	}
+
+	napi_status status;
+	status = napi_resolve_deferred(env, c->_deferred, result);
+	FLOATING_STATUS;
+
+	tidyCarrier(env, c);
+}
+
+napi_value getPortProperties(napi_env env, napi_callback_info info) {
+	portPropertiesCarrier* c = new portPropertiesCarrier;
+	napi_value promise, resourceName, options, prop;
+	napi_valuetype type;
+	bool isArray;
+	char* portName;
+	size_t portNameLen;
+	char* isaIOR = nullptr;
+	size_t iorLen = 0;
+
+	c->status = napi_create_promise(env, &c->_deferred, &promise);
+	REJECT_RETURN;
+
+	size_t argc = 2;
+	napi_value argv[2];
+	c->status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+	REJECT_RETURN;
+
+	if (argc < 1) {
+		REJECT_ERROR_RETURN("Port properties must be provided with a IOR reference to an ISA server.",
+			QGW_INVALID_ARGS);
+	}
+	c->status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &iorLen);
+	REJECT_RETURN;
+	isaIOR = (char*) malloc((iorLen + 1) * sizeof(char));
+	c->status = napi_get_value_string_utf8(env, argv[0], isaIOR, iorLen + 1, &iorLen);
+	REJECT_RETURN;
+
+	c->isaIOR = isaIOR;
+
+	if (argc < 2) {
+		REJECT_ERROR_RETURN("Options object with server ID and port name must be provided.",
+			QGW_INVALID_ARGS);
+	}
+	c->status = napi_typeof(env, argv[1], &type);
+	REJECT_RETURN;
+	c->status = napi_is_array(env, argv[1], &isArray);
+	REJECT_RETURN;
+	if (isArray || type != napi_object) {
+		REJECT_ERROR_RETURN("Argument must be an options object with server ID and port name.",
+			QGW_INVALID_ARGS);
+	}
+
+	options = argv[1];
+	c->status = napi_get_named_property(env, options, "serverID", &prop);
+	REJECT_RETURN;
+	c->status = napi_get_value_int32(env, prop, &c->serverID);
+	REJECT_RETURN;
+
+	c->status = napi_get_named_property(env, options, "portName", &prop);
+	REJECT_RETURN;
+	c->status = napi_get_value_string_utf8(env, prop, nullptr, 0, &portNameLen);
+	REJECT_RETURN;
+	portName = (char*) malloc((portNameLen + 1) * sizeof(char));
+	c->status = napi_get_value_string_utf8(env, prop, portName, portNameLen + 1, &portNameLen);
+	REJECT_RETURN;
+	c->portName = std::string(portName);
+	free(portName);
+
+	c->status = napi_create_string_utf8(env, "GetPortProperties", NAPI_AUTO_LENGTH, &resourceName);
+	REJECT_RETURN;
+	c->status = napi_create_async_work(env, nullptr, resourceName, getPortPropertiesExecute,
+		getPortPropertiesComplete, c, &c->_request);
+	REJECT_RETURN;
+	c->status = napi_queue_async_work(env, c->_request);
+	REJECT_RETURN;
+
+	return promise;
 }

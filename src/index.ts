@@ -73,7 +73,8 @@ export namespace Quantel {
 		endOfData: number
 		framesUnused: number
 		outputTime: string
-		channels: number[],
+		channels: number[]
+		videoFormat: string
 	}
 
 	export interface ReleaseStatus extends PortRef {
@@ -790,6 +791,21 @@ export namespace Quantel {
 			await getISAReference()
 			await checkServerPort(options)
 			return await quantel.wipe(await isaIOR, options)
+		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return wipe(options)
+			}
+			throw err
+		}
+	}
+
+	export async function getPortProperties (options: PortRef): Promise<any> {
+		try {
+			await getISAReference()
+			await checkServerPort(options)
+			return await quantel.getPortProperties(await isaIOR, options)
 		} catch (err) {
 			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
