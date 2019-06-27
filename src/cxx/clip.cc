@@ -230,40 +230,49 @@ void searchClipsComplete(napi_env env, napi_status asyncStatus, void* data) {
 	c->status = napi_create_array(env, &result);
 	REJECT_STATUS;
 
-	c->status = napi_create_object(env, &term);
-	REJECT_STATUS;
-	c->status = napi_create_string_utf8(env, "ClipDataSummary", NAPI_AUTO_LENGTH, &prop);
-	REJECT_STATUS;
-	c->status = napi_set_named_property(env, term, "type", prop);
-	REJECT_STATUS;
-
-	for ( uint32_t x = 0 ; x < c->values.size() ; x++ ) {
-		std::string value = c->values.at(x);
-		std::string key = columnNames.at(x % columnNames.size());
-
-		if ((key == "ClipID") || (key == "CloneId") || (key == "PoolID")) {
-			c->status = napi_create_int32(env, std::stol(value), &prop);
+	if (c->idOnly) {
+		for ( uint32_t x = 0 ; x < c->values.size() ; x++ ) {
+			status = napi_create_int32(env, std::stol(c->values.at(x)), &prop);
 			REJECT_STATUS;
-		} else if ((key == "Completed") || (key == "Created")) {
-			c->status = convertToDate(env, value, &prop);
-			REJECT_STATUS;
-		} else {
-			c->status = napi_create_string_utf8(env, value.c_str(), NAPI_AUTO_LENGTH, &prop);
+			c->status = napi_set_element(env, result, x, prop);
 			REJECT_STATUS;
 		}
-		c->status = napi_set_named_property(env, term, key.c_str(), prop);
+	} else {
+		c->status = napi_create_object(env, &term);
+		REJECT_STATUS;
+		c->status = napi_create_string_utf8(env, "ClipDataSummary", NAPI_AUTO_LENGTH, &prop);
+		REJECT_STATUS;
+		c->status = napi_set_named_property(env, term, "type", prop);
 		REJECT_STATUS;
 
-		if (x % columnNames.size() == (columnNames.size() - 1)) {
-			c->status = napi_set_element(env, result, resultCount++, term);
+		for ( uint32_t x = 0 ; x < c->values.size() ; x++ ) {
+			std::string value = c->values.at(x);
+			std::string key = c->columnNames.at(x % c->columnNames.size());
+
+			if ((key == "ClipID") || (key == "CloneId") || (key == "PoolID")) {
+				c->status = napi_create_int32(env, std::stol(value), &prop);
+				REJECT_STATUS;
+			} else if ((key == "Completed") || (key == "Created")) {
+				c->status = convertToDate(env, value, &prop);
+				REJECT_STATUS;
+			} else {
+				c->status = napi_create_string_utf8(env, value.c_str(), NAPI_AUTO_LENGTH, &prop);
+				REJECT_STATUS;
+			}
+			c->status = napi_set_named_property(env, term, key.c_str(), prop);
 			REJECT_STATUS;
-			if (x < c->values.size() - 2) {
-				c->status = napi_create_object(env, &term);
+
+			if (x % c->columnNames.size() == (c->columnNames.size() - 1)) {
+				c->status = napi_set_element(env, result, resultCount++, term);
 				REJECT_STATUS;
-				c->status = napi_create_string_utf8(env, "ClipDataSummary", NAPI_AUTO_LENGTH, &prop);
-				REJECT_STATUS;
-				c->status = napi_set_named_property(env, term, "type", prop);
-				REJECT_STATUS;
+				if (x < c->values.size() - 2) {
+					c->status = napi_create_object(env, &term);
+					REJECT_STATUS;
+					c->status = napi_create_string_utf8(env, "ClipDataSummary", NAPI_AUTO_LENGTH, &prop);
+					REJECT_STATUS;
+					c->status = napi_set_named_property(env, term, "type", prop);
+					REJECT_STATUS;
+				}
 			}
 		}
 	}
@@ -344,6 +353,7 @@ napi_value searchClips(napi_env env, napi_callback_info info) {
 			REJECT_RETURN;
 		} else if (std::string(nameStr) == "idOnly") {
 			c->columnNames = clipIDonly;
+			c->idOnly = true;
 		} else {
 			c->status = napi_get_value_string_utf8(env, prop, nullptr, 0, &strLen);
 			REJECT_RETURN;

@@ -600,7 +600,7 @@ export namespace Quantel {
 		}
 	}
 
-	export async function searchClips (options: ClipPropertyList): Promise<ClipDataSummary[]> {
+	export async function searchClips (options: ClipPropertyList): Promise<ClipDataSummary[] | Number[]> {
 		try {
 			await getISAReference()
 			return await quantel.searchClips(await isaIOR, options)
