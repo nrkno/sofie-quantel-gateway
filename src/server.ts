@@ -235,6 +235,18 @@ router.get('/default/clip', async (ctx) => {
 		} as JSONError
 	} else {
 		try {
+			if (ctx.query.limit) {
+				if (isNaN(+ctx.query.limit) || +ctx.query.limit < 1) {
+					ctx.status = 400
+					ctx.body = {
+						status: 400,
+						message: 'Limit parameter must be a positive number.',
+						stack: ''
+					}
+					return
+				}
+				ctx.query.limit = +ctx.query.limit
+			}
 			ctx.body = await Quantel.searchClips(ctx.query)
 		} catch (err) {
 			if (err.message.indexOf('BadColumnData') >= 0) {

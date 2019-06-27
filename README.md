@@ -237,6 +237,12 @@ To refine a search, multiple query parameters can be used. For example, to limit
 
     /:zoneID/clip?Title=Game%20of%20Thrones%20Disappoints&PoolID=11
 
+Some parameters, such as `ClipGUID`s containing hyphens, may need to be surrounded by quotation marks.
+
+The number of results returned can be altered using the `limit` parameter that defaults to `10`. For example, to find up to 1000 uptimes in a category:
+
+    /:zoneID/clip?Category=NewsReport&limit=1000
+
 ### Formats
 
 To query information about format of a clip, including framerate, compression and dimensions, use the format resource.
