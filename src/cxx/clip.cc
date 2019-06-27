@@ -232,7 +232,7 @@ void searchClipsComplete(napi_env env, napi_status asyncStatus, void* data) {
 
 	if (c->idOnly) {
 		for ( uint32_t x = 0 ; x < c->values.size() ; x++ ) {
-			status = napi_create_int32(env, std::stol(c->values.at(x)), &prop);
+			c->status = napi_create_int32(env, std::stol(c->values.at(x)), &prop);
 			REJECT_STATUS;
 			c->status = napi_set_element(env, result, x, prop);
 			REJECT_STATUS;
