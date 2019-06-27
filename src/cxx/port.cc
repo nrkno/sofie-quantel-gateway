@@ -297,25 +297,16 @@ void getPlayPortExecute(napi_env env, void* data) {
 		 	c->channels.push_back(channels[x]);
 	 	}
 
-		// TODO
-		for ( int32_t y = 0 ; y < Quentin::FragmentType::numFragmentTypes ; y++ ) {
-			printf("Fragment type %i\n", y);
-	 		Quentin::ConfigDescriptionList_var cdl = port->getConfigurations(c->channels.at(0), (Quentin::FragmentType) y, true);
-	 		for ( uint32_t x = 0 ; x < cdl->length() ; x++ ) {
-	 			wprintf(L"Configuration %i has description %ws\n", cdl[x].configNumber, cdl[x].description);
-	 		}
-		}
-		Quentin::Longs_var defaults = port->getDefaultConfigurations(c->channels.at(0));
-		for ( uint32_t x = 0 ; x < defaults->length() ; x++ ) {
-			printf("Default config %i\n", defaults[x]);
-		}
-		printf("The channel is %i\n", c->channels.at(0));
-		// defaults->length(1);
-		// defaults[0] = defaults[0] + 1;
-		// //port->configure(0, defaults.in());
+	 	Quentin::ConfigDescriptionList_var cdl = port->getConfigurations(c->channels.at(0),
+		  Quentin::FragmentType::videoFragment, true);
 		Quentin::Longs_var currents = port->getCurrentConfigurations(c->channels.at(0));
 		for ( uint32_t x = 0 ; x < currents->length() ; x++ ) {
-			printf("Current config %i\n", currents[x]);
+			for ( uint32_t y = 0 ; y < cdl->length() ; y++ ) {
+				if (cdl[y].configNumber == currents[x]) {
+					c->videoFormat = utf8_conv.to_bytes(std::wstring(cdl[x].description));
+					break;
+				}
+			}
 		}
  	}
  	catch(CORBA::SystemException& ex) {
@@ -413,6 +404,11 @@ void getPlayPortComplete(napi_env env, napi_status asyncStatus, void* data) {
 		REJECT_STATUS;
 	}
 	c->status = napi_set_named_property(env, result, "channels", chanList);
+	REJECT_STATUS;
+
+	c->status = napi_create_string_utf8(env, c->videoFormat.c_str(), NAPI_AUTO_LENGTH, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "videoFormat", prop);
 	REJECT_STATUS;
 
 	napi_status status;

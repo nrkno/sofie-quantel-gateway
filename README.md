@@ -243,6 +243,10 @@ The number of results returned can be altered using the `limit` parameter that d
 
     /:zoneID/clip?Category=NewsReport&limit=1000
 
+To receive and array of `ClipID`s that match the given query rather than a detailed summary of each clip, add parameter `idOnly`. Combine this with a high `limit` and a wildcard to produce a list of all known clips:
+
+    /:zoneID/clip?Title=\*&limit=20000&idOnly
+
 ### Formats
 
 To query information about format of a clip, including framerate, compression and dimensions, use the format resource.

@@ -64,6 +64,7 @@ struct playPortStatusCarrier : carrier {
 	int64_t framesUnused;
 	std::string outputTime;
 	std::vector<int32_t> channels;
+	std::string videoFormat = "";
 	~playPortStatusCarrier() { }
 };
 
