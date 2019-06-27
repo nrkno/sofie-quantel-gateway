@@ -190,9 +190,14 @@ A GET request to this path returns the port status.
   "endOfData": 0,
   "framesUnused": 0,
   "channels": [ 1 ],
-	"outputTime": "00:00:00:00"
+	"outputTime": "00:00:00:00",
+	"videoFormat": "1080i50"
 }
 ```
+
+Add `/properties` to the port to get name/value pair configuration properties for the port and server, including the configured frame rate. (Note: Does not work with a dummy server, returning an empty list.)
+
+		/:zoneID/server/:serverID/port/:portID/properties
 
 ### Clip references
 

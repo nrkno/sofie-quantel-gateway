@@ -1260,7 +1260,6 @@ void getPortPropertiesExecute(napi_env env, void* data) {
 		Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(c->portName).data(), 0);
 
 		Quentin::WStrings_var propList = port->getPropertyList();
-		printf("Port properties length is %i\n", propList->length());
 		for ( uint32_t x = 0 ; x < propList->length() ; x++ ) {
 			CORBA::WChar* value = port->getProperty(propList[x]);
 			c->properties.emplace(

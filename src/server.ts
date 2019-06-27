@@ -218,6 +218,13 @@ router.get('/default/server/:serverID/port/:portID', async (ctx) => {
 	})
 })
 
+router.get('/default/server/:serverID/port/:portID/properties', async (ctx) => {
+	ctx.body = await Quantel.getPortProperties({
+		serverID: ctx.params.serverID,
+		portName: ctx.params.portID
+	})
+})
+
 router.delete('/default/server/:serverID/port/:portID', async (ctx) => {
 	ctx.body = await Quantel.releasePort({
 		serverID: ctx.params.serverID,
