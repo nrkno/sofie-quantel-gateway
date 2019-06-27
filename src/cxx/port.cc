@@ -1300,9 +1300,9 @@ void getPortPropertiesComplete(napi_env env, napi_status asyncStatus, void* data
 	REJECT_STATUS;
 
 	for ( auto it = c->properties.begin(); it != c->properties.end() ; ++it ) {
-		c->status = napi_create_string_utf8(env, it->first.c_str(), NAPI_AUTO_LENGTH, &prop);
+		c->status = napi_create_string_utf8(env, it->second.c_str(), NAPI_AUTO_LENGTH, &prop);
 		REJECT_STATUS;
-		c->status = napi_set_named_property(env, result, it->second.c_str(), prop);
+		c->status = napi_set_named_property(env, result, it->first.c_str(), prop);
 		REJECT_STATUS;
 	}
 
