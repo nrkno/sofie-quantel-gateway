@@ -203,10 +203,18 @@ napi_status fragmentsToJS(napi_env env, Quentin::ServerFragments_var fragments, 
 	napi_value frag, fragprop;
 	char rushID[33];
 	bool isArray = false;
+	uint32_t index = 0;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
-	status = napi_create_array(env, prop);
+	status = napi_is_array(env, *prop, &isArray);
 	PASS_STATUS;
+	if (isArray) {
+		status = napi_get_array_length(env, *prop, &index);
+		PASS_STATUS;
+	} else {
+		status = napi_create_array(env, prop);
+		PASS_STATUS;
+	}
 
 	for ( uint32_t x = 0 ; x < fragments->length() ; x++ ) {
 		status = napi_create_object(env, &frag);
@@ -532,7 +540,7 @@ napi_status fragmentsToJS(napi_env env, Quentin::ServerFragments_var fragments, 
 			break;
 		}
 
-		status = napi_set_element(env, *prop, x, frag);
+		status = napi_set_element(env, *prop, index++, frag);
 		PASS_STATUS;
 	}
 

@@ -432,7 +432,11 @@ void getFragmentsComplete(napi_env env, napi_status asyncStatus, void* data) {
 		REJECT_STATUS;
 	}
 
+	c->status = fragmentsToJS(env, c->fragments, &prop);
+	REJECT_STATUS;
 	c->status = fragmentsToJS(env, c->sourceTCs, &prop);
+	REJECT_STATUS;
+	c->status = fragmentsToJS(env, c->refTCs, &prop);
 	REJECT_STATUS;
   c->status =  napi_set_named_property(env, result, "fragments", prop);
   REJECT_STATUS;
