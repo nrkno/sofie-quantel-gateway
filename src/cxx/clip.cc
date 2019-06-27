@@ -192,9 +192,9 @@ void searchClipsExecute(napi_env env, void* data) {
 		}
 
 		Quentin::WStrings columnNamesWide;
-		columnNamesWide.length(columnNames.size());
-		for ( uint32_t i = 0 ; i < columnNames.size() ; i++ ) {
-			columnNamesWide[i] = utf8_conv.from_bytes(columnNames.at(i)).data();
+		columnNamesWide.length(c->columnNames.size());
+		for ( uint32_t i = 0 ; i < c->columnNames.size() ; i++ ) {
+			columnNamesWide[i] = utf8_conv.from_bytes(c->columnNames.at(i)).data();
 		}
 
 		Quentin::WStrings_var results = zp->searchClips(cpl, columnNamesWide, c->limit);
@@ -342,8 +342,9 @@ napi_value searchClips(napi_env env, napi_callback_info info) {
 		if (std::string(nameStr) == "limit") {
 			c->status = napi_get_value_int32(env, prop, &c->limit);
 			REJECT_RETURN;
+		} else if (std::string(nameStr) == "idOnly") {
+			c->columnNames = clipIDonly;
 		} else {
-
 			c->status = napi_get_value_string_utf8(env, prop, nullptr, 0, &strLen);
 			REJECT_RETURN;
 			valueStr = (char *) malloc((strLen + 1) * sizeof(char));

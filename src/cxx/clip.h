@@ -63,8 +63,13 @@ const std::vector<std::string> columnNames = {
 	"Title",
 };
 
+const std::vector<std::string> clipIDonly = {
+	"ClipID"
+};
+
 struct searchClipsCarrier : carrier {
 	std::map<std::wstring, std::wstring> query;
+	std::vector<std::string> columnNames = columnNames;
 	int32_t limit = 10;
 	std::vector<std::string> values;
 	~searchClipsCarrier() { }
