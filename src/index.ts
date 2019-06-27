@@ -96,7 +96,8 @@ export namespace Quantel {
 	}
 
 	export interface ClipPropertyList {
-		[ name: string ]: string
+		// Use property 'limit' of type number to set the maximum number of values to return
+		[ name: string ]: string | number
 	}
 
 	export interface ClipDataSummary {

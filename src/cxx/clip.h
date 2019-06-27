@@ -65,6 +65,7 @@ const std::vector<std::string> columnNames = {
 
 struct searchClipsCarrier : carrier {
 	std::map<std::wstring, std::wstring> query;
+	int32_t limit = 10;
 	std::vector<std::string> values;
 	~searchClipsCarrier() { }
 };

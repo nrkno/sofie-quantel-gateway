@@ -197,7 +197,7 @@ void searchClipsExecute(napi_env env, void* data) {
 			columnNamesWide[i] = utf8_conv.from_bytes(columnNames.at(i)).data();
 		}
 
-		Quentin::WStrings_var results = zp->searchClips(cpl, columnNamesWide, 10);
+		Quentin::WStrings_var results = zp->searchClips(cpl, columnNamesWide, c->limit);
 
 		for ( uint32_t i = 0 ; i < results->length() ; i++ ) {
 			c->values.push_back(utf8_conv.to_bytes(results[i]));
@@ -339,17 +339,23 @@ napi_value searchClips(napi_env env, napi_callback_info info) {
 		c->status = napi_get_value_string_utf8(env, term, nameStr, strLen + 1, &strLen);
 		REJECT_RETURN;
 
-		c->status = napi_get_value_string_utf8(env, prop, nullptr, 0, &strLen);
-		REJECT_RETURN;
-		valueStr = (char *) malloc((strLen + 1) * sizeof(char));
-		c->status = napi_get_value_string_utf8(env, prop, valueStr, strLen + 1, &strLen);
-		REJECT_RETURN;
+		if (std::string(nameStr) == "limit") {
+			c->status = napi_get_value_int32(env, prop, &c->limit);
+			REJECT_RETURN;
+		} else {
 
-		c->query.emplace(
-			utf8_conv.from_bytes(std::string(nameStr)),
-			utf8_conv.from_bytes(std::string(valueStr)));
+			c->status = napi_get_value_string_utf8(env, prop, nullptr, 0, &strLen);
+			REJECT_RETURN;
+			valueStr = (char *) malloc((strLen + 1) * sizeof(char));
+			c->status = napi_get_value_string_utf8(env, prop, valueStr, strLen + 1, &strLen);
+			REJECT_RETURN;
+
+			c->query.emplace(
+				utf8_conv.from_bytes(std::string(nameStr)),
+				utf8_conv.from_bytes(std::string(valueStr)));
+				free(valueStr);
+		}
 		free(nameStr);
-		free(valueStr);
 	}
 
 	c->status = napi_create_string_utf8(env, "SearchClips", NAPI_AUTO_LENGTH, &resourceName);
