@@ -24,7 +24,7 @@
 //
 // Description:
 //	*** PROPRIETARY INTERFACE ***
-//	
+//
 
 #ifndef __OMNIINTERNAL_H__
 #define __OMNIINTERNAL_H__
