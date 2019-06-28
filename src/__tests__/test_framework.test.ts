@@ -86,6 +86,7 @@ describe('Test framework', () => {
 	})
 
 	afterAll(async () => {
+		Quantel.destroyOrb()
 		await new Promise((resolve, reject) => {
 			server.close(e => {
 				if (e) {

@@ -657,4 +657,7 @@ if (!module.parent) {
 	server.on('listening', () => {
 		console.log('Quantel gateway HTTP API - server running on port 3000')
 	})
+	server.on('close', () => {
+		Quantel.destroyOrb()
+	})
 }
