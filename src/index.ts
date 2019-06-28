@@ -23,8 +23,8 @@ import * as request from 'request-promise-native'
 
 const quantel = require('../build/Release/quantel_gateway')
 
-// import * as SegfaultHandler from 'segfault-handler'
-// SegfaultHandler.registerHandler('crash.log')
+import * as SegfaultHandler from 'segfault-handler'
+SegfaultHandler.registerHandler('crash.log')
 
 export namespace Quantel {
 
