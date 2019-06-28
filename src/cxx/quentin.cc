@@ -27,11 +27,21 @@
 #include <omniORB4/callDescriptor.h>
 #include <omniORB4/callHandle.h>
 #include <omniORB4/objTracker.h>
-
+#ifdef __linux__
+#include <linux/version.h>
+#endif
 
 OMNI_USING_NAMESPACE(omni)
 
-static const char* _0RL_library_version = omniORB_4_1;
+#ifdef __linux__
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(4,15,0)
+static const char* _0RL_library_version = omniORB_4_1; // earler than buster, e.g. stretch
+#else
+static const char* _0RL_library_version = omniORB_4_2;
+#endif
+#else
+static const char* _0RL_library_version = omniORB_4_2;
+#endif
 
 
 _init_in_def_( const ::CORBA::Long Quentin::maxNumber = 9999; )
