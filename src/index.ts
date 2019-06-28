@@ -391,7 +391,7 @@ export namespace Quantel {
 		}
 	}
 
-	export async function destroyOrb () {
+	export function destroyOrb () {
 		quantel.destroyOrb()
 	}
 
