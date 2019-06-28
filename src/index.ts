@@ -30,7 +30,6 @@ export namespace Quantel {
 
 	let isaIOR: Promise<string> | null = null
 	let stickyRef: string = 'http://localhost:2096'
-	let queue: Promise<any> = Promise.resolve()
 
 	export interface ZoneInfo {
 		type: 'ZonePortal'
