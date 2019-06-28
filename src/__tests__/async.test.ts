@@ -42,7 +42,35 @@ describe('Async operations Quantel gateway tests', () => {
 		])).resolves.toBeTruthy()
 	})
 
+	test('Try 3 requests at once', async () => {
+		await expect(Promise.all([
+			Quantel.getServers(),
+			Quantel.getDefaultZoneInfo(),
+			Quantel.testConnection()
+		])).resolves.toBeTruthy()
+	})
+
+	test('Try 4 requests at once', async () => {
+		await expect(Promise.all([
+			Quantel.getServers(),
+			Quantel.getDefaultZoneInfo(),
+			Quantel.testConnection(),
+			Quantel.getFormatInfo({ formatNumber: 90 })
+		])).resolves.toBeTruthy()
+	})
+
+	test('Destory orb and try again', async () => {
+		Quantel.destroyOrb()
+		await expect(Promise.all([
+			Quantel.getServers(),
+			Quantel.getDefaultZoneInfo(),
+			Quantel.testConnection(),
+			Quantel.getFormatInfo({ formatNumber: 90 })
+		])).resolves.toBeTruthy()
+	})
+
 	afterAll(async () => {
+		Quantel.destroyOrb()
 		await spawn.stop()
 	})
 })

@@ -23,8 +23,8 @@ import * as request from 'request-promise-native'
 
 const quantel = require('../build/Release/quantel_gateway')
 
-// import * as SegfaultHandler from 'segfault-handler'
-// SegfaultHandler.registerHandler('crash.log')
+import * as SegfaultHandler from 'segfault-handler'
+SegfaultHandler.registerHandler('crash.log')
 
 export namespace Quantel {
 
@@ -392,10 +392,6 @@ export namespace Quantel {
 		}
 	}
 
-	export async function destroyOrb () {
-		quantel.destroyOrb()
-	}
-
 	export async function getConnectionDetails (): Promise<ConnectionDetails> {
 		return {
 			type: 'ConnectionDetails',
@@ -436,7 +432,8 @@ export namespace Quantel {
 	export async function getDefaultZoneInfo (): Promise<ZoneInfo> {
 		try {
 			await getISAReference()
-			let zones = await quantel.listZones(await isaIOR)
+			queue = queue.then(async () => quantel.listZones(await isaIOR))
+			let zones = await queue
 			return zones[0]
 		} catch (err) {
 			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
@@ -451,7 +448,8 @@ export namespace Quantel {
 	export async function getServers (): Promise<ServerInfo[]> {
 		try {
 			await getISAReference()
-			return await quantel.getServers(await isaIOR)
+			queue = queue.then(async () => quantel.getServers(await isaIOR))
+			return queue
 		} catch (err) {
 			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {

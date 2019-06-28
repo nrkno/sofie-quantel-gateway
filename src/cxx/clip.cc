@@ -23,13 +23,12 @@
 
 void getClipDataExecute(napi_env env, void* data) {
   clipDataCarrier* c = (clipDataCarrier*) data;
-	CORBA::ORB_var orb;
 	Quentin::ZonePortal::_ptr_type zp;
 	Quentin::WStrings columns;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
 	try {
-		resolveZonePortal(c->isaIOR, &orb, &zp);
+		resolveZonePortalShared(c->isaIOR, &zp);
 		Quentin::ColumnDescList_var cdl = zp->getColumnDescriptions();
 		columns.length(cdl->length());
 		for ( uint32_t x = 0 ; x < cdl->length() ; x++ ) {
@@ -54,8 +53,6 @@ void getClipDataExecute(napi_env env, void* data) {
 	catch(omniORB::fatalException& fe) {
 		NAPI_REJECT_FATAL_EXCEPTION(fe);
 	}
-
-	orb->destroy();
 }
 
 void getClipDataComplete(napi_env env, napi_status asyncStatus, void* data) {
@@ -176,14 +173,13 @@ napi_value getClipData(napi_env env, napi_callback_info info) {
 
 void searchClipsExecute(napi_env env, void* data) {
 	searchClipsCarrier* c = (searchClipsCarrier*) data;
-	CORBA::ORB_var orb;
 	Quentin::ZonePortal::_ptr_type zp;
 	Quentin::ClipPropertyList cpl;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 	uint32_t queryCounter = 0;
 
 	try {
-		resolveZonePortal(c->isaIOR, &orb, &zp);
+		resolveZonePortalShared(c->isaIOR, &zp);
 
 		cpl.length(c->query.size());
 		for ( auto it = c->query.begin(); it != c->query.end() ; ++it ) {
@@ -212,8 +208,6 @@ void searchClipsExecute(napi_env env, void* data) {
 	catch(omniORB::fatalException& fe) {
 		NAPI_REJECT_FATAL_EXCEPTION(fe);
 	}
-
-	orb->destroy();
 }
 
 void searchClipsComplete(napi_env env, napi_status asyncStatus, void* data) {
@@ -382,11 +376,10 @@ napi_value searchClips(napi_env env, napi_callback_info info) {
 
 void getFragmentsExecute(napi_env env, void* data) {
 	getFragmentsCarrier* c = (getFragmentsCarrier*) data;
-	CORBA::ORB_var orb;
 	Quentin::ZonePortal::_ptr_type zp;
 
 	try {
-		resolveZonePortal(c->isaIOR, &orb, &zp);
+		resolveZonePortalShared(c->isaIOR, &zp);
 
 		c->fragments = (c->start >= 0) && (c->finish >= 0) ?
 		  zp->getFragments(c->clipID, c->start, c->finish) : zp->getAllFragments(c->clipID);
@@ -403,8 +396,6 @@ void getFragmentsExecute(napi_env env, void* data) {
 	catch(omniORB::fatalException& fe) {
 		NAPI_REJECT_FATAL_EXCEPTION(fe);
 	}
-
-	orb->destroy();
 }
 
 void getFragmentsComplete(napi_env env, napi_status asyncStatus, void* data) {
@@ -541,12 +532,11 @@ napi_value getFragments(napi_env env, napi_callback_info info) {
 // TODO leaving sync for now until requirements are clearer
 void cloneIfNeededExecute(napi_env env, void* data) {
 	cloneIfNeededCarrier* c = (cloneIfNeededCarrier*) data;
-	CORBA::ORB_var orb;
 	Quentin::ZonePortal::_ptr_type zp;
 	CORBA::Boolean copyCreated;
 
 	try {
-		resolveZonePortal(c->isaIOR, &orb, &zp);
+		resolveZonePortalShared(c->isaIOR, &zp);
 
 		zp->cloneIfNeeded(c->clipID, c->poolID, 0,
 			c->highPriority ? Quentin::Port::HighPriority : Quentin::Port::StandardPriority,
@@ -563,8 +553,6 @@ void cloneIfNeededExecute(napi_env env, void* data) {
 	catch(omniORB::fatalException& fe) {
 		NAPI_REJECT_FATAL_EXCEPTION(fe);
 	}
-
-	orb->destroy();
 }
 
 void cloneIfNeededComplete(napi_env env, napi_status asyncStatus, void* data) {
@@ -660,11 +648,10 @@ napi_value cloneIfNeeded(napi_env env, napi_callback_info info) {
 
 void deletClipExecute(napi_env env, void* data) {
 	deleteClipCarrier* c = (deleteClipCarrier*) data;
-	CORBA::ORB_var orb;
 	Quentin::ZonePortal::_ptr_type zp;
 
 	try {
-		resolveZonePortal(c->isaIOR, &orb, &zp);
+		resolveZonePortalShared(c->isaIOR, &zp);
 
 		c->deleted = zp->deleteClip(c->clipID);
 	}
@@ -677,8 +664,6 @@ void deletClipExecute(napi_env env, void* data) {
 	catch(omniORB::fatalException& fe) {
 		NAPI_REJECT_FATAL_EXCEPTION(fe);
 	}
-
-	orb->destroy();
 }
 
 void deleteClipComplete(napi_env env, napi_status asyncStatus, void* data) {

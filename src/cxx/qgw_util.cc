@@ -70,9 +70,48 @@ napi_status retrieveZonePortal(napi_env env, napi_callback_info info, CORBA::ORB
   status = napi_get_value_string_utf8(env, argv[0], isaIOR, iorLen + 1, &iorLen);
   PASS_STATUS;
 
-  const char* options[][2] = { { "traceLevel", "1" }, { 0, 0 } };
-  int orbc = 0;
-  CORBA::ORB_var local_orb = CORBA::ORB_init(orbc, nullptr, "omniORB4", options);
+	CORBA::ORB_var local_orb;
+  if (*orb == nullptr) {
+		const char* options[][2] = { { "traceLevel", "1" }, { 0, 0 } };
+		int orbc = 0;
+		local_orb = CORBA::ORB_init(orbc, nullptr, "omniORB4", options);
+	}
+
+  CORBA::Object_ptr ptr = local_orb->string_to_object(isaIOR);
+  free(isaIOR);
+	*zp = Quentin::ZonePortal::_unchecked_narrow(ptr);
+  *orb = local_orb;
+
+	return napi_ok;
+}
+
+CORBA::ORB_var local_orb = nullptr;
+
+napi_status retrieveZonePortalShared(napi_env env, napi_callback_info info, CORBA::ORB_var *orb, Quentin::ZonePortal::_ptr_type *zp) {
+  napi_status status;
+  char* isaIOR = nullptr;
+  size_t iorLen = 0;
+
+  size_t argc = 1;
+  napi_value argv[1];
+  status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+  PASS_STATUS;
+
+  if (argc < 1) {
+    printf("Connection test must be provided with a IOR reference to an ISA server.");
+    return napi_string_expected;
+  }
+  status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &iorLen);
+  PASS_STATUS;
+  isaIOR = (char*) malloc((iorLen + 1) * sizeof(char));
+  status = napi_get_value_string_utf8(env, argv[0], isaIOR, iorLen + 1, &iorLen);
+  PASS_STATUS;
+
+  if (local_orb == nullptr) {
+		const char* options[][2] = { { "traceLevel", "1" }, { 0, 0 } };
+		int orbc = 0;
+		local_orb = CORBA::ORB_init(orbc, nullptr, "omniORB4", options);
+	}
 
   CORBA::Object_ptr ptr = local_orb->string_to_object(isaIOR);
   free(isaIOR);
@@ -92,6 +131,32 @@ napi_status resolveZonePortal(char* ior, CORBA::ORB_var *orb, Quentin::ZonePorta
   *orb = local_orb;
 
 	return napi_ok;
+}
+
+napi_status resolveZonePortalShared(char* ior, Quentin::ZonePortal::_ptr_type *zp) {
+	if (local_orb == nullptr) {
+		const char* options[][2] = { { "traceLevel", "1" }, { 0, 0 } };
+	  int orbc = 0;
+	  local_orb = CORBA::ORB_init(orbc, nullptr, "omniORB4", options);
+	}
+
+  CORBA::Object_ptr ptr = local_orb->string_to_object(ior);
+	*zp = Quentin::ZonePortal::_unchecked_narrow(ptr);
+
+	return napi_ok;
+}
+
+napi_value destroyOrb(napi_env env, napi_callback_info info) {
+	napi_status status;
+	napi_value result;
+	if (local_orb != nullptr) {
+		local_orb->destroy();
+	}
+	local_orb = nullptr;
+
+	status = napi_get_undefined(env, &result);
+	CHECK_STATUS;
+	return result;
 }
 
 std::string formatTimecode(Quentin::Timecode tc) {

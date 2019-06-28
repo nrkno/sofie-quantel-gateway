@@ -23,11 +23,10 @@
 
 void testConnectionExecute(napi_env env, void* data) {
 	testConnectionCarrier* c = (testConnectionCarrier*) data;
-	CORBA::ORB_var orb;
 	Quentin::ZonePortal::_ptr_type zp;
 
 	try {
-		resolveZonePortal(c->isaIOR, &orb, &zp);
+		resolveZonePortalShared(c->isaIOR, &zp);
 
 		c->zoneNumber = zp->getZoneNumber();
 	}
@@ -40,8 +39,6 @@ void testConnectionExecute(napi_env env, void* data) {
 	catch(omniORB::fatalException& fe) {
 		NAPI_REJECT_FATAL_EXCEPTION(fe);
 	}
-
-	orb->destroy();
 }
 
 void testConnectionComplete(napi_env env, napi_status asyncStatus, void* data) {
@@ -103,11 +100,10 @@ napi_value testConnection(napi_env env, napi_callback_info info) {
 
 void listZonesExecute(napi_env env, void* data) {
 	listZonesCarrier* c = (listZonesCarrier*) data;
-	CORBA::ORB_var orb;
 	Quentin::ZonePortal::_ptr_type zp;
 
 	try {
-		resolveZonePortal(c->isaIOR, &orb, &zp);
+		resolveZonePortalShared(c->isaIOR, &zp);
 
 		c->zoneIDs =zp->getZones(false);
 		c->zoneIDs->length(c->zoneIDs->length() + 1);
@@ -133,8 +129,6 @@ void listZonesExecute(napi_env env, void* data) {
 	catch(omniORB::fatalException& fe) {
 		NAPI_REJECT_FATAL_EXCEPTION(fe);
 	}
-
-	orb->destroy();
 }
 
 void listZonesComplete(napi_env env, napi_status asyncStatus, void* data) {
@@ -230,7 +224,6 @@ napi_value listZones(napi_env env, napi_callback_info info) {
 
 void getServersExecute(napi_env env, void* data) {
 	getServersCarrier* c = (getServersCarrier*) data;
-	CORBA::ORB_var orb;
 	Quentin::ZonePortal::_ptr_type zp;
 	serverDetails* server;
 	Quentin::Server_var qserver;
@@ -241,7 +234,7 @@ void getServersExecute(napi_env env, void* data) {
 	Quentin::Longs_var serverIDs;
 
 	try {
-		resolveZonePortal(c->isaIOR, &orb, &zp);
+		resolveZonePortalShared(c->isaIOR, &zp);
 
 		serverIDs = zp->getServers(true);
 		for ( uint32_t x = 0 ; x < serverIDs->length() ; x++ ) {
@@ -277,8 +270,6 @@ void getServersExecute(napi_env env, void* data) {
 	catch(omniORB::fatalException& fe) {
 		NAPI_REJECT_FATAL_EXCEPTION(fe);
 	}
-
-	orb->destroy();
 }
 
 void getServersComplete(napi_env env, napi_status asyncStatus, void* data) {
@@ -420,11 +411,10 @@ napi_value getServers(napi_env env, napi_callback_info info) {
 
 void getFormatInfoExecute(napi_env env, void* data) {
 	formatInfoCarrier* c = (formatInfoCarrier*) data;
-	CORBA::ORB_var orb;
 	Quentin::ZonePortal::_ptr_type zp;
 
 	try {
-		resolveZonePortal(c->isaIOR, &orb, &zp);
+		resolveZonePortalShared(c->isaIOR, &zp);
 
 		c->info = zp->getFormatInfo(c->formatNumber);
 	}
@@ -437,8 +427,6 @@ void getFormatInfoExecute(napi_env env, void* data) {
 	catch(omniORB::fatalException& fe) {
 		NAPI_REJECT_FATAL_EXCEPTION(fe);
 	}
-
-	orb->destroy();
 }
 
 void getFormatInfoComplete(napi_env env, napi_status asyncStatus, void* data) {

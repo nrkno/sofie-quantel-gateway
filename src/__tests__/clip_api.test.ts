@@ -51,6 +51,7 @@ describe('Clip-level Quantel gateway tests for querying clips', () => {
 	})
 
 	afterAll(async () => {
+		Quantel.destroyOrb()
 		await spawn.stop()
 	})
 })

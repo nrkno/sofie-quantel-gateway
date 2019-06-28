@@ -154,6 +154,7 @@ describe('Error handling when server has failed', () => {
 	})
 
 	afterAll(async () => {
+		Quantel.destroyOrb()
 		await spawn.stop()
 	})
 })

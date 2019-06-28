@@ -191,6 +191,7 @@ describe('Port-level Quantel gateway tests', () => {
 	})
 
 	afterAll(async () => {
+		Quantel.destroyOrb()
 		await spawn.stop()
 	})
 })

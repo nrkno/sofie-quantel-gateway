@@ -23,12 +23,11 @@
 
 void triggerExecute(napi_env env, void* data) {
 	triggerCarrier* c = (triggerCarrier*) data;
-	CORBA::ORB_var orb;
 	Quentin::ZonePortal::_ptr_type zp;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
 	try {
-		resolveZonePortal(c->isaIOR, &orb, &zp);
+		resolveZonePortalShared(c->isaIOR, &zp);
 
     Quentin::Server_ptr server = zp->getServer(c->serverID);
     Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(c->portName).data(), 0);
@@ -37,12 +36,10 @@ void triggerExecute(napi_env env, void* data) {
       	c->offset >= 0 ? Quentin::Port::trModeOffset : Quentin::Port::trModeNow,
       	c->offset >= 0 ? c->offset : 0) ) {
       if (c->offset >= 0) {
-				orb->destroy();
 				c->status = QGW_TRIGGER_OFFSET_FAIL;
         c->errorMsg = "Failed to trigger action at offset.";
 				return;
       } else {
-				orb->destroy();
 				c->status = QGW_TRIGGER_NOW_FAIL;
         c->errorMsg = "Failed to trigger action immediately.";
 				return;
@@ -58,8 +55,6 @@ void triggerExecute(napi_env env, void* data) {
 	catch(omniORB::fatalException& fe) {
 		NAPI_REJECT_FATAL_EXCEPTION(fe);
 	}
-
-	orb->destroy();
 }
 
 void triggerComplete(napi_env env, napi_status asyncStatus, void* data) {
@@ -168,12 +163,11 @@ napi_value trigger(napi_env env, napi_callback_info info) {
 
 void jumpExecute(napi_env env, void* data) {
 	jumpCarrier* c = (jumpCarrier*) data;
-	CORBA::ORB_var orb;
 	Quentin::ZonePortal::_ptr_type zp;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
 	try {
-		resolveZonePortal(c->isaIOR, &orb, &zp);
+		resolveZonePortalShared(c->isaIOR, &zp);
 
 		Quentin::Server_ptr server = zp->getServer(c->serverID);
 		Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(c->portName).data(), 0);
@@ -193,8 +187,6 @@ void jumpExecute(napi_env env, void* data) {
 	catch(omniORB::fatalException& fe) {
 		NAPI_REJECT_FATAL_EXCEPTION(fe);
 	}
-
-	orb->destroy();
 }
 
 void jumpComplete(napi_env env, napi_status asyncStatus, void* data) {

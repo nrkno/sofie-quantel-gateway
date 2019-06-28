@@ -86,6 +86,7 @@ describe('Zone-level Quantel gateway tests', () => {
 	})
 
 	afterAll(async () => {
+		Quantel.destroyOrb()
 		await spawn.stop()
 	})
 })

@@ -25,13 +25,12 @@ int32_t portCounter = 1;
 
 void createPlayPortExecute(napi_env env, void* data) {
 	createPlayPortCarrier* c = (createPlayPortCarrier*) data;
-	CORBA::ORB_var orb;
 	Quentin::ZonePortal::_ptr_type zp;
 	int32_t portID = portCounter++;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
 	try {
-		resolveZonePortal(c->isaIOR, &orb, &zp);
+		resolveZonePortalShared(c->isaIOR, &zp);
 
 		Quentin::Server_var server = zp->getServer(c->serverID);
 
@@ -41,7 +40,6 @@ void createPlayPortExecute(napi_env env, void* data) {
 
 		Quentin::Port_var port = server->getPort(utf8_conv.from_bytes(c->portName).data(), portID);
 		if (port == nullptr) {
-			orb->destroy();
 			c->status = QGW_GET_PORT_FAIL;
 			c->errorMsg = "Unable to create port. It is likely that all ports are assigned.";
 			return;
@@ -51,26 +49,22 @@ void createPlayPortExecute(napi_env env, void* data) {
 
 		CORBA::Boolean playing = port->setMode(Quentin::Port::PortMode::playing);
 		if (!playing) {
-			orb->destroy();
 			c->status = QGW_SET_MODE_FAIL;
 			c->errorMsg = "Failed to set play mode for new port.";
 			return;
 		}
 
 		if (!port->actionAtTrigger(START, Quentin::Port::trActStart)) {
-			orb->destroy();
 			c->status = QGW_TRIGGER_SETUP_FAIL;
 			c->errorMsg = "Unable set set up START trigger action for new port.";
 			return;
 		}
 		if (!port->actionAtTrigger(STOP, Quentin::Port::trActStop)) {
-			orb->destroy();
 			c->status = QGW_TRIGGER_SETUP_FAIL;
 			c->errorMsg = "Unable set set up STOP trigger action for new port.";
 			return;
 		}
 		if (!port->actionAtTrigger(JUMP, Quentin::Port::trActJump)) {
-			orb->destroy();
 			c->status = QGW_TRIGGER_SETUP_FAIL;
 			c->errorMsg = "Unable set set up JUMP trigger action for new port.";
 			return;
@@ -89,8 +83,6 @@ void createPlayPortExecute(napi_env env, void* data) {
 	catch(omniORB::fatalException& fe) {
 		NAPI_REJECT_FATAL_EXCEPTION(fe);
 	}
-
-	orb->destroy();
 }
 
 void createPlayPortComplete(napi_env env, napi_status asyncStatus, void* data) {
@@ -247,13 +239,12 @@ napi_value createPlayPort(napi_env env, napi_callback_info info) {
 
 void getPlayPortExecute(napi_env env, void* data) {
 	playPortStatusCarrier* c = (playPortStatusCarrier*) data;
-	CORBA::ORB_var orb;
 	Quentin::ZonePortal::_ptr_type zp;
 	Quentin::Longs_var channels;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
 	try {
-		resolveZonePortal(c->isaIOR, &orb, &zp);
+		resolveZonePortalShared(c->isaIOR, &zp);
 
 	 	Quentin::Server_ptr server = zp->getServer(c->serverID);
 
@@ -325,8 +316,6 @@ void getPlayPortExecute(napi_env env, void* data) {
  	catch(omniORB::fatalException& fe) {
 	 	NAPI_REJECT_FATAL_EXCEPTION(fe);
  	}
-
-  orb->destroy();
 }
 
 void getPlayPortComplete(napi_env env, napi_status asyncStatus, void* data) {
@@ -497,12 +486,11 @@ napi_value getPlayPortStatus(napi_env env, napi_callback_info info) {
 
 void releasePortExecute(napi_env env, void* data) {
 	releasePortCarrier* c = (releasePortCarrier*) data;
-	CORBA::ORB_var orb;
 	Quentin::ZonePortal::_ptr_type zp;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
 	try {
-		resolveZonePortal(c->isaIOR, &orb, &zp);
+		resolveZonePortalShared(c->isaIOR, &zp);
 
 		Quentin::Server_ptr server = zp->getServer(c->serverID);
     Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(c->portName).data(), 0);
@@ -520,8 +508,6 @@ void releasePortExecute(napi_env env, void* data) {
 	catch(omniORB::fatalException& fe) {
 		NAPI_REJECT_FATAL_EXCEPTION(fe);
 	}
-
-	orb->destroy();
 }
 
 void releasePortComplete(napi_env env, napi_status asyncStatus, void* data) {
@@ -636,12 +622,11 @@ napi_value releasePort(napi_env env, napi_callback_info info) {
 
 void wipeExecute(napi_env env, void* data) {
 	wipeCarrier* c = (wipeCarrier*) data;
-	CORBA::ORB_var orb;
 	Quentin::ZonePortal::_ptr_type zp;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
 	try {
-		resolveZonePortal(c->isaIOR, &orb, &zp);
+		resolveZonePortalShared(c->isaIOR, &zp);
 
 		Quentin::Server_ptr server = zp->getServer(c->serverID);
     Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(c->portName).data(), 0);
@@ -657,8 +642,6 @@ void wipeExecute(napi_env env, void* data) {
 	catch(omniORB::fatalException& fe) {
 		NAPI_REJECT_FATAL_EXCEPTION(fe);
 	}
-
-	orb->destroy();
 }
 
 void wipeComplete(napi_env env, napi_status asyncStatus, void* data) {
@@ -801,12 +784,11 @@ napi_value wipe(napi_env env, napi_callback_info info) {
 
 void loadPlayPortExecute(napi_env env, void* data) {
 	loadPlayPortCarrier* c = (loadPlayPortCarrier*) data;
-	CORBA::ORB_var orb;
 	Quentin::ZonePortal::_ptr_type zp;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
 	try {
-		resolveZonePortal(c->isaIOR, &orb, &zp);
+		resolveZonePortalShared(c->isaIOR, &zp);
 
 	  Quentin::Server_ptr server = zp->getServer(c->serverID);
 
@@ -822,8 +804,6 @@ void loadPlayPortExecute(napi_env env, void* data) {
 	catch(omniORB::fatalException& fe) {
 		NAPI_REJECT_FATAL_EXCEPTION(fe);
 	}
-
-	orb->destroy();
 }
 
 void loadPlayPortComplete(napi_env env, napi_status asyncStatus, void* data) {
@@ -1078,12 +1058,11 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
 
 void getPortFragmentsExecute(napi_env env, void* data) {
 	portFragmentsCarrier* c = (portFragmentsCarrier*) data;
-	CORBA::ORB_var orb;
 	Quentin::ZonePortal::_ptr_type zp;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
 	try {
-		resolveZonePortal(c->isaIOR, &orb, &zp);
+		resolveZonePortalShared(c->isaIOR, &zp);
 
 		Quentin::Server_ptr server = zp->getServer(c->serverID);
 		Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(c->portName).data(), 0);
@@ -1099,8 +1078,6 @@ void getPortFragmentsExecute(napi_env env, void* data) {
 	catch(omniORB::fatalException& fe) {
 		NAPI_REJECT_FATAL_EXCEPTION(fe);
 	}
-
-	orb->destroy();
 }
 
 void getPortFragmentsComplete(napi_env env, napi_status asyncStatus, void* data) {
@@ -1252,12 +1229,11 @@ napi_value getPortFragments(napi_env env, napi_callback_info info) {
 
 void getPortPropertiesExecute(napi_env env, void* data) {
 	portPropertiesCarrier* c = (portPropertiesCarrier*) data;
-	CORBA::ORB_var orb;
 	Quentin::ZonePortal::_ptr_type zp;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
 	try {
-		resolveZonePortal(c->isaIOR, &orb, &zp);
+		resolveZonePortalShared(c->isaIOR, &zp);
 
 		Quentin::Server_ptr server = zp->getServer(c->serverID);
 		Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(c->portName).data(), 0);
@@ -1280,8 +1256,6 @@ void getPortPropertiesExecute(napi_env env, void* data) {
 	catch(omniORB::fatalException& fe) {
 		NAPI_REJECT_FATAL_EXCEPTION(fe);
 	}
-
-	orb->destroy();
 }
 
 void getPortPropertiesComplete(napi_env env, napi_status asyncStatus, void* data) {

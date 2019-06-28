@@ -58,6 +58,7 @@ describe('Clip-level Quantel gateway tests for searching', () => {
 	})
 
 	afterAll(async () => {
+		Quantel.destroyOrb()
 		await spawn.stop()
 	})
 })

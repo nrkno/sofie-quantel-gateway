@@ -77,6 +77,7 @@ describe('Clip-level REST API tests', () => {
 	})
 
 	afterAll(async () => {
+		Quantel.destroyOrb()
 		await new Promise((resolve, reject) => {
 			server.close(e => {
 				if (e) {

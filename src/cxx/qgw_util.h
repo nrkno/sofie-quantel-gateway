@@ -65,8 +65,8 @@ napi_status checkStatus(napi_env env, napi_status status,
   return nullptr; \
 }
 
+// TODO remove this ... no longer required
 #define NAPI_THROW_ORB_DESTROY(msg) { \
-  orb->destroy(); \
   char errorMsg[256]; \
   snprintf(errorMsg, 256, "%s", msg); \
   napi_throw_error(env, nullptr, errorMsg); \
@@ -74,7 +74,6 @@ napi_status checkStatus(napi_env env, napi_status status,
 }
 
 #define NAPI_THROW_SYSTEM_EXCEPTION(ex) { \
-  orb->destroy(); \
   char errorMsg[256]; \
   snprintf(errorMsg, 256, "System exception thrown from CORBA subsystem: %s.", ex._name()); \
   napi_throw_error(env, nullptr, errorMsg); \
@@ -83,7 +82,6 @@ napi_status checkStatus(napi_env env, napi_status status,
 
 //snprintf(errorMsg, 256, "System exception thrown from CORBA subsystem with code 0x%lx: %s.", ex.minor(), ex._name());
 #define NAPI_REJECT_SYSTEM_EXCEPTION(ex) { \
-	orb->destroy(); \
   char errorMsg[256]; \
 	snprintf(errorMsg, 256, "System exception thrown from CORBA subsystem: %s.", ex._name()); \
 	c->errorMsg = std::string(errorMsg); \
@@ -92,7 +90,6 @@ napi_status checkStatus(napi_env env, napi_status status,
 }
 
 #define NAPI_THROW_CORBA_EXCEPTION(ex) { \
-  orb->destroy(); \
   char errorMsg[256]; \
   snprintf(errorMsg, 256, "Exception thrown from CORBA subsystem: %s.", ex._name()); \
   napi_throw_error(env, nullptr, errorMsg); \
@@ -100,7 +97,6 @@ napi_status checkStatus(napi_env env, napi_status status,
 }
 
 #define NAPI_REJECT_CORBA_EXCEPTION(ex) { \
-	orb->destroy(); \
 	char errorMsg[256]; \
 	snprintf(errorMsg, 256, "Exception thrown from CORBA subsystem: %s.", ex._name()); \
 	c->errorMsg = std::string(errorMsg); \
@@ -109,7 +105,6 @@ napi_status checkStatus(napi_env env, napi_status status,
 }
 
 #define NAPI_THROW_FATAL_EXCEPTION(fe) { \
-  orb->destroy(); \
   char errorMsg[512]; \
   snprintf(errorMsg, 512, "Omni ORB fatal exception thrown at line %i of %s: %s.", fe.line(), fe.file(), fe.errmsg()); \
   napi_throw_error(env, nullptr, errorMsg); \
@@ -117,7 +112,6 @@ napi_status checkStatus(napi_env env, napi_status status,
 }
 
 #define NAPI_REJECT_FATAL_EXCEPTION(fe) { \
-  orb->destroy(); \
 	char errorMsg[512]; \
 	snprintf(errorMsg, 512, "Omni ORB fatal exception thrown at line %i of %s: %s.", fe.line(), fe.file(), fe.errmsg()); \
 	c->errorMsg = std::string(errorMsg); \
@@ -171,10 +165,14 @@ int32_t rejectStatus(napi_env env, carrier* c, char* file, int32_t line);
 napi_status retrieveZonePortal(napi_env env, napi_callback_info info,
 	CORBA::ORB_var *orb, Quentin::ZonePortal::_ptr_type *zp);
 napi_status resolveZonePortal(char* ior, CORBA::ORB_var *orb, Quentin::ZonePortal::_ptr_type *zp);
+napi_status resolveZonePortalShared(char* ior, Quentin::ZonePortal::_ptr_type *zp);
+
 std::string formatTimecode(Quentin::Timecode tc);
 Quentin::Timecode timecodeFromString(std::string tcs);
 napi_status convertToDate(napi_env env, std::string date, napi_value *nodeDate);
 
 napi_status fragmentsToJS(napi_env env, Quentin::ServerFragments_var fragments, napi_value* prop);
+
+napi_value destroyOrb(napi_env env, napi_callback_info info);
 
 #endif // QGW_UTIL

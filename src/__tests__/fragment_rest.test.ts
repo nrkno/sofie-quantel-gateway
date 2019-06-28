@@ -165,6 +165,7 @@ describe('Clip-fragments REST API tests', () => {
 	})
 
 	afterAll(async () => {
+		Quantel.destroyOrb()
 		await new Promise((resolve, reject) => {
 			server.close(e => {
 				if (e) {
