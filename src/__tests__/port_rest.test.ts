@@ -618,6 +618,15 @@ describe('Port-level REST API tests', () => {
 		.rejects.toThrow('400')
 	})
 
+	test('Get port properties', async () => {
+		await expect(request.get('http://localhost:3000/default/server/1100/port/Port 1/properties').then(JSON.parse))
+		.resolves.toMatchObject({
+			type: 'PortProperties',
+			FrameRate: '25',
+			Name: 'Testing'
+		})
+	})
+
 	afterAll(async () => {
 		await new Promise((resolve, reject) => {
 			server.close(e => {

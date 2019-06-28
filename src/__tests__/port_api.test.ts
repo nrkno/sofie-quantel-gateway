@@ -65,7 +65,8 @@ describe('Port-level Quantel gateway tests', () => {
 				offset: 44,
 				framesUnused: 43,
 				endOfData: 45,
-				channels: [ 1 ]
+				channels: [ 1 ],
+				videoFormat: '1080i50'
 			} as Quantel.PortStatus)
 	})
 
@@ -177,6 +178,16 @@ describe('Port-level Quantel gateway tests', () => {
 				skew: 24,
 				trackNum: 0
 			} as Quantel.AudioFragment]} as Quantel.PortServerFragments)
+	})
+
+	test('Get port properties', async () => {
+		await expect(Quantel.getPortProperties({
+			serverID: 1100,
+			portName: 'Port 1' })).resolves.toMatchObject({
+				type: 'PortProperties',
+				FrameRate: '25',
+				Name: 'Testing'
+			})
 	})
 
 	afterAll(async () => {

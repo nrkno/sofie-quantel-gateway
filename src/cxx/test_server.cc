@@ -53,9 +53,9 @@ public:
 	virtual Quentin::PortInfo* getPortInfo() { return nullptr; }
 	virtual Quentin::DirectoryViewer_ptr getDirViewer(::CORBA::Long timeoutSecs, const ::CORBA::WChar* viewerName) { return nullptr; }
 	virtual Quentin::DirectoryViewer_ptr getPoolDirViewer(::CORBA::Long poolID, ::CORBA::Long timeoutSecs, const ::CORBA::WChar* viewerName) { return nullptr; }
-	virtual Quentin::ConfigDescriptionList* getConfigurations(::CORBA::Long channel, ::Quentin::FragmentType type, ::CORBA::Boolean forPlay) { return nullptr; }
+	virtual Quentin::ConfigDescriptionList* getConfigurations(::CORBA::Long channel, ::Quentin::FragmentType type, ::CORBA::Boolean forPlay);
 	virtual Quentin::Longs* getDefaultConfigurations(::CORBA::Long channel) { return nullptr; }
-	virtual Quentin::Longs* getCurrentConfigurations(::CORBA::Long channel) { return nullptr; }
+	virtual Quentin::Longs* getCurrentConfigurations(::CORBA::Long channel);
 	virtual void configure(::CORBA::Long channel, const ::Quentin::Longs& configurations) { return; }
 	virtual ::CORBA::Boolean assignChannel(::CORBA::Long chanNum, ::CORBA::Long flags);
 	virtual void assignTransitionPort(::Quentin::Port_ptr transitionPort) { return; }
@@ -87,8 +87,8 @@ public:
 	virtual void setOverlayIndicator(const ::CORBA::WChar* indicator, ::CORBA::Boolean active) { return; }
 	virtual void setOverlayTallyID(::CORBA::Long id, ::CORBA::Boolean numeric) { return; }
 
-	virtual ::CORBA::WChar* getProperty(const ::CORBA::WChar* propertyName) { return nullptr; }
-	virtual Quentin::WStrings* getPropertyList() { return nullptr; }
+	virtual ::CORBA::WChar* getProperty(const ::CORBA::WChar* propertyName);
+	virtual Quentin::WStrings* getPropertyList();
 
 private:
 	const ::CORBA::WChar* ident;
@@ -196,6 +196,48 @@ CORBA::Boolean Port_i::setTrigger(CORBA::Long trigger, Quentin::Port::TriggerMod
 		default:
 			return false;
 	}
+}
+
+Quentin::ConfigDescriptionList* Port_i::getConfigurations(CORBA::Long channel, Quentin::FragmentType type, CORBA::Boolean forPlay) {
+	Quentin::ConfigDescriptionList* cdl = new Quentin::ConfigDescriptionList;
+	cdl->length(2);
+	(*cdl)[0].description = CORBA::WString_var(L"625i50 16:9");
+	(*cdl)[0].configNumber = 41;
+
+	(*cdl)[1].description = CORBA::WString_var(L"1080i50");
+	(*cdl)[1].configNumber = 42;
+
+	return cdl;
+}
+
+Quentin::Longs* Port_i::getCurrentConfigurations(CORBA::Long channel) {
+	Quentin::Longs* zones = new Quentin::Longs;
+	zones->length(2);
+	(*zones)[0] = 4;
+	(*zones)[1] = 42;
+	return zones;
+}
+
+CORBA::WChar* Port_i::getProperty(const CORBA::WChar* propertyName) {
+	CORBA::WChar* result = (CORBA::WChar*) malloc(sizeof(CORBA::WChar) * 20);
+	if (wcscmp(propertyName, L"FrameRate") == 0) {
+		wcsncpy(result, L"25", 20);
+		return result;
+	}
+	if (wcscmp(propertyName, L"Name") == 0) {
+		wcsncpy(result, L"Testing", 20);
+		return result;
+	}
+	wcsncpy(result, L"", 20);
+	return result;
+}
+
+Quentin::WStrings* Port_i::getPropertyList() {
+	Quentin::WStrings* propList = new Quentin::WStrings;
+	propList->length(2);
+	(*propList)[0] = CORBA::WString_var(L"Name");
+	(*propList)[1] = CORBA::WString_var(L"FrameRate");
+	return propList;
 }
 
 class Server_i: public POA_Quentin::Server,
@@ -505,7 +547,7 @@ Quentin::WStrings* ZonePortal_i::searchClips(const Quentin::ClipPropertyList& pr
 	if (std::wstring(theProp.value) != L"Once upon*" &&
 			std::wstring(theProp.value) != L"e977435806f24b37aed871bf15a2eef9") {
 		result->length(0);
-		// printf("Got into here.\n"); fflush(stdout);
+		// wprintf(L"Got into here with %ws = %ws.\n", theProp.name, theProp.value); fflush(stdout);
 		return result;
 	}
 	result->length(columns.length());

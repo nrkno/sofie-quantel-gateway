@@ -52,6 +52,11 @@ describe('Clip-level Quantel gateway tests for searching', () => {
 		await expect(Quantel.searchClips({ Title: 'Once under*' })).resolves.toHaveLength(0)
 	})
 
+	test('Search for clip, return clipID only', async () => {
+		await expect(Quantel.searchClips({ Title: 'Once upon*', idOnly: '' }))
+		.resolves.toEqual([ 2 ])
+	})
+
 	afterAll(async () => {
 		await spawn.stop()
 	})

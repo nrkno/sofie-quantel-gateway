@@ -299,19 +299,22 @@ void getPlayPortExecute(napi_env env, void* data) {
 
 	 	Quentin::ConfigDescriptionList_var cdl = port->getConfigurations(c->channels.at(0),
 		  Quentin::FragmentType::videoFragment, true);
-		Quentin::Longs_var currents = port->getCurrentConfigurations(c->channels.at(0));
-		for ( uint32_t x = 0 ; x < currents->length() ; x++ ) {
-			for ( uint32_t y = 0 ; y < cdl->length() ; y++ ) {
-				if (cdl[y].configNumber == currents[x]) {
-					c->videoFormat = utf8_conv.to_bytes(std::wstring(cdl[x].description));
-					break;
+		try {
+			Quentin::Longs_var currents = port->getCurrentConfigurations(c->channels.at(0));
+			for ( uint32_t x = 0 ; x < currents->length() ; x++ ) {
+				for ( uint32_t y = 0 ; y < cdl->length() ; y++ ) {
+					if (cdl[y].configNumber == currents[x]) {
+						c->videoFormat = utf8_conv.to_bytes(std::wstring(cdl[x].description));
+						break;
+					}
 				}
 			}
 		}
-
-		Quentin::WStrings_var properties = port->getPropertyList();
-
-
+		catch (CORBA::SystemException& ex) {
+			if (std::string(ex._name()) == "UNKNOWN") {
+				c->videoFormat = std::string("not available - dummy server");
+			}
+		}
  	}
  	catch(CORBA::SystemException& ex) {
 	 NAPI_REJECT_SYSTEM_EXCEPTION(ex);
@@ -1259,6 +1262,7 @@ void getPortPropertiesExecute(napi_env env, void* data) {
 		Quentin::Server_ptr server = zp->getServer(c->serverID);
 		Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(c->portName).data(), 0);
 
+		printf("Port properties execute ... here we go\n");
 		Quentin::WStrings_var propList = port->getPropertyList();
 		for ( uint32_t x = 0 ; x < propList->length() ; x++ ) {
 			CORBA::WChar* value = port->getProperty(propList[x]);
@@ -1283,7 +1287,6 @@ void getPortPropertiesExecute(napi_env env, void* data) {
 void getPortPropertiesComplete(napi_env env, napi_status asyncStatus, void* data) {
 	portPropertiesCarrier* c = (portPropertiesCarrier*) data;
 	napi_value result, prop;
-	// char rushID[33];
 
 	if (asyncStatus != napi_ok) {
 		c->status = asyncStatus;

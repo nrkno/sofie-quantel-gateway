@@ -24,6 +24,7 @@
 
 #include "qgw_util.h"
 #include <iostream>
+#include <wchar.h>
 
 napi_value runServer(napi_env env, napi_callback_info info);
 

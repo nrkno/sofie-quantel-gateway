@@ -192,9 +192,9 @@ void searchClipsExecute(napi_env env, void* data) {
 		}
 
 		Quentin::WStrings columnNamesWide;
-		columnNamesWide.length(c->columnNames.size());
-		for ( uint32_t i = 0 ; i < c->columnNames.size() ; i++ ) {
-			columnNamesWide[i] = utf8_conv.from_bytes(c->columnNames.at(i)).data();
+		columnNamesWide.length(c->colNames.size());
+		for ( uint32_t i = 0 ; i < c->colNames.size() ; i++ ) {
+			columnNamesWide[i] = utf8_conv.from_bytes(c->colNames.at(i)).data();
 		}
 
 		Quentin::WStrings_var results = zp->searchClips(cpl, columnNamesWide, c->limit);
@@ -247,7 +247,7 @@ void searchClipsComplete(napi_env env, napi_status asyncStatus, void* data) {
 
 		for ( uint32_t x = 0 ; x < c->values.size() ; x++ ) {
 			std::string value = c->values.at(x);
-			std::string key = c->columnNames.at(x % c->columnNames.size());
+			std::string key = c->colNames.at(x % c->colNames.size());
 
 			if ((key == "ClipID") || (key == "CloneId") || (key == "PoolID")) {
 				c->status = napi_create_int32(env, std::stol(value), &prop);
@@ -262,7 +262,7 @@ void searchClipsComplete(napi_env env, napi_status asyncStatus, void* data) {
 			c->status = napi_set_named_property(env, term, key.c_str(), prop);
 			REJECT_STATUS;
 
-			if (x % c->columnNames.size() == (c->columnNames.size() - 1)) {
+			if (x % c->colNames.size() == (c->colNames.size() - 1)) {
 				c->status = napi_set_element(env, result, resultCount++, term);
 				REJECT_STATUS;
 				if (x < c->values.size() - 2) {
@@ -352,7 +352,7 @@ napi_value searchClips(napi_env env, napi_callback_info info) {
 			c->status = napi_get_value_int32(env, prop, &c->limit);
 			REJECT_RETURN;
 		} else if (std::string(nameStr) == "idOnly") {
-			c->columnNames = clipIDonly;
+			c->colNames = clipIDonly;
 			c->idOnly = true;
 		} else {
 			c->status = napi_get_value_string_utf8(env, prop, nullptr, 0, &strLen);

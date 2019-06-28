@@ -121,6 +121,42 @@ describe('Search REST API tests', () => {
 		.rejects.toThrow('400')
 	})
 
+	test('Search for clip, id only', async () => {
+		await expect(request.get('http://localhost:3000/default/clip?Title=Once upon*&idOnly').then(JSON.parse))
+		.resolves.toEqual([ 2 ])
+	})
+
+	test('Search for clip by title with limit', async () => {
+		await expect(request.get('http://localhost:3000/default/clip?Title=Once upon*&limit=1').then(JSON.parse))
+		.resolves.toMatchObject([{
+			type: 'ClipDataSummary',
+			ClipID: 2,
+			ClipGUID: 'e977435806f24b37aed871bf15a2eef9',
+			CloneId: 2,
+			Completed: '2019-06-12T19:16:00.000Z',
+			Created: '2019-06-12T19:16:00.000Z',
+			Description: 'This is the best programme ever to be produced.',
+			Frames: '1234',
+			Owner: 'Mine Hands Off',
+			PoolID: 11,
+			Title: 'Once upon a time in Quantel'
+		}])
+	})
+
+	test('Expect search fail if limit is a string', async () => {
+		await expect(request.get('http://localhost:3000/default/clip?Title=Once upon*&limit=wtf'))
+		.rejects.toThrow('Limit parameter must be a positive number')
+		await expect(request.get('http://localhost:3000/default/clip?Title=Once upon*&limit=wtf'))
+		.rejects.toThrow('400')
+	})
+
+	test('Expect search fail if limit is a zero', async () => {
+		await expect(request.get('http://localhost:3000/default/clip?Title=Once upon*&limit=wtf'))
+		.rejects.toThrow('Limit parameter must be a positive number')
+		await expect(request.get('http://localhost:3000/default/clip?Title=Once upon*&limit=wtf'))
+		.rejects.toThrow('400')
+	})
+
 	afterAll(async () => {
 		await new Promise((resolve, reject) => {
 			server.close(e => {

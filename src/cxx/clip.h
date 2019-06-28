@@ -69,7 +69,7 @@ const std::vector<std::string> clipIDonly = {
 
 struct searchClipsCarrier : carrier {
 	std::map<std::wstring, std::wstring> query;
-	std::vector<std::string> columnNames = columnNames;
+	std::vector<std::string> colNames = columnNames;
 	int32_t limit = 10;
 	bool idOnly = false;
 	std::vector<std::string> values;
