@@ -631,6 +631,14 @@ void wipeExecute(napi_env env, void* data) {
 		Quentin::Server_ptr server = zp->getServer(c->serverID);
     Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(c->portName).data(), 0);
 
+		Quentin::PortListener::PlayPortStatus_var gps;
+		gps = port->getStatus().playStatus();
+
+		if (c->frames == 0x7fffffff) {
+			c->frames = gps->offset - c->start;
+			c->frames = (c->frames < 0) ? 0 : c->frames;
+		}
+
 		c->wiped = port->wipe(c->start, c->frames);
 	}
 	catch(CORBA::SystemException& ex) {

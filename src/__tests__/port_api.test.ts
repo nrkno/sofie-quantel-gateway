@@ -89,7 +89,7 @@ describe('Port-level Quantel gateway tests', () => {
 		})).resolves.toMatchObject({
 			type: 'WipeResult',
 			portName: 'Port 1',
-			frames: 0x7fffffff,
+			frames: 44,
 			serverID: 1100,
 			start: 0,
 			wiped: true
@@ -106,6 +106,20 @@ describe('Port-level Quantel gateway tests', () => {
 			type: 'WipeResult',
 			portName: 'Port 1',
 			frames: 321,
+			start: 123,
+			wiped: true
+		})
+	})
+
+	test('Wipe a port with start beyond play head and frames omitted', async () => {
+		await expect(Quantel.wipe({
+			serverID: 1100,
+			portName: 'Port 1',
+			start: 123
+		})).resolves.toMatchObject({
+			type: 'WipeResult',
+			portName: 'Port 1',
+			frames: 0,
 			start: 123,
 			wiped: true
 		})
