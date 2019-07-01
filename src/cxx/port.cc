@@ -1033,7 +1033,7 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
 
 			c->status = napi_get_named_property(env, prop, "userBits", &subprop);
 			REJECT_RETURN;
-			c->status = napi_get_value_int32(env, prop, (int32_t*) &stf.userBits);
+			c->status = napi_get_value_int32(env, subprop, (int32_t*) &stf.userBits);
 			REJECT_RETURN;
 
 			sfd.timecodeFragmentData(stf);
