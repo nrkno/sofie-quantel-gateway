@@ -594,12 +594,16 @@ napi_status fragmentsToJS(napi_env env, Quentin::ServerFragments_var fragments, 
 			PASS_STATUS;
 			status = napi_set_named_property(env, frag, "ccType", fragprop);
 			PASS_STATUS;
+
+			// TODO RawData type parameter "ccData"
 			break;
 		case Quentin::FragmentType::effectFragment:
 			status = napi_create_int32(env, fragments[x].fragmentData.effectFragmentData().effectID, &fragprop);
 			PASS_STATUS;
 			status = napi_set_named_property(env, frag, "effectID", fragprop);
 			PASS_STATUS;
+
+			// TODO RawData type parameter "effectData"
 			break;
 		default:
 			break;

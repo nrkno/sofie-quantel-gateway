@@ -866,6 +866,9 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
   uint32_t fragmentCount = 0;
 	char* isaIOR = nullptr;
 	size_t iorLen = 0;
+	char* noteStr = nullptr;
+	size_t noteLen = 0;
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
   c->status = napi_create_promise(env, &c->_deferred, &promise);
   REJECT_RETURN;
@@ -948,6 +951,15 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
     Quentin::ServerFragment sf = {};
     Quentin::PositionData vfd = {};
 		Quentin::ServerTimecodeFragment stf = {};
+		Quentin::ServerAspectFragment saf = {};
+		Quentin::ServerCropFragment scf = {};
+		Quentin::ServerCCFragment sccf = {};
+		Quentin::ServerSpeedFragment spdf = {};
+		Quentin::ServerEffectFragment seff = {};
+		Quentin::ServerMultiCamFragment smcf = {};
+		Quentin::ServerPanZoomFragment spzf = {};
+		Quentin::ServerFlagsFragment sff = {};
+		Quentin::ServerNoteFragment sntf = {};
     Quentin::ServerFragmentData sfd;
     std::string rushIDStr, tcStr;
 
@@ -975,7 +987,19 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
     case 'V': // VideoFragment
     case 'A': // AudioFragment & AUXFragment & Aspect Fragment
 			if (typeName[1] == 's') {
-				// TODO process AspectFragment if present
+				c->status = napi_get_named_property(env, prop, "width", &subprop);
+				REJECT_RETURN;
+				c->status = napi_get_value_int32(env, subprop, (int32_t *) &saf.width);
+				REJECT_RETURN;
+
+				c->status = napi_get_named_property(env, prop, "height", &subprop);
+				REJECT_RETURN;
+				c->status = napi_get_value_int32(env, subprop, (int32_t *) &saf.height);
+				REJECT_RETURN;
+
+				sfd.aspectFragmentData(saf);
+				sf.fragmentData = sfd;
+				c->fragments[fragmentCount++] = sf;
 				break;
 			}
       c->status = napi_get_named_property(env, prop, "format", &subprop);
@@ -1023,7 +1047,6 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
       c->fragments[fragmentCount++] = sf;
       break;
 		case 'T': // TimecodeFragment
-
 			c->status = napi_get_named_property(env, prop, "startTimecode", &subprop);
 			REJECT_RETURN;
 			c->status = napi_get_value_string_utf8(env, subprop, timecode, 12, nullptr);
@@ -1039,6 +1062,156 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
 			sfd.timecodeFragmentData(stf);
 			sf.fragmentData = sfd;
 			c->fragments[fragmentCount++] = sf;
+			break;
+		case 'C': // CropFragment and CCFragment
+			if (typeName[1] == 'r') { // assume CropFragment
+				c->status = napi_get_named_property(env, prop, "x", &subprop);
+				REJECT_RETURN;
+				c->status = napi_get_value_int32(env, subprop, (int32_t *) &scf.x);
+				REJECT_RETURN;
+
+				c->status = napi_get_named_property(env, prop, "y", &subprop);
+				REJECT_RETURN;
+				c->status = napi_get_value_int32(env, subprop, (int32_t *) &scf.y);
+				REJECT_RETURN;
+
+				c->status = napi_get_named_property(env, prop, "width", &subprop);
+				REJECT_RETURN;
+				c->status = napi_get_value_int32(env, subprop, (int32_t *) &scf.width);
+				REJECT_RETURN;
+
+				c->status = napi_get_named_property(env, prop, "height", &subprop);
+				REJECT_RETURN;
+				c->status = napi_get_value_int32(env, subprop, (int32_t *) &scf.height);
+				REJECT_RETURN;
+
+				sfd.cropFragmentData(scf);
+				sf.fragmentData = sfd;
+				c->fragments[fragmentCount++] = sf;
+			} else { // assume ccFragment
+				c->status = napi_get_named_property(env, prop, "ccID", &subprop);
+				REJECT_RETURN;
+				c->status = napi_get_value_string_utf8(env, subprop, rushID, 33, nullptr);
+				REJECT_RETURN;
+				rushIDStr.assign(rushID);
+				sccf.ccID = {
+					(CORBA::LongLong) strtoull(rushIDStr.substr(0, 16).c_str(), nullptr, 16),
+					(CORBA::LongLong) strtoull(rushIDStr.substr(16, 32).c_str(), nullptr, 16) };
+
+				c->status = napi_get_named_property(env, prop, "ccType", &subprop);
+				REJECT_RETURN;
+				c->status = napi_get_value_int32(env, subprop, (int32_t *) &sccf.ccType);
+				REJECT_RETURN;
+
+				// TODO RawData type parameter "ccData"
+
+				sfd.ccFragmentData(sccf);
+				sf.fragmentData = sfd;
+				c->fragments[fragmentCount++] = sf;
+			}
+			break;
+		case 'S': // SpeedFragment or ServerFragment
+			if (typeName[0] != 'p') { break; }
+			c->status = napi_get_named_property(env, prop, "speed", &subprop);
+			REJECT_RETURN;
+			c->status = napi_get_value_int32(env, subprop, (int32_t *) &spdf.speed);
+			REJECT_RETURN;
+
+			c->status = napi_get_named_property(env, prop, "profile", &subprop);
+			REJECT_RETURN;
+			c->status = napi_get_value_int32(env, subprop, (int32_t *) &spdf.profile);
+			REJECT_RETURN;
+
+			sfd.speedFragmentData(spdf);
+			sf.fragmentData = sfd;
+			c->fragments[fragmentCount++] = sf;
+			break;
+		case 'E': // EffectFragment
+			c->status = napi_get_named_property(env, prop, "effectID", &subprop);
+			REJECT_RETURN;
+			c->status = napi_get_value_int32(env, subprop, (int32_t *) &seff.effectID);
+			REJECT_RETURN;
+
+			// TODO RawData type parameter "effectData"
+
+			sfd.effectFragmentData(seff);
+			sf.fragmentData = sfd;
+			c->fragments[fragmentCount++] = sf;
+			break;
+		case 'N': // NoteFragment
+			c->status = napi_get_named_property(env, prop, "noteID", &subprop);
+			REJECT_RETURN;
+			c->status = napi_get_value_int32(env, subprop, (int32_t *) &sntf.noteID);
+			REJECT_RETURN;
+
+			c->status = napi_get_named_property(env, prop, "aux", &subprop);
+			REJECT_RETURN;
+			c->status = napi_get_value_int32(env, subprop, (int32_t *) &sntf.aux);
+			REJECT_RETURN;
+
+			c->status = napi_get_named_property(env, prop, "mask", &subprop);
+			REJECT_RETURN;
+			c->status = napi_get_value_int32(env, subprop, (int32_t *) &sntf.mask);
+			REJECT_RETURN;
+
+			c->status = napi_get_named_property(env, prop, "note", &subprop);
+			REJECT_RETURN;
+			c->status = napi_get_value_string_utf8(env, subprop, nullptr, 0, &noteLen);
+			REJECT_RETURN;
+			noteStr = (char*) malloc((noteLen + 1) * sizeof(char));
+			c->status = napi_get_value_string_utf8(env, subprop, noteStr, noteLen + 1, &noteLen);
+			REJECT_RETURN;
+			sntf.note = utf8_conv.from_bytes(noteStr).data();
+
+			sfd.noteFragmentData(sntf);
+			sf.fragmentData = sfd;
+			c->fragments[fragmentCount++] = sf;
+			break;
+		case 'P': // PanZoomFragment
+			c->status = napi_get_named_property(env, prop, "x", &subprop);
+			REJECT_RETURN;
+			c->status = napi_get_value_int32(env, subprop, (int32_t *) &spzf.x);
+			REJECT_RETURN;
+
+			c->status = napi_get_named_property(env, prop, "y", &subprop);
+			REJECT_RETURN;
+			c->status = napi_get_value_int32(env, subprop, (int32_t *) &spzf.y);
+			REJECT_RETURN;
+
+			c->status = napi_get_named_property(env, prop, "hZoom", &subprop);
+			REJECT_RETURN;
+			c->status = napi_get_value_int32(env, subprop, (int32_t *) &spzf.hZoom);
+			REJECT_RETURN;
+
+			c->status = napi_get_named_property(env, prop, "vZoom", &subprop);
+			REJECT_RETURN;
+			c->status = napi_get_value_int32(env, subprop, (int32_t *) &spzf.vZoom);
+			REJECT_RETURN;
+
+			sfd.panZoomFragmentData(spzf);
+			sf.fragmentData = sfd;
+			c->fragments[fragmentCount++] = sf;
+			break;
+		case 'F': // FlagsFragment
+			c->status = napi_get_named_property(env, prop, "flags", &subprop);
+			REJECT_RETURN;
+			c->status = napi_get_value_int32(env, subprop, (int32_t *) &sff.flags);
+			REJECT_RETURN;
+
+			sfd.flagsFragmentData(sff);
+			sf.fragmentData = sfd;
+			c->fragments[fragmentCount++] = sf;
+			break;
+		case 'M': // MultiCamFragment
+			c->status = napi_get_named_property(env, prop, "stream", &subprop);
+			REJECT_RETURN;
+			c->status = napi_get_value_int32(env, subprop, (int32_t *) &smcf.stream);
+			REJECT_RETURN;
+
+			sfd.multiCamFragmentData(smcf);
+			sf.fragmentData = sfd;
+			c->fragments[fragmentCount++] = sf;
+			break;
     default:
       break;
     } // switch typeName[0]
