@@ -24,6 +24,7 @@
 #include "clip.h"
 #include "port.h"
 #include "control.h"
+#include "clone.h"
 #include "thumbs.h"
 #include "test_server.h"
 
@@ -115,16 +116,18 @@ napi_value Init(napi_env env, napi_value exports) {
 		DECLARE_NAPI_METHOD("getFormatInfo", getFormatInfo),
 		DECLARE_NAPI_METHOD("getPortProperties", getPortProperties),
 		DECLARE_NAPI_METHOD("cloneInterZone", cloneInterZone),
+		DECLARE_NAPI_METHOD("getCopyRemaining", getCopyRemaining),
+		DECLARE_NAPI_METHOD("getCopiesRemaining", getCopiesRemaining),
 		DECLARE_NAPI_METHOD("runServer", runServer),
 		DECLARE_NAPI_METHOD("destroyOrb", destroyOrb),
     { "START", nullptr, nullptr, nullptr, nullptr, start, napi_enumerable, nullptr },
-    { "STOP", nullptr, nullptr, nullptr, nullptr, stop, napi_enumerable, nullptr },
+    { "STOP", nullptr, nullptr, nullptr, nullptr, stop, napi_enumerable, nullptr }, // 30
     { "JUMP", nullptr, nullptr, nullptr, nullptr, jump, napi_enumerable, nullptr },
-    { "TRANSITION", nullptr, nullptr, nullptr, nullptr, transition, napi_enumerable, nullptr }, // 30
+    { "TRANSITION", nullptr, nullptr, nullptr, nullptr, transition, napi_enumerable, nullptr },
 		{ "STANDARD", nullptr, nullptr, nullptr, nullptr, standard, napi_enumerable, nullptr},
 		{ "HIGH", nullptr, nullptr, nullptr, nullptr, high, napi_enumerable, nullptr},
   };
-  status = napi_define_properties(env, exports, 32, desc);
+  status = napi_define_properties(env, exports, 34, desc);
 	CHECK_STATUS;
 
   return exports;

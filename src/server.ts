@@ -102,7 +102,7 @@ router.get('/:zoneID.json', async (ctx) => {
 
 router.get('/:zoneID/', async (ctx) => {
 	if (ctx.params.zoneID === 'default') {
-		ctx.body = [ 'server/', 'clip/', 'format/' ]
+		ctx.body = [ 'server/', 'clip/', 'format/', 'copy/' ]
 	} else {
 		let zones = await Quantel.listZones()
 		let inTheZone = zones.find(z => z.zoneName === ctx.params.zoneID || z.zoneNumber.toString() === ctx.params.zoneID)
@@ -143,6 +143,93 @@ router.get('/default/format/:formatID', async (ctx) => {
 			ctx.body = {
 				status: 404,
 				message: `Not found. A format with identifier '${ctx.params.formatID}' was not found.`,
+				stack: ''
+			}
+		} else {
+			throw err
+		}
+	}
+})
+
+router.get('/default/copy', async (ctx) => {
+	ctx.body = await Quantel.getCopiesRemaining()
+})
+
+router.get('/default/copy/:copyID', async (ctx) => {
+	if (isNaN(+ctx.params.copyID) || +ctx.params.copyID < 1) {
+		ctx.status = 400
+		ctx.body = {
+			status: 400,
+			message: 'Bad request. Copy ID is a clip ID that must be a positive integer.',
+			stack: ''
+		} as JSONError
+		return
+	}
+	try {
+		ctx.body = await Quantel.getCopyRemaining({ clipID: +ctx.params.copyID })
+	} catch (err) {
+		if (err.message.indexOf('BadIdent') >= 0) {
+			ctx.status = 404
+			ctx.body = {
+				status: 404,
+				message: `Not found. A copy for clip ID '${ctx.params.clipID}' was not found.`,
+				stack: ''
+			}
+		} else {
+			throw err
+		}
+	}
+})
+
+router.post('/default/copy', async (ctx) => {
+	let clone: Quantel.CloneInterZoneInfo = {} as Quantel.CloneInterZoneInfo
+	try {
+		if (ctx.body && ctx.status === 400) return
+		clone = ctx.request.body as Quantel.CloneInterZoneInfo
+		if (isNaN(+clone.zoneID) || +clone.zoneID < 0) {
+			ctx.status = 400
+			ctx.body = {
+				status: 400,
+				message: 'Bad request. A clone request must use a positive integer for zone ID.',
+				stack: ''
+			}
+			return
+		}
+		if (isNaN(+clone.clipID) || +clone.clipID < 1) {
+			ctx.status = 400
+			ctx.body = {
+				status: 400,
+				message: 'Bad request. A clone request must have a positive integer for the source clip ID.',
+				stack: ''
+			}
+			return
+		}
+		if (isNaN(+clone.poolID) || +clone.poolID < 0) {
+			ctx.status = 400
+			ctx.body = {
+				status: 400,
+				message: 'Bad request. A clone request must use a positive integer for the destiniation pool ID.',
+				stack: ''
+			}
+			return
+		}
+		if (clone.priority &&
+				(isNaN(+clone.priority) || +clone.priority < 0 || +clone.priority > Quantel.Priority.HIGH)) {
+			ctx.status = 400
+			ctx.body = {
+				status: 400,
+				message: 'Bad request. A clone request with priority specified must use an integer in the range 0 to 15.',
+				stack: ''
+			}
+			return
+		}
+		ctx.body = await Quantel.cloneInterZone(clone)
+	} catch (err) {
+		if (err.message.indexOf('BadIdent') >= 0) {
+			ctx.status = 404
+			ctx.body = {
+				status: 404,
+				message: `Not found. One of the source clip ID '${clone.clipID}', source zone ID '${clone.zoneID}' or destiniation pool ID '${clone.poolID}' was not found.`,
 				stack: ''
 			}
 		} else {

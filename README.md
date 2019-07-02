@@ -341,6 +341,49 @@ All fragments can be cleared from the port by sending a DELETE request to the po
 
 The `:start` parameter is the first frame in the port's timeline to wipe from and `:frames` is the count of frames to wipe forward from that point. The `:start` parameter defaults to `0`. If `:frames` is omitted, all frames from the given start offset to the current play position will be wiped, which will be no frames if `:start` is after the play head offset. The range of frames to wipe must not include the current play position. Check the Boolean-valued `wiped` property of the response message to see that whether the fragments were successfully cleared.
 
+### Cloning clips
+
+The Quantel systems have a mechanism to clone clips between servers, either within in the same zone or between servers in different zones (_inter-zone cloning_). Only the essence material that is missing from a particular disk pool is copied, meaning that a request to clone can be almost instantaneous where the material has already been duplicated. The Quantel gateway allows clones to be initiated and the subsequent copy progress of that or any other clone to be monitored.
+
+To cause a clone, POST an object containing the source `zoneID` (number, not name), source `clipID` and destination `poolID` to `/:zoneID/copy`, as follows:
+
+```JSON
+{
+	"zoneID": 1000,
+	"clipID": 42,
+	"poolID": 12,
+	"priority": 15
+}
+```
+
+The `priority` is a number between `0` for low and `15` for high that indicates a relative priority for this requested clone wrt other current copy operations. The response is similar, with an additional property `copyID` that is the clip ID of the newly created clip at the destination.
+
+To view the status of a single copy operation for destination clip `:copyID`, use path:
+
+    /:zoneID/copy/:copyID
+
+If the copy is still in progress or has been recently completed, an object of type `ClipProgress` is returned. If the copy completed a while ago or the clip does not exist, a `404 Not found` response is generated. Use this request in combination clip query (`.../clip/:clipID`) to determine if the clip exists.
+
+```JSON
+{
+  "type": "CopyProgress",
+  "clipID": 19,
+  "totalProtons": 225,
+  "protonsLeft": 116,
+  "secsLeft": 34,
+  "priority": 8,
+  "ticketed": false
+}
+```
+
+_Protons_ are a unit of Quantel storage. The calculation `protonsLeft / totalProtons` can be used to provide a percentage complete of the copy. The Quantel system also provides a `secsLeft` property that is an estimation of how many seconds remain before the copy is complete. This value can go negative after the copy has completed, providing how many seconds ago did the copy complete.
+
+Copies can be halted by deleting the destination clip.
+
+### Deleting Clips
+
+TO FOLLOW.
+
 ### Controlling the port
 
 To control the PORT, POST trigger messages:

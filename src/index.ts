@@ -279,6 +279,11 @@ export namespace Quantel {
 		TRANSITION = quantel.TRANSITION
 	}
 
+	export enum Priority {
+		STANDARD = quantel.STANDARD,
+		HIGH = quantel.HIGH
+	}
+
 	export interface TriggerInfo extends PortRef {
 		trigger: Trigger
 		offset?: number
@@ -362,6 +367,15 @@ export namespace Quantel {
 	export interface CloneInterZoneResult extends CloneInterZoneInfo {
 		type: 'CloneInterZoneResult'
 		copyID: number
+	}
+
+	export interface CopyProgress extends ClipRef {
+		type: 'CopyProgress'
+		totalProtons: number
+		protonsLeft: number
+		secsLeft: number
+		priority: number
+		ticketed: boolean
 	}
 
 	export class ConnectError extends Error {
@@ -797,6 +811,34 @@ export namespace Quantel {
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
 				return cloneInterZone(options)
+			}
+			throw err
+		}
+	}
+
+	export async function getCopyRemaining (options: ClipRef): Promise<CopyProgress> {
+		try {
+			await getISAReference()
+			return await quantel.getCopyRemaining(await isaIOR, options)
+		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return getCopyRemaining(options)
+			}
+			throw err
+		}
+	}
+
+	export async function getCopiesRemaining (): Promise<CopyProgress[]> {
+		try {
+			await getISAReference()
+			return await quantel.getCopiesRemaining(await isaIOR)
+		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return getCopiesRemaining()
 			}
 			throw err
 		}
