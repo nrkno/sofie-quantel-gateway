@@ -76,7 +76,7 @@ napi_value timecodeToBCD(napi_env env, napi_callback_info info) {
 
 napi_value Init(napi_env env, napi_value exports) {
   napi_status status;
-  napi_value start, stop, jump, transition;
+  napi_value start, stop, jump, transition, standard, high;
   status = napi_create_int32(env, START, &start);
 	CHECK_STATUS;
   status = napi_create_int32(env, STOP, &stop);
@@ -84,6 +84,10 @@ napi_value Init(napi_env env, napi_value exports) {
   status = napi_create_int32(env, JUMP, &jump);
 	CHECK_STATUS;
   status = napi_create_int32(env, TRANSITION, &transition);
+	CHECK_STATUS;
+	status = napi_create_int32(env, Quentin::Port::StandardPriority, &standard);
+	CHECK_STATUS;
+	status = napi_create_int32(env, Quentin::Port::HighPriority, &high);
 	CHECK_STATUS;
 
   napi_property_descriptor desc[] = {
@@ -110,14 +114,17 @@ napi_value Init(napi_env env, napi_value exports) {
 		DECLARE_NAPI_METHOD("timecodeToBCD", timecodeToBCD),
 		DECLARE_NAPI_METHOD("getFormatInfo", getFormatInfo),
 		DECLARE_NAPI_METHOD("getPortProperties", getPortProperties),
+		DECLARE_NAPI_METHOD("cloneInterZone", cloneInterZone),
 		DECLARE_NAPI_METHOD("runServer", runServer),
 		DECLARE_NAPI_METHOD("destroyOrb", destroyOrb),
     { "START", nullptr, nullptr, nullptr, nullptr, start, napi_enumerable, nullptr },
     { "STOP", nullptr, nullptr, nullptr, nullptr, stop, napi_enumerable, nullptr },
     { "JUMP", nullptr, nullptr, nullptr, nullptr, jump, napi_enumerable, nullptr },
-    { "TRANSITION", nullptr, nullptr, nullptr, nullptr, transition, napi_enumerable, nullptr },
+    { "TRANSITION", nullptr, nullptr, nullptr, nullptr, transition, napi_enumerable, nullptr }, // 30
+		{ "STANDARD", nullptr, nullptr, nullptr, nullptr, standard, napi_enumerable, nullptr},
+		{ "HIGH", nullptr, nullptr, nullptr, nullptr, high, napi_enumerable, nullptr},
   };
-  status = napi_define_properties(env, exports, 29, desc);
+  status = napi_define_properties(env, exports, 32, desc);
 	CHECK_STATUS;
 
   return exports;

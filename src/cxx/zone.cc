@@ -616,3 +616,150 @@ napi_value getFormatInfo(napi_env env, napi_callback_info info) {
 
 	return promise;
 }
+
+void cloneInterZoneExecute(napi_env env, void* data) {
+	cloneInterZoneCarrier* c = (cloneInterZoneCarrier*) data;
+	Quentin::ZonePortal::_ptr_type zp;
+
+	try {
+		resolveZonePortalShared(c->isaIOR, &zp);
+
+		c->copyID = zp->cloneClipInterZone(c->zoneID, c->clipID, c->poolID, c->priority);
+	}
+	catch(CORBA::SystemException& ex) {
+		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
+	}
+	catch(CORBA::Exception& ex) {
+		NAPI_REJECT_CORBA_EXCEPTION(ex);
+	}
+	catch(omniORB::fatalException& fe) {
+		NAPI_REJECT_FATAL_EXCEPTION(fe);
+	}
+}
+
+void cloneInterZoneComplete(napi_env env, napi_status asyncStatus, void* data) {
+	cloneInterZoneCarrier* c = (cloneInterZoneCarrier*) data;
+	napi_value result, prop;
+
+	if (asyncStatus != napi_ok) {
+		c->status = asyncStatus;
+		c->errorMsg = "Clone inter zone failed to complete.";
+	}
+	REJECT_STATUS;
+
+  c->status = napi_create_object(env, &result);
+	REJECT_STATUS;
+	
+	c->status = napi_create_string_utf8(env, "CloneInterZoneResult", NAPI_AUTO_LENGTH, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "type", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, c->zoneID , &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "zoneID", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, c->clipID , &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "clipID", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, c->poolID , &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "poolID", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, c->priority , &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "priority", prop);
+	REJECT_STATUS;
+
+	c->status = napi_create_int32(env, c->copyID, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "copyID", prop);
+	REJECT_STATUS;
+
+	napi_status status;
+	status = napi_resolve_deferred(env, c->_deferred, result);
+	FLOATING_STATUS;
+
+	tidyCarrier(env, c);
+}
+
+napi_value cloneInterZone(napi_env env, napi_callback_info info) {
+	cloneInterZoneCarrier* c = new cloneInterZoneCarrier;
+	napi_value promise, resourceName, prop, options;
+	napi_valuetype type;
+	bool isArray;
+	char* isaIOR = nullptr;
+	size_t iorLen = 0;
+
+	c->status = napi_create_promise(env, &c->_deferred, &promise);
+	REJECT_RETURN;
+
+	size_t argc = 2;
+	napi_value argv[2];
+	c->status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+	REJECT_RETURN;
+
+	if (argc < 1) {
+		REJECT_ERROR_RETURN("Clone inter zone must be provided with a IOR reference to an ISA server.",
+			QGW_INVALID_ARGS);
+	}
+	c->status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &iorLen);
+	REJECT_RETURN;
+	isaIOR = (char*) malloc((iorLen + 1) * sizeof(char));
+	c->status = napi_get_value_string_utf8(env, argv[0], isaIOR, iorLen + 1, &iorLen);
+	REJECT_RETURN;
+
+	c->isaIOR = isaIOR;
+
+	if (argc < 2) {
+		REJECT_ERROR_RETURN("Clone inter zone must be provided with an options object containing source zone ID, source clip ID and destination pool ID.",
+			QGW_INVALID_ARGS);
+	}
+	c->status = napi_typeof(env, argv[1], &type);
+	REJECT_RETURN;
+	c->status = napi_is_array(env, argv[1], &isArray);
+	REJECT_RETURN;
+	if (isArray || type != napi_object) {
+		REJECT_ERROR_RETURN("Argument must be an options object with a source zone ID, source clip ID and destination pool ID",
+			QGW_INVALID_ARGS);
+	}
+
+	options = argv[1];
+	c->status = napi_get_named_property(env, options, "zoneID", &prop);
+	REJECT_RETURN;
+	c->status = napi_get_value_int32(env, prop, (int32_t*) &c->zoneID);
+	REJECT_RETURN;
+
+	c->status = napi_get_named_property(env, options, "clipID", &prop);
+	REJECT_RETURN;
+	c->status = napi_get_value_int32(env, prop, (int32_t*) &c->clipID);
+	REJECT_RETURN;
+
+	c->status = napi_get_named_property(env, options, "poolID", &prop);
+	REJECT_RETURN;
+	c->status = napi_get_value_int32(env, prop, (int32_t*) &c->poolID);
+	REJECT_RETURN;
+
+	c->status = napi_get_named_property(env, options, "priority", &prop);
+	REJECT_RETURN;
+	c->status = napi_typeof(env, prop, &type);
+	REJECT_RETURN;
+	if (type == napi_number) {
+		c->status = napi_get_value_int32(env, prop, (int32_t*) &c->priority);
+		REJECT_RETURN;
+	}
+
+	c->status = napi_create_string_utf8(env, "CloneInterZone", NAPI_AUTO_LENGTH, &resourceName);
+	REJECT_RETURN;
+	c->status = napi_create_async_work(env, nullptr, resourceName, cloneInterZoneExecute,
+		cloneInterZoneComplete, c, &c->_request);
+	REJECT_RETURN;
+	c->status = napi_queue_async_work(env, c->_request);
+	REJECT_RETURN;
+
+	return promise;
+}

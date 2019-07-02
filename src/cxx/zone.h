@@ -29,6 +29,7 @@ napi_value testConnection(napi_env env, napi_callback_info info);
 napi_value listZones(napi_env env, napi_callback_info info);
 napi_value getServers(napi_env env, napi_callback_info info);
 napi_value getFormatInfo(napi_env env, napi_callback_info info);
+napi_value cloneInterZone(napi_env env, napi_callback_info info);
 
 void testConnectionExecute(napi_env env, void* data);
 void testConnectionComplete(napi_env env, napi_status asyncStatus, void* data);
@@ -89,6 +90,18 @@ struct formatInfoCarrier : carrier {
 	Quentin::FormatCode formatNumber;
 	Quentin::FormatInfo_var info;
 	~formatInfoCarrier() { }
+};
+
+void cloneInterZoneExecute(napi_env env, void* data);
+void cloneInterZoneComplete(napi_env env, napi_status asyncStatus, void* data);
+
+struct cloneInterZoneCarrier : carrier {
+	int32_t zoneID; // ZoneID of the remote zone where the source clip resides
+	int32_t clipID; // The clipID of the clip in the remote zone to be cloned
+	int32_t poolID; // PoolID in the local destination zone where the clip it copied to
+	int32_t priority = Quentin::Port::StandardPriority; // The priority of the transfer
+	int32_t copyID; // Newly allocated clipID on the local destination zone
+	~cloneInterZoneCarrier() { }
 };
 
 #endif // QGW_ZONE

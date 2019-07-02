@@ -352,6 +352,18 @@ export namespace Quantel {
 		compressionName: string
 	}
 
+	export interface CloneInterZoneInfo {
+		zoneID: number // Source zone ID
+		clipID: number // Source clip ID
+		poolID: number // Destination pool ID
+		priority?: number // Prioerity, between 0 (low) and 15 (high) - default is 8 (standard)
+	}
+
+	export interface CloneInterZoneResult extends CloneInterZoneInfo {
+		type: 'CloneInterZoneResult'
+		copyID: number
+	}
+
 	export class ConnectError extends Error {
 		public statusCode: number
 		constructor (message?: string | undefined, statusCode?: number) {
@@ -771,6 +783,20 @@ export namespace Quantel {
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				isaIOR = null
 				return cloneIfNeeded(options)
+			}
+			throw err
+		}
+	}
+
+	export async function cloneInterZone (options: CloneInterZoneInfo): Promise<CloneInterZoneResult> {
+		try {
+			await getISAReference()
+			return await quantel.cloneInterZone(await isaIOR, options)
+		} catch (err) {
+			if (err.message.indexOf('TRANSIENT') >= 0) { isaIOR = null }
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+				isaIOR = null
+				return cloneInterZone(options)
 			}
 			throw err
 		}
