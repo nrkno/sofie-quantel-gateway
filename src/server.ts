@@ -172,7 +172,7 @@ router.get('/default/copy/:copyID', async (ctx) => {
 			ctx.status = 404
 			ctx.body = {
 				status: 404,
-				message: `Not found. A copy for clip ID '${ctx.params.clipID}' was not found.`,
+				message: `Not found. A copy associated with clip ID '${ctx.params.copyID}' was not found.`,
 				stack: ''
 			}
 		} else {

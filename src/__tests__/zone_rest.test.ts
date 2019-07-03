@@ -95,7 +95,7 @@ describe('Zone-level REST API tests', () => {
 
 	test('Get zone paths', async () => {
 		await expect(request.get('http://localhost:3000/default/').then(JSON.parse))
-		.resolves.toMatchObject([ 'server/', 'clip/', 'format/' ])
+		.resolves.toMatchObject([ 'server/', 'clip/', 'format/', 'copy/' ])
 	})
 
 	test('Get servers', async () => {
