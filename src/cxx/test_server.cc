@@ -380,7 +380,7 @@ public:
 	virtual Quentin::WStrings* getClipData(::CORBA::Long clipID, const ::Quentin::WStrings& colsWanted);
 	virtual void updateClip(::CORBA::Long clipID, const ::Quentin::ClipPropertyList& newColumns) { }
 	virtual void setClipProtection(::CORBA::Long clipID, const ::CORBA::WChar* userID, ::Quentin::ProtectMode mode) { }
-	virtual ::CORBA::Boolean deleteClip(::CORBA::Long clipID) { return false; }
+	virtual ::CORBA::Boolean deleteClip(::CORBA::Long clipID);
 	virtual ::CORBA::Long trimUnrecorded(::CORBA::Long clipID) { return 0; }
 	virtual ::CORBA::Long numberClip(::CORBA::Long clipID, ::CORBA::Long number, ::Quentin::ConflictMode confMode) { return 0; }
 	virtual ::CORBA::Long scanNumbers(::CORBA::Long poolID, ::CORBA::Long number, ::Quentin::FindMode mode) { return 0; }
@@ -757,6 +757,13 @@ Quentin::CopyProgressList* ZonePortal_i::getCopiesRemaining() {
 	Quentin::CopyProgress cp = { 42, 256, 128, -3, 9, CORBA::Boolean(false) };
 	(*cpl)[0] = cp;
 	return cpl;
+}
+
+CORBA::Boolean ZonePortal_i::deleteClip(::CORBA::Long clipID) {
+	if (clipID == 666) {
+		throw Quentin::BadIdent(Quentin::BadIdentReason::clipNotKnown, clipID);
+	}
+	return ((clipID % 2) == 0);
 }
 
 napi_value runServer(napi_env env, napi_callback_info info) {

@@ -76,6 +76,20 @@ describe('Clip-level REST API tests', () => {
 		.rejects.toThrow('400')
 	})
 
+	test('Delete a clip', async () => {
+		await expect(request.delete('http://localhost:3000/default/clip/42').then(JSON.parse))
+		.resolves.toMatchObject({ deleted: true })
+		await expect(request.delete('http://localhost:3000/default/clip/43').then(JSON.parse))
+		.resolves.toMatchObject({ deleted: false })
+	})
+
+	test('Attempt to delete a clip with unknown ID', async () => {
+		await expect(request.delete('http://localhost:3000/default/clip/666'))
+		.rejects.toThrow('A clip with identifier \'666\' was not found')
+		await expect(request.delete('http://localhost:3000/default/clip/666'))
+		.rejects.toThrow('404')
+	})
+
 	afterAll(async () => {
 		Quantel.destroyOrb()
 		await new Promise((resolve, reject) => {

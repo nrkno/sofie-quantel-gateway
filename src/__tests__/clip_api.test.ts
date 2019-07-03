@@ -50,6 +50,18 @@ describe('Clip-level Quantel gateway tests for querying clips', () => {
 		await expect(Quantel.getClipData({ clipID: 42 })).rejects.toThrow('BadIdent')
 	})
 
+	test('Delete a clip', async () => {
+		await expect(Quantel.deleteClip({ clipID: 42 }))
+		.resolves.toEqual(true)
+		await expect(Quantel.deleteClip({ clipID: 43 }))
+		.resolves.toEqual(false)
+	})
+
+	test('Attempt to delete a clip with unknown ID', async () => {
+		await expect(Quantel.deleteClip({ clipID: 666 }))
+		.rejects.toThrow('BadIdent')
+	})
+
 	afterAll(async () => {
 		Quantel.destroyOrb()
 		await spawn.stop()
