@@ -351,8 +351,8 @@ public:
 	virtual ::CORBA::Boolean addNamedStateChangeListener(const ::CORBA::WChar* listenerName, ::Quentin::StateChangeListener_ptr listener, ::CORBA::Long flags, ::CORBA::Long interval) { return false; }
 	virtual ::CORBA::Boolean removeStateChangeListener(::Quentin::StateChangeListener_ptr listener) { return false; }
 	virtual Quentin::StateChangeList* getStateChanges(::CORBA::Long changeNum) { return nullptr; }
-	virtual Quentin::CopyProgress getCopyRemaining(::CORBA::Long clipID) { return { }; }
-	virtual Quentin::CopyProgressList* getCopiesRemaining() { return nullptr; }
+	virtual Quentin::CopyProgress getCopyRemaining(::CORBA::Long clipID);
+	virtual Quentin::CopyProgressList* getCopiesRemaining();
 	virtual Quentin::CopyMapList* getCopyMap(::CORBA::Long clipID, ::Quentin::FragmentType type, ::CORBA::Long track) { return nullptr; }
 	virtual ::CORBA::Boolean deleteCopy(::CORBA::Long clipID) { return false; }
 	virtual ::CORBA::Boolean ticketCopy(::CORBA::Long clipID, ::CORBA::Long ticket) { return false; }
@@ -385,9 +385,9 @@ public:
 	virtual ::CORBA::Long numberClip(::CORBA::Long clipID, ::CORBA::Long number, ::Quentin::ConflictMode confMode) { return 0; }
 	virtual ::CORBA::Long scanNumbers(::CORBA::Long poolID, ::CORBA::Long number, ::Quentin::FindMode mode) { return 0; }
 	virtual ::CORBA::Long cloneClip(::CORBA::Long clipID, ::CORBA::Long poolIdent, ::CORBA::Long ticket, ::CORBA::Long priority) { return 0; }
-	virtual ::CORBA::Long cloneClipInterZone(::CORBA::Long zoneID, ::CORBA::Long clipID, ::CORBA::Long poolID, ::CORBA::Long priority) { return 0; }
-	virtual ::CORBA::Long cloneClipInterZoneWithoutHistory(::CORBA::Long zoneID, ::CORBA::Long clipID, ::CORBA::Long poolID, ::CORBA::Long priority) { return 0; }
-	virtual ::CORBA::Long cloneIfNeeded(::CORBA::Long clipID, ::CORBA::Long poolIdent, ::CORBA::Long ticket, ::CORBA::Long priority, ::CORBA::Long expirySecs, ::CORBA::Boolean& copyCreated) { return 0; }
+	virtual ::CORBA::Long cloneClipInterZone(::CORBA::Long zoneID, ::CORBA::Long clipID, ::CORBA::Long poolID, ::CORBA::Long priority);
+	virtual ::CORBA::Long cloneClipInterZoneWithoutHistory(::CORBA::Long zoneID, ::CORBA::Long clipID, ::CORBA::Long poolID, ::CORBA::Long priority);
+	virtual ::CORBA::Long cloneIfNeeded(::CORBA::Long clipID, ::CORBA::Long poolIdent, ::CORBA::Long ticket, ::CORBA::Long priority, ::CORBA::Long expirySecs, ::CORBA::Boolean& copyCreated);
 	virtual void replaceContent(::CORBA::Long clipID, ::CORBA::Long contentType, const ::Quentin::ServerFragments& frags) { }
 	virtual Quentin::FullClipIDList* createPlaceholder(const ::Quentin::ClipPropertyList& props, const ::Quentin::Longs& pools) { return nullptr; }
 	virtual Quentin::FullClipIDList* clonePlaceholder(::CORBA::Long clipID, const ::Quentin::Longs& pools) { return nullptr; }
@@ -705,6 +705,58 @@ Quentin::FormatInfo* ZonePortal_i::getFormatInfo(Quentin::FormatCode format) {
 	fi->layoutName = L"720x576i25";
 	fi->compressionName = L"Mpeg-2";
 	return fi;
+}
+
+CORBA::Long ZonePortal_i::cloneClipInterZone(CORBA::Long zoneID, CORBA::Long clipID, CORBA::Long poolID, CORBA::Long priority) {
+	if (zoneID == 666) {
+		throw Quentin::BadIdent(Quentin::BadIdentReason::zoneNotKnown, zoneID);
+	}
+	if (poolID == 666) {
+		throw Quentin::BadIdent(Quentin::BadIdentReason::poolNotKnown, poolID);
+	}
+	if (clipID == 666) {
+		throw Quentin::BadIdent(Quentin::BadIdentReason::clipNotKnown, clipID);
+	}
+	return 421;
+}
+
+CORBA::Long ZonePortal_i::cloneClipInterZoneWithoutHistory(CORBA::Long zoneID, CORBA::Long clipID, CORBA::Long poolID, CORBA::Long priority) {
+	if (zoneID == 666) {
+		throw Quentin::BadIdent(Quentin::BadIdentReason::zoneNotKnown, zoneID);
+	}
+	if (poolID == 666) {
+		throw Quentin::BadIdent(Quentin::BadIdentReason::poolNotKnown, poolID);
+	}
+	if (clipID == 666) {
+		throw Quentin::BadIdent(Quentin::BadIdentReason::clipNotKnown, clipID);
+	}
+	return 422;
+}
+
+CORBA::Long ZonePortal_i::cloneIfNeeded(CORBA::Long clipID, CORBA::Long poolID, CORBA::Long ticket, CORBA::Long priority, CORBA::Long expirySecs, CORBA::Boolean& copyCreated) {
+	if (poolID == 666) {
+		throw Quentin::BadIdent(Quentin::BadIdentReason::poolNotKnown, poolID);
+	}
+	if (clipID == 666) {
+		throw Quentin::BadIdent(Quentin::BadIdentReason::clipNotKnown, clipID);
+	}
+	copyCreated = (clipID != 43);
+	return 423;
+}
+
+Quentin::CopyProgress ZonePortal_i::getCopyRemaining(CORBA::Long clipID) {
+	if (clipID == 666) {
+		throw Quentin::BadIdent(Quentin::BadIdentReason::clipNotKnown, clipID);
+	}
+	return { 42, 256, 128, 19, 9, CORBA::Boolean(false) };
+}
+
+Quentin::CopyProgressList* ZonePortal_i::getCopiesRemaining() {
+	Quentin::CopyProgressList* cpl = new Quentin::CopyProgressList;
+	cpl->length(1);
+	Quentin::CopyProgress cp = { 42, 256, 128, -3, 9, CORBA::Boolean(false) };
+	(*cpl)[0] = cp;
+	return cpl;
 }
 
 napi_value runServer(napi_env env, napi_callback_info info) {

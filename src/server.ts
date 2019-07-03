@@ -190,7 +190,7 @@ router.post('/default/copy', async (ctx) => {
 			ctx.status = 400
 			ctx.body = {
 				status: 400,
-				message: 'Bad request. Where present, aclone request must use a positive integer for zone ID.',
+				message: 'Bad request. Where present, a clone request must use a positive integer for the zone ID.',
 				stack: ''
 			}
 			return
@@ -208,7 +208,7 @@ router.post('/default/copy', async (ctx) => {
 			ctx.status = 400
 			ctx.body = {
 				status: 400,
-				message: 'Bad request. A clone request must use a positive integer for the destiniation pool ID.',
+				message: 'Bad request. A clone request must have a positive integer for the destiniation pool ID.',
 				stack: ''
 			}
 			return
@@ -224,7 +224,19 @@ router.post('/default/copy', async (ctx) => {
 			return
 		}
 		if (clone.history) {
-			clone.history = true
+			if (typeof clone.history === 'string') {
+				if (clone.history === 'false') clone.history = false
+				else if (clone.history === 'true') clone.history = true
+			}
+			if (typeof clone.history !== 'boolean') {
+				ctx.status = 400
+				ctx.body = {
+					status: 400,
+					message: 'Bad request. A history parameter for a clone request must be either \'true\' or \'false\'.',
+					stack: ''
+				}
+				return
+			}
 		}
 		ctx.body = await Quantel.cloneInterZone(clone)
 	} catch (err) {
