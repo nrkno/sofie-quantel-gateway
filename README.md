@@ -343,7 +343,7 @@ The `:start` parameter is the first frame in the port's timeline to wipe from an
 
 ### Cloning clips
 
-The Quantel systems have a mechanism to clone clips between servers, either within in the same zone or between servers in different zones (_inter-zone cloning_). Only the source essence material that is missing from a particular destination disk pool is copied, meaning that a request to clone can be almost instantaneous where the material has already been duplicated. The Quantel gateway allows clones to be initiated and the subsequent copy progress of that or any other clone to be monitored.
+The Quantel systems have a mechanism to clone clips between servers, either within in the same zone or between servers in different zones (_inter-zone cloning_). Only the source essence material that is missing from a particular destination disk pool is copied. Where the material has already been duplicated, this means that a request to clone can be almost instantaneous. The Quantel gateway allows clones to be initiated and the subsequent copy progress of that or any other clone to be monitored.
 
 To cause a clone, POST an object containing the source `zoneID` (number, omit for a within-zone copy), source `clipID` and destination `poolID` to `/:zoneID/copy`, as follows:
 
@@ -357,7 +357,9 @@ To cause a clone, POST an object containing the source `zoneID` (number, omit fo
 }
 ```
 
-The optional `priority` is a number between `0` for _low_ and `15` for _high_ that provides a relative priority for this requested clone wrt other current copy operations. Relevant for interzone cloning only, the optional `history` flag specifies whether the provenance of the clip should be carried along with the copy. The response is similar to the request, with an additional property `copyID` that is the clip ID of the newly created clip - or the clip ID of an existing copy - at the destination and `copyCreated` if a copy operation was required.
+The optional `priority` is a number between `0` for _low_ and `15` for _high_ that provides a relative priority for this requested clone wrt other current copy operations. Relevant for interzone cloning only, the optional `history` flag specifies whether the provenance of the clip should be carried along with the copy.
+
+The `CloneResult` response is similar to the request, with an additional property of `copyID` that is set to the clip ID of the newly created clip - or the clip ID of an existing copy if one already existed - at the destination. The `copyCreated` flag is set if a copy operation was required.
 
 To view the status of a single copy operation for destination clip `:copyID`, use path:
 
@@ -377,7 +379,11 @@ If the copy is still in progress or has been recently completed, an object of ty
 }
 ```
 
-_Protons_ are a unit of Quantel storage. The calculation `protonsLeft / totalProtons` can be used to provide a percentage complete of the copy. The Quantel system also provides a `secsLeft` property that is an estimation of how many seconds remain before the copy is complete. This value can go negative after the copy has completed, providing how many seconds ago did the copy complete.
+_Protons_ are a unit of Quantel storage. The calculation `protonsLeft / totalProtons` can be used to provide a percentage complete of the copy. The Quantel system also provides a `secsLeft` property that is an estimation of how many seconds remain before the copy is complete. This value can go negative after the copy has completed, indicating how many seconds ago that the copy operation completed.
+
+The status of all copy operations can be queried by omitting the `:copyID`:
+
+    /:zoneID/copy
 
 Copies can be halted by deleting the destination clip.
 
