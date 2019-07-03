@@ -224,11 +224,11 @@ router.post('/default/copy', async (ctx) => {
 			return
 		}
 		if (clone.history) {
-			if (typeof clone.history === 'string') {
-				if (clone.history === 'false') clone.history = false
-				else if (clone.history === 'true') clone.history = true
+			if (typeof (clone.history as any) === 'string') {
+				if ((clone.history as any) === 'false') clone.history = false
+				else if ((clone.history as any) === 'true') clone.history = true
 			}
-			if (typeof clone.history !== 'boolean') {
+			if (typeof (clone.history as any) !== 'boolean') {
 				ctx.status = 400
 				ctx.body = {
 					status: 400,
