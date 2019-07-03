@@ -343,20 +343,21 @@ The `:start` parameter is the first frame in the port's timeline to wipe from an
 
 ### Cloning clips
 
-The Quantel systems have a mechanism to clone clips between servers, either within in the same zone or between servers in different zones (_inter-zone cloning_). Only the essence material that is missing from a particular disk pool is copied, meaning that a request to clone can be almost instantaneous where the material has already been duplicated. The Quantel gateway allows clones to be initiated and the subsequent copy progress of that or any other clone to be monitored.
+The Quantel systems have a mechanism to clone clips between servers, either within in the same zone or between servers in different zones (_inter-zone cloning_). Only the source essence material that is missing from a particular destination disk pool is copied, meaning that a request to clone can be almost instantaneous where the material has already been duplicated. The Quantel gateway allows clones to be initiated and the subsequent copy progress of that or any other clone to be monitored.
 
-To cause a clone, POST an object containing the source `zoneID` (number, not name), source `clipID` and destination `poolID` to `/:zoneID/copy`, as follows:
+To cause a clone, POST an object containing the source `zoneID` (number, omit for a within-zone copy), source `clipID` and destination `poolID` to `/:zoneID/copy`, as follows:
 
 ```JSON
 {
 	"zoneID": 1000,
 	"clipID": 42,
 	"poolID": 12,
-	"priority": 15
+	"priority": 15,
+	"history": true
 }
 ```
 
-The `priority` is a number between `0` for low and `15` for high that indicates a relative priority for this requested clone wrt other current copy operations. The response is similar, with an additional property `copyID` that is the clip ID of the newly created clip at the destination.
+The optional `priority` is a number between `0` for _low_ and `15` for _high_ that provides a relative priority for this requested clone wrt other current copy operations. Relevant for interzone cloning only, the optional `history` flag specifies whether the provenance of the clip should be carried along with the copy. The response is similar to the request, with an additional property `copyID` that is the clip ID of the newly created clip - or the clip ID of an existing copy - at the destination and `copyCreated` if a copy operation was required.
 
 To view the status of a single copy operation for destination clip `:copyID`, use path:
 
@@ -382,7 +383,11 @@ Copies can be halted by deleting the destination clip.
 
 ### Deleting Clips
 
-TO FOLLOW.
+A clip can be deleted by sending a DELETE request to its path:
+
+    /:zoneID/clip/:clipID
+
+Note that the clip metadata will persist in the database but the essence will be removed, setting the `Frames` field to `0`.
 
 ### Controlling the port
 

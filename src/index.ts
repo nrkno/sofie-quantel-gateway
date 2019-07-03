@@ -357,16 +357,18 @@ export namespace Quantel {
 		compressionName: string
 	}
 
-	export interface CloneInterZoneInfo {
-		zoneID: number // Source zone ID
+	export interface CloneInfo {
+		zoneID?: number // Source zone ID, omit for local zone
 		clipID: number // Source clip ID
 		poolID: number // Destination pool ID
-		priority?: number // Prioerity, between 0 (low) and 15 (high) - default is 8 (standard)
+		priority?: number // Priority, between 0 (low) and 15 (high) - default is 8 (standard)
+		history?: boolean // Should an interzone clone link to historical provinance - default is true
 	}
 
-	export interface CloneInterZoneResult extends CloneInterZoneInfo {
-		type: 'CloneInterZoneResult'
+	export interface CloneResult extends CloneInfo {
+		type: 'CloneResult'
 		copyID: number
+		copyCreated: boolean
 	}
 
 	export interface CopyProgress extends ClipRef {
@@ -788,6 +790,7 @@ export namespace Quantel {
 
 	Plan is to hide this behind the REST API
 	*/
+	// Deprecated ... cloneInterZone is now a general clone operation
 	export async function cloneIfNeeded (options: CloneRequest): Promise<boolean> {
 		try {
 			await getISAReference()
@@ -802,7 +805,7 @@ export namespace Quantel {
 		}
 	}
 
-	export async function cloneInterZone (options: CloneInterZoneInfo): Promise<CloneInterZoneResult> {
+	export async function cloneInterZone (options: CloneInfo): Promise<CloneResult> {
 		try {
 			await getISAReference()
 			return await quantel.cloneInterZone(await isaIOR, options)

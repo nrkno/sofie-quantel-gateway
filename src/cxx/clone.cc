@@ -21,7 +21,7 @@
 
 #include "clone.h"
 
-// TODO leaving sync for now until requirements are clearer
+// Deprecated ... cloneInterZone is now a general clone operation
 void cloneIfNeededExecute(napi_env env, void* data) {
 	cloneIfNeededCarrier* c = (cloneIfNeededCarrier*) data;
 	Quentin::ZonePortal::_ptr_type zp;
@@ -141,11 +141,22 @@ napi_value cloneIfNeeded(napi_env env, napi_callback_info info) {
 void cloneInterZoneExecute(napi_env env, void* data) {
 	cloneInterZoneCarrier* c = (cloneInterZoneCarrier*) data;
 	Quentin::ZonePortal::_ptr_type zp;
+	CORBA::Boolean copyCreated;
 
 	try {
 		resolveZonePortalShared(c->isaIOR, &zp);
 
-		c->copyID = zp->cloneClipInterZone(c->zoneID, c->clipID, c->poolID, c->priority);
+		if (c->zoneID < 0) { // Local zone clone
+			// Note: Clip does not expire - that's what -1 means!
+			c->copyID = zp->cloneIfNeeded(c->clipID, c->poolID, 0, c->priority, -1, copyCreated);
+			c->copyCreated = copyCreated;
+		} else {
+			if (c->history) {
+				c->copyID = zp->cloneClipInterZone(c->zoneID, c->clipID, c->poolID, c->priority);
+			} else {
+				c->copyID = zp->cloneClipInterZoneWithoutHistory(c->zoneID, c->clipID, c->poolID, c->priority);
+			}
+		}
 	}
 	catch(CORBA::SystemException& ex) {
 		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
@@ -171,15 +182,17 @@ void cloneInterZoneComplete(napi_env env, napi_status asyncStatus, void* data) {
   c->status = napi_create_object(env, &result);
 	REJECT_STATUS;
 
-	c->status = napi_create_string_utf8(env, "CloneInterZoneResult", NAPI_AUTO_LENGTH, &prop);
+	c->status = napi_create_string_utf8(env, "CloneResult", NAPI_AUTO_LENGTH, &prop);
 	REJECT_STATUS;
 	c->status = napi_set_named_property(env, result, "type", prop);
 	REJECT_STATUS;
 
-	c->status = napi_create_int32(env, c->zoneID , &prop);
-	REJECT_STATUS;
-	c->status = napi_set_named_property(env, result, "zoneID", prop);
-	REJECT_STATUS;
+	if (c->zoneID >= 0) {
+		c->status = napi_create_int32(env, c->zoneID , &prop);
+		REJECT_STATUS;
+		c->status = napi_set_named_property(env, result, "zoneID", prop);
+		REJECT_STATUS;
+	}
 
 	c->status = napi_create_int32(env, c->clipID , &prop);
 	REJECT_STATUS;
@@ -194,6 +207,16 @@ void cloneInterZoneComplete(napi_env env, napi_status asyncStatus, void* data) {
 	c->status = napi_create_int32(env, c->priority , &prop);
 	REJECT_STATUS;
 	c->status = napi_set_named_property(env, result, "priority", prop);
+	REJECT_STATUS;
+
+	c->status = napi_get_boolean(env, c->history, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "history", prop);
+	REJECT_STATUS;
+
+	c->status = napi_get_boolean(env, c->copyCreated, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "copyCreated", prop);
 	REJECT_STATUS;
 
 	c->status = napi_create_int32(env, c->copyID, &prop);
@@ -252,8 +275,12 @@ napi_value cloneInterZone(napi_env env, napi_callback_info info) {
 	options = argv[1];
 	c->status = napi_get_named_property(env, options, "zoneID", &prop);
 	REJECT_RETURN;
-	c->status = napi_get_value_int32(env, prop, (int32_t*) &c->zoneID);
+	c->status = napi_typeof(env, prop, &type);
 	REJECT_RETURN;
+	if (type == napi_number) {
+		c->status = napi_get_value_int32(env, prop, (int32_t*) &c->zoneID);
+		REJECT_RETURN;
+	}
 
 	c->status = napi_get_named_property(env, options, "clipID", &prop);
 	REJECT_RETURN;
@@ -271,6 +298,15 @@ napi_value cloneInterZone(napi_env env, napi_callback_info info) {
 	REJECT_RETURN;
 	if (type == napi_number) {
 		c->status = napi_get_value_int32(env, prop, (int32_t*) &c->priority);
+		REJECT_RETURN;
+	}
+
+	c->status = napi_get_named_property(env, options, "history", &prop);
+	REJECT_RETURN;
+	c->status = napi_typeof(env, prop, &type);
+	REJECT_RETURN;
+	if (type == napi_boolean) {
+		c->status = napi_get_value_bool(env, prop, &c->history);
 		REJECT_RETURN;
 	}
 

@@ -107,7 +107,7 @@ router.get('/:zoneID/', async (ctx) => {
 		let zones = await Quantel.listZones()
 		let inTheZone = zones.find(z => z.zoneName === ctx.params.zoneID || z.zoneNumber.toString() === ctx.params.zoneID)
 		if (inTheZone) {
-			ctx.body = [ 'server/', 'clip/', 'format/' ]
+			ctx.body = [ 'server/', 'clip/', 'format/', 'copy/' ]
 		} else {
 			ctx.status = 404
 			ctx.body = {
@@ -182,15 +182,15 @@ router.get('/default/copy/:copyID', async (ctx) => {
 })
 
 router.post('/default/copy', async (ctx) => {
-	let clone: Quantel.CloneInterZoneInfo = {} as Quantel.CloneInterZoneInfo
+	let clone: Quantel.CloneInfo = {} as Quantel.CloneInfo
 	try {
 		if (ctx.body && ctx.status === 400) return
-		clone = ctx.request.body as Quantel.CloneInterZoneInfo
-		if (isNaN(+clone.zoneID) || +clone.zoneID < 0) {
+		clone = ctx.request.body as Quantel.CloneInfo
+		if (clone.zoneID && (isNaN(+clone.zoneID) || +clone.zoneID < 0)) {
 			ctx.status = 400
 			ctx.body = {
 				status: 400,
-				message: 'Bad request. A clone request must use a positive integer for zone ID.',
+				message: 'Bad request. Where present, aclone request must use a positive integer for zone ID.',
 				stack: ''
 			}
 			return
@@ -222,6 +222,9 @@ router.post('/default/copy', async (ctx) => {
 				stack: ''
 			}
 			return
+		}
+		if (clone.history) {
+			clone.history = true
 		}
 		ctx.body = await Quantel.cloneInterZone(clone)
 	} catch (err) {
@@ -383,6 +386,35 @@ router.get('/default/clip/:clipID', async (ctx) => {
 			throw err
 		}
 	}
+})
+
+router.delete('/default/clip/:clipID', async (ctx) => {
+	if (isNaN(+ctx.params.clipID) || +ctx.params.clipID < 0) {
+		ctx.status = 400
+		ctx.body = {
+			status: 400,
+			message: 'Bad request. Clip ID must be a positive number.',
+			stack: ''
+		} as JSONError
+		return
+	}
+	try {
+		ctx.body = {
+			deleted: await Quantel.deleteClip({ clipID: +ctx.params.clipID })
+		}
+	} catch (err) {
+		if (err.message.indexOf('BadIdent') >= 0) {
+			ctx.status = 404
+			ctx.body = {
+				status: 404,
+				message: `Not found. A clip with identifier '${ctx.params.clipID}' was not found.`,
+				stack: ''
+			}
+		} else {
+			throw err
+		}
+	}
+
 })
 
 router.get('/default/clip/:clipID/fragments', async (ctx) => {
