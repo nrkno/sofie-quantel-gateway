@@ -394,6 +394,10 @@ export namespace Quantel {
 		}
 	}
 
+	export function destroyOrb () {
+		quantel.destroyOrb()
+	}
+
 	function resetConnection () {
 		isaIOR = null
 		robin++
@@ -408,7 +412,6 @@ export namespace Quantel {
 		isaIOR = isaIOR.then(x => x, (): Promise<string> => new Promise((resolve, reject) => {
 			if (stickyRef[index].endsWith('/')) { stickyRef[index] = stickyRef[index].slice(0, -1) }
 			if (stickyRef[index].indexOf(':') < 0) { stickyRef[index] = stickyRef[index] + ':2096' }
-			console.log('About to request', index, stickyRef[index])
 			request({
 				uri: stickyRef[index] + '/ZoneManager.ior',
 				resolveWithFullResponse: true
@@ -417,11 +420,11 @@ export namespace Quantel {
 					resolve(res.body)
 				} else {
 					if (myCount >= stickyRef.length) {
+						destroyOrb()
 						reject(new ConnectError(
 							`HTTP request for ISA IOR failed with status ${res.statusCode}: ${res.statusMessage}`,
 							res.statusCode))
 					} else {
-						console.log('Got in here 1')
 						resetConnection()
 						getISAReference(undefined, myCount).catch(reject)
 						resolve(isaIOR as Promise<string>)
@@ -429,9 +432,9 @@ export namespace Quantel {
 				}
 			}, err => {
 				if (myCount >= stickyRef.length) {
+					destroyOrb()
 					reject(err)
 				} else {
-					console.log('Got in here 2')
 					resetConnection()
 					getISAReference(undefined, myCount).catch(reject)
 					resolve(isaIOR as Promise<string>)
@@ -447,10 +450,6 @@ export namespace Quantel {
 		}
 	}
 
-	export function destroyOrb () {
-		quantel.destroyOrb()
-	}
-
 	export async function getConnectionDetails (): Promise<ConnectionDetails> {
 		return {
 			type: 'ConnectionDetails',
@@ -464,7 +463,6 @@ export namespace Quantel {
 	// Resolves to 'PONG!' on success, otherwise rejects with a connection error
 	export async function testConnection (): Promise<string> {
 		try {
-			console.log('Testing connection', robin)
 			await getISAReference()
 			return await quantel.testConnection(await isaIOR)
 		} catch (err) {
