@@ -60,7 +60,12 @@ router.post('/connect/:addr', async (ctx) => {
 		if (ctx.params.addr.indexOf(':') < 0) {
 			ctx.params.addr += ':2096'
 		}
-		ctx.body = await Quantel.getISAReference(`http://${ctx.params.addr}`)
+		if (ctx.params.addr.indexOf(',') >= 0) {
+			ctx.body = await Quantel.getISAReference(
+				ctx.params.addr.split(',').map((x: string) => `http://${x}`))
+		} else {
+			ctx.body = await Quantel.getISAReference(`http://${ctx.params.addr}`)
+		}
 	} catch (err) {
 		if (err.message.indexOf('ENOTFOUND') >= 0) {
 			err.status = 404

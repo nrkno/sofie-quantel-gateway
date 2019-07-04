@@ -394,6 +394,11 @@ export namespace Quantel {
 		}
 	}
 
+	function resetConnection () {
+		isaIOR = null
+		robin++
+	}
+
 	export async function getISAReference (ref?: string | string[], count?: number): Promise<ConnectionDetails> {
 		if (typeof ref === 'string') ref = [ ref ]
 		let myCount: number = count ? count + 1 : 1
@@ -403,6 +408,7 @@ export namespace Quantel {
 		isaIOR = isaIOR.then(x => x, (): Promise<string> => new Promise((resolve, reject) => {
 			if (stickyRef[index].endsWith('/')) { stickyRef[index] = stickyRef[index].slice(0, -1) }
 			if (stickyRef[index].indexOf(':') < 0) { stickyRef[index] = stickyRef[index] + ':2096' }
+			console.log('About to request', index, stickyRef[index])
 			request({
 				uri: stickyRef[index] + '/ZoneManager.ior',
 				resolveWithFullResponse: true
@@ -415,16 +421,20 @@ export namespace Quantel {
 							`HTTP request for ISA IOR failed with status ${res.statusCode}: ${res.statusMessage}`,
 							res.statusCode))
 					} else {
-						robin++
-						getISAReference(undefined, myCount).then(x => resolve(x.isaIOR), reject)
+						console.log('Got in here 1')
+						resetConnection()
+						getISAReference(undefined, myCount).catch(reject)
+						resolve(isaIOR as Promise<string>)
 					}
 				}
 			}, err => {
 				if (myCount >= stickyRef.length) {
 					reject(err)
 				} else {
-					robin++
-					getISAReference(undefined, myCount).then(x => resolve(x.isaIOR), reject)
+					console.log('Got in here 2')
+					resetConnection()
+					getISAReference(undefined, myCount).catch(reject)
+					resolve(isaIOR as Promise<string>)
 				}
 			})
 		}))
@@ -435,11 +445,6 @@ export namespace Quantel {
 			refs: stickyRef,
 			robin: robin
 		}
-	}
-
-	function resetConnection () {
-		isaIOR = null
-		robin++
 	}
 
 	export function destroyOrb () {
@@ -459,11 +464,13 @@ export namespace Quantel {
 	// Resolves to 'PONG!' on success, otherwise rejects with a connection error
 	export async function testConnection (): Promise<string> {
 		try {
+			console.log('Testing connection', robin)
 			await getISAReference()
 			return await quantel.testConnection(await isaIOR)
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
-			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
+			// if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0 ||
+					err.message.indexOf('TRANSIENT') >= 0) {
 				resetConnection()
 				return testConnection()
 			}

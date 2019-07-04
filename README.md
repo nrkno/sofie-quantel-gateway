@@ -43,7 +43,7 @@ Build the typescript interface module:
 
 This package has automated tests that run with [jest](). Test with:
 
-		yarn test
+    yarn test
 
 ### Running
 
@@ -55,7 +55,7 @@ This will start a [nodemon](https://nodemon.io/) watch on the source files and r
 
 For production use, a simple server can be run with:
 
-		yarn server
+    yarn server
 
 These servers listen on port `3000` by default.
 
@@ -68,7 +68,7 @@ Experiment from the REPL with:
 Import into an external project with:
 
     import { Quantel } from 'tv-automation-quantel-gateway'
-    const { Quantel } = require('tv-autonation-quantel-gateway')
+    const { Quantel } = require('tv-automation-quantel-gateway')
 
 See the [walkthrough for how to do playback](./doc/plyout_walkthrough.md) with this module as a Node.js API.
 
@@ -82,17 +82,20 @@ To connect to an ISA system on a different host, POST to:
 
     /connect/:address
 
-The `:address` should consist of a DNS name or IP address and, optionally, a port number (defaults to 2096), where the CORBA Interoperable Object Reference (IOR) of the Quantel ISA is advertised. For example:
+ISA systems are normally deployed in _master_ and _slave_ pairs. The `:address` should consist of a comma separated list of DNS names or IP addresses and, optionally, with port number (defaults to 2096), where the CORBA Interoperable Object Reference (IOR) of the Quantel ISA(s)  is/are advertised. For example:
 
-    /connect/isa.national.ztv.com:3737
+    /connect/isa-master.national.ztv.com:3737,isa-slave.national.ztv.com:3737
 
 A successful request produces a JSON response with the discovered IOR (`isaIOR`) and ISA endpoint address (`href`). Subsequently, the currently configured connection can be queried with a GET request to `/connect`.
 
 ### Topology of a Quantel system
 
-Paths are all of the form ...
+In general, paths are all of the form ...
 
     /:zoneID/server/:serverID/port/:portID
+    /:zoneID/clip/:clipID(/fragments)
+    /:zoneID/format/:formatID
+    /:zoneID/copy/:copyID
 
 In most cases and in the current implementation, `:zoneID` is the `default` local zone at the ISA that the gateway connects to.
 
@@ -100,7 +103,10 @@ Types are:
 
 * `:zoneID` - zone number or `default`;
 * `:serverID` - integer number or the string name of the server;
-* `:portID` - string name of the port.
+* `:portID` - string name of the port;
+* `:clipID` - identifier for a clip within a zone;
+* `:formatID` - identifier for a specific media format;
+* `:copyID` - identifier for a new clip that is a copy of an existing clip.
 
 A GET request to the root path `/` lists all available zones.
 
