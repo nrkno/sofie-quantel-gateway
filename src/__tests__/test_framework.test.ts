@@ -47,7 +47,9 @@ describe('Test framework', () => {
 		await expect(Quantel.getISAReference()).resolves.toStrictEqual({
 			type: 'ConnectionDetails',
 			href: 'http://localhost:2096',
-			isaIOR } as Quantel.ConnectionDetails)
+			isaIOR,
+		 	refs: ['http://localhost:2096' ],
+			robin: 0 } as Quantel.ConnectionDetails)
 	})
 
 	test('Test CORBA connection', async () => {
@@ -123,7 +125,9 @@ describe('Error handling when server has failed', () => {
 		await expect(Quantel.getISAReference()).resolves.toStrictEqual({
 			type: 'ConnectionDetails',
 			href: 'http://127.0.0.1:2096',
-			isaIOR } as Quantel.ConnectionDetails)
+			isaIOR,
+			refs: [ 'http://127.0.0.1:2096' ],
+		 	robin: 1 } as Quantel.ConnectionDetails)
 	})
 
 	test('Stopping server', async () => {
@@ -147,7 +151,9 @@ describe('Error handling when server has failed', () => {
 		await expect(Quantel.getISAReference()).resolves.toStrictEqual({
 			type: 'ConnectionDetails',
 			href: 'http://127.0.0.1:2096',
-			isaIOR } as Quantel.ConnectionDetails)
+			isaIOR,
+		 	refs: [ 'http://127.0.0.1:2096' ],
+			robin: 2 } as Quantel.ConnectionDetails)
 	})
 
 	test('Check that get servers now works', async () => {

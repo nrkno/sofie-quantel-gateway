@@ -48,7 +48,9 @@ describe('Control-level REST API tests', () => {
 		.resolves.toStrictEqual({
 			type: 'ConnectionDetails',
 			href: 'http://127.0.0.1:2096',
-			isaIOR } as Quantel.ConnectionDetails)
+			isaIOR,
+		 	refs: [ 'http://127.0.0.1:2096' ],
+			robin: 0 } as Quantel.ConnectionDetails)
 	})
 
 	test('START playing using server number', async () => {
