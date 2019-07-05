@@ -43,12 +43,14 @@ export async function start (): Promise<string> {
 				response.end()
 			})
 			app.listen(2096)
-			app.on('listening', () => {
+			app.on('listening', (e: Error) => {
+				console.log('Test server listening OK', e)
 				resolved = true
 				resolve(isaIOR.trim())
 			})
 			app.on('error', e => {
 				if (!resolved) {
+					console.error(e)
 					reject(e)
 				} else {
 					console.error(e)
