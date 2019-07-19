@@ -38,7 +38,7 @@
     "types-test": "cd src/types && yarn lint && yarn unitci && cd ../..",
     "types-ci": "cd src/types && yarn lint && yarn unitci && cd ../..",
     "watch-server": "nodemon --watch src -e ts,tsx --exec ts-node ./src/server.ts",
-		"server": "ts-node ./src/server.ts"
+    "server": "ts-node ./src/server.ts"
   },
   "repository": {
     "type": "git",
@@ -137,6 +137,7 @@
     "koa": "^2.7.0",
     "koa-bodyparser": "^4.2.1",
     "koa-router": "^7.4.0",
+    "marked": "^0.6.2",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",
     "segfault-handler": "^1.1.0"
