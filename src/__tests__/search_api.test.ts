@@ -19,7 +19,7 @@
 	 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-import { Quantel } from '../index'
+import * as Quantel from '../index'
 import * as spawn from './spawn_server'
 
 describe('Clip-level Quantel gateway tests for searching', () => {

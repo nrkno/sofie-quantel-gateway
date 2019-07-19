@@ -22,7 +22,7 @@
 import * as Koa from 'koa'
 import * as Router from 'koa-router'
 import * as bodyParser from 'koa-bodyparser'
-import { Quantel } from '.'
+import * as Quantel from '.'
 
 console.log(`Sofie: Quantel gateway  Copyright (c) 2019 Norsk rikskringkasting AS (NRK)
 
