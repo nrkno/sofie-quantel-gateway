@@ -28,4 +28,4 @@ Stop and optionally remove the build container:
 
 Run up the server:
 
-    sudo docker run -it -w /home/circleci/tv-automation-quantel-gateway --name quantel-gateway -p 3000:3000 sofietv/tv-automation-quantel-gateway:test1 sh -c "yarn server"
+    sudo docker run -it -w /home/circleci/tv-automation-quantel-gateway --name quantel-gateway -p 3000:3000 sofietv/tv-automation-quantel-gateway:v42 sh -c "yarn server"

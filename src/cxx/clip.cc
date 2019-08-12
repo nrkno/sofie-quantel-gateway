@@ -31,6 +31,7 @@ void getClipDataExecute(napi_env env, void* data) {
 		resolveZonePortalShared(c->isaIOR, &zp);
 		Quentin::ColumnDescList_var cdl = zp->getColumnDescriptions();
 		columns.length(cdl->length());
+
 		for ( uint32_t x = 0 ; x < cdl->length() ; x++ ) {
 			columns[x] = cdl[x].columnName;
 			c->columnNames.push_back(utf8_conv.to_bytes(cdl[x].columnName));
@@ -193,8 +194,10 @@ void searchClipsExecute(napi_env env, void* data) {
 			columnNamesWide[i] = utf8_conv.from_bytes(c->colNames.at(i)).data();
 		}
 
+    printf("Searching clips\n");
 		Quentin::WStrings_var results = zp->searchClips(cpl, columnNamesWide, c->limit);
 
+    printf("Received a result of length %i\n", results->length());
 		for ( uint32_t i = 0 ; i < results->length() ; i++ ) {
 			c->values.push_back(utf8_conv.to_bytes(results[i]));
 		}
