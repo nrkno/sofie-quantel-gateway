@@ -1,0 +1,12 @@
+# DEPLOY IMAGE
+FROM node:8-slim
+
+RUN apt-get update && apt-get install -y \
+    libomniorb4-1 \
+ && rm -rf /var/lib/apt/lists/*
+
+COPY . /opt/quantel-gateway
+WORKDIR /opt/quantel-gateway
+
+EXPOSE 3000
+CMD ["yarn", "start"]

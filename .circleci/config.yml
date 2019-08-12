@@ -11,17 +11,28 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/project
-      - restore_cache:
-          keys:
-            - yarn-cache-{{ .Branch }}-{{ checksum "yarn.lock" }}
-            - yarn-cache-{{ .Branch }}
-            - yarn-cache-
+      # - restore_cache: # Note: disabled because something was being cached that was causing tests to fail
+      #     keys:
+      #       - yarn-cache-{{ .Branch }}-{{ checksum "yarn.lock" }}
+      #       - yarn-cache-{{ .Branch }}
+      #       - yarn-cache-
       - run: sudo apt-get update
       - run: sudo apt-get install libomniorb4-dev
-      - run: yarn install
-      - save_cache:
-          key: yarn-cache-{{ .Branch }}-{{ checksum "yarn.lock" }}
-          paths: [node_modules]
+      - run:
+          name: yarn install
+          command: yarn install --check-files --frozen-lockfile
+          no_output_timeout: 60m
+      - run:
+          name: yarn build
+          command: yarn build
+          no_output_timeout: 60m
+      # - save_cache:
+      #     key: yarn-cache-{{ .Branch }}-{{ checksum "yarn.lock" }}
+      #     paths: [node_modules]
+      - run:
+          name: yarn install (production)
+          command: yarn install --check-files --frozen-lockfile --production --force
+          no_output_timeout: 60m
       - persist_to_workspace:
           root: .
           paths: [.]
@@ -31,7 +42,10 @@ jobs:
       - attach_workspace:
           at: ~/project
       - run: sudo apt-get install libomniorb4-dev
-      - run: yarn install
+      - run:
+          name: yarn install
+          command: yarn install --check-files --frozen-lockfile
+          no_output_timeout: 60m
       - run: yarn validate:dependencies
   Test node-8:
     <<: *defaults
@@ -39,74 +53,66 @@ jobs:
       - attach_workspace:
           at: ~/project
       - run: sudo apt-get install libomniorb4-dev
-      - run: yarn install
+      - run: yarn install --check-files --frozen-lockfile
       - run: yarn build
       - run: yarn ci
-  Send Coverage:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/project
-      - run: sudo apt-get install libomniorb4-dev
-      - run: yarn install
       - run: yarn send-coverage
-      - store_artifacts:
-          path: ./coverage/clover.xml
-          prefix: tests
-      - store_artifacts:
-          path: coverage
-          prefix: coverage
-      - store_test_results:
-          path: ./coverage/clover.xml
 
-  Build:
-    <<: *defaults
+  # Git Release:
+  #   <<: *defaults
+  #   steps:
+  #     - attach_workspace:
+  #         at: ~/project
+  #     - add_ssh_keys:
+  #         fingerprints:
+  #           - "21:4d:ff:37:4d:e2:f2:65:82:5b:b4:f7:2a:bf:9f:e3"
+  #     - run: sudo apt-get install libomniorb4-dev
+  #     - run: yarn install --check-files --frozen-lockfile
+  #     - run: mkdir -p ~/.ssh
+  #     - run:
+  #         name: Keyscan Github
+  #         command: ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+  #     - run: git config --global user.email "info@superfly.tv"
+  #     - run: git config --global user.name "superflytvab"
+  #     - run: yarn release
+  #     - run: git push --follow-tags origin HEAD
+  #     - persist_to_workspace:
+  #         root: .
+  #         paths: [.]
+  publish-tag:
+    docker:
+      - image: circleci/buildpack-deps:stretch
     steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+          version: 18.06.0-ce
       - attach_workspace:
-          at: ~/project
-      - run: sudo apt-get install libomniorb4-dev
-      - run: yarn install
-      - run: yarn build
-      - persist_to_workspace:
-          root: .
-          paths: [.]
-
-  Git Release:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/project
-      - add_ssh_keys:
-          fingerprints:
-            - "21:4d:ff:37:4d:e2:f2:65:82:5b:b4:f7:2a:bf:9f:e3"
-      - run: sudo apt-get install libomniorb4-dev
-      - run: yarn install
-      - run: mkdir -p ~/.ssh
+          at: .
       - run:
-          name: Keyscan Github
-          command: ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-      - run: git config --global user.email "info@superfly.tv"
-      - run: git config --global user.name "superflytvab"
-      - run: yarn release
-      - run: git push --follow-tags origin HEAD
-      - persist_to_workspace:
-          root: .
-          paths: [.]
-  #Deploy to NPM:
-  #  <<: *defaults
-  #  steps:
-  #    - attach_workspace:
-  #        at: ~/project
-  #    - run:
-  #        name: Write NPM Token to ~/.npmrc
-  #        command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
-  #    - run:
-  #        name: Publish to NPM with yarn
-  #        command: NEW_VERSION=$(node -p "require('./package.json').version") && yarn publish --access=public --new-version=$NEW_VERSION --network-timeout 100000
-  #    # I have read that some people are experiencing problems with yars publish. Change to npm publish, as below, if that happens.
-  #    # - deploy:
-  #    #     name: Publish to NPM with npm
-  #    #     command: npm publish --access=public
+          name: Build Docker Image
+          command: docker build -f Dockerfile.circle . -t sofietv/tv-automation-quantel-gateway:$CIRCLE_TAG
+      - run:
+           name: Publish Docker Image to Docker Hub
+           command: |
+             echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+             docker push sofietv/tv-automation-quantel-gateway:$CIRCLE_TAG
+  publish-branch:
+    docker:
+      - image: circleci/buildpack-deps:stretch
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+          version: 18.06.0-ce
+      - attach_workspace:
+          at: .
+      - run:
+          name: Build Docker Image
+          command: docker build -f Dockerfile.circle . -t sofietv/tv-automation-quantel-gateway:$CIRCLE_BRANCH
+      - run:
+           name: Publish Docker Image to Docker Hub
+           command: |
+             echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+             docker push sofietv/tv-automation-quantel-gateway:$CIRCLE_BRANCH
 
 workflows:
   version: 2
@@ -116,36 +122,40 @@ workflows:
       - Check for vulnerabilities:
           requires:
             - Checkout Code
+          filters:
+            tags:
+              only: /v.*/
+            branches:
+              only: 
+                - master
+                - develop
       - Test node-8:
           requires:
             - Checkout Code
-      - Send Coverage:
+      - publish-tag:
           requires:
-            - Check for vulnerabilities
             - Test node-8
+            - Check for vulnerabilities
           filters:
+            tags:
+              only: /v.*/
             branches:
-              only:
-                - master
-      - Git Release:
+              ignore: /.*/
+      - publish-branch:
           requires:
-            - Send Coverage
+            - Test node-8
+            - Check for vulnerabilities
           filters:
+            tags:
+              ignore: /.*/
             branches:
-              only:
+              only: 
                 - master
-      - Build:
-          requires:
-            - Send Coverage
-            - Git Release
-          filters:
-            branches:
-              only:
-                - master
-      #- Deploy to NPM:
-      #    requires:
-      #      - Build
-      #    filters:
-      #      branches:
-      #        only:
-      #          - master
+                - develop
+      # - Git Release:
+      #     requires:
+      #       - Test node-8
+      #     filters:
+      #       branches:
+      #         only:
+      #           - master
