@@ -194,11 +194,9 @@ void searchClipsExecute(napi_env env, void* data) {
 			columnNamesWide[i] = utf8_conv.from_bytes(c->colNames.at(i)).data();
 		}
 
-    printf("Searching clips\n");
-		Quentin::WStrings_var results = zp->searchClips(cpl, columnNamesWide, c->limit);
+  	Quentin::WStrings_var results = zp->searchClips(cpl, columnNamesWide, c->limit);
 
-    printf("Received a result of length %i\n", results->length());
-		for ( uint32_t i = 0 ; i < results->length() ; i++ ) {
+  	for ( uint32_t i = 0 ; i < results->length() ; i++ ) {
 			c->values.push_back(utf8_conv.to_bytes(results[i]));
 		}
 	}
@@ -247,8 +245,12 @@ void searchClipsComplete(napi_env env, napi_status asyncStatus, void* data) {
 			std::string key = c->colNames.at(x % c->colNames.size());
 
 			if ((key == "ClipID") || (key == "CloneId") || (key == "PoolID")) {
-				c->status = napi_create_int32(env, std::stol(value), &prop);
-				REJECT_STATUS;
+        if (value.length() == 0) {
+          c->status = napi_get_null(env, &prop);
+        } else {
+    			c->status = napi_create_int32(env, std::stol(value), &prop);
+        }
+    		REJECT_STATUS;
 			} else if ((key == "Completed") || (key == "Created")) {
 				c->status = convertToDate(env, value, &prop);
 				REJECT_STATUS;
