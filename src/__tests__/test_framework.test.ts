@@ -43,7 +43,7 @@ describe('Test framework', () => {
 		})
 	})
 
-  test('Default request for connection fails before first connect', async () => {
+	test('Default request for connection fails before first connect', async () => {
 		await expect(Quantel.getISAReference()).rejects.toThrow('First provide')
 	})
 

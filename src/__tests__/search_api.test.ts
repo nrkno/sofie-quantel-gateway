@@ -28,7 +28,7 @@ describe('Clip-level Quantel gateway tests for searching', () => {
 
 	beforeAll(async () => {
 		isaIOR = await spawn.start()
-		Quantel.getISAReference('http://localhost:2096')
+		await Quantel.getISAReference('http://localhost:2096')
 		isaIOR = isaIOR
 	})
 

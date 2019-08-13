@@ -28,7 +28,7 @@ describe('Copy-level Quantel gateway tests for cloning clips', () => {
 
 	beforeAll(async () => {
 		isaIOR = await spawn.start()
-		Quantel.getISAReference('http://localhost:2096')
+		await Quantel.getISAReference('http://localhost:2096')
 		isaIOR = isaIOR
 	})
 
