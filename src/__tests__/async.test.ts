@@ -28,6 +28,7 @@ describe('Async operations Quantel gateway tests', () => {
 
 	beforeAll(async () => {
 		isaIOR = await spawn.start()
+		Quantel.getISAReference('http://localhost:2096')
 		isaIOR = isaIOR
 	})
 

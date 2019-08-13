@@ -251,8 +251,6 @@ void getPlayPortExecute(napi_env env, void* data) {
 	 	std::wstring wportName = utf8_conv.from_bytes(c->portName);
 		Quentin::Port_var port = server->getPort(wportName.data(), 0);
 
-		wprintf(L"Hello port %ws\n", wportName.data());
-
 	 	Quentin::PortListener::PlayPortStatus_var gps;
 		gps = port->getStatus().playStatus();
 
@@ -290,7 +288,6 @@ void getPlayPortExecute(napi_env env, void* data) {
 		 	c->channels.push_back(channels[x]);
 	 	}
 
-		printf("About to get configuration for channel %i\n", c->channels.at(0));
 	 	Quentin::ConfigDescriptionList_var cdl = port->getConfigurations(0,
 		  Quentin::FragmentType::videoFragment, true);
 		try {
@@ -637,7 +634,7 @@ void wipeExecute(napi_env env, void* data) {
 		gps = port->getStatus().playStatus();
 
 		if (c->frames == 0x7fffffff) {
-			c->frames = gps->offset - c->start;
+			c->frames = gps->offset - c->start + 1;
 			c->frames = (c->frames < 0) ? 0 : c->frames;
 		}
 

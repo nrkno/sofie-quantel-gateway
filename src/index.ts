@@ -31,6 +31,7 @@ export namespace Quantel {
 	let isaIOR: Promise<string> | null = null
 	let stickyRef: string[] = [ 'http://localhost:2096' ]
 	let robin = 0
+	let connectAttempt = false
 
 	export interface ZoneInfo {
 		type: 'ZonePortal'
@@ -404,6 +405,11 @@ export namespace Quantel {
 	}
 
 	export async function getISAReference (ref?: string | string[], count?: number): Promise<ConnectionDetails> {
+		if (connectAttempt === false && !ref) {
+			throw new ConnectError(`First provide a Quantel ISA connection URL (e.g. POST to /connect).`, 502)
+		} else {
+			connectAttempt = true
+		}
 		if (typeof ref === 'string') ref = [ ref ]
 		let myCount: number = count ? count + 1 : 1
 		if (isaIOR === null || ref) isaIOR = Promise.reject()

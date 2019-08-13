@@ -28,6 +28,7 @@ describe('Port-level Quantel gateway tests', () => {
 
 	beforeAll(async () => {
 		isaIOR = await spawn.start()
+		Quantel.getISAReference('http://localhost:2096')
 		isaIOR = isaIOR
 	})
 
@@ -89,7 +90,7 @@ describe('Port-level Quantel gateway tests', () => {
 		})).resolves.toMatchObject({
 			type: 'WipeResult',
 			portName: 'Port 1',
-			frames: 44,
+			frames: 45,
 			serverID: 1100,
 			start: 0,
 			wiped: true

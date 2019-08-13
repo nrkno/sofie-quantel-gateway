@@ -43,8 +43,12 @@ describe('Test framework', () => {
 		})
 	})
 
-	test('Default get connection reference', async () => {
-		await expect(Quantel.getISAReference()).resolves.toStrictEqual({
+  test('Default request for connection fails before first connect', async () => {
+		await expect(Quantel.getISAReference()).rejects.toThrow('First provide')
+	})
+
+	test('Default get connection reference with localhost', async () => {
+		await expect(Quantel.getISAReference('http://localhost:2096')).resolves.toStrictEqual({
 			type: 'ConnectionDetails',
 			href: 'http://localhost:2096',
 			isaIOR,
