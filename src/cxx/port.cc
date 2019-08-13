@@ -494,9 +494,9 @@ void releasePortExecute(napi_env env, void* data) {
 		Quentin::Server_ptr server = zp->getServer(c->serverID);
     Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(c->portName).data(), 0);
 
-		port->setMode(Quentin::Port::PortMode::idle);
+		if (!c->resetOnly) { port->setMode(Quentin::Port::PortMode::idle); }
     port->reset();
-    port->release();
+    if (!c->resetOnly) { port->release(); }
 	}
 	catch(CORBA::SystemException& ex) {
 		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
@@ -535,6 +535,11 @@ void releasePortComplete(napi_env env, napi_status asyncStatus, void* data) {
 	c->status = napi_create_string_utf8(env, c->portName.c_str(), NAPI_AUTO_LENGTH, &prop);
 	REJECT_STATUS;
 	c->status = napi_set_named_property(env, result, "portName", prop);
+	REJECT_STATUS;
+
+  c->status = napi_get_boolean(env, c->resetOnly, &prop);
+	REJECT_STATUS;
+	c->status = napi_set_named_property(env, result, "resetOnly", prop);
 	REJECT_STATUS;
 
 	c->status = napi_get_boolean(env, true, &prop);
@@ -608,6 +613,15 @@ napi_value releasePort(napi_env env, napi_callback_info info) {
 	c->portName = std::string(portName);
 	free(portName);
 
+  c->status = napi_get_named_property(env, options, "resetOnly", &prop);
+	REJECT_RETURN;
+	c->status = napi_typeof(env, prop, &type);
+	REJECT_RETURN;
+	if (type == napi_boolean) {
+		c->status = napi_get_value_bool(env, prop, &c->resetOnly);
+		REJECT_RETURN;
+	}
+
 	c->status = napi_create_string_utf8(env, "ReleasePort", NAPI_AUTO_LENGTH, &resourceName);
   REJECT_RETURN;
   c->status = napi_create_async_work(env, nullptr, resourceName, releasePortExecute,
@@ -634,7 +648,7 @@ void wipeExecute(napi_env env, void* data) {
 		gps = port->getStatus().playStatus();
 
 		if (c->frames == 0x7fffffff) {
-			c->frames = gps->offset - c->start + 1;
+			c->frames = gps->offset - c->start;
 			c->frames = (c->frames < 0) ? 0 : c->frames;
 		}
 

@@ -79,9 +79,14 @@ export namespace Quantel {
 		videoFormat: string
 	}
 
-	export interface ReleaseStatus extends PortRef {
+	export interface ReleaseRef extends PortRef {
+		resetOnly?: boolean
+	}
+
+	export interface ReleaseStatus extends ReleaseRef {
 		type: 'ReleaseStatus'
 		released: boolean
+		resetOnly: boolean
 	}
 
 	export interface ClipRef {
@@ -640,7 +645,7 @@ export namespace Quantel {
 		}
 	}
 
-	export async function releasePort (options: PortRef): Promise<ReleaseStatus> {
+	export async function releasePort (options: ReleaseRef): Promise<ReleaseStatus> {
 		try {
 			await getISAReference()
 			await checkServerPort(options)

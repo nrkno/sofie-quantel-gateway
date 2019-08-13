@@ -77,6 +77,7 @@ void releasePortComplete(napi_env env, napi_status asyncStatus, void* data);
 struct releasePortCarrier : carrier {
 	int32_t serverID;
 	std::string portName;
+	bool resetOnly = false;
 	~releasePortCarrier() { }
 };
 

@@ -176,7 +176,11 @@ On success, the response is:
 
 Note that this approach does not allow more than one channel to be assigned to a port. As a result, key and fill playback on separate channels is not yet supported by this gateway.
 
-To release the port, send a DELETE request to the complete path for the port.
+To reset the port, clearing all fragments and triggers and resetting the state, POST to:
+
+    /:zoneID/server/:serverID/port/reset
+
+To completely release the port and set it to idle, send a DELETE request to the complete path for the port.
 
     /:zoneID/server/:serverID/port/:portID
 
@@ -341,11 +345,13 @@ If the optional `:start` and/or `:finish` query parameters is/are provided, the 
 
 Note that once loaded onto a port/server, the fragments are no longer directly linked with a clip and so the `clipID` property is set to `-1`.
 
-All fragments can be cleared from the port by sending a DELETE request to the port's fragments resource. By default, this will clear (_wipe_ is the Quantel CORBA API term) all fragments from the port between offset `0` and the current play head offset. To provide a time range for this operation, use the `start` and `frames` query parameters:
+Some fragments can be cleared from the port by sending a DELETE request to the port's fragments resource. By default, this will clear (_wipe_ is the Quantel CORBA API term) all fragments from the port between offset `0` up to the current play head offset. To provide a time range for this operation, use the `start` and `frames` query parameters:
 
     /:zoneID/server/:serverID/port/:portID/fragments(?start=:start&frames=:frames)
 
 The `:start` parameter is the first frame in the port's timeline to wipe from and `:frames` is the count of frames to wipe forward from that point. The `:start` parameter defaults to `0`. If `:frames` is omitted, all frames from the given start offset to the current play position will be wiped, which will be no frames if `:start` is after the play head offset. The range of frames to wipe must not include the current play position. Check the Boolean-valued `wiped` property of the response message to see that whether the fragments were successfully cleared.
+
+To completely clear a port of all fragments, see port reset.
 
 ### Cloning clips
 
