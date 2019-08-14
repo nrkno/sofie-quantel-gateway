@@ -90,7 +90,7 @@ describe('Port-level Quantel gateway tests', () => {
 		})).resolves.toMatchObject({
 			type: 'WipeResult',
 			portName: 'Port 1',
-			frames: 45,
+			frames: 44,
 			serverID: 1100,
 			start: 0,
 			wiped: true
