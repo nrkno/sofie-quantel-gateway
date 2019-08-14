@@ -162,13 +162,36 @@ describe('Port-level REST API tests', () => {
 		.rejects.toThrow('404')
 	})
 
+	test('Reset port with server by number', async () => {
+		await expect(request.post('http://localhost:3000/default/server/1100/port/Port 1/reset').then(JSON.parse))
+		.resolves.toMatchObject({
+			type: 'ReleaseStatus',
+			serverID: 1100,
+			portName: 'Port 1',
+			released: true,
+			resetOnly: true
+		})
+	})
+
+	test('Reset port with server by name', async () => {
+		await expect(request.post('http://localhost:3000/default/server/Server 1100/port/Port 1/reset').then(JSON.parse))
+		.resolves.toMatchObject({
+			type: 'ReleaseStatus',
+			serverID: 1100,
+			portName: 'Port 1',
+			released: true,
+			resetOnly: true
+		})
+	})
+
 	test('Release port with server by number', async () => {
 		await expect(request.delete('http://localhost:3000/default/server/1100/port/Port 1').then(JSON.parse))
 		.resolves.toMatchObject({
 			type: 'ReleaseStatus',
 			serverID: 1100,
 			portName: 'Port 1',
-			released: true
+			released: true,
+			resetOnly: false
 		})
 	})
 
@@ -178,7 +201,8 @@ describe('Port-level REST API tests', () => {
 			type: 'ReleaseStatus',
 			serverID: 1100,
 			portName: 'Port 1',
-			released: true
+			released: true,
+			resetOnly: false
 		})
 	})
 

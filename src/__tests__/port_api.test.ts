@@ -79,7 +79,22 @@ describe('Port-level Quantel gateway tests', () => {
 			type: 'ReleaseStatus',
 			serverID: 1100,
 			portName: 'Port 1',
-			released: true
+			released: true,
+			resetOnly: false
+		} as Quantel.ReleaseStatus)
+	})
+
+	test('Reset port', async () => {
+		await expect(Quantel.releasePort({
+			serverID: 1100,
+			portName: 'Port 1',
+			resetOnly: true
+		})).resolves.toMatchObject({
+			type: 'ReleaseStatus',
+			serverID: 1100,
+			portName: 'Port 1',
+			released: true,
+			resetOnly: true
 		} as Quantel.ReleaseStatus)
 	})
 
