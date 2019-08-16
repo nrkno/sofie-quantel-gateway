@@ -252,7 +252,11 @@ void searchClipsComplete(napi_env env, napi_status asyncStatus, void* data) {
         }
     		REJECT_STATUS;
 			} else if ((key == "Completed") || (key == "Created")) {
-				c->status = convertToDate(env, value, &prop);
+				if (value.length() == 0) {
+          c->status = napi_get_null(env, &prop);
+        } else {
+					c->status = convertToDate(env, value, &prop);
+				}
 				REJECT_STATUS;
 			} else {
 				c->status = napi_create_string_utf8(env, value.c_str(), NAPI_AUTO_LENGTH, &prop);
