@@ -84,6 +84,10 @@ router.get('/connect', async (ctx) => {
 	ctx.body = await Quantel.getConnectionDetails()
 })
 
+router.get('/health', async (ctx) => {
+	ctx.body = { status: 'OK' }
+})
+
 router.get('/:zoneID.json', async (ctx) => {
 	if (ctx.params.zoneID.toLowerCase() === 'default') {
 		ctx.body = await Quantel.getDefaultZoneInfo()
