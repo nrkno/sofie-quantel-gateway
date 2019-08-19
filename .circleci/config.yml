@@ -55,6 +55,7 @@ jobs:
       - run: sudo apt-get install libomniorb4-dev
       - run: yarn install --check-files --frozen-lockfile
       - run: yarn build
+      - run: ulimit -c unlimited
       - run: yarn ci
       - run: yarn send-coverage
 
@@ -126,7 +127,7 @@ workflows:
             tags:
               only: /v.*/
             branches:
-              only: 
+              only:
                 - master
                 - develop
       - Test node-8:
@@ -149,7 +150,7 @@ workflows:
             tags:
               ignore: /.*/
             branches:
-              only: 
+              only:
                 - master
                 - develop
       # - Git Release:
