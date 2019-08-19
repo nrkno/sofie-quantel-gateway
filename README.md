@@ -178,7 +178,7 @@ Note that this approach does not allow more than one channel to be assigned to a
 
 To reset the port, clearing all fragments and triggers and resetting the state, POST to:
 
-    /:zoneID/server/:serverID/port/reset
+    /:zoneID/server/:serverID/port/:portID/reset
 
 To completely release the port and set it to idle, send a DELETE request to the complete path for the port.
 
