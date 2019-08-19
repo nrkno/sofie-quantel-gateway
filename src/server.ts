@@ -40,6 +40,7 @@ interface JSONError {
 
 export const app = new Koa()
 const router = new Router()
+const instanceId = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(16)
 
 app.use(bodyParser({
 	onerror: (err, ctx) => {
@@ -85,7 +86,14 @@ router.get('/connect', async (ctx) => {
 })
 
 router.get('/health', async (ctx) => {
-	ctx.body = { status: 'OK' }
+	ctx.body = {
+		status: 'OK',
+		name: 'Sofie Automation Quantel Gateway',
+		updated: `${(new Date()).toISOString()}`,
+		documentation: 'https://github.com/nrkno/tv-automation-quantel-gateway',
+		version: '3',
+		instanceId
+	}
 })
 
 router.get('/:zoneID.json', async (ctx) => {
