@@ -47,6 +47,16 @@ describe('Test framework', () => {
 		await expect(Quantel.getISAReference()).rejects.toThrow('First provide')
 	})
 
+	test('Health endpoint in a warning state', async () => {
+		await expect(request.get('http://localhost:3000/health', { json: true })).resolves.toMatchObject({
+			status: 'WARNING',
+			name: 'Sofie Automation Quantel Gateway',
+			documentation: 'https://github.com/nrkno/tv-automation-quantel-gateway',
+			version: '3',
+			statusMessage: 'Waiting for connection request to Quantel server.'
+		})
+	})
+
 	test('Default get connection reference with localhost', async () => {
 		await expect(Quantel.getISAReference('http://localhost:2096')).resolves.toStrictEqual({
 			type: 'ConnectionDetails',
@@ -62,6 +72,16 @@ describe('Test framework', () => {
 
 	test('Test HTTP API is running', async () => {
 		await expect(request.post('http://localhost:3000/connect/127.0.0.1')).resolves.toBeTruthy()
+	})
+
+	test('Health endpoint in a good state', async () => {
+		await expect(request.get('http://localhost:3000/health', { json: true })).resolves.toMatchObject({
+			status: 'OK',
+			name: 'Sofie Automation Quantel Gateway',
+			documentation: 'https://github.com/nrkno/tv-automation-quantel-gateway',
+			version: '3',
+			statusMessage: 'Functioning as expected - last response was successful'
+		})
 	})
 
 	test('Bad route', async () => {

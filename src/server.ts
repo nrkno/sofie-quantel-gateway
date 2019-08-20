@@ -23,7 +23,7 @@ import * as Koa from 'koa'
 import * as Router from 'koa-router'
 import * as bodyParser from 'koa-bodyparser'
 import { Quantel } from '.'
-import { StatusResponse } from './systemStatus'
+import { StatusResponse, ExternalStatus } from './systemStatus'
 
 console.log(`Sofie: Quantel gateway  Copyright (c) 2019 Norsk rikskringkasting AS (NRK)
 
@@ -42,6 +42,7 @@ interface JSONError {
 export const app = new Koa()
 const router = new Router()
 const instanceId = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(16)
+let currentStatus: ExternalStatus = 'OK'
 
 app.use(bodyParser({
 	onerror: (err, ctx) => {
@@ -87,14 +88,29 @@ router.get('/connect', async (ctx) => {
 })
 
 router.get('/health', async (ctx) => {
-	ctx.body = {
-		status: 'OK',
-		name: 'Sofie Automation Quantel Gateway',
-		updated: `${(new Date()).toISOString()}`,
-		documentation: 'https://github.com/nrkno/tv-automation-quantel-gateway',
-		version: '3',
-		instanceId
-	} as StatusResponse
+	if (Quantel.connectAttempted() === false) {
+		ctx.body = {
+			status: 'WARNING',
+			name: 'Sofie Automation Quantel Gateway',
+			updated: `${(new Date()).toISOString()}`,
+			documentation: 'https://github.com/nrkno/tv-automation-quantel-gateway',
+			version: '3',
+			statusMessage: 'Waiting for connection request to Quantel server.',
+			instanceId
+		} as StatusResponse
+	} else {
+		ctx.body = {
+			status: currentStatus,
+			name: 'Sofie Automation Quantel Gateway',
+			updated: `${(new Date()).toISOString()}`,
+			documentation: 'https://github.com/nrkno/tv-automation-quantel-gateway',
+			version: '3',
+			statusMessage: currentStatus === 'FAIL' ?
+				'Last response was a server error - check Kibana logs' :
+				'Functioning as expected - last response was successful',
+			instanceId
+		} as StatusResponse
+	}
 })
 
 router.get('/:zoneID.json', async (ctx) => {
@@ -776,7 +792,6 @@ router.put('/default/server/:serverID/port/:portID/jump', async (ctx) => {
 	}
 })
 
-// Make the default error handler use JSON
 app.use(async (ctx, next) => {
 	try {
 		console.log(JSON.stringify({
@@ -817,6 +832,12 @@ app.use(async (ctx, next) => {
 			message: ctx.body.message,
 			stack: ctx.body.stack
 		}))
+	}
+	if (ctx.status >= 500) {
+		currentStatus = 'FAIL'
+	}
+	if (ctx.status < 500 && currentStatus === 'FAIL') {
+		currentStatus = 'OK'
 	}
 })
 

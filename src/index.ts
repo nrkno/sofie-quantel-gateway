@@ -948,4 +948,8 @@ export namespace Quantel {
 		}
 		return result
 	}
+
+	export function connectAttempted (): boolean {
+		return connectAttempt
+	}
 }
