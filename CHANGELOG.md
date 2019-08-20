@@ -4,7 +4,6 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## 1.0.0-1 (2019-08-20)
 
-
 ### Bug Fixes
 
 * add EffectFragment to typings ([c0f90f1](https://github.com/nrkno/tv-automation-quantel-gateway/commit/c0f90f1))
