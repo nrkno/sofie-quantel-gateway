@@ -23,6 +23,7 @@ import * as Koa from 'koa'
 import * as Router from 'koa-router'
 import * as bodyParser from 'koa-bodyparser'
 import { Quantel } from '.'
+import { StatusResponse } from './systemStatus'
 
 console.log(`Sofie: Quantel gateway  Copyright (c) 2019 Norsk rikskringkasting AS (NRK)
 
@@ -93,7 +94,7 @@ router.get('/health', async (ctx) => {
 		documentation: 'https://github.com/nrkno/tv-automation-quantel-gateway',
 		version: '3',
 		instanceId
-	}
+	} as StatusResponse
 })
 
 router.get('/:zoneID.json', async (ctx) => {
@@ -778,7 +779,11 @@ router.put('/default/server/:serverID/port/:portID/jump', async (ctx) => {
 // Make the default error handler use JSON
 app.use(async (ctx, next) => {
 	try {
-		console.log(`Received command: ${ctx.request.method} ${ctx.URL.pathname}${ctx.request.querystring ? `?${ctx.request.querystring}` : ''}`)
+		console.log(JSON.stringify({
+			type: 'request',
+			method: ctx.request.method,
+			path: `${ctx.URL.pathname}${ctx.request.querystring ? `?${ctx.request.querystring}` : ''}`
+		}))
 
 		await next()
 		if (ctx.status === 404) {
@@ -802,6 +807,16 @@ app.use(async (ctx, next) => {
 			message: err.message,
 			stack: err.stack
 		} as JSONError
+	}
+	if (ctx.status >= 400) {
+		console.log(JSON.stringify({
+			type: ctx.status >= 500 ? 'server_error' : 'client_error',
+			method: ctx.request.method,
+			path: `${ctx.URL.pathname}${ctx.request.querystring ? `?${ctx.request.querystring}` : ''}`,
+			status: ctx.status,
+			message: ctx.body.message,
+			stack: ctx.body.stack
+		}))
 	}
 })
 
