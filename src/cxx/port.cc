@@ -499,6 +499,13 @@ void releasePortExecute(napi_env env, void* data) {
     if (!c->resetOnly) { port->release(); }
 
 		if (c->resetOnly) {
+			CORBA::Boolean playing = port->setMode(Quentin::Port::PortMode::playing);
+			if (!playing) {
+				c->status = QGW_SET_MODE_FAIL;
+				c->errorMsg = "Failed to set play mode for reset port.";
+				return;
+			}
+
 			if (!port->actionAtTrigger(START, Quentin::Port::trActStart)) {
 				c->status = QGW_TRIGGER_SETUP_FAIL;
 				c->errorMsg = "Unable set set up START trigger action for reset port.";
