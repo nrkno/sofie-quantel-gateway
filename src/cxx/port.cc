@@ -497,6 +497,24 @@ void releasePortExecute(napi_env env, void* data) {
 		if (!c->resetOnly) { port->setMode(Quentin::Port::PortMode::idle); }
     port->reset();
     if (!c->resetOnly) { port->release(); }
+
+		if (c->resetOnly) {
+			if (!port->actionAtTrigger(START, Quentin::Port::trActStart)) {
+				c->status = QGW_TRIGGER_SETUP_FAIL;
+				c->errorMsg = "Unable set set up START trigger action for reset port.";
+				return;
+			}
+			if (!port->actionAtTrigger(STOP, Quentin::Port::trActStop)) {
+				c->status = QGW_TRIGGER_SETUP_FAIL;
+				c->errorMsg = "Unable set set up STOP trigger action for reset port.";
+				return;
+			}
+			if (!port->actionAtTrigger(JUMP, Quentin::Port::trActJump)) {
+				c->status = QGW_TRIGGER_SETUP_FAIL;
+				c->errorMsg = "Unable set set up JUMP trigger action for reset port.";
+				return;
+			};
+		}
 	}
 	catch(CORBA::SystemException& ex) {
 		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
