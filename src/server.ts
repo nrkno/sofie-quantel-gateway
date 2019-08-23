@@ -24,6 +24,7 @@ import * as Router from 'koa-router'
 import * as bodyParser from 'koa-bodyparser'
 import { Quantel } from '.'
 import { StatusResponse, ExternalStatus } from './systemStatus'
+import * as yargs from 'yargs'
 
 console.log(`Sofie: Quantel gateway  Copyright (c) 2019 Norsk rikskringkasting AS (NRK)
 
@@ -32,6 +33,21 @@ Sofie: Quantel gateway comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it
 under certain conditions (GPL v2.0 or later).
 See https://github.com/nrkno/tv-automation-quantel-gateway/blob/master/LICENSE`)
+
+let cliOpts = yargs
+	.boolean('dummy')
+	.number('port')
+	.string('isa')
+	.default('dummy', false)
+	.default('port', 3000)
+	.help()
+	.usage('$0', 'Start the Sofie TV Automation Quantel Gateway')
+	.describe('dummy', 'Modify behaviour to match ISA dummy server')
+	.describe('port', 'Port number to listen on')
+	.describe('isa', 'ISA endpoint (server[:port]) for initial connection (no http:)')
+	.argv
+
+// console.log(cliOpts)
 
 interface JSONError {
 	status: number
@@ -649,7 +665,8 @@ router.post('/default/server/:serverID/port/:portID/fragments/', async (ctx) => 
 			serverID: ctx.params.serverID,
 			portName: ctx.params.portID,
 			fragments: fragments,
-			offset: ctx.query.offset ? +ctx.query.offset : 0
+			offset: ctx.query.offset ? +ctx.query.offset : 0,
+			dummy: cliOpts.dummy
 		})
 	} catch (err) {
 		if (err.message.indexOf('was expected')) {
@@ -844,10 +861,33 @@ app.use(async (ctx, next) => {
 app.use(router.routes())
 
 if (!module.parent) {
-	let server = app.listen(3000)
+	let server = app.listen(cliOpts.port)
 	server.on('error', console.error)
-	server.on('listening', () => {
-		console.log('Quantel gateway HTTP API - server running on port 3000')
+	server.on('listening', async () => {
+		console.log(`Quantel gateway HTTP API - server running on port ${cliOpts.port}`)
+		if (cliOpts.isa) {
+			let connectResult: Quantel.ConnectionDetails
+			try {
+				if (cliOpts.isa.indexOf(':') < 0) {
+					cliOpts.isa += ':2096'
+				}
+				if (cliOpts.isa.indexOf(',') >= 0) {
+					connectResult = await Quantel.getISAReference(
+						cliOpts.isa.split(',').map((x: string) => `http://${x}`))
+				} else {
+					connectResult = await Quantel.getISAReference(`http://${cliOpts.isa}`)
+				}
+				console.dir(connectResult)
+			} catch (err) {
+				if (err.message.indexOf('ENOTFOUND') >= 0) {
+					console.error(`Not found: ${err.message}`)
+				} else if (err.message.indexOf('ECONNREFUSED') >= 0) {
+					console.error(`Bad gateway: ${err.message}`)
+				} else if (!(err instanceof Quantel.ConnectError)) {
+					console.error(`Connection error: ${err.message}`)
+				}
+			}
+		}
 	})
 	server.on('close', () => {
 		Quantel.destroyOrb()

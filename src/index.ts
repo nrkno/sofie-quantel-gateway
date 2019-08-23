@@ -271,6 +271,7 @@ export namespace Quantel {
 	export interface PortLoadInfo extends PortRef {
 		fragments: ServerFragmentTypes[]
 		offset?: number
+		dummy?: boolean
 	}
 
 	export interface PortLoadStatus extends PortRef {
@@ -709,6 +710,9 @@ export namespace Quantel {
 		try {
 			await getISAReference()
 			await checkServerPort(options)
+			if (options.dummy) {
+				options.fragments = options.fragments.filter(x => x.type === 'VideoFragment' || x.type === 'AudioFragment')
+			}
 			return await quantel.loadPlayPort(await isaIOR, options)
 		} catch (err) {
 			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
