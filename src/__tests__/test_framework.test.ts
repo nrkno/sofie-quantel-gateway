@@ -248,3 +248,67 @@ describe('Error handling when server has failed, two servers', () => {
 		await spawn.stop()
 	})
 })
+
+describe('Check overlapping requests on failure', () => {
+	let isaIOR: string
+
+	beforeAll(async () => {
+		isaIOR = await spawn.start()
+	})
+
+	test('Default get connection reference and close', async () => {
+		await expect(Quantel.getISAReference('http://127.0.0.1:2096'))
+		.resolves.toStrictEqual({
+			type: 'ConnectionDetails',
+			href: 'http://127.0.0.1:2096',
+			isaIOR,
+			refs: [ 'http://127.0.0.1:2096' ],
+		 	robin: 5 } as Quantel.ConnectionDetails)
+	})
+
+	test('Stopping server', async () => {
+		await expect(spawn.stop()).resolves.toBeUndefined()
+	})
+
+	test('Test fail to get servers 1', async () => {
+		expect.assertions(2)
+		await Promise.all([
+			expect(Quantel.getServers()).rejects.toThrow('CORBA subsystem: TRANSIENT'),
+			expect(Quantel.getServers()).rejects.toThrow('CORBA subsystem: TRANSIENT') ])
+	})
+
+	test('Test the failed CORBA connection 1', async () => {
+		expect.assertions(2)
+		await Promise.all([
+			expect(Quantel.testConnection()).rejects.toThrow('ECONNREFUSED'),
+			expect(Quantel.testConnection()).rejects.toThrow('ECONNREFUSED') ])
+	})
+
+	test('Test the failed CORBA connection 2', async () => {
+		expect.assertions(2)
+		await Promise.all([
+			expect(Quantel.testConnection()).rejects.toThrow('ECONNREFUSED'),
+			expect(Quantel.getServers()).rejects.toThrow('ECONNREFUSED') ])
+	})
+
+	test('Restart server and get details', async () => {
+		isaIOR = await spawn.start()
+		// await new Promise((resolve) => setTimeout(() => resolve(), 1000))
+		await expect(Quantel.testConnection()).resolves.toBe('PONG!')
+		await expect(Quantel.getISAReference()).resolves.toStrictEqual({
+			type: 'ConnectionDetails',
+			href: 'http://127.0.0.1:2096',
+			isaIOR,
+		 	refs: [ 'http://127.0.0.1:2096' ],
+			robin: 7 } as Quantel.ConnectionDetails)
+	})
+
+	test('Check that get servers now works', async () => {
+		await expect(Quantel.getServers()).resolves.toBeTruthy()
+	})
+
+	afterAll(async () => {
+		Quantel.destroyOrb()
+		await spawn.stop()
+	})
+})
