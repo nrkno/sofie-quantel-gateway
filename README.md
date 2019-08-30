@@ -444,6 +444,14 @@ All error responses are in JSON format and includes properties for a numerical `
 }
 ```
 
+### Shutting down
+
+To request that the application shuts down, POST to
+
+    /kill/me/if/you/are/sure
+
+This will wait 5 seconds and then initiate web server and Quantel connection shutdown. If the application is running in a docker container with automatic restart enabled,
+
 ## License
 
 Unless otherwise called out in the header of a file, the files of this project are licensed under the GPL V2 or later, as detailed in the [`LICENSE`](./LICENSE) file. This project links to [omniORB](http://omniorb.sourceforge.net/) that is similarly GPL v2.
