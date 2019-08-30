@@ -25,6 +25,7 @@ import * as bodyParser from 'koa-bodyparser'
 import { Quantel } from '.'
 import { StatusResponse, ExternalStatus } from './systemStatus'
 import * as yargs from 'yargs'
+import { Server } from 'http'
 
 console.log(`Sofie: Quantel gateway  Copyright (c) 2019 Norsk rikskringkasting AS (NRK)
 
@@ -127,6 +128,11 @@ router.get('/health', async (ctx) => {
 			instanceId
 		} as StatusResponse
 	}
+})
+
+router.post('/kill/me/if/you/are/sure', async (ctx) => {
+	ctx.body = { status: 'Application shutting down in 5s' }
+	setTimeout(shutdown, 5000)
 })
 
 router.get('/:zoneID.json', async (ctx) => {
@@ -860,8 +866,10 @@ app.use(async (ctx, next) => {
 
 app.use(router.routes())
 
+let server: Server
+
 if (!module.parent) {
-	let server = app.listen(cliOpts.port)
+	server = app.listen(cliOpts.port)
 	server.on('error', console.error)
 	server.on('listening', async () => {
 		console.log(`Quantel gateway HTTP API - server running on port ${cliOpts.port}`)
@@ -892,4 +900,22 @@ if (!module.parent) {
 	server.on('close', () => {
 		Quantel.destroyOrb()
 	})
+}
+
+async function shutdown () {
+	console.log('Server shutdown starting.')
+	try {
+		await new Promise((resolve, reject) => {
+			server.close((err) => {
+				if (err) {
+					reject(err)
+				} else resolve()
+			})
+		})
+		console.log('Server shutdown completed.')
+		process.exit(0)
+	} catch (err) {
+		console.error('Error closing server: ', err)
+		process.exit(42)
+	}
 }
