@@ -24,7 +24,7 @@ This addon has not been built for or tested on MacOS.
 * This addon has been developed with Node.js v8.1.15 LTS and makes use of the N-API which is not available in earlier versions than 8.
 * Install the `node-gyp` build tool globally with `npm install -g node-gyp`.
 * Ensure the build system has the [node-gyp prerequisites](https://github.com/nodejs/node-gyp#installation).
-* Either install the Quantel ISA dummy server installation or ensure you have access to an installed ISA and sQ servers. (Not ones that are on-air ... yet!)
+* Either install the Quantel ISA dummy server installation or ensure you have access to an installed ISA and sQ servers.
 * Install the [yarn package manager](https://yarnpkg.com/en/docs/install).
 
 On Linux systems, install the OmniORB development package. On Ubuntu, this can be achieved with:
@@ -64,11 +64,17 @@ The server can be configured via command line parameters:
 * `--port` - Port number to listen on.
 * `--dummy` - Boolean that modifies the behaviour of the gateway to target a dummy server, as used in a development environment.
 * `--isa` - Name/IP address and optional port number of the Quantel ISA to connect to, e.g. `qisa01:2099`. Omit `http://`.
-* `--watchdog` - How often, in seconds, to try to connect to the server to see that it is still running OK. Set to 0 for no watchdog.
+* `--watchdog` - How often, in seconds, to try to connect to the server to see that it is still running OK. Set to `0` for no watchdog.
 
 For example:
 
     yarn server --port 9876 --isa qisa01:2099 --dummy true --watchdog 30
+
+### Run with docker
+
+Available on the [Sofie TV docker hub](https://hub.docker.com/u/sofietv):
+
+    docker pull sofietv/tv-automation-quantel-gateway:master
 
 ### Experimenting and importing
 
@@ -465,7 +471,7 @@ This will wait 5 seconds and then initiate web server and Quantel connection shu
 
 ### Watchdog
 
-The server includes a watchdog that monitors whether the gateway is healthy every 60 seconds or an interval configured with the watchdog command line parameter. If the watchdog fails to connect to the `/` endpoint three times in a row, the gateway will initiate a shutdown. If the application is running in a docker container with automatic restart enabled, it will then restart.
+The server includes a watchdog that monitors whether the gateway is healthy every 60 seconds, or an interval configured with the watchdog command line parameter. If the watchdog fails to connect to the `/` endpoint three times in a row, the gateway will initiate a shutdown. If the application is running in a docker container with automatic restart enabled, it will then restart.
 
 ## License
 
