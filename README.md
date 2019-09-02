@@ -59,6 +59,17 @@ For production use, a simple server can be run with:
 
 These servers listen on port `3000` by default.
 
+The server can be configured via command line parameters:
+
+* `--port` - Port number to listen on.
+* `--dummy` - Boolean that modifies the behaviour of the gateway to target a dummy server, as used in a development environment.
+* `--isa` - Name/IP address and optional port number of the Quantel ISA to connect to, e.g. `qisa01:2099`. Omit `http://`.
+* `--watchdog` - How often, in seconds, to try to connect to the server to see that it is still running OK. Set to 0 for no watchdog.
+
+For example:
+
+    yarn server --port 9876 --isa qisa01:2099 --dummy true --watchdog 30
+
 ### Experimenting and importing
 
 Experiment from the REPL with:
@@ -450,7 +461,11 @@ To request that the application shuts down, POST to
 
     /kill/me/if/you/are/sure
 
-This will wait 5 seconds and then initiate web server and Quantel connection shutdown. If the application is running in a docker container with automatic restart enabled,
+This will wait 5 seconds and then initiate web server and Quantel connection shutdown. If the application is running in a docker container with automatic restart enabled, the server will restart.
+
+### Watchdog
+
+The server includes a watchdog that monitors whether the gateway is healthy every 60 seconds or an interval configured with the watchdog command line parameter. If the watchdog fails to connect to the `/` endpoint three times in a row, the gateway will initiate a shutdown. If the application is running in a docker container with automatic restart enabled, it will then restart.
 
 ## License
 
