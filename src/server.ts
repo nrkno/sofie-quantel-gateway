@@ -25,7 +25,7 @@ import * as bodyParser from 'koa-bodyparser'
 import { Quantel } from '.'
 import { StatusResponse, ExternalStatus } from './systemStatus'
 import * as yargs from 'yargs'
-import { Server } from 'http'
+import { Server, get } from 'http'
 
 console.log(`Sofie: Quantel gateway  Copyright (c) 2019 Norsk rikskringkasting AS (NRK)
 
@@ -39,13 +39,16 @@ let cliOpts = yargs
 	.boolean('dummy')
 	.number('port')
 	.string('isa')
+	.number('watchdog')
 	.default('dummy', false)
 	.default('port', 3000)
+	.default('watchdog', 60)
 	.help()
 	.usage('$0', 'Start the Sofie TV Automation Quantel Gateway')
 	.describe('dummy', 'Modify behaviour to match ISA dummy server')
 	.describe('port', 'Port number to listen on')
 	.describe('isa', 'ISA endpoint (server[:port]) for initial connection (no http:)')
+	.describe('watchdog', 'Interval (s) between watchdog checks. 0 for none.')
 	.argv
 
 // console.log(cliOpts)
@@ -866,6 +869,43 @@ app.use(async (ctx, next) => {
 
 app.use(router.routes())
 
+function watchDog (interval: number, count: number = 0) {
+	setTimeout(() => {
+		let req = get(`http://localhost:${cliOpts.port}/`, res => {
+			res.on('error', err => {
+				if (count === 2) {
+					console.error(`Watchdog error on response: ${err.message}. Shutting down to trigger auto-restart in 5s.`)
+					setTimeout(shutdown, 5000)
+					res.resume()
+				} else {
+					console.log(`Watchdog error on response: ${err.message}. Incrementing counter to ${++count}/2.`)
+					res.resume()
+					watchDog(interval >> 1, count)
+				}
+			})
+			if (res.statusCode && res.statusCode >= 400) {
+				if (count === 2) {
+					console.error(`Watchdog failure with status ${res.statusCode}. Shutting down to trigger auto-restart in 5s.`)
+					setTimeout(shutdown, 5000)
+					res.resume()
+				} else {
+					console.log(`Watchdog failure with status ${res.statusCode}. Incrementing counter to ${++count}/2.`)
+					res.resume()
+					watchDog(interval >> 1, count)
+				}
+			} else {
+				res.resume()
+				console.log('Watchdog test successful.')
+				watchDog(interval, 0)
+			}
+		})
+		req.on('error', err => {
+			console.error(`Watchdog error on request: ${err.message}. Shutting down to trigger auto-restart in 5s.`)
+			setTimeout(shutdown, 5000)
+		})
+	}, interval)
+}
+
 let server: Server
 
 if (!module.parent) {
@@ -895,6 +935,12 @@ if (!module.parent) {
 					console.error(`Connection error: ${err.message}`)
 				}
 			}
+		}
+		if (cliOpts.watchdog > 0) {
+			console.log(`Starting watchdog with interval ${cliOpts.watchdog}s`)
+			watchDog(cliOpts.watchdog * 1000)
+		} else {
+			console.log('Server is starting without a watchdog.')
 		}
 	})
 	server.on('close', () => {
