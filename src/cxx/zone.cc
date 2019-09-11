@@ -224,25 +224,24 @@ napi_value listZones(napi_env env, napi_callback_info info) {
 
 void getServersExecute(napi_env env, void* data) {
 	getServersCarrier* c = (getServersCarrier*) data;
-	Quentin::ZonePortal::_ptr_type zp;
+	Quentin::ZonePortal_ptr zpp;
+	Quentin::ZonePortal_var zpv;
 	serverDetails* server;
-	Quentin::Server_var qserver;
-	Quentin::ServerInfo_var serverInfo;
-	Quentin::WStrings_var portNames, chanPorts;
-	std::string portName;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 	Quentin::Longs_var serverIDs;
 
 	try {
-		resolveZonePortalShared(c->isaIOR, &zp);
+		resolveZonePortalShared(c->isaIOR, &zpp);
+		zpv = zpp;
 
-		serverIDs = zp->getServers(true);
+		serverIDs = zpp->getServers(true);
 		for ( uint32_t x = 0 ; x < serverIDs->length() ; x++ ) {
 			server = new serverDetails;
 			server->ident = serverIDs[x];
 			if (serverIDs[x] > 0) { // server is online
-				qserver = zp->getServer(serverIDs[x]);
-				serverInfo = qserver->getServerInfo();
+				Quentin::WStrings_var portNames, chanPorts;
+				Quentin::Server_var qserver = zpp->getServer(serverIDs[x]);
+				Quentin::ServerInfo_var serverInfo = qserver->getServerInfo();
 				server->down = serverInfo->down;
 				server->name = utf8_conv.to_bytes(serverInfo->name);
 				server->numChannels = serverInfo->numChannels;
@@ -257,6 +256,7 @@ void getServersExecute(napi_env env, void* data) {
 				for ( uint32_t y = 0 ; y < chanPorts->length() ; y++ ) {
 					server->chanPorts.push_back(utf8_conv.to_bytes(chanPorts[y]));
 				}
+				CORBA::release(qserver);
 			}
 			c->servers.push_back(server);
 		}

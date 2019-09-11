@@ -40,15 +40,18 @@ let cliOpts = yargs
 	.number('port')
 	.string('isa')
 	.number('watchdog')
+	.number('memory')
 	.default('dummy', false)
 	.default('port', 3000)
 	.default('watchdog', 60)
+	.default('memory', 0)
 	.help()
 	.usage('$0', 'Start the Sofie TV Automation Quantel Gateway')
 	.describe('dummy', 'Modify behaviour to match ISA dummy server')
 	.describe('port', 'Port number to listen on')
 	.describe('isa', 'ISA endpoint (server[:port]) for initial connection (no http:)')
 	.describe('watchdog', 'Interval (s) between watchdog checks. 0 for none.')
+	.describe('memory', 'Internal (s) between memory logging. 0 to disable.')
 	.argv
 
 // console.log(cliOpts)
@@ -820,11 +823,11 @@ router.put('/default/server/:serverID/port/:portID/jump', async (ctx) => {
 
 app.use(async (ctx, next) => {
 	try {
-		console.log(JSON.stringify({
-			type: 'request',
-			method: ctx.request.method,
-			path: `${ctx.URL.pathname}${ctx.request.querystring ? `?${ctx.request.querystring}` : ''}`
-		}))
+		// console.log(JSON.stringify({
+		// 	type: 'request',
+		// 	method: ctx.request.method,
+		// 	path: `${ctx.URL.pathname}${ctx.request.querystring ? `?${ctx.request.querystring}` : ''}`
+		// }))
 
 		await next()
 		if (ctx.status === 404) {
@@ -964,4 +967,11 @@ async function shutdown () {
 		console.error('Error closing server: ', err)
 		process.exit(42)
 	}
+}
+
+if (cliOpts.memory > 0) {
+	setInterval(() => {
+		// global.gc()
+		console.log(JSON.stringify(process.memoryUsage()))
+	}, cliOpts.memory * 1000)
 }

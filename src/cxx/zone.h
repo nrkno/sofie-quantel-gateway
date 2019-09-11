@@ -67,7 +67,10 @@ struct serverDetails {
   std::vector<std::string> portNames;
 	std::vector<std::string> chanPorts;
 	~serverDetails() {
-		// printf("Server details destructor called.\n");
+		// printf("Server details destructor called %i.\n", ident);
+		// pools.clear();
+		// portNames.clear();
+		// chanPorts.clear();
 	}
 };
 
