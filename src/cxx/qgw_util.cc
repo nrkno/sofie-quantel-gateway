@@ -122,7 +122,7 @@ napi_status retrieveZonePortalShared(napi_env env, napi_callback_info info, CORB
 }
 
 napi_status resolveZonePortal(char* ior, CORBA::ORB_var *orb, Quentin::ZonePortal::_ptr_type *zp) {
-  const char* options[][2] = { { "traceLevel", "1" }, { 0, 0 } };
+  const char* options[][2] = { { "traceLevel", "21" }, { 0, 0 } };
   int orbc = 0;
   CORBA::ORB_var local_orb = CORBA::ORB_init(orbc, nullptr, "omniORB4", options);
 
@@ -161,6 +161,7 @@ napi_value destroyOrb(napi_env env, napi_callback_info info) {
 		local_orb->destroy();
 	}
 	local_orb = nullptr;
+	local_zp = nullptr;
 
 	status = napi_get_undefined(env, &result);
 	CHECK_STATUS;
