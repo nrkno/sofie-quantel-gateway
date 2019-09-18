@@ -23,13 +23,15 @@
 
 void triggerExecute(napi_env env, void* data) {
 	triggerCarrier* c = (triggerCarrier*) data;
-	Quentin::ZonePortal::_ptr_type zp;
+	Quentin::ZonePortal_ptr zpp;
+	Quentin::ZonePortal_var zpv;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
 	try {
-		resolveZonePortalShared(c->isaIOR, &zp);
+		resolveZonePortalShared(c->isaIOR, &zpp);
+		zpv = zpp;
 
-    Quentin::Server_ptr server = zp->getServer(c->serverID);
+    Quentin::Server_ptr server = zpv->getServer(c->serverID);
     Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(c->portName).data(), 0);
 
     if (!port->setTrigger(c->trigger,
@@ -163,13 +165,15 @@ napi_value trigger(napi_env env, napi_callback_info info) {
 
 void jumpExecute(napi_env env, void* data) {
 	jumpCarrier* c = (jumpCarrier*) data;
-	Quentin::ZonePortal::_ptr_type zp;
+	Quentin::ZonePortal_ptr zpp;
+	Quentin::ZonePortal_var zpv;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
 	try {
-		resolveZonePortalShared(c->isaIOR, &zp);
+		resolveZonePortalShared(c->isaIOR, &zpp);
+		zpv = zpp;
 
-		Quentin::Server_ptr server = zp->getServer(c->serverID);
+		Quentin::Server_ptr server = zpv->getServer(c->serverID);
 		Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(c->portName).data(), 0);
 
 		if (c->hardJump) {

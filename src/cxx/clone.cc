@@ -24,13 +24,15 @@
 // Deprecated ... cloneInterZone is now a general clone operation
 void cloneIfNeededExecute(napi_env env, void* data) {
 	cloneIfNeededCarrier* c = (cloneIfNeededCarrier*) data;
-	Quentin::ZonePortal::_ptr_type zp;
+	Quentin::ZonePortal_ptr zpp;
+	Quentin::ZonePortal_var zpv;
 	CORBA::Boolean copyCreated;
 
 	try {
-		resolveZonePortalShared(c->isaIOR, &zp);
+		resolveZonePortalShared(c->isaIOR, &zpp);
+		zpv = zpp;
 
-		zp->cloneIfNeeded(c->clipID, c->poolID, 0,
+		zpv->cloneIfNeeded(c->clipID, c->poolID, 0,
 			c->highPriority ? Quentin::Port::HighPriority : Quentin::Port::StandardPriority,
 			-1, copyCreated); // TODO -1 means the cloned clip never expires. Is this OK?
 
@@ -140,21 +142,23 @@ napi_value cloneIfNeeded(napi_env env, napi_callback_info info) {
 
 void cloneInterZoneExecute(napi_env env, void* data) {
 	cloneInterZoneCarrier* c = (cloneInterZoneCarrier*) data;
-	Quentin::ZonePortal::_ptr_type zp;
+	Quentin::ZonePortal_ptr zpp;
+	Quentin::ZonePortal_var zpv;
 	CORBA::Boolean copyCreated;
 
 	try {
-		resolveZonePortalShared(c->isaIOR, &zp);
+		resolveZonePortalShared(c->isaIOR, &zpp);
+		zpv = zpp;
 
 		if (c->zoneID < 0) { // Local zone clone
 			// Note: Clip does not expire - that's what -1 means!
-			c->copyID = zp->cloneIfNeeded(c->clipID, c->poolID, 0, c->priority, -1, copyCreated);
+			c->copyID = zpv->cloneIfNeeded(c->clipID, c->poolID, 0, c->priority, -1, copyCreated);
 			c->copyCreated = copyCreated;
 		} else {
 			if (c->history) {
-				c->copyID = zp->cloneClipInterZone(c->zoneID, c->clipID, c->poolID, c->priority);
+				c->copyID = zpv->cloneClipInterZone(c->zoneID, c->clipID, c->poolID, c->priority);
 			} else {
-				c->copyID = zp->cloneClipInterZoneWithoutHistory(c->zoneID, c->clipID, c->poolID, c->priority);
+				c->copyID = zpv->cloneClipInterZoneWithoutHistory(c->zoneID, c->clipID, c->poolID, c->priority);
 			}
 		}
 	}
@@ -323,12 +327,14 @@ napi_value cloneInterZone(napi_env env, napi_callback_info info) {
 
 void getCopyRemainingExecute(napi_env env, void* data) {
 	getCopyRemainingCarrier *c = (getCopyRemainingCarrier*) data;
-	Quentin::ZonePortal::_ptr_type zp;
+	Quentin::ZonePortal_ptr zpp;
+	Quentin::ZonePortal_var zpv;
 
 	try {
-		resolveZonePortalShared(c->isaIOR, &zp);
+		resolveZonePortalShared(c->isaIOR, &zpp);
+		zpv = zpp;
 
-		c->progress = zp->getCopyRemaining(c->clipID);
+		c->progress = zpv->getCopyRemaining(c->clipID);
 	}
 	catch(CORBA::SystemException& ex) {
 		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
@@ -456,13 +462,15 @@ napi_value getCopyRemaining(napi_env env, napi_callback_info info) {
 
 void getCopiesRemainingExecute(napi_env env, void* data) {
 	getCopiesRemainingCarrier* c = (getCopiesRemainingCarrier*) data;
-	Quentin::ZonePortal::_ptr_type zp;
+	Quentin::ZonePortal_ptr zpp;
+	Quentin::ZonePortal_var zpv;
 	Quentin::CopyProgressList_var cpl;
 
 	try {
-		resolveZonePortalShared(c->isaIOR, &zp);
+		resolveZonePortalShared(c->isaIOR, &zpp);
+		zpv = zpp;
 
-		cpl = zp->getCopiesRemaining();
+		cpl = zpv->getCopiesRemaining();
 		for ( uint32_t x = 0 ; x < cpl->length() ; x++ ) {
 			c->progresses.push_back(cpl[x]);
 		}

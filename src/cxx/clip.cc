@@ -23,13 +23,15 @@
 
 void getClipDataExecute(napi_env env, void* data) {
   clipDataCarrier* c = (clipDataCarrier*) data;
-	Quentin::ZonePortal::_ptr_type zp;
+	Quentin::ZonePortal_ptr zpp;
+	Quentin::ZonePortal_var zpv;
 	Quentin::WStrings columns;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
 	try {
-		resolveZonePortalShared(c->isaIOR, &zp);
-		Quentin::ColumnDescList_var cdl = zp->getColumnDescriptions();
+		resolveZonePortalShared(c->isaIOR, &zpp);
+		zpv = zpp;
+		Quentin::ColumnDescList_var cdl = zpv->getColumnDescriptions();
 		columns.length(cdl->length());
 
 		for ( uint32_t x = 0 ; x < cdl->length() ; x++ ) {
@@ -38,7 +40,7 @@ void getClipDataExecute(napi_env env, void* data) {
 			c->columnTypes.push_back(utf8_conv.to_bytes(cdl[x].columnType));
 		}
 
-		Quentin::WStrings_var results = zp->getClipData(c->clipID, columns);
+		Quentin::WStrings_var results = zpv->getClipData(c->clipID, columns);
 
 		for ( uint32_t i = 0 ; i < results->length() ; i++ ) {
 			c->values.push_back(utf8_conv.to_bytes(results[i]));
@@ -174,13 +176,15 @@ napi_value getClipData(napi_env env, napi_callback_info info) {
 
 void searchClipsExecute(napi_env env, void* data) {
 	searchClipsCarrier* c = (searchClipsCarrier*) data;
-	Quentin::ZonePortal::_ptr_type zp;
+	Quentin::ZonePortal_ptr zpp;
+	Quentin::ZonePortal_var zpv;
 	Quentin::ClipPropertyList cpl;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 	uint32_t queryCounter = 0;
 
 	try {
-		resolveZonePortalShared(c->isaIOR, &zp);
+		resolveZonePortalShared(c->isaIOR, &zpp);
+		zpv = zpp;
 
 		cpl.length(c->query.size());
 		for ( auto it = c->query.begin(); it != c->query.end() ; ++it ) {
@@ -194,7 +198,7 @@ void searchClipsExecute(napi_env env, void* data) {
 			columnNamesWide[i] = utf8_conv.from_bytes(c->colNames.at(i)).data();
 		}
 
-  	Quentin::WStrings_var results = zp->searchClips(cpl, columnNamesWide, c->limit);
+  	Quentin::WStrings_var results = zpv->searchClips(cpl, columnNamesWide, c->limit);
 
   	for ( uint32_t i = 0 ; i < results->length() ; i++ ) {
 			c->values.push_back(utf8_conv.to_bytes(results[i]));
@@ -385,16 +389,18 @@ napi_value searchClips(napi_env env, napi_callback_info info) {
 
 void getFragmentsExecute(napi_env env, void* data) {
 	getFragmentsCarrier* c = (getFragmentsCarrier*) data;
-	Quentin::ZonePortal::_ptr_type zp;
+	Quentin::ZonePortal_ptr zpp;
+	Quentin::ZonePortal_var zpv;
 
 	try {
-		resolveZonePortalShared(c->isaIOR, &zp);
+		resolveZonePortalShared(c->isaIOR, &zpp);
+		zpv = zpp;
 
 		c->fragments = (c->start >= 0) && (c->finish >= 0) ?
-		  zp->getFragments(c->clipID, c->start, c->finish) : zp->getAllFragments(c->clipID);
+		  zpv->getFragments(c->clipID, c->start, c->finish) : zpv->getAllFragments(c->clipID);
 		// Turns out this is not needed. If clip has decent timecode, you will get a TimecodeFragment
-		// c->sourceTCs = zp->getSourceTimecode(c->clipID, c->start, c->finish);
-		// c->refTCs = zp->getSourceTimecode(c->clipID, c->start, c->finish);
+		// c->sourceTCs = zpv->getSourceTimecode(c->clipID, c->start, c->finish);
+		// c->refTCs = zpv->getSourceTimecode(c->clipID, c->start, c->finish);
 	}
 	catch(CORBA::SystemException& ex) {
 		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
@@ -540,12 +546,14 @@ napi_value getFragments(napi_env env, napi_callback_info info) {
 
 void deletClipExecute(napi_env env, void* data) {
 	deleteClipCarrier* c = (deleteClipCarrier*) data;
-	Quentin::ZonePortal::_ptr_type zp;
+	Quentin::ZonePortal_ptr zpp;
+	Quentin::ZonePortal_var zpv;
 
 	try {
-		resolveZonePortalShared(c->isaIOR, &zp);
+		resolveZonePortalShared(c->isaIOR, &zpp);
+		zpv = zpp;
 
-		c->deleted = zp->deleteClip(c->clipID);
+		c->deleted = zpv->deleteClip(c->clipID);
 	}
 	catch(CORBA::SystemException& ex) {
 		NAPI_REJECT_SYSTEM_EXCEPTION(ex);

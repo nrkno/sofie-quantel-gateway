@@ -25,14 +25,16 @@ int32_t portCounter = 1;
 
 void createPlayPortExecute(napi_env env, void* data) {
 	createPlayPortCarrier* c = (createPlayPortCarrier*) data;
-	Quentin::ZonePortal::_ptr_type zp;
+	Quentin::ZonePortal_ptr zpp;
+	Quentin::ZonePortal_var zpv;
 	int32_t portID = portCounter++;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
 	try {
-		resolveZonePortalShared(c->isaIOR, &zp);
+		resolveZonePortalShared(c->isaIOR, &zpp);
+		zpv = zpp;
 
-		Quentin::Server_var server = zp->getServer(c->serverID);
+		Quentin::Server_var server = zpv->getServer(c->serverID);
 
 		if (c->portID >= 0) {
 			portID = c->portID;
@@ -239,14 +241,16 @@ napi_value createPlayPort(napi_env env, napi_callback_info info) {
 
 void getPlayPortExecute(napi_env env, void* data) {
 	playPortStatusCarrier* c = (playPortStatusCarrier*) data;
-	Quentin::ZonePortal::_ptr_type zp;
+	Quentin::ZonePortal_ptr zpp;
+	Quentin::ZonePortal_var zpv;
 	Quentin::Longs_var channels;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
 	try {
-		resolveZonePortalShared(c->isaIOR, &zp);
+		resolveZonePortalShared(c->isaIOR, &zpp);
+		zpv = zpp;
 
-	 	Quentin::Server_ptr server = zp->getServer(c->serverID);
+	 	Quentin::Server_ptr server = zpv->getServer(c->serverID);
 
 	 	std::wstring wportName = utf8_conv.from_bytes(c->portName);
 		Quentin::Port_var port = server->getPort(wportName.data(), 0);
@@ -485,13 +489,15 @@ napi_value getPlayPortStatus(napi_env env, napi_callback_info info) {
 
 void releasePortExecute(napi_env env, void* data) {
 	releasePortCarrier* c = (releasePortCarrier*) data;
-	Quentin::ZonePortal::_ptr_type zp;
+	Quentin::ZonePortal_ptr zpp;
+	Quentin::ZonePortal_var zpv;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
 	try {
-		resolveZonePortalShared(c->isaIOR, &zp);
+		resolveZonePortalShared(c->isaIOR, &zpp);
+		zpv = zpp;
 
-		Quentin::Server_ptr server = zp->getServer(c->serverID);
+		Quentin::Server_ptr server = zpv->getServer(c->serverID);
     Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(c->portName).data(), 0);
 
 		if (!c->resetOnly) { port->setMode(Quentin::Port::PortMode::idle); }
@@ -660,13 +666,15 @@ napi_value releasePort(napi_env env, napi_callback_info info) {
 
 void wipeExecute(napi_env env, void* data) {
 	wipeCarrier* c = (wipeCarrier*) data;
-	Quentin::ZonePortal::_ptr_type zp;
+	Quentin::ZonePortal_ptr zpp;
+	Quentin::ZonePortal_var zpv;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
 	try {
-		resolveZonePortalShared(c->isaIOR, &zp);
+		resolveZonePortalShared(c->isaIOR, &zpp);
+		zpv = zpp;
 
-		Quentin::Server_ptr server = zp->getServer(c->serverID);
+		Quentin::Server_ptr server = zpv->getServer(c->serverID);
     Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(c->portName).data(), 0);
 
 		Quentin::PortListener::PlayPortStatus_var gps;
@@ -830,13 +838,15 @@ napi_value wipe(napi_env env, napi_callback_info info) {
 
 void loadPlayPortExecute(napi_env env, void* data) {
 	loadPlayPortCarrier* c = (loadPlayPortCarrier*) data;
-	Quentin::ZonePortal::_ptr_type zp;
+	Quentin::ZonePortal_ptr zpp;
+	Quentin::ZonePortal_var zpv;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
 	try {
-		resolveZonePortalShared(c->isaIOR, &zp);
+		resolveZonePortalShared(c->isaIOR, &zpp);
+		zpv = zpp;
 
-	  Quentin::Server_ptr server = zp->getServer(c->serverID);
+	  Quentin::Server_ptr server = zpv->getServer(c->serverID);
 
 	  Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(c->portName).data(), 0);
 	  port->load(c->offset, c->fragments);
@@ -1277,13 +1287,15 @@ napi_value loadPlayPort(napi_env env, napi_callback_info info) {
 
 void getPortFragmentsExecute(napi_env env, void* data) {
 	portFragmentsCarrier* c = (portFragmentsCarrier*) data;
-	Quentin::ZonePortal::_ptr_type zp;
+	Quentin::ZonePortal_ptr zpp;
+	Quentin::ZonePortal_var zpv;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
 	try {
-		resolveZonePortalShared(c->isaIOR, &zp);
+		resolveZonePortalShared(c->isaIOR, &zpp);
+		zpv = zpp;
 
-		Quentin::Server_ptr server = zp->getServer(c->serverID);
+		Quentin::Server_ptr server = zpv->getServer(c->serverID);
 		Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(c->portName).data(), 0);
 
 		c->fragments = port->getPortFragments(c->start, c->finish);
@@ -1448,13 +1460,15 @@ napi_value getPortFragments(napi_env env, napi_callback_info info) {
 
 void getPortPropertiesExecute(napi_env env, void* data) {
 	portPropertiesCarrier* c = (portPropertiesCarrier*) data;
-	Quentin::ZonePortal::_ptr_type zp;
+	Quentin::ZonePortal_ptr zpp;
+	Quentin::ZonePortal_var zpv;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
 	try {
-		resolveZonePortalShared(c->isaIOR, &zp);
+		resolveZonePortalShared(c->isaIOR, &zpp);
+		zpv = zpp;
 
-		Quentin::Server_ptr server = zp->getServer(c->serverID);
+		Quentin::Server_ptr server = zpv->getServer(c->serverID);
 		Quentin::Port_ptr port = server->getPort(utf8_conv.from_bytes(c->portName).data(), 0);
 
 		printf("Port properties execute ... here we go\n");
