@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.1-0](https://github.com/nrkno/tv-automation-quantel-gateway/compare/1.0.0-1...0.0.1-0) (2019-09-18)
+
+
+### Bug Fixes
+
+* Hot fix to re-add triggers after port reset ([2bc6c41](https://github.com/nrkno/tv-automation-quantel-gateway/commit/2bc6c41))
+* hotfix to force port into play mode after reset ([206f623](https://github.com/nrkno/tv-automation-quantel-gateway/commit/206f623))
+* memory leak caused by allocating a zone portal per call ([6829a03](https://github.com/nrkno/tv-automation-quantel-gateway/commit/6829a03))
+
 ## 1.0.0-1 (2019-08-20)
 
 ### Bug Fixes
