@@ -135,19 +135,19 @@ napi_status resolveZonePortal(char* ior, CORBA::ORB_var *orb, Quentin::ZonePorta
 
 Quentin::ZonePortal_ptr local_zp = nullptr;
 
-napi_status resolveZonePortalShared(char* ior, Quentin::ZonePortal::_ptr_type *zp) {
+napi_status resolveZonePortalShared(char* ior, Quentin::ZonePortal_ptr *zp) {
 	if (local_orb == nullptr) {
 		const char* options[][2] = { { "traceLevel", "1" }, { 0, 0 } };
 	  int orbc = 0;
 	  local_orb = CORBA::ORB_init(orbc, nullptr, "omniORB4", options);
 	}
 
-	//if (local_zp == nullptr) {
+	if (local_zp == nullptr) {
 	  CORBA::Object_ptr ptr = local_orb->string_to_object(ior);
-		*zp = Quentin::ZonePortal::_unchecked_narrow(ptr);
-	// }
+		local_zp = Quentin::ZonePortal::_unchecked_narrow(ptr);
+	}
 
-	// *zp = Quentin::ZonePortal::_duplicate(local_zp);
+	*zp = Quentin::ZonePortal::_duplicate(local_zp);
 	return napi_ok;
 }
 

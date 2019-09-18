@@ -975,3 +975,5 @@ if (cliOpts.memory > 0) {
 		console.log(JSON.stringify(process.memoryUsage()))
 	}, cliOpts.memory * 1000)
 }
+
+process.on('SIGINT', shutdown)

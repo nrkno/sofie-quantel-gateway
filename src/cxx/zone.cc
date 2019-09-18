@@ -23,12 +23,14 @@
 
 void testConnectionExecute(napi_env env, void* data) {
 	testConnectionCarrier* c = (testConnectionCarrier*) data;
-	Quentin::ZonePortal::_ptr_type zp;
+	Quentin::ZonePortal_ptr zpp;
+	Quentin::ZonePortal_var zpv;
 
 	try {
-		resolveZonePortalShared(c->isaIOR, &zp);
+		resolveZonePortalShared(c->isaIOR, &zpp);
+		zpv = zpp;
 
-		c->zoneNumber = zp->getZoneNumber();
+		c->zoneNumber = zpv->getZoneNumber();
 	}
 	catch(CORBA::SystemException& ex) {
 		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
@@ -100,24 +102,26 @@ napi_value testConnection(napi_env env, napi_callback_info info) {
 
 void listZonesExecute(napi_env env, void* data) {
 	listZonesCarrier* c = (listZonesCarrier*) data;
-	Quentin::ZonePortal::_ptr_type zp;
+	Quentin::ZonePortal_ptr zpp;
+	Quentin::ZonePortal_var zpv;
 
 	try {
-		resolveZonePortalShared(c->isaIOR, &zp);
+		resolveZonePortalShared(c->isaIOR, &zpp);
+		zpv = zpp;
 
-		c->zoneIDs =zp->getZones(false);
+		c->zoneIDs = zpv->getZones(false);
 		c->zoneIDs->length(c->zoneIDs->length() + 1);
 		for ( int x = c->zoneIDs->length() - 1 ; x > 0 ; x-- ) {
 			c->zoneIDs[x] = c->zoneIDs[x - 1];
 		}
-		c->zoneIDs[0] = zp->getZoneNumber(); // Always start with the local/default zone
+		c->zoneIDs[0] = zpv->getZoneNumber(); // Always start with the local/default zone
 
 		c->zoneNames = (CORBA::WChar**) malloc(c->zoneIDs->length() * sizeof(CORBA::WChar*));
 		c->remotes = (CORBA::Boolean*) malloc(c->zoneIDs->length() * sizeof(CORBA::Boolean));
 
 		for ( uint32_t x = 0 ; x < c->zoneIDs->length() ; x++ ) {
-			c->zoneNames[x] = zp->getZoneName(c->zoneIDs[x]);
-			c->remotes[x] = zp->zoneIsRemote(c->zoneIDs[x]);
+			c->zoneNames[x] = zpv->getZoneName(c->zoneIDs[x]);
+			c->remotes[x] = zpv->zoneIsRemote(c->zoneIDs[x]);
 		}
 	}
 	catch(CORBA::SystemException& ex) {
@@ -234,13 +238,13 @@ void getServersExecute(napi_env env, void* data) {
 		resolveZonePortalShared(c->isaIOR, &zpp);
 		zpv = zpp;
 
-		serverIDs = zpp->getServers(true);
+		serverIDs = zpv->getServers(true);
 		for ( uint32_t x = 0 ; x < serverIDs->length() ; x++ ) {
 			server = new serverDetails;
 			server->ident = serverIDs[x];
 			if (serverIDs[x] > 0) { // server is online
 				Quentin::WStrings_var portNames, chanPorts;
-				Quentin::Server_var qserver = zpp->getServer(serverIDs[x]);
+				Quentin::Server_var qserver = zpv->getServer(serverIDs[x]);
 				Quentin::ServerInfo_var serverInfo = qserver->getServerInfo();
 				server->down = serverInfo->down;
 				server->name = utf8_conv.to_bytes(serverInfo->name);
@@ -256,7 +260,6 @@ void getServersExecute(napi_env env, void* data) {
 				for ( uint32_t y = 0 ; y < chanPorts->length() ; y++ ) {
 					server->chanPorts.push_back(utf8_conv.to_bytes(chanPorts[y]));
 				}
-				CORBA::release(qserver);
 			}
 			c->servers.push_back(server);
 		}
@@ -411,12 +414,14 @@ napi_value getServers(napi_env env, napi_callback_info info) {
 
 void getFormatInfoExecute(napi_env env, void* data) {
 	formatInfoCarrier* c = (formatInfoCarrier*) data;
-	Quentin::ZonePortal::_ptr_type zp;
+	Quentin::ZonePortal_ptr zpp;
+	Quentin::ZonePortal_var zpv;
 
 	try {
-		resolveZonePortalShared(c->isaIOR, &zp);
+		resolveZonePortalShared(c->isaIOR, &zpp);
+		zpv = zpp;
 
-		c->info = zp->getFormatInfo(c->formatNumber);
+		c->info = zpv->getFormatInfo(c->formatNumber);
 	}
 	catch(CORBA::SystemException& ex) {
 		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
