@@ -27,6 +27,7 @@ import { StatusResponse, ExternalStatus } from './systemStatus'
 import * as yargs from 'yargs'
 import { Server, get } from 'http'
 
+console.log('Starting Quantel Gateway')
 console.log(`Sofie: Quantel gateway  Copyright (c) 2019 Norsk rikskringkasting AS (NRK)
 
 Sofie: Quantel gateway comes with ABSOLUTELY NO WARRANTY.
