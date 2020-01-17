@@ -96,7 +96,7 @@
     "watch-server": "Run HTTP server and restart when changes are made."
   },
   "engines": {
-    "node": ">=8.1.15"
+    "node": ">=12.13.00"
   },
   "devDependencies": {
     "@types/jest": "^24.0.11",
