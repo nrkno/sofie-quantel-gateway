@@ -31,7 +31,7 @@ export async function start (): Promise<string> {
 		mockServer = fork(`src/__tests__/test_server.js`, { stdio: 'pipe' } as any)
 		let isaIOR = ''
 
-		mockServer.stdout.on('data', (data) => {
+		mockServer.stdout!.on('data', (data) => {
 			if (resolved) {
 				console.log(data.toString())
 				return
@@ -58,7 +58,7 @@ export async function start (): Promise<string> {
 			})
 		})
 
-		mockServer.stderr.on('data', (data) => {
+		mockServer.stderr!.on('data', (data) => {
 			console.error(data.toString())
 		})
 

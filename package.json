@@ -1,6 +1,6 @@
 {
   "name": "tv-automation-quantel-gateway",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "CORBA to REST gateway for Quantel/ISA playback",
   "main": "dist/index.js",
   "scripts": {
@@ -96,13 +96,18 @@
     "watch-server": "Run HTTP server and restart when changes are made."
   },
   "engines": {
-    "node": ">=8.1.15"
+    "node": ">=12.13.00"
   },
   "devDependencies": {
     "@types/jest": "^24.0.11",
-    "@types/node": "^8.0.4",
+    "@types/node": "^12.12.0",
     "@types/yargs": "^13.0.2",
-    "codecov": "^3.5.0",
+		"@types/koa": "^2.0.48",
+    "@types/koa-bodyparser": "^4.2.2",
+    "@types/koa-router": "^7.0.40",
+    "@types/request": "^2.48.1",
+    "@types/request-promise-native": "^1.0.16",
+		"codecov": "^3.5.0",
     "gh-pages": "^2.0.1",
     "jest": "^24.8.0",
     "jest-haste-map": "^24.8.1",
@@ -124,11 +129,6 @@
     "typescript": "^3.3.3333"
   },
   "dependencies": {
-    "@types/koa": "^2.0.48",
-    "@types/koa-bodyparser": "^4.2.2",
-    "@types/koa-router": "^7.0.40",
-    "@types/request": "^2.48.1",
-    "@types/request-promise-native": "^1.0.16",
     "bindings": "^1.5.0",
     "koa": "^2.7.0",
     "koa-bodyparser": "^4.2.1",
