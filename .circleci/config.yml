@@ -82,11 +82,10 @@ jobs:
   #         paths: [.]
   publish-tag:
     docker:
-      - image: circleci/buildpack-deps:stretch
+      - image: circleci/buildpack-deps:buster
     steps:
       - setup_remote_docker:
-          docker_layer_caching: true
-          version: 18.06.0-ce
+          version: 19.03.8
       - attach_workspace:
           at: .
       - run:
@@ -99,11 +98,10 @@ jobs:
              docker push sofietv/tv-automation-quantel-gateway:$CIRCLE_TAG
   publish-branch:
     docker:
-      - image: circleci/buildpack-deps:stretch
+      - image: circleci/buildpack-deps:buster
     steps:
       - setup_remote_docker:
-          docker_layer_caching: true
-          version: 18.06.0-ce
+          version: 19.03.8
       - attach_workspace:
           at: .
       - run:
