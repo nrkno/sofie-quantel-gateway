@@ -1,6 +1,6 @@
 {
   "name": "tv-automation-quantel-gateway",
-  "version": "1.0.3",
+  "version": "1.0.4-0",
   "description": "CORBA to REST gateway for Quantel/ISA playback",
   "main": "dist/index.js",
   "scripts": {
