@@ -469,6 +469,13 @@ To request that the application shuts down, POST to
 
 This will wait 5 seconds and then initiate web server and Quantel connection shutdown. If the application is running in a docker container with automatic restart enabled, the server will restart.
 
+### Debug logging
+
+The application can be told to activate debug-logging at runtime by POST:ing to
+
+    /debug/1
+    /debug/0
+
 ### Watchdog
 
 The server includes a watchdog that monitors whether the gateway is healthy every 60 seconds, or an interval configured with the watchdog command line parameter. If the watchdog fails to connect to the `/` endpoint three times in a row, the gateway will initiate a shutdown. If the application is running in a docker container with automatic restart enabled, it will then restart.
