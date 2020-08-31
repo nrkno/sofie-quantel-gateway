@@ -55,7 +55,7 @@ let cliOpts = yargs
 	.number('watchdog')
 	.number('memory')
 	.default('dummy', false)
-	.default('port', 9154)
+	.default('port', 3000)
 	.default('watchdog', 60)
 	.default('memory', 0)
 	.help()
