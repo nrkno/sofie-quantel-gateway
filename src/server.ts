@@ -28,16 +28,15 @@ import * as yargs from 'yargs'
 import { Server, get } from 'http'
 
 let debug = false
-function debugLog(...args: any[]) {
+function debugLog (...args: any[]) {
 	if (debug) console.log(...args)
 }
-function infoLog(...args: any[]) {
+function infoLog (...args: any[]) {
 	console.log(...args)
 }
-function errorLog(...args: any[]) {
+function errorLog (...args: any[]) {
 	console.error(...args)
 }
-
 
 infoLog('Starting Quantel Gateway')
 infoLog(`Sofie: Quantel gateway  Copyright (c) 2019 Norsk rikskringkasting AS (NRK)
