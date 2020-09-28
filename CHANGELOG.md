@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.4-0](https://github.com/nrkno/tv-automation-quantel-gateway/compare/1.0.2...1.0.4-0) (2020-05-29)
+
+
+### Bug Fixes
+
+* add startup message (the same way we have in the other gateways in the Sofie-project) ([2cbbdfd](https://github.com/nrkno/tv-automation-quantel-gateway/commit/2cbbdfd15cd907814fb063ad1308f5595b15d542))
+* address review comments ([b65eede](https://github.com/nrkno/tv-automation-quantel-gateway/commit/b65eede2e6170dc8db63a14c20456b2e0faea997))
+
 ### [1.0.2](https://github.com/nrkno/tv-automation-quantel-gateway/compare/1.0.2-0...1.0.2) (2019-09-18)
 
 ### [1.0.2-0](https://github.com/nrkno/tv-automation-quantel-gateway/compare/0.0.1-0...1.0.2-0) (2019-09-18)

@@ -27,8 +27,19 @@ import { StatusResponse, ExternalStatus } from './systemStatus'
 import * as yargs from 'yargs'
 import { Server, get } from 'http'
 
-console.log('Starting Quantel Gateway')
-console.log(`Sofie: Quantel gateway  Copyright (c) 2019 Norsk rikskringkasting AS (NRK)
+let debug = false
+function debugLog (...args: any[]) {
+	if (debug) console.log(...args)
+}
+function infoLog (...args: any[]) {
+	console.log(...args)
+}
+function errorLog (...args: any[]) {
+	console.error(...args)
+}
+
+infoLog('Starting Quantel Gateway')
+infoLog(`Sofie: Quantel gateway  Copyright (c) 2019 Norsk rikskringkasting AS (NRK)
 
 Sofie: Quantel gateway comes with ABSOLUTELY NO WARRANTY.
 
@@ -140,6 +151,10 @@ router.get('/health', async (ctx) => {
 router.post('/kill/me/if/you/are/sure', async (ctx) => {
 	ctx.body = { status: 'Application shutting down in 5s' }
 	setTimeout(shutdown, 5000)
+})
+router.post('/debug/:debug', async (ctx) => {
+	debug = ctx.params.debug === '1'
+	ctx.body = { status: `Debug logging set to ${debug}` }
 })
 
 router.get('/:zoneID.json', async (ctx) => {
@@ -824,11 +839,11 @@ router.put('/default/server/:serverID/port/:portID/jump', async (ctx) => {
 
 app.use(async (ctx, next) => {
 	try {
-		// console.log(JSON.stringify({
-		// 	type: 'request',
-		// 	method: ctx.request.method,
-		// 	path: `${ctx.URL.pathname}${ctx.request.querystring ? `?${ctx.request.querystring}` : ''}`
-		// }))
+		debugLog(JSON.stringify({
+			type: 'request',
+			method: ctx.request.method,
+			path: `${ctx.URL.pathname}${ctx.request.querystring ? `?${ctx.request.querystring}` : ''}`
+		}))
 
 		await next()
 		if (ctx.status === 404) {
@@ -854,7 +869,7 @@ app.use(async (ctx, next) => {
 		} as JSONError
 	}
 	if (ctx.status >= 400) {
-		console.log(JSON.stringify({
+		errorLog(JSON.stringify({
 			type: ctx.status >= 500 ? 'server_error' : 'client_error',
 			method: ctx.request.method,
 			path: `${ctx.URL.pathname}${ctx.request.querystring ? `?${ctx.request.querystring}` : ''}`,
@@ -878,33 +893,33 @@ function watchDog (interval: number, count: number = 0) {
 		let req = get(`http://localhost:${cliOpts.port}/`, res => {
 			res.on('error', err => {
 				if (count === 2) {
-					console.error(`Watchdog error on response: ${err.message}. Shutting down to trigger auto-restart in 5s.`)
+					errorLog(`Watchdog error on response: ${err.message}. Shutting down to trigger auto-restart in 5s.`)
 					setTimeout(shutdown, 5000)
 					res.resume()
 				} else {
-					console.log(`Watchdog error on response: ${err.message}. Incrementing counter to ${++count}/2.`)
+					infoLog(`Watchdog error on response: ${err.message}. Incrementing counter to ${++count}/2.`)
 					res.resume()
 					watchDog(interval >> 1, count)
 				}
 			})
 			if (res.statusCode && res.statusCode >= 400) {
 				if (count === 2) {
-					console.error(`Watchdog failure with status ${res.statusCode}. Shutting down to trigger auto-restart in 5s.`)
+					errorLog(`Watchdog failure with status ${res.statusCode}. Shutting down to trigger auto-restart in 5s.`)
 					setTimeout(shutdown, 5000)
 					res.resume()
 				} else {
-					console.log(`Watchdog failure with status ${res.statusCode}. Incrementing counter to ${++count}/2.`)
+					infoLog(`Watchdog failure with status ${res.statusCode}. Incrementing counter to ${++count}/2.`)
 					res.resume()
 					watchDog(interval >> 1, count)
 				}
 			} else {
 				res.resume()
-				console.log('Watchdog test successful.')
+				infoLog('Watchdog test successful.')
 				watchDog(interval, 0)
 			}
 		})
 		req.on('error', err => {
-			console.error(`Watchdog error on request: ${err.message}. Shutting down to trigger auto-restart in 5s.`)
+			errorLog(`Watchdog error on request: ${err.message}. Shutting down to trigger auto-restart in 5s.`)
 			setTimeout(shutdown, 5000)
 		})
 	}, interval)
@@ -914,9 +929,9 @@ let server: Server
 
 if (!module.parent) {
 	server = app.listen(cliOpts.port)
-	server.on('error', console.error)
+	server.on('error', errorLog)
 	server.on('listening', async () => {
-		console.log(`Quantel gateway HTTP API - server running on port ${cliOpts.port}`)
+		infoLog(`Quantel gateway HTTP API - server running on port ${cliOpts.port}`)
 		if (cliOpts.isa) {
 			let connectResult: Quantel.ConnectionDetails
 			try {
@@ -932,19 +947,19 @@ if (!module.parent) {
 				console.dir(connectResult)
 			} catch (err) {
 				if (err.message.indexOf('ENOTFOUND') >= 0) {
-					console.error(`Not found: ${err.message}`)
+					errorLog(`Not found: ${err.message}`)
 				} else if (err.message.indexOf('ECONNREFUSED') >= 0) {
-					console.error(`Bad gateway: ${err.message}`)
+					errorLog(`Bad gateway: ${err.message}`)
 				} else if (!(err instanceof Quantel.ConnectError)) {
-					console.error(`Connection error: ${err.message}`)
+					errorLog(`Connection error: ${err.message}`)
 				}
 			}
 		}
 		if (cliOpts.watchdog > 0) {
-			console.log(`Starting watchdog with interval ${cliOpts.watchdog}s`)
+			infoLog(`Starting watchdog with interval ${cliOpts.watchdog}s`)
 			watchDog(cliOpts.watchdog * 1000)
 		} else {
-			console.log('Server is starting without a watchdog.')
+			infoLog('Server is starting without a watchdog.')
 		}
 	})
 	server.on('close', () => {
@@ -953,7 +968,7 @@ if (!module.parent) {
 }
 
 async function shutdown () {
-	console.log('Server shutdown starting.')
+	infoLog('Server shutdown starting.')
 	try {
 		await new Promise((resolve, reject) => {
 			server.close((err) => {
@@ -962,10 +977,10 @@ async function shutdown () {
 				} else resolve()
 			})
 		})
-		console.log('Server shutdown completed.')
+		infoLog('Server shutdown completed.')
 		process.exit(0)
 	} catch (err) {
-		console.error('Error closing server: ', err)
+		errorLog('Error closing server: ', err)
 		process.exit(42)
 	}
 }
@@ -973,7 +988,7 @@ async function shutdown () {
 if (cliOpts.memory > 0) {
 	setInterval(() => {
 		// global.gc()
-		console.log(JSON.stringify(process.memoryUsage()))
+		infoLog(JSON.stringify(process.memoryUsage()))
 	}, cliOpts.memory * 1000)
 }
 
