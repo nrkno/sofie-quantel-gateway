@@ -32,7 +32,7 @@ describe('Search REST API tests', () => {
 
 	beforeAll(async () => {
 		isaIOR = await spawn.start()
-		await new Promise((resolve, reject) => {
+		await new Promise<void>((resolve, reject) => {
 			server = app.listen(3000) // TODO change this to a config parameter
 			server.on('listening', () => {
 				resolve()
@@ -161,7 +161,7 @@ describe('Search REST API tests', () => {
 
 	afterAll(async () => {
 		Quantel.destroyOrb()
-		await new Promise((resolve, reject) => {
+		await new Promise<void>((resolve, reject) => {
 			server.close(e => {
 				if (e) {
 					reject(e)

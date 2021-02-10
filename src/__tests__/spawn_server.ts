@@ -72,8 +72,8 @@ export async function start (): Promise<string> {
 	})
 }
 
-export async function stop (): Promise<undefined> {
-	return new Promise((resolve) => {
+export async function stop (): Promise<void> {
+	return new Promise<void>((resolve) => {
 		if (mockServer) {
 			mockServer.kill()
 			mockServer.on('exit', (_code, _signal) => {

@@ -927,7 +927,7 @@ function watchDog (interval: number, count: number = 0) {
 
 let server: Server
 
-if (!module.parent) {
+if (require.main === module) {
 	server = app.listen(cliOpts.port)
 	server.on('error', errorLog)
 	server.on('listening', async () => {
@@ -970,7 +970,7 @@ if (!module.parent) {
 async function shutdown () {
 	infoLog('Server shutdown starting.')
 	try {
-		await new Promise((resolve, reject) => {
+		await new Promise<void>((resolve, reject) => {
 			server.close((err) => {
 				if (err) {
 					reject(err)
