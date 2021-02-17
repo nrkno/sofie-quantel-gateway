@@ -24,4 +24,40 @@ const quantel = require('../../build/Release/quantel_gateway')
 // const SegfaultHandler = require('segfault-handler')
 // SegfaultHandler.registerHandler('crash2.log')
 
+
+
+// process.on('SIGHUP', () => {
+// 	quantel.closeServer()
+// 	console.log("Close server called.")
+// 	setTimeout(() => {}, 3000)
+// })
+
 quantel.runServer()
+
+const loopy = setInterval(() => {
+	// console.log('loopy');
+	quantel.performWork();
+}, 10);
+
+const closeDown = () => {
+	console.error("closeDown called");
+	clearInterval(loopy);
+	console.log('quantel.closeServer about to call');
+	quantel.closeServer();
+	console.log('quantel.closeServer returned');
+	// quantel.performWork();
+	// quantel.deactivatePman();
+	setTimeout(() => { process.exit(); }, 3000);
+}
+
+process.on('SIGINT', closeDown)
+process.on('message', m => {
+	if (typeof m === 'string' && m === 'close') {
+		closeDown();
+	}
+})
+
+process.on('exit', () => {
+	console.log('BANG!!!')
+})
+

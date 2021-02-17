@@ -335,8 +335,10 @@ class ZonePortal_i : public POA_Quentin::ZonePortal,
         public PortableServer::RefCountServantBase
 {
 public:
-  inline ZonePortal_i() {}
-  virtual ~ZonePortal_i() {}
+  inline ZonePortal_i(PortableServer::POA_var poa) : l_poa(poa) { }
+  virtual ~ZonePortal_i() {
+	  // l_poa->deactivate_object(l_objectID);
+  }
 	virtual ::CORBA::Long majorIDLVersion() { return 0; }
 	virtual Quentin::Longs* getServers(::CORBA::Boolean negateIfDown);
 	virtual Quentin::Server_ptr getServer(::CORBA::Long serverID);
@@ -437,6 +439,14 @@ public:
 
 	virtual ::CORBA::WChar* getProperty(const ::CORBA::WChar* propertyName) { return nullptr; };
 	virtual Quentin::WStrings* getPropertyList() { return nullptr; }
+
+	virtual void setObjectID(PortableServer::ObjectId_var objectID) {
+		l_objectID = objectID;
+	};
+
+  private:
+    PortableServer::POA_var l_poa;	
+	PortableServer::ObjectId_var l_objectID;
 };
 
 CORBA::Long ZonePortal_i::getZoneNumber()
@@ -766,17 +776,29 @@ CORBA::Boolean ZonePortal_i::deleteClip(::CORBA::Long clipID) {
 	return ((clipID % 2) == 0);
 }
 
+ZonePortal_i* closeMe = nullptr;
+CORBA::ORB_ptr myPrettyOrb = nullptr;
+PortableServer::POAManager_var myLovelyPman = nullptr;
+PortableServer::POA_var myYummyPoa = nullptr;
+PortableServer::ObjectId_var myZpId = nullptr;
+
 napi_value runServer(napi_env env, napi_callback_info info) {
 	// napi_status status;
 
 	int argc = 0;
-	CORBA::ORB_var orb = CORBA::ORB_init(argc, nullptr);
-  CORBA::Object_var obj = orb->resolve_initial_references("RootPOA");
+	const char* options[][2] = { { "traceLevel", "21" }, { 0, 0 } };
+	CORBA::ORB_var orb = CORBA::ORB_init(argc, nullptr,"omniORB4",options);
+	myPrettyOrb = orb;
+  	CORBA::Object_var obj = orb->resolve_initial_references("RootPOA");
 	PortableServer::POA_var poa = PortableServer::POA::_narrow(obj);
+	myYummyPoa = poa;
 
-	ZonePortal_i* myecho = new ZonePortal_i();
+	ZonePortal_i* myecho = new ZonePortal_i(poa);
+	closeMe = myecho;
 
 	PortableServer::ObjectId_var myechoid = poa->activate_object(myecho);
+	myZpId = myechoid;
+	myecho->setObjectID(myechoid);
 	obj = myecho->_this();
 	CORBA::String_var sior(orb->object_to_string(obj));
 	printf("%s\n", (char*)sior);
@@ -785,10 +807,51 @@ napi_value runServer(napi_env env, napi_callback_info info) {
 	myecho->_remove_ref();
 
 	PortableServer::POAManager_var pman = poa->the_POAManager();
+	myLovelyPman = pman;	
 	pman->activate();
 
-	orb->run();
-	orb->destroy();
+	return nullptr;
+}
 
+napi_value closeServer(napi_env env, napi_callback_info info) {
+	printf("closeServer called.\n");
+	if (closeMe != nullptr) {
+		myYummyPoa->deactivate_object(myZpId);
+	}
+	if (myLovelyPman != nullptr) {
+		myLovelyPman->deactivate(false, true);
+	}
+
+	// if (myYummyPoa != nullptr) {
+	// 	myYummyPoa->destroy(true, true);
+	// }
+
+	if (myPrettyOrb != nullptr) {
+		myPrettyOrb->destroy();
+	}
+
+
+	return nullptr;
+}
+
+napi_value deactivatePman(napi_env env, napi_callback_info info) {
+	if (myLovelyPman != nullptr) {
+		myLovelyPman->deactivate(false, true);
+	}
+	myPrettyOrb->perform_work();
+
+	if (myPrettyOrb != nullptr) {
+		myPrettyOrb->destroy();
+	}
+	// if (myYummyPoa != nullptr) {
+	// 	myYummyPoa->destroy(true, true);
+	// }
+	return nullptr;
+}
+
+napi_value performWork(napi_env env, napi_callback_info info) {
+	if (myPrettyOrb != nullptr) {
+		myPrettyOrb->perform_work();
+	}
 	return nullptr;
 }

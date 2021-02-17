@@ -137,7 +137,7 @@ Quentin::ZonePortal_ptr local_zp = nullptr;
 
 napi_status resolveZonePortalShared(char* ior, Quentin::ZonePortal_ptr *zp) {
 	if (local_orb == nullptr) {
-		const char* options[][2] = { { "traceLevel", "1" }, { 0, 0 } };
+		const char* options[][2] = { { "traceLevel", "21" }, { 0, 0 } };
 	  int orbc = 0;
 	  local_orb = CORBA::ORB_init(orbc, nullptr, "omniORB4", options);
 	}

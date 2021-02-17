@@ -119,6 +119,9 @@ napi_value Init(napi_env env, napi_value exports) {
 		DECLARE_NAPI_METHOD("getCopyRemaining", getCopyRemaining),
 		DECLARE_NAPI_METHOD("getCopiesRemaining", getCopiesRemaining),
 		DECLARE_NAPI_METHOD("runServer", runServer),
+		DECLARE_NAPI_METHOD("closeServer", closeServer),
+		DECLARE_NAPI_METHOD("performWork", performWork),
+		DECLARE_NAPI_METHOD("deactivatePman", deactivatePman), 
 		DECLARE_NAPI_METHOD("destroyOrb", destroyOrb),
     { "START", nullptr, nullptr, nullptr, nullptr, start, napi_enumerable, nullptr },
     { "STOP", nullptr, nullptr, nullptr, nullptr, stop, napi_enumerable, nullptr }, // 30
@@ -127,7 +130,7 @@ napi_value Init(napi_env env, napi_value exports) {
 		{ "STANDARD", nullptr, nullptr, nullptr, nullptr, standard, napi_enumerable, nullptr},
 		{ "HIGH", nullptr, nullptr, nullptr, nullptr, high, napi_enumerable, nullptr},
   };
-  status = napi_define_properties(env, exports, 34, desc);
+  status = napi_define_properties(env, exports, 37, desc);
 	CHECK_STATUS;
 
   return exports;
