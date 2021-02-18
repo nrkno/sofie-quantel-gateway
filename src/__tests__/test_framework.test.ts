@@ -25,7 +25,7 @@ import { app } from '../server'
 import { Server } from 'http'
 import * as request from 'request-promise-native'
 
-// const wait = (t: number): Promise<void> => { 
+// const wait = (t: number): Promise<void> => {
 // 	return new Promise((resolve) => {
 // 		setTimeout(resolve, t)
 // 	})
