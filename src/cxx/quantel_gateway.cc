@@ -27,6 +27,7 @@
 #include "clone.h"
 #include "thumbs.h"
 #include "test_server.h"
+#include <omniORB4/omniORB.h>
 
 napi_value timecodeFromBCD(napi_env env, napi_callback_info info) {
 	napi_status status;
@@ -73,6 +74,12 @@ napi_value timecodeToBCD(napi_env env, napi_callback_info info) {
 	CHECK_STATUS;
 
 	return result;
+}
+
+CORBA::Boolean commFailureHandler (void* cookie, CORBA::ULong retries, const CORBA::COMM_FAILURE& ex)
+{
+   printf("comm failure handler called.\n");
+   return 0;
 }
 
 napi_value Init(napi_env env, napi_value exports) {
@@ -132,6 +139,8 @@ napi_value Init(napi_env env, napi_value exports) {
   };
   status = napi_define_properties(env, exports, 37, desc);
 	CHECK_STATUS;
+
+  omniORB::installCommFailureExceptionHandler(0, commFailureHandler);
 
   return exports;
 }

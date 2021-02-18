@@ -479,8 +479,11 @@ export namespace Quantel {
 			return await quantel.testConnection(await isaIOR)
 		} catch (err) {
 			// if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
-			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0 ||
-					err.message.indexOf('TRANSIENT') >= 0) {
+			if (
+				err.message.indexOf('OBJECT_NOT_EXIST') >= 0 ||
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			) {
 				resetConnection()
 				return testConnection()
 			}
@@ -493,7 +496,10 @@ export namespace Quantel {
 			await getISAReference()
 			return await quantel.listZones(await isaIOR)
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			)  { resetConnection() }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				resetConnection()
 				return listZones()
@@ -508,7 +514,10 @@ export namespace Quantel {
 			let zones = await quantel.listZones(await isaIOR)
 			return zones[0]
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			)  { resetConnection() }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				resetConnection()
 				return getDefaultZoneInfo()
@@ -522,7 +531,10 @@ export namespace Quantel {
 			await getISAReference()
 			return await quantel.getServers(await isaIOR)
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			)  { resetConnection() }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				resetConnection()
 				return getServers()
@@ -536,7 +548,10 @@ export namespace Quantel {
 			await getISAReference()
 			return await quantel.getFormatInfo(await isaIOR, options)
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			)  { resetConnection() }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				resetConnection()
 				return getFormatInfo(options)
@@ -563,7 +578,10 @@ export namespace Quantel {
 			}
 			return formats
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			)  { resetConnection() }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				resetConnection()
 				return getFormats()
@@ -614,7 +632,10 @@ export namespace Quantel {
 
 			return await quantel.createPlayPort(await isaIOR, options)
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			)  { resetConnection() }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				resetConnection()
 				return createPlayPort(options)
@@ -637,7 +658,10 @@ export namespace Quantel {
 			await checkServerPort(options)
 			return await quantel.getPlayPortStatus(await isaIOR, options)
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			)  { resetConnection() }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				resetConnection()
 				return getPlayPortStatus(options)
@@ -652,7 +676,10 @@ export namespace Quantel {
 			await checkServerPort(options)
 			return await quantel.releasePort(await isaIOR, options)
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			)  { resetConnection() }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				resetConnection()
 				return releasePort(options)
@@ -666,7 +693,10 @@ export namespace Quantel {
 			await getISAReference()
 			return await quantel.getClipData(await isaIOR, options)
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			)  { resetConnection() }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				resetConnection()
 				return getClipData(options)
@@ -680,7 +710,10 @@ export namespace Quantel {
 			await getISAReference()
 			return await quantel.searchClips(await isaIOR, options)
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			)  { resetConnection() }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				resetConnection()
 				return searchClips(options)
@@ -697,7 +730,10 @@ export namespace Quantel {
 			}
 			return await quantel.getFragments(await isaIOR, options)
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			)  { resetConnection() }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				resetConnection()
 				return getFragments(options)
@@ -715,7 +751,10 @@ export namespace Quantel {
 			}
 			return await quantel.loadPlayPort(await isaIOR, options)
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			)  { resetConnection() }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				resetConnection()
 				return loadPlayPort(options)
@@ -730,7 +769,10 @@ export namespace Quantel {
 			await checkServerPort(options)
 			return await quantel.getPortFragments(await isaIOR, options)
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			)  { resetConnection() }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				resetConnection()
 				return getPortFragments(options)
@@ -752,7 +794,10 @@ export namespace Quantel {
 				success: await quantel.trigger(await isaIOR, options)
 			}
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			)  { resetConnection() }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				resetConnection()
 				return trigger(options)
@@ -773,7 +818,10 @@ export namespace Quantel {
 				success: await quantel.jump(await isaIOR, options)
 			}
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			)  { resetConnection() }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				resetConnection()
 				return jump(options)
@@ -794,7 +842,10 @@ export namespace Quantel {
 				success: await quantel.setJump(await isaIOR, options)
 			}
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			)  { resetConnection() }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				resetConnection()
 				return setJump(options)
@@ -808,7 +859,10 @@ export namespace Quantel {
 			await getISAReference()
 			return quantel.getThumbnailSize(await isaIOR)
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			)  { resetConnection() }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				resetConnection()
 				return getThumbnailSize()
@@ -841,7 +895,10 @@ export namespace Quantel {
 			await getISAReference()
 			return await quantel.cloneIfNeeded(await isaIOR, options)
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			)  { resetConnection() }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				resetConnection()
 				return cloneIfNeeded(options)
@@ -855,7 +912,10 @@ export namespace Quantel {
 			await getISAReference()
 			return await quantel.cloneInterZone(await isaIOR, options)
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			)  { resetConnection() }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				resetConnection()
 				return cloneInterZone(options)
@@ -869,7 +929,10 @@ export namespace Quantel {
 			await getISAReference()
 			return await quantel.getCopyRemaining(await isaIOR, options)
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			)  { resetConnection() }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				resetConnection()
 				return getCopyRemaining(options)
@@ -883,7 +946,10 @@ export namespace Quantel {
 			await getISAReference()
 			return await quantel.getCopiesRemaining(await isaIOR)
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			)  { resetConnection() }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				resetConnection()
 				return getCopiesRemaining()
@@ -897,7 +963,10 @@ export namespace Quantel {
 			await getISAReference()
 			return await quantel.deleteClip(await isaIOR, options)
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			)  { resetConnection() }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				resetConnection()
 				return deleteClip(options)
@@ -912,7 +981,10 @@ export namespace Quantel {
 			await checkServerPort(options)
 			return await quantel.wipe(await isaIOR, options)
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			)  { resetConnection() }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				resetConnection()
 				return wipe(options)
@@ -927,7 +999,10 @@ export namespace Quantel {
 			await checkServerPort(options)
 			return await quantel.getPortProperties(await isaIOR, options)
 		} catch (err) {
-			if (err.message.indexOf('TRANSIENT') >= 0) { resetConnection() }
+			if (
+				err.message.indexOf('TRANSIENT') >= 0 ||
+				err.message.indexOf('TIMEOUT') >= 0
+			)  { resetConnection() }
 			if (err.message.indexOf('OBJECT_NOT_EXIST') >= 0) {
 				resetConnection()
 				return wipe(options)

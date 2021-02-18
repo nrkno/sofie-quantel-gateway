@@ -40,11 +40,11 @@ const loopy = setInterval(() => {
 }, 10);
 
 const closeDown = () => {
-	console.error("closeDown called");
+	// console.error("closeDown called");
 	clearInterval(loopy);
-	console.log('quantel.closeServer about to call');
+	// console.log('quantel.closeServer about to call');
 	quantel.closeServer();
-	console.log('quantel.closeServer returned');
+	// console.log('quantel.closeServer returned');
 	// quantel.performWork();
 	// quantel.deactivatePman();
 	setTimeout(() => { process.exit(); }, 3000);
@@ -57,7 +57,7 @@ process.on('message', m => {
 	}
 })
 
-process.on('exit', () => {
-	console.log('BANG!!!')
-})
+// process.on('exit', () => {
+// 	console.log('BANG!!!')
+// })
 
