@@ -76,11 +76,11 @@ napi_value timecodeToBCD(napi_env env, napi_callback_info info) {
 	return result;
 }
 
-CORBA::Boolean commFailureHandler (void* cookie, CORBA::ULong retries, const CORBA::COMM_FAILURE& ex)
-{
-   printf("comm failure handler called.\n");
-   return 0;
-}
+// CORBA::Boolean commFailureHandler (void* cookie, CORBA::ULong retries, const CORBA::COMM_FAILURE& ex)
+// {
+//    printf("comm failure handler called.\n");
+//    return 0;
+// }
 
 napi_value Init(napi_env env, napi_value exports) {
   napi_status status;
@@ -140,7 +140,7 @@ napi_value Init(napi_env env, napi_value exports) {
   status = napi_define_properties(env, exports, 37, desc);
 	CHECK_STATUS;
 
-  omniORB::installCommFailureExceptionHandler(0, commFailureHandler);
+  // omniORB::installCommFailureExceptionHandler(0, commFailureHandler);
 
   return exports;
 }
