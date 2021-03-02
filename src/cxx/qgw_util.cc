@@ -139,6 +139,7 @@ napi_status resolveZonePortal(char* ior, CORBA::ORB_var *orb, Quentin::ZonePorta
 Quentin::ZonePortal_ptr local_zp = nullptr;
 
 napi_status resolveZonePortalShared(char* ior, Quentin::ZonePortal_ptr *zp) {
+	printf("Setting client call timeout period to 2000ms.\n");
 	if (local_orb == nullptr) {
 		const char* options[][2] = { 
 			{ "traceLevel", "1" }, 
