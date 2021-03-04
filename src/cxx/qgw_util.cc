@@ -162,6 +162,14 @@ napi_status resolveZonePortalShared(char* ior, Quentin::ZonePortal_ptr *zp) {
 napi_value destroyOrb(napi_env env, napi_callback_info info) {
 	napi_status status;
 	napi_value result;
+	closedownORB();
+
+	status = napi_get_undefined(env, &result);
+	CHECK_STATUS;
+	return result;
+}
+
+void closedownORB() {
 	if (local_zp != nullptr) {
 		CORBA::release(local_zp);
 	}
@@ -170,10 +178,6 @@ napi_value destroyOrb(napi_env env, napi_callback_info info) {
 	}
 	local_orb = nullptr;
 	local_zp = nullptr;
-
-	status = napi_get_undefined(env, &result);
-	CHECK_STATUS;
-	return result;
 }
 
 std::string formatTimecode(Quentin::Timecode tc) {
