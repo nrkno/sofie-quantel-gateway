@@ -83,6 +83,13 @@ CORBA::Boolean commFailureHandler (void* cookie, CORBA::ULong retries, const COR
    return false;
 }
 
+CORBA::Boolean transientHandler (void* cookie, CORBA::ULong retries, const CORBA::TRANSIENT& ex)
+{
+   printf("transient failure handler called.\n");
+   closedownORB();
+   return false;
+}
+
 napi_value Init(napi_env env, napi_value exports) {
   napi_status status;
   napi_value start, stop, jump, transition, standard, high;
@@ -142,6 +149,7 @@ napi_value Init(napi_env env, napi_value exports) {
 	CHECK_STATUS;
 
   omniORB::installCommFailureExceptionHandler(0, commFailureHandler);
+  omniORB::installTransientExceptionHandler(0, transientHandler);
 
   return exports;
 }
