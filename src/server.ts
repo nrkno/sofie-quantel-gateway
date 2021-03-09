@@ -585,7 +585,7 @@ router.get('/default/clip/:clipID/fragments/:in-:out', async (ctx) => {
 		ctx.status = 400
 		ctx.body = {
 			status: 400,
-			message: 'Bad request. Out point must be after in point.',
+			message: `Bad request. Out point "${ctx.params.out}" must be after in point "${ctx.params.in}".`,
 			stack: ''
 		} as JSONError
 		return

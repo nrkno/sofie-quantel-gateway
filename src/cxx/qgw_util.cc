@@ -137,8 +137,14 @@ napi_status resolveZonePortal(char* ior, CORBA::ORB_var *orb, Quentin::ZonePorta
 }
 
 Quentin::ZonePortal_ptr local_zp = nullptr;
+bool connectionFailed = false;
 
 napi_status resolveZonePortalShared(char* ior, Quentin::ZonePortal_ptr *zp) {
+	if (connectionFailed) {
+		printf("Not resolving zone portal. Connection has failed.\n");
+		throw new CORBA::TRANSIENT(omni::TRANSIENT_ConnectFailed);
+	}
+
 	if (local_orb == nullptr) {
 		const char* options[][2] = { 
 			{ "traceLevel", "21" }, 
@@ -159,10 +165,13 @@ napi_status resolveZonePortalShared(char* ior, Quentin::ZonePortal_ptr *zp) {
 	return napi_ok;
 }
 
-napi_value destroyOrb(napi_env env, napi_callback_info info) {
+napi_value destroyOrb(napi_env env, napi_callback_info info) { 
 	napi_status status;
 	napi_value result;
+	printf("DestroyORB called from Javascript land. Closing down ORB now.\n");
 	closedownORB();
+	connectionFailed = false;
+	printf("Reset connection failed flag to allow zone portal resolution again.\n");
 
 	status = napi_get_undefined(env, &result);
 	CHECK_STATUS;
@@ -178,6 +187,11 @@ void closedownORB() {
 	}
 	local_orb = nullptr;
 	local_zp = nullptr;
+}
+
+void connectionIssue() {
+	printf("Connection issue notified. Setting connection failed to true.\n");
+	connectionFailed = true;
 }
 
 std::string formatTimecode(Quentin::Timecode tc) {

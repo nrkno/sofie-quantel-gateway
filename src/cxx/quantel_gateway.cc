@@ -79,14 +79,14 @@ napi_value timecodeToBCD(napi_env env, napi_callback_info info) {
 CORBA::Boolean commFailureHandler (void* cookie, CORBA::ULong retries, const CORBA::COMM_FAILURE& ex)
 {
    printf("comm failure handler called.\n");
-   closedownORB();
+   connectionIssue();
    return false;
 }
 
 CORBA::Boolean transientHandler (void* cookie, CORBA::ULong retries, const CORBA::TRANSIENT& ex)
 {
    printf("transient failure handler called.\n");
-   closedownORB();
+   connectionIssue();
    return false;
 }
 
