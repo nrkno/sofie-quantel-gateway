@@ -27,6 +27,7 @@
 #include "clone.h"
 #include "thumbs.h"
 #include "test_server.h"
+#include <omniORB4/omniORB.h>
 
 napi_value timecodeFromBCD(napi_env env, napi_callback_info info) {
 	napi_status status;
@@ -75,6 +76,20 @@ napi_value timecodeToBCD(napi_env env, napi_callback_info info) {
 	return result;
 }
 
+CORBA::Boolean commFailureHandler (void* cookie, CORBA::ULong retries, const CORBA::COMM_FAILURE& ex)
+{
+   printf("comm failure handler called. Retry %i.\n", (int) retries);
+   connectionIssue();
+   return (retries < 5); // Retries used in the case that on failover, the new master is slow to update its IOR
+}
+
+CORBA::Boolean transientHandler (void* cookie, CORBA::ULong retries, const CORBA::TRANSIENT& ex)
+{
+   printf("transient failure handler called. Retry %i.\n", (int) retries);
+   connectionIssue();
+   return (retries < 5); // Retries used in the case that on failover, the new master is slow to update its IOR
+}
+
 napi_value Init(napi_env env, napi_value exports) {
   napi_status status;
   napi_value start, stop, jump, transition, standard, high;
@@ -119,6 +134,9 @@ napi_value Init(napi_env env, napi_value exports) {
 		DECLARE_NAPI_METHOD("getCopyRemaining", getCopyRemaining),
 		DECLARE_NAPI_METHOD("getCopiesRemaining", getCopiesRemaining),
 		DECLARE_NAPI_METHOD("runServer", runServer),
+		DECLARE_NAPI_METHOD("closeServer", closeServer),
+		DECLARE_NAPI_METHOD("performWork", performWork),
+		DECLARE_NAPI_METHOD("deactivatePman", deactivatePman), 
 		DECLARE_NAPI_METHOD("destroyOrb", destroyOrb),
     { "START", nullptr, nullptr, nullptr, nullptr, start, napi_enumerable, nullptr },
     { "STOP", nullptr, nullptr, nullptr, nullptr, stop, napi_enumerable, nullptr }, // 30
@@ -127,8 +145,11 @@ napi_value Init(napi_env env, napi_value exports) {
 		{ "STANDARD", nullptr, nullptr, nullptr, nullptr, standard, napi_enumerable, nullptr},
 		{ "HIGH", nullptr, nullptr, nullptr, nullptr, high, napi_enumerable, nullptr},
   };
-  status = napi_define_properties(env, exports, 34, desc);
+  status = napi_define_properties(env, exports, 37, desc);
 	CHECK_STATUS;
+
+  omniORB::installCommFailureExceptionHandler(0, commFailureHandler);
+  omniORB::installTransientExceptionHandler(0, transientHandler);
 
   return exports;
 }

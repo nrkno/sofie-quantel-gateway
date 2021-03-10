@@ -33,6 +33,7 @@
 #include <locale>
 #include <exception>
 #include <inttypes.h>
+#include "omniORB4/minorCode.h"
 #include "node_api.h"
 
 // Now setting from binding.gyp
@@ -174,5 +175,7 @@ napi_status convertToDate(napi_env env, std::string date, napi_value *nodeDate);
 napi_status fragmentsToJS(napi_env env, Quentin::ServerFragments_var fragments, napi_value* prop);
 
 napi_value destroyOrb(napi_env env, napi_callback_info info);
+void closedownORB();
+void connectionIssue();
 
 #endif // QGW_UTIL

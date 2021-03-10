@@ -27,5 +27,8 @@
 #include <wchar.h>
 
 napi_value runServer(napi_env env, napi_callback_info info);
+napi_value closeServer(napi_env env, napi_callback_info info);
+napi_value performWork(napi_env env, napi_callback_info info);
+napi_value deactivatePman(napi_env env, napi_callback_info info);
 
 #endif // QGW_TEST_SERVER
