@@ -80,14 +80,14 @@ CORBA::Boolean commFailureHandler (void* cookie, CORBA::ULong retries, const COR
 {
    printf("comm failure handler called.\n");
    connectionIssue();
-   return false;
+   return true;
 }
 
 CORBA::Boolean transientHandler (void* cookie, CORBA::ULong retries, const CORBA::TRANSIENT& ex)
 {
    printf("transient failure handler called.\n");
    connectionIssue();
-   return false;
+   return true;
 }
 
 napi_value Init(napi_env env, napi_value exports) {
