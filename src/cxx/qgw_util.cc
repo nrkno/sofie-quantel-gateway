@@ -147,7 +147,7 @@ napi_status resolveZonePortalShared(char* ior, Quentin::ZonePortal_ptr *zp) {
 
 	if (local_orb == nullptr) {
 		const char* options[][2] = { 
-			{ "traceLevel", "21" }, 
+			{ "traceLevel", "1" }, 
 			{ "clientCallTimeOutPeriod", "2000" },
 			{ "clientConnectTimeOutPeriod", "2000" }, 
 			{ 0, 0 } 
