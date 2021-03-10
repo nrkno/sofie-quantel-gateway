@@ -80,14 +80,14 @@ CORBA::Boolean commFailureHandler (void* cookie, CORBA::ULong retries, const COR
 {
    printf("comm failure handler called. Retry %i.\n", (int) retries);
    connectionIssue();
-   return (retries < 10);
+   return (retries < 5); // Retries used in the case that on failover, the new master is slow to update its IOR
 }
 
 CORBA::Boolean transientHandler (void* cookie, CORBA::ULong retries, const CORBA::TRANSIENT& ex)
 {
    printf("transient failure handler called. Retry %i.\n", (int) retries);
    connectionIssue();
-   return (retries < 10);
+   return (retries < 5); // Retries used in the case that on failover, the new master is slow to update its IOR
 }
 
 napi_value Init(napi_env env, napi_value exports) {
