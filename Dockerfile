@@ -17,7 +17,7 @@ RUN yarn install --check-files --frozen-lockfile --production --force # purge de
 FROM node:12-slim
 
 RUN apt-get update && apt-get install -y \
-    libomniorb4-1 \
+    libomniorb4-1 curl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=0 /opt/quantel-gateway /opt/quantel-gateway
