@@ -78,8 +78,16 @@ napi_value timecodeToBCD(napi_env env, napi_callback_info info) {
 
 CORBA::Boolean commFailureHandler (void* cookie, CORBA::ULong retries, const CORBA::COMM_FAILURE& ex)
 {
-   printf("comm failure handler called.\n");
-   return 0;
+   printf("comm failure handler called. Retry %i.\n", (int) retries);
+   connectionIssue();
+   return (retries < 5); // Retries used in the case that on failover, the new master is slow to update its IOR
+}
+
+CORBA::Boolean transientHandler (void* cookie, CORBA::ULong retries, const CORBA::TRANSIENT& ex)
+{
+   printf("transient failure handler called. Retry %i.\n", (int) retries);
+   connectionIssue();
+   return (retries < 5); // Retries used in the case that on failover, the new master is slow to update its IOR
 }
 
 napi_value Init(napi_env env, napi_value exports) {
@@ -141,6 +149,7 @@ napi_value Init(napi_env env, napi_value exports) {
 	CHECK_STATUS;
 
   omniORB::installCommFailureExceptionHandler(0, commFailureHandler);
+  omniORB::installTransientExceptionHandler(0, transientHandler);
 
   return exports;
 }

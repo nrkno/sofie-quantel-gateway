@@ -38,7 +38,7 @@ function errorLog (...args: any[]) {
 	console.error(...args)
 }
 
-infoLog('Starting Quantel Gateway')
+infoLog('Starting Quantel Gateway - TIMEOUT test version')
 infoLog(`Sofie: Quantel gateway  Copyright (c) 2019 Norsk rikskringkasting AS (NRK)
 
 Sofie: Quantel gateway comes with ABSOLUTELY NO WARRANTY.
@@ -585,7 +585,7 @@ router.get('/default/clip/:clipID/fragments/:in-:out', async (ctx) => {
 		ctx.status = 400
 		ctx.body = {
 			status: 400,
-			message: 'Bad request. Out point must be after in point.',
+			message: `Bad request. Out point "${ctx.params.out}" must be after in point "${ctx.params.in}".`,
 			stack: ''
 		} as JSONError
 		return
