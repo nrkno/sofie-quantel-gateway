@@ -25,6 +25,10 @@ import { app } from '../server'
 import { Server } from 'http'
 import * as request from 'request-promise-native'
 
+const aBriefPause = (p: number) => new Promise((resolve) => {
+	setTimeout(resolve, p)
+})
+
 describe('Copy-level REST API tests', () => {
 
 	let isaIOR: string
@@ -496,6 +500,7 @@ describe('Copy-level REST API tests', () => {
 				} else { resolve() }
 			})
 		})
+		await aBriefPause(500)
 		await spawn.stop()
 	})
 })
