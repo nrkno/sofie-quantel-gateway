@@ -8,7 +8,6 @@ pipeline {
         branch 'master'
       }
       steps {
-        sh(returnStdout: true, script: "sudo apt-get install libomniorb4-dev")
         gatewayRelease()
       }
     }
