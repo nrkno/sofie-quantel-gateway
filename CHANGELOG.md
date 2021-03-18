@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0-0](https://github.com/nrkno/tv-automation-quantel-gateway/compare/1.0.4-0...1.1.0-0) (2021-02-10)
+
+
+### Features
+
+* be able to activate debug-logging at runtime ([f98a846](https://github.com/nrkno/tv-automation-quantel-gateway/commit/f98a846042647b6f738086d2d27bc3d87e2bfa1c))
+
+
+### Bug Fixes
+
+* revert port change ([1b76aea](https://github.com/nrkno/tv-automation-quantel-gateway/commit/1b76aea3ef421cc53a5174a62bc6c55982319a2e))
+* vunerabilities and deprecations ([e00cb71](https://github.com/nrkno/tv-automation-quantel-gateway/commit/e00cb716487f1681312482426eaa72ea31b896ee))
+
 ### [1.0.4-0](https://github.com/nrkno/tv-automation-quantel-gateway/compare/1.0.2...1.0.4-0) (2020-05-29)
 
 

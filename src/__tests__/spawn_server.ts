@@ -72,11 +72,13 @@ export async function start (): Promise<string> {
 	})
 }
 
-export async function stop (): Promise<undefined> {
-	return new Promise((resolve) => {
+export async function stop (): Promise<void> {
+	return new Promise<void>((resolve) => {
 		if (mockServer) {
-			mockServer.kill()
+			console.log('Sending close!')
+			mockServer.send('close')
 			mockServer.on('exit', (_code, _signal) => {
+				console.log('Exiting!')
 				if (app) {
 					app.close(() => {
 						resolve()

@@ -25,6 +25,12 @@ import { app } from '../server'
 import { Server } from 'http'
 import * as request from 'request-promise-native'
 
+// const wait = (t: number): Promise<void> => {
+// 	return new Promise((resolve) => {
+// 		setTimeout(resolve, t)
+// 	})
+// }
+
 describe('Test framework', () => {
 
 	let isaIOR: string
@@ -32,7 +38,7 @@ describe('Test framework', () => {
 
 	beforeAll(async () => {
 		isaIOR = await spawn.start()
-		await new Promise((resolve, reject) => {
+		await new Promise<void>((resolve, reject) => {
 			server = app.listen(3000) // TODO change this to a config parameter
 			server.on('listening', () => {
 				resolve()
@@ -113,7 +119,7 @@ describe('Test framework', () => {
 
 	afterAll(async () => {
 		Quantel.destroyOrb()
-		await new Promise((resolve, reject) => {
+		await new Promise<void>((resolve, reject) => {
 			server.close(e => {
 				if (e) {
 					reject(e)
@@ -128,7 +134,7 @@ describe('Error handling when no server running', () => {
 
 	test('Test failed IOR HTTP connection', async () => {
 		expect.assertions(1)
-		await expect(Quantel.getServers()).rejects.toThrow('CORBA subsystem: TRANSIENT')
+		await expect(Quantel.getServers()).rejects.toThrow('TIMEOUT')
 	})
 
 	test('Test fail to get servers 1', async () => {
@@ -160,7 +166,12 @@ describe('Error handling when server has failed', () => {
 
 	test('Test fail to get servers 1', async () => {
 		expect.assertions(1)
-		await expect(Quantel.getServers()).rejects.toThrow('CORBA subsystem: TRANSIENT')
+		await expect(Quantel.getServers()).rejects.toThrow('TIMEOUT')
+	})
+
+	test('Test fail to get servers 2', async () => {
+		expect.assertions(1)
+		await expect(Quantel.getServers()).rejects.toThrow('ECONNREFUSED')
 	})
 
 	test('Test the failed CORBA connection', async () => {
@@ -214,7 +225,7 @@ describe('Error handling when server has failed, two servers', () => {
 
 	test('Test fail to get servers 1', async () => {
 		expect.assertions(1)
-		await expect(Quantel.getServers()).rejects.toThrow('CORBA subsystem: TRANSIENT')
+		await expect(Quantel.getServers()).rejects.toThrow('TIMEOUT')
 	})
 
 	test('Test the failed CORBA connection 1', async () => {
@@ -273,8 +284,8 @@ describe('Check overlapping requests on failure', () => {
 	test('Test fail to get servers 1', async () => {
 		expect.assertions(2)
 		await Promise.all([
-			expect(Quantel.getServers()).rejects.toThrow('CORBA subsystem: TRANSIENT'),
-			expect(Quantel.getServers()).rejects.toThrow('CORBA subsystem: TRANSIENT') ])
+			expect(Quantel.getServers()).rejects.toThrow('TIMEOUT'),
+			expect(Quantel.getServers()).rejects.toThrow('TIMEOUT') ])
 	})
 
 	test('Test the failed CORBA connection 1', async () => {

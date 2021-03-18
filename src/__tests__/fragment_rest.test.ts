@@ -32,7 +32,7 @@ describe('Clip-fragments REST API tests', () => {
 
 	beforeAll(async () => {
 		isaIOR = await spawn.start()
-		await new Promise((resolve, reject) => {
+		await new Promise<void>((resolve, reject) => {
 			server = app.listen(3000) // TODO change this to a config parameter
 			server.on('listening', () => {
 				resolve()
@@ -133,7 +133,7 @@ describe('Clip-fragments REST API tests', () => {
 
 	test('Get fragments with bad range', async () => {
 		await expect(request.get('http://localhost:3000/default/clip/2/fragments/10-9'))
-		.rejects.toThrow('Out point must be after in point')
+		.rejects.toThrow('must be after in point')
 		await expect(request.get('http://localhost:3000/default/clip/2/fragments/10-9'))
 		.rejects.toThrow('400')
 	})
@@ -168,7 +168,7 @@ describe('Clip-fragments REST API tests', () => {
 
 	afterAll(async () => {
 		Quantel.destroyOrb()
-		await new Promise((resolve, reject) => {
+		await new Promise<void>((resolve, reject) => {
 			server.close(e => {
 				if (e) {
 					reject(e)
