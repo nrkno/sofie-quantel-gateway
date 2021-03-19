@@ -123,7 +123,7 @@ describe('Copy-level REST API tests', () => {
 		} as Quantel.CloneResult)
 	})
 
-	test('Attempt to clone with a string zone ID', async () => {
+	test('Attempt to clone with a string zone ID - message', async () => {
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -135,7 +135,10 @@ describe('Copy-level REST API tests', () => {
 			},
 			json: true }))
 		.rejects.toThrow('Where present, a clone request must use a positive integer for the zone ID')
-		await expect(request({
+	})
+	
+	test('Attempt to clone with a string zone ID - code', async () => {
+			await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
 			body: {
@@ -148,7 +151,7 @@ describe('Copy-level REST API tests', () => {
 		.rejects.toThrow('400')
 	})
 
-	test('Attempt to clone with a negative zone ID', async () => {
+	test('Attempt to clone with a negative zone ID - message', async () => {
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -160,6 +163,9 @@ describe('Copy-level REST API tests', () => {
 			},
 			json: true }))
 		.rejects.toThrow('Where present, a clone request must use a positive integer for the zone ID')
+	})
+
+	test('Attempt to clone with a negative zone ID - code', async () => {
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -173,7 +179,7 @@ describe('Copy-level REST API tests', () => {
 		.rejects.toThrow('400')
 	})
 
-	test('Attempt to clone with a string clip ID', async () => {
+	test('Attempt to clone with a string clip ID - message', async () => {
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -185,6 +191,9 @@ describe('Copy-level REST API tests', () => {
 			},
 			json: true }))
 		.rejects.toThrow('A clone request must have a positive integer for the source clip ID')
+	})
+
+	test('Attempt to clone with a string clip ID - code', async () => {
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -198,7 +207,7 @@ describe('Copy-level REST API tests', () => {
 		.rejects.toThrow('400')
 	})
 
-	test('Attempt to clone with a negative clip ID', async () => {
+	test('Attempt to clone with a negative clip ID - message', async () => {
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -210,6 +219,9 @@ describe('Copy-level REST API tests', () => {
 			},
 			json: true }))
 		.rejects.toThrow('A clone request must have a positive integer for the source clip ID')
+	})
+	
+	test('Attempt to clone with a negative clip ID - code', async () => {
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -223,7 +235,7 @@ describe('Copy-level REST API tests', () => {
 		.rejects.toThrow('400')
 	})
 
-	test('Attempt to clone with a string pool ID', async () => {
+	test('Attempt to clone with a string pool ID - message', async () => {
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -235,6 +247,9 @@ describe('Copy-level REST API tests', () => {
 			},
 			json: true }))
 		.rejects.toThrow('A clone request must have a positive integer for the destiniation pool ID')
+	})
+	
+	test('Attempt to clone with a string pool ID - code', async () => {
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -248,7 +263,7 @@ describe('Copy-level REST API tests', () => {
 		.rejects.toThrow('400')
 	})
 
-	test('Attempt to clone with a negative pool ID', async () => {
+	test('Attempt to clone with a negative pool ID - message', async () => {
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -260,6 +275,9 @@ describe('Copy-level REST API tests', () => {
 			},
 			json: true }))
 		.rejects.toThrow('A clone request must have a positive integer for the destiniation pool ID')
+	})
+	
+	test('Attempt to clone with a negative pool ID - code', async () => {
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -273,7 +291,7 @@ describe('Copy-level REST API tests', () => {
 		.rejects.toThrow('400')
 	})
 
-	test('Attempt to clone with a string priority', async () => {
+	test('Attempt to clone with a string priority - message', async () => {
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -285,6 +303,9 @@ describe('Copy-level REST API tests', () => {
 			},
 			json: true }))
 		.rejects.toThrow('A clone request with priority specified must use an integer in the range 0 to 15')
+	})
+
+	test('Attempt to clone with a string priority - code', async () => {
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -298,7 +319,7 @@ describe('Copy-level REST API tests', () => {
 		.rejects.toThrow('400')
 	})
 
-	test('Attempt to clone with a negative priority', async () => {
+	test('Attempt to clone with a negative priority - message', async () => {
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -310,6 +331,9 @@ describe('Copy-level REST API tests', () => {
 			},
 			json: true }))
 		.rejects.toThrow('A clone request with priority specified must use an integer in the range 0 to 15')
+	})
+
+	test('Attempt to clone with a negative priority - code', async () => {
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -323,7 +347,7 @@ describe('Copy-level REST API tests', () => {
 		.rejects.toThrow('400')
 	})
 
-	test('Attempt to clone with a over-range priority', async () => {
+	test('Attempt to clone with a over-range priority - message', async () => {
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -335,6 +359,9 @@ describe('Copy-level REST API tests', () => {
 			},
 			json: true }))
 		.rejects.toThrow('A clone request with priority specified must use an integer in the range 0 to 15')
+	})
+	
+	test('Attempt to clone with a over-range priority - code', async () => {
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -348,7 +375,7 @@ describe('Copy-level REST API tests', () => {
 		.rejects.toThrow('400')
 	})
 
-	test('Attempt to clone with bad history parameter', async () => {
+	test('Attempt to clone with bad history parameter - message', async () => {
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -361,6 +388,9 @@ describe('Copy-level REST API tests', () => {
 			},
 			json: true }))
 		.rejects.toThrow('A history parameter for a clone request must be either \'true\' or \'false\'.')
+	})
+
+	test('Attempt to clone with bad history parameter - code', async () => {
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -375,7 +405,7 @@ describe('Copy-level REST API tests', () => {
 		.rejects.toThrow('400')
 	})
 
-	test('Attempt to clone clip with bad zone ID', async () => {
+	test('Attempt to clone clip with bad zone ID - message', async () => {
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -386,7 +416,10 @@ describe('Copy-level REST API tests', () => {
 			} as Quantel.CloneInfo,
 			json: true }))
 		.rejects.toThrow('One of the source clip ID \'1234\', source zone ID \'666\' or destiniation pool ID \'4321\' was not found.')
-		await expect(request({
+	})
+
+	test('Attempt to clone clip with bad zone ID - code', async () => {
+			await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
 			body: {
@@ -398,7 +431,7 @@ describe('Copy-level REST API tests', () => {
 		.rejects.toThrow('404')
 	})
 
-	test('Attempt to clone clip with bad clip ID', async () => {
+	test('Attempt to clone clip with bad clip ID - message', async () => {
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -409,6 +442,9 @@ describe('Copy-level REST API tests', () => {
 			} as Quantel.CloneInfo,
 			json: true }))
 		.rejects.toThrow('One of the source clip ID \'666\', source zone ID \'1000\' or destiniation pool ID \'4321\' was not found.')
+	})
+
+	test('Attempt to clone clip with bad clip ID - code', async () => {
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -421,7 +457,7 @@ describe('Copy-level REST API tests', () => {
 		.rejects.toThrow('404')
 	})
 
-	test('Attempt to clone clip with bad pool ID', async () => {
+	test('Attempt to clone clip with bad pool ID - message', async () => {
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -432,7 +468,10 @@ describe('Copy-level REST API tests', () => {
 			} as Quantel.CloneInfo,
 			json: true }))
 		.rejects.toThrow('One of the source clip ID \'1234\', source zone ID \'1000\' or destiniation pool ID \'666\' was not found.')
-		await expect(request({
+	})
+
+	test('Attempt to clone clip with bad pool ID - code', async () => {
+			await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
 			body: {
