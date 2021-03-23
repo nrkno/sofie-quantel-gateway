@@ -136,9 +136,9 @@ describe('Copy-level REST API tests', () => {
 			json: true }))
 		.rejects.toThrow('Where present, a clone request must use a positive integer for the zone ID')
 	})
-	
+
 	test('Attempt to clone with a string zone ID - code', async () => {
-			await expect(request({
+		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
 			body: {
@@ -220,7 +220,7 @@ describe('Copy-level REST API tests', () => {
 			json: true }))
 		.rejects.toThrow('A clone request must have a positive integer for the source clip ID')
 	})
-	
+
 	test('Attempt to clone with a negative clip ID - code', async () => {
 		await expect(request({
 			method: 'POST',
@@ -248,7 +248,7 @@ describe('Copy-level REST API tests', () => {
 			json: true }))
 		.rejects.toThrow('A clone request must have a positive integer for the destiniation pool ID')
 	})
-	
+
 	test('Attempt to clone with a string pool ID - code', async () => {
 		await expect(request({
 			method: 'POST',
@@ -276,7 +276,7 @@ describe('Copy-level REST API tests', () => {
 			json: true }))
 		.rejects.toThrow('A clone request must have a positive integer for the destiniation pool ID')
 	})
-	
+
 	test('Attempt to clone with a negative pool ID - code', async () => {
 		await expect(request({
 			method: 'POST',
@@ -360,7 +360,7 @@ describe('Copy-level REST API tests', () => {
 			json: true }))
 		.rejects.toThrow('A clone request with priority specified must use an integer in the range 0 to 15')
 	})
-	
+
 	test('Attempt to clone with a over-range priority - code', async () => {
 		await expect(request({
 			method: 'POST',
@@ -419,7 +419,7 @@ describe('Copy-level REST API tests', () => {
 	})
 
 	test('Attempt to clone clip with bad zone ID - code', async () => {
-			await expect(request({
+		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
 			body: {
@@ -471,7 +471,7 @@ describe('Copy-level REST API tests', () => {
 	})
 
 	test('Attempt to clone clip with bad pool ID - code', async () => {
-			await expect(request({
+		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
 			body: {
