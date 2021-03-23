@@ -166,6 +166,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone with a string zone ID - message', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -180,6 +181,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone with a string zone ID - code', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -194,6 +196,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone with a negative zone ID - message', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -208,6 +211,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone with a negative zone ID - code', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -222,6 +226,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone with a string clip ID - message', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -236,6 +241,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone with a string clip ID - code', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -250,6 +256,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone with a negative clip ID - message', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -264,6 +271,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone with a negative clip ID - code', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -278,6 +286,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone with a string pool ID - message', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -292,6 +301,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone with a string pool ID - code', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -306,6 +316,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone with a negative pool ID - message', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -320,6 +331,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone with a negative pool ID - code', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -334,6 +346,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone with a string priority - message', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -348,6 +361,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone with a string priority - code', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -362,6 +376,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone with a negative priority - message', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -376,6 +391,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone with a negative priority - code', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -390,6 +406,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone with a over-range priority - message', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -404,6 +421,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone with a over-range priority - code', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -418,6 +436,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone with bad history parameter - message', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -433,6 +452,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone with bad history parameter - code', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -448,6 +468,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone clip with bad zone ID - message', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -461,6 +482,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone clip with bad zone ID - code', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -474,6 +496,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone clip with bad clip ID - message', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -487,6 +510,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone clip with bad clip ID - code', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -500,6 +524,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone clip with bad pool ID - message', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -513,6 +538,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to clone clip with bad pool ID - code', async () => {
+		await aBriefPause(500)
 		await expect(request({
 			method: 'POST',
 			uri: 'http://localhost:3000/default/copy',
@@ -526,6 +552,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Copy remaining', async () => {
+		await aBriefPause(500)
 		await expect(request.get('http://localhost:3000/default/copy/42').then(JSON.parse))
 		.resolves.toMatchObject({
 			type: 'CopyProgress',
@@ -539,6 +566,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to get copy remaining, non-integer ident', async () => {
+		await aBriefPause(500)
 		await expect(request.get('http://localhost:3000/default/copy/wtf'))
 		.rejects.toThrow('Copy ID is a clip ID that must be a positive integer')
 		await expect(request.get('http://localhost:3000/default/copy/wtf'))
@@ -546,6 +574,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to get copy remaining, negative ident', async () => {
+		await aBriefPause(500)
 		await expect(request.get('http://localhost:3000/default/copy/-7'))
 		.rejects.toThrow('Copy ID is a clip ID that must be a positive integer')
 		await expect(request.get('http://localhost:3000/default/copy/-7'))
@@ -553,6 +582,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Attempt to get copy remaining, no copy record', async () => {
+		await aBriefPause(500)
 		await expect(request.get('http://localhost:3000/default/copy/666'))
 		.rejects.toThrow('A copy associated with clip ID \'666\' was not found.')
 		await expect(request.get('http://localhost:3000/default/copy/666'))
@@ -560,6 +590,7 @@ describe('Copy-level REST tests - failure cases', () => {
 	})
 
 	test('Copies remaining', async () => {
+		await aBriefPause(500)
 		await expect(request.get('http://localhost:3000/default/copy/').then(JSON.parse))
 		.resolves.toMatchObject([{
 			type: 'CopyProgress',
