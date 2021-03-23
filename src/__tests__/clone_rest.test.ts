@@ -123,6 +123,48 @@ describe('Copy-level REST API tests', () => {
 		} as Quantel.CloneResult)
 	})
 
+	afterAll(async () => {
+		Quantel.destroyOrb()
+		await new Promise<void>((resolve, reject) => {
+			server.close(e => {
+				if (e) {
+					reject(e)
+				} else { resolve() }
+			})
+		})
+		await aBriefPause(500)
+		await spawn.stop()
+	})
+})
+
+describe('Copy-level REST tests - failure cases', () => { 
+
+	let isaIOR: string
+	let server: Server
+
+	beforeAll(async () => {
+		isaIOR = await spawn.start()
+		await new Promise<void>((resolve, reject) => {
+			server = app.listen(3000) // TODO change this to a config parameter
+			server.on('listening', () => {
+				resolve()
+			})
+			server.on('error', e => {
+				reject(e)
+			})
+		})
+	})
+
+	test('Test connect', async () => {
+		await expect(request.post('http://localhost:3000/connect/127.0.0.1').then(JSON.parse))
+		.resolves.toStrictEqual({
+			type: 'ConnectionDetails',
+			href: 'http://127.0.0.1:2096',
+			isaIOR,
+		 	refs: [ 'http://127.0.0.1:2096' ],
+			robin: 0 } as Quantel.ConnectionDetails)
+	})
+
 	test('Attempt to clone with a string zone ID - message', async () => {
 		await expect(request({
 			method: 'POST',
