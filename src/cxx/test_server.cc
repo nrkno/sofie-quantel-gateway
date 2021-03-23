@@ -756,8 +756,10 @@ CORBA::Long ZonePortal_i::cloneIfNeeded(CORBA::Long clipID, CORBA::Long poolID, 
 
 Quentin::CopyProgress ZonePortal_i::getCopyRemaining(CORBA::Long clipID) {
 	if (clipID == 666) {
+		printf("About to throw BadIdent exception from copyRemaining.\n");
 		throw Quentin::BadIdent(Quentin::BadIdentReason::clipNotKnown, clipID);
 	}
+	printf("About to return value from copyRemaining.\n");
 	return { 42, 256, 128, 19, 9, CORBA::Boolean(false) };
 }
 
