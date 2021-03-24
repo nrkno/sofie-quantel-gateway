@@ -756,10 +756,10 @@ CORBA::Long ZonePortal_i::cloneIfNeeded(CORBA::Long clipID, CORBA::Long poolID, 
 
 Quentin::CopyProgress ZonePortal_i::getCopyRemaining(CORBA::Long clipID) {
 	if (clipID == 666) {
-		printf("About to throw BadIdent exception from copyRemaining %ld.\n", clipID);
+		printf("About to throw BadIdent exception from copyRemaining %i.\n", clipID);
 		throw Quentin::BadIdent(Quentin::BadIdentReason::clipNotKnown, clipID);
 	}
-	printf("About to return value from copyRemaining %ld.\n", clipID);
+	printf("About to return value from copyRemaining %i.\n", clipID);
 	return { 42, 256, 128, 19, 9, CORBA::Boolean(false) };
 }
 
@@ -788,7 +788,7 @@ napi_value runServer(napi_env env, napi_callback_info info) {
 	// napi_status status;
 
 	int argc = 0;
-	const char* options[][2] = { { "traceLevel", "1" }, { 0, 0 } };
+	const char* options[][2] = { { "traceLevel", "21" }, { 0, 0 } };
 	CORBA::ORB_var orb = CORBA::ORB_init(argc, nullptr,"omniORB4",options);
 	myPrettyOrb = orb;
   	CORBA::Object_var obj = orb->resolve_initial_references("RootPOA");
