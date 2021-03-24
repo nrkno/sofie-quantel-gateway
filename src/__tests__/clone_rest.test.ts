@@ -137,7 +137,7 @@ describe('Copy-level REST API tests', () => {
 	})
 })
 
-describe('Copy-level REST tests - failure cases 1', () => { 
+describe('Copy-level REST tests - failure cases 1', () => {
 
 	let isaIOR: string
 	let server: Server
@@ -645,9 +645,9 @@ describe('Copy-level REST tests - failure cases 4', () => {
 			type: 'ConnectionDetails',
 			href: 'http://127.0.0.1:2096',
 			isaIOR,
-				refs: [ 'http://127.0.0.1:2096' ],
+			refs: [ 'http://127.0.0.1:2096' ],
 			robin: 0 } as Quantel.ConnectionDetails)
-	})	
+	})
 
 	test('Attempt to clone clip with bad pool ID - message', async () => {
 		await aBriefPause(500)
