@@ -791,6 +791,7 @@ napi_value runServer(napi_env env, napi_callback_info info) {
 	const char* options[][2] = {  
 		{ "traceLevel", "21" },
 		{ "maxServerThreadPerConnection", "1" }, 
+		{ "threadPerConnectionPolicy", "0" },
 		{ 0, 0 } 
 	};
 	CORBA::ORB_var orb = CORBA::ORB_init(argc, nullptr,"omniORB4",options);
