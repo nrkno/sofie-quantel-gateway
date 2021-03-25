@@ -788,7 +788,11 @@ napi_value runServer(napi_env env, napi_callback_info info) {
 	// napi_status status;
 
 	int argc = 0;
-	const char* options[][2] = { { "traceLevel", "21" }, { 0, 0 } };
+	const char* options[][2] = {  
+		{ "traceLevel", "21" },
+		{ "maxServerThreadPerConnection", "1" }, 
+		{ 0, 0 } 
+	};
 	CORBA::ORB_var orb = CORBA::ORB_init(argc, nullptr,"omniORB4",options);
 	myPrettyOrb = orb;
   	CORBA::Object_var obj = orb->resolve_initial_references("RootPOA");
