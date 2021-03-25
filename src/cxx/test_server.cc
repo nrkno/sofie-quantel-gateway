@@ -789,7 +789,7 @@ napi_value runServer(napi_env env, napi_callback_info info) {
 
 	int argc = 0;
 	const char* options[][2] = {  
-		{ "traceLevel", "21" },
+		{ "traceLevel", "1" },
 		{ "maxServerThreadPerConnection", "1" }, 
 		{ "threadPerConnectionPolicy", "0" },
 		{ "threadPoolWatchConnection", "0" },
