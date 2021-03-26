@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/nrkno/tv-automation-quantel-gateway/compare/1.1.0-1...1.1.0) (2021-03-26)
+
+
+### Bug Fixes
+
+* limit number of repeats on OBJECT_NOT_EXIST exception ([16af817](https://github.com/nrkno/tv-automation-quantel-gateway/commit/16af8173aad71f9b88d2825bea75f987ef135810))
+* throw connection failures up into Javascript land and reset from there ([8a42e2b](https://github.com/nrkno/tv-automation-quantel-gateway/commit/8a42e2b6ab9d49ed28d0c3e0c3b43bba646f1270))
+* use ORB client timeout to detect an ISA manager failure ASAP ([57d5997](https://github.com/nrkno/tv-automation-quantel-gateway/commit/57d59978c0ca95b4bcdbde4bfdcfcfd65739f4f8))
+
 ## [1.1.0-0](https://github.com/nrkno/tv-automation-quantel-gateway/compare/1.0.4-0...1.1.0-0) (2021-02-10)
 
 
