@@ -133,7 +133,7 @@ describe('Clip-fragments REST API tests', () => {
 
 	test('Get fragments with bad range', async () => {
 		await expect(request.get('http://localhost:3000/default/clip/2/fragments/10-9'))
-		.rejects.toThrow('Out point must be after in point')
+		.rejects.toThrow('must be after in point')
 		await expect(request.get('http://localhost:3000/default/clip/2/fragments/10-9'))
 		.rejects.toThrow('400')
 	})

@@ -436,7 +436,8 @@ export namespace Quantel {
 			if (stickyRef[index].indexOf(':') < 0) { stickyRef[index] = stickyRef[index] + ':2096' }
 			request({
 				uri: stickyRef[index] + '/ZoneManager.ior',
-				resolveWithFullResponse: true
+				resolveWithFullResponse: true,
+				timeout: 1000
 			}).then(res => {
 				if (res.statusCode === 200) {
 					resolve(res.body)
