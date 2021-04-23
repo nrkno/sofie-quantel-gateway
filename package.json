@@ -1,6 +1,6 @@
 {
   "name": "tv-automation-quantel-gateway",
-  "version": "1.3.0-release33",
+  "version": "1.3.0-release33.0",
   "private": true,
   "description": "CORBA to REST gateway for Quantel/ISA playback",
   "main": "dist/index.js",

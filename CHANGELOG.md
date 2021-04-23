@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0-release33.0](https://github.com/nrkno/tv-automation-quantel-gateway/compare/1.1.0-release31.0...1.3.0-release33.0) (2021-04-23)
+
+
+### Bug Fixes
+
+* throw connection failures up into Javascript land and reset from there ([8a42e2b](https://github.com/nrkno/tv-automation-quantel-gateway/commit/8a42e2b6ab9d49ed28d0c3e0c3b43bba646f1270))
+
 ## [1.1.0-release31.0](https://github.com/nrkno/tv-automation-quantel-gateway/compare/1.1.0-1...1.1.0-release31.0) (2021-03-02)
 
 
