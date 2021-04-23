@@ -38,8 +38,8 @@ function errorLog (...args: any[]) {
 	console.error(...args)
 }
 
-infoLog('Starting Quantel Gateway - TIMEOUT test version')
-infoLog(`Sofie: Quantel gateway  Copyright (c) 2019 Norsk rikskringkasting AS (NRK)
+infoLog('Starting Quantel Gateway')
+infoLog(`Sofie: Quantel gateway  Copyright (c) 2021 Norsk rikskringkasting AS (NRK)
 
 Sofie: Quantel gateway comes with ABSOLUTELY NO WARRANTY.
 
