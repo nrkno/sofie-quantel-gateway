@@ -134,7 +134,7 @@ describe('Error handling when no server running', () => {
 
 	test('Test failed IOR HTTP connection', async () => {
 		expect.assertions(1)
-		await expect(Quantel.getServers()).rejects.toThrow('TIMEOUT')
+		await expect(Quantel.getServers()).rejects.toThrow(/TIMEOUT|TRANSIENT/)
 	})
 
 	test('Test fail to get servers 1', async () => {
@@ -166,7 +166,7 @@ describe('Error handling when server has failed', () => {
 
 	test('Test fail to get servers 1', async () => {
 		expect.assertions(1)
-		await expect(Quantel.getServers()).rejects.toThrow('TIMEOUT')
+		await expect(Quantel.getServers()).rejects.toThrow(/TIMEOUT|TRANSIENT/)
 	})
 
 	test('Test fail to get servers 2', async () => {
@@ -225,7 +225,7 @@ describe('Error handling when server has failed, two servers', () => {
 
 	test('Test fail to get servers 1', async () => {
 		expect.assertions(1)
-		await expect(Quantel.getServers()).rejects.toThrow('TIMEOUT')
+		await expect(Quantel.getServers()).rejects.toThrow(/TIMEOUT|TRANSIENT/)
 	})
 
 	test('Test the failed CORBA connection 1', async () => {
@@ -284,8 +284,8 @@ describe('Check overlapping requests on failure', () => {
 	test('Test fail to get servers 1', async () => {
 		expect.assertions(2)
 		await Promise.all([
-			expect(Quantel.getServers()).rejects.toThrow('TIMEOUT'),
-			expect(Quantel.getServers()).rejects.toThrow('TIMEOUT') ])
+			expect(Quantel.getServers()).rejects.toThrow(/TIMEOUT|TRANSIENT/),
+			expect(Quantel.getServers()).rejects.toThrow(/TIMEOUT|TRANSIENT/) ])
 	})
 
 	test('Test the failed CORBA connection 1', async () => {
