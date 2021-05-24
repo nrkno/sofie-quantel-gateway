@@ -99,7 +99,7 @@ jobs:
               DOCKERHUB_PUBLISH="0"
             else
               DOCKERHUB_PUBLISH="1"
-              IMAGES="${{ secrets.DOCKERHUB_IMAGE_PREFIX }}${{ quantel-gateway }}:$DOCKER_TAG"$'\n'$IMAGES
+              IMAGES="${{ secrets.DOCKERHUB_IMAGE_PREFIX }}quantel-gateway:$DOCKER_TAG"$'\n'$IMAGES
             fi
             # debug output
             echo dockerhub-publish $DOCKERHUB_PUBLISH
