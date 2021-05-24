@@ -440,9 +440,8 @@ router.get('/default/clip', async (ctx) => {
 					}
 					return
 				}
-				ctx.query.limit = +ctx.query.limit
 			}
-			ctx.body = await Quantel.searchClips(ctx.query)
+			ctx.body = await Quantel.searchClips({ ...ctx.query, limit: +ctx.query.limit })
 		} catch (err) {
 			if (err.message.indexOf('BadColumnData') >= 0) {
 				ctx.status = 400
