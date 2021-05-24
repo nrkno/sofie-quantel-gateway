@@ -55,6 +55,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12.x
+      - name: Install Omniorb 4
+        run: sudo apt-get install libomniorb4-dev
       - name: Prepare Environment
         run: yarn
         env:
