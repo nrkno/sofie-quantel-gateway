@@ -94,12 +94,12 @@ jobs:
           if [[ $DOCKER_TAG =~ ^release([0-9]+)$ || $DOCKER_TAG == "latest" || "${{ github.ref }}" == refs/tags/* ]]
           then
             # If we have a dockerhub image name, then setup to publish there
-            if [ -z "${{ secrets.DOCKERHUB_IMAGE_PREFIX }}" ]
+            if [ -z "${{ secrets.DOCKERHUB_IMAGE }}" ]
             then
               DOCKERHUB_PUBLISH="0"
             else
               DOCKERHUB_PUBLISH="1"
-              IMAGES="${{ secrets.DOCKERHUB_IMAGE_PREFIX }}quantel-gateway:$DOCKER_TAG"$'\n'$IMAGES
+              IMAGES="${{ secrets.DOCKERHUB_IMAGE }}:$DOCKER_TAG"$'\n'$IMAGES
             fi
             # debug output
             echo dockerhub-publish $DOCKERHUB_PUBLISH
