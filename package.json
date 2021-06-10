@@ -144,7 +144,7 @@
   },
   "resolutions": {
     "node-license-validator/**/minimist": "^1.2.3",
-    "trim-newlines": "^4.0.1",
+    "trim-newlines": "^3.0.1",
     "gh-pages/**/normalize-url": "^4.5.1"
   }
 }
