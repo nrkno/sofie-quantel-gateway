@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0-release35.3](https://github.com/nrkno/tv-automation-quantel-gateway/compare/1.5.0-release35.2...1.5.0-release35.3) (2021-06-10)
+
+## [1.5.0-release35.2](https://github.com/nrkno/tv-automation-quantel-gateway/compare/1.5.0-release35.1...1.5.0-release35.2) (2021-06-10)
+
+## [1.5.0-release35.1](https://github.com/nrkno/tv-automation-quantel-gateway/compare/v0.0.0-test2...v1.5.0-release35.1) (2021-06-10)
+
+## [1.1.0](https://github.com/nrkno/tv-automation-quantel-gateway/compare/1.1.0...v1.1.0) (2021-03-26)
+
 ## [1.3.0-release33.0](https://github.com/nrkno/tv-automation-quantel-gateway/compare/1.1.0-release31.0...1.3.0-release33.0) (2021-04-23)
 
 
