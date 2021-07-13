@@ -3,14 +3,6 @@
 pipeline {
   agent any
   stages {
-    stage('Version') {
-      when {
-        branch 'master'
-      }
-      steps {
-        gatewayRelease()
-      }
-    }
     stage('Build') {
       steps {
         sofieSlackSendBuildStarted()
