@@ -23,14 +23,11 @@
     "cov": "jest --runInBand --coverage; open-cli coverage/lcov-report/index.html",
     "cov-open": "open-cli coverage/lcov-report/index.html",
     "send-coverage": "yarn testci && codecov",
-<<<<<<< HEAD
     "docs": "yarn docs:html && open-cli docs/index.html",
     "docs:test": "yarn docs:html",
     "docs:html": "typedoc src/index.ts --excludePrivate --theme minimal --out docs",
     "docs:json": "typedoc --mode file --json docs/typedoc.json src/index.ts",
     "docs:publish": "yarn docs:html && gh-pages -d docs",
-=======
->>>>>>> 4bf4ec2115d183e40faa10d8b8376892f04e2bdb
     "changelog": "standard-version",
     "release": "yarn reset && yarn testci && yarn changelog",
     "prepareChangelog": "standard-version --prerelease",
@@ -121,12 +118,8 @@
     "ts-node": "^9.0.0",
     "tslint": "^6.1.3",
     "tslint-config-standard": "^9.0.0",
-<<<<<<< HEAD
     "typedoc": "^0.21.4",
     "typescript": "^4.3.0"
-=======
-    "typescript": "^4.0.3"
->>>>>>> 4bf4ec2115d183e40faa10d8b8376892f04e2bdb
   },
   "dependencies": {
     "bindings": "^1.5.0",
