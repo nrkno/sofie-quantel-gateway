@@ -132,7 +132,7 @@
     "yargs": "^14.0.0"
   },
   "standard-version": {
-    "message": "chore(release): %s [skip ci]",
+    "message": "chore(release): %s",
     "tagPrefix": ""
   },
   "resolutions": {
