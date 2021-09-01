@@ -29,7 +29,8 @@
 #include "test_server.h"
 #include <omniORB4/omniORB.h>
 
-napi_value timecodeFromBCD(napi_env env, napi_callback_info info) {
+napi_value timecodeFromBCD(napi_env env, napi_callback_info info)
+{
 	napi_status status;
 	napi_value result;
 	uint32_t timecode;
@@ -39,21 +40,23 @@ napi_value timecodeFromBCD(napi_env env, napi_callback_info info) {
 	status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
 	CHECK_STATUS;
 
-	if (argc != 1) {
-		NAPI_THROW_ERROR("Timecode conversion requires a single numberical value.");
+	if (argc != 1)
+	{
+		NAPI_THROW_ERROR("Timecode conversion requires a single numerical value.");
 	}
 
 	status = napi_get_value_uint32(env, argv[0], &timecode);
 	CHECK_STATUS;
 
 	status = napi_create_string_utf8(env, formatTimecode(timecode).c_str(),
-		NAPI_AUTO_LENGTH, &result);
+									 NAPI_AUTO_LENGTH, &result);
 	CHECK_STATUS;
 
 	return result;
 }
 
-napi_value timecodeToBCD(napi_env env, napi_callback_info info) {
+napi_value timecodeToBCD(napi_env env, napi_callback_info info)
+{
 	napi_status status;
 	napi_value result;
 	char tcChars[12];
@@ -63,7 +66,8 @@ napi_value timecodeToBCD(napi_env env, napi_callback_info info) {
 	status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
 	CHECK_STATUS;
 
-	if (argc != 1) {
+	if (argc != 1)
+	{
 		NAPI_THROW_ERROR("Timecode conversion requires a single string value.");
 	}
 
@@ -76,52 +80,53 @@ napi_value timecodeToBCD(napi_env env, napi_callback_info info) {
 	return result;
 }
 
-CORBA::Boolean commFailureHandler (void* cookie, CORBA::ULong retries, const CORBA::COMM_FAILURE& ex)
+CORBA::Boolean commFailureHandler(void *cookie, CORBA::ULong retries, const CORBA::COMM_FAILURE &ex)
 {
-   printf("comm failure handler called. Retry %i.\n", (int) retries);
-   connectionIssue();
-   return (retries < 5); // Retries used in the case that on failover, the new master is slow to update its IOR
+	printf("comm failure handler called. Retry %i.\n", (int)retries);
+	connectionIssue();
+	return (retries < 5); // Retries used in the case that on failover, the new master is slow to update its IOR
 }
 
-CORBA::Boolean transientHandler (void* cookie, CORBA::ULong retries, const CORBA::TRANSIENT& ex)
+CORBA::Boolean transientHandler(void *cookie, CORBA::ULong retries, const CORBA::TRANSIENT &ex)
 {
-   printf("transient failure handler called. Retry %i.\n", (int) retries);
-   connectionIssue();
-   return (retries < 5); // Retries used in the case that on failover, the new master is slow to update its IOR
+	printf("transient failure handler called. Retry %i.\n", (int)retries);
+	connectionIssue();
+	return (retries < 5); // Retries used in the case that on failover, the new master is slow to update its IOR
 }
 
-napi_value Init(napi_env env, napi_value exports) {
-  napi_status status;
-  napi_value start, stop, jump, transition, standard, high;
-  status = napi_create_int32(env, START, &start);
+napi_value Init(napi_env env, napi_value exports)
+{
+	napi_status status;
+	napi_value start, stop, jump, transition, standard, high;
+	status = napi_create_int32(env, START, &start);
 	CHECK_STATUS;
-  status = napi_create_int32(env, STOP, &stop);
+	status = napi_create_int32(env, STOP, &stop);
 	CHECK_STATUS;
-  status = napi_create_int32(env, JUMP, &jump);
+	status = napi_create_int32(env, JUMP, &jump);
 	CHECK_STATUS;
-  status = napi_create_int32(env, TRANSITION, &transition);
+	status = napi_create_int32(env, TRANSITION, &transition);
 	CHECK_STATUS;
 	status = napi_create_int32(env, Quentin::Port::StandardPriority, &standard);
 	CHECK_STATUS;
 	status = napi_create_int32(env, Quentin::Port::HighPriority, &high);
 	CHECK_STATUS;
 
-  napi_property_descriptor desc[] = {
-    DECLARE_NAPI_METHOD("testConnection", testConnection),
+	napi_property_descriptor desc[] = {
+		DECLARE_NAPI_METHOD("testConnection", testConnection),
 		DECLARE_NAPI_METHOD("listZones", listZones),
-    DECLARE_NAPI_METHOD("getServers", getServers),
-    DECLARE_NAPI_METHOD("createPlayPort", createPlayPort),
-    DECLARE_NAPI_METHOD("getPlayPortStatus", getPlayPortStatus),
-    DECLARE_NAPI_METHOD("releasePort", releasePort),
+		DECLARE_NAPI_METHOD("getServers", getServers),
+		DECLARE_NAPI_METHOD("createPlayPort", createPlayPort),
+		DECLARE_NAPI_METHOD("getPlayPortStatus", getPlayPortStatus),
+		DECLARE_NAPI_METHOD("releasePort", releasePort),
 		DECLARE_NAPI_METHOD("wipe", wipe),
 		DECLARE_NAPI_METHOD("getClipData", getClipData),
-    DECLARE_NAPI_METHOD("getFragments", getFragments),
+		DECLARE_NAPI_METHOD("getFragments", getFragments),
 		DECLARE_NAPI_METHOD("searchClips", searchClips), // 10
-    DECLARE_NAPI_METHOD("loadPlayPort", loadPlayPort),
+		DECLARE_NAPI_METHOD("loadPlayPort", loadPlayPort),
 		DECLARE_NAPI_METHOD("getPortFragments", getPortFragments),
-    DECLARE_NAPI_METHOD("trigger", trigger),
-    DECLARE_NAPI_METHOD("jump", qJump),
-    DECLARE_NAPI_METHOD("setJump", setJump),
+		DECLARE_NAPI_METHOD("trigger", trigger),
+		DECLARE_NAPI_METHOD("jump", qJump),
+		DECLARE_NAPI_METHOD("setJump", setJump),
 		DECLARE_NAPI_METHOD("getThumbnailSize", getThumbnailSize),
 		DECLARE_NAPI_METHOD("requestThumbnails", requestThumbnails),
 		DECLARE_NAPI_METHOD("cloneIfNeeded", cloneIfNeeded),
@@ -136,22 +141,22 @@ napi_value Init(napi_env env, napi_value exports) {
 		DECLARE_NAPI_METHOD("runServer", runServer),
 		DECLARE_NAPI_METHOD("closeServer", closeServer),
 		DECLARE_NAPI_METHOD("performWork", performWork),
-		DECLARE_NAPI_METHOD("deactivatePman", deactivatePman), 
+		DECLARE_NAPI_METHOD("deactivatePman", deactivatePman),
 		DECLARE_NAPI_METHOD("destroyOrb", destroyOrb),
-    { "START", nullptr, nullptr, nullptr, nullptr, start, napi_enumerable, nullptr },
-    { "STOP", nullptr, nullptr, nullptr, nullptr, stop, napi_enumerable, nullptr }, // 30
-    { "JUMP", nullptr, nullptr, nullptr, nullptr, jump, napi_enumerable, nullptr },
-    { "TRANSITION", nullptr, nullptr, nullptr, nullptr, transition, napi_enumerable, nullptr },
-		{ "STANDARD", nullptr, nullptr, nullptr, nullptr, standard, napi_enumerable, nullptr},
-		{ "HIGH", nullptr, nullptr, nullptr, nullptr, high, napi_enumerable, nullptr},
-  };
-  status = napi_define_properties(env, exports, 37, desc);
+		{"START", nullptr, nullptr, nullptr, nullptr, start, napi_enumerable, nullptr},
+		{"STOP", nullptr, nullptr, nullptr, nullptr, stop, napi_enumerable, nullptr}, // 30
+		{"JUMP", nullptr, nullptr, nullptr, nullptr, jump, napi_enumerable, nullptr},
+		{"TRANSITION", nullptr, nullptr, nullptr, nullptr, transition, napi_enumerable, nullptr},
+		{"STANDARD", nullptr, nullptr, nullptr, nullptr, standard, napi_enumerable, nullptr},
+		{"HIGH", nullptr, nullptr, nullptr, nullptr, high, napi_enumerable, nullptr},
+	};
+	status = napi_define_properties(env, exports, 37, desc);
 	CHECK_STATUS;
 
-  omniORB::installCommFailureExceptionHandler(0, commFailureHandler);
-  omniORB::installTransientExceptionHandler(0, transientHandler);
+	omniORB::installCommFailureExceptionHandler(0, commFailureHandler);
+	omniORB::installTransientExceptionHandler(0, transientHandler);
 
-  return exports;
+	return exports;
 }
 
 NAPI_MODULE(quantel_gateway, Init)
