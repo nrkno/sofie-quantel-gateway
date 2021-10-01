@@ -33,7 +33,7 @@
     "prepareChangelog": "standard-version --prerelease",
     "reset": "git clean -dfx && git reset --hard && yarn",
     "ci": "yarn testci",
-    "validate:dependencies": "yarn audit && yarn license-validate",
+    "validate:dependencies": "yarn audit --groups dependencies && yarn license-validate",
     "license-validate": "node-license-validator -p -d --allow-licenses MIT BSD BSD-2-Clause BSD-3-Clause ISC Apache Unlicense WTFPL GPL GPL-2.0-or-later --allow-packages cycle",
     "watch-server": "nodemon --watch src -e ts,tsx --exec ts-node ./src/server.ts",
     "server": "ts-node ./src/server.ts",
