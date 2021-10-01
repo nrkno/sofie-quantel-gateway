@@ -19,13 +19,20 @@
 	 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-import * as Koa from 'koa'
-import * as Router from 'koa-router'
-import * as bodyParser from 'koa-bodyparser'
+import Koa from 'koa'
+import Router from 'koa-router'
+import bodyParser from 'koa-bodyparser'
 import { Quantel } from '.'
 import { StatusResponse, ExternalStatus } from './systemStatus'
-import * as yargs from 'yargs'
+import yargs from 'yargs'
 import { Server, get } from 'http'
+import PQueue from 'p-queue'
+
+const queue = new PQueue({
+	concurrency: 1,
+	timeout: 10000,
+	throwOnTimeout: true
+})
 
 let debug = false
 function debugLog (...args: any[]) {
@@ -384,40 +391,50 @@ router.get('/default/server/:serverID/port/', async (ctx) => {
 })
 
 router.put('/default/server/:serverID/port/:portID/channel/:channelID', async (ctx) => {
-	ctx.body = await Quantel.createPlayPort({
-		serverID: ctx.params.serverID,
-		portName: ctx.params.portID,
-		channelNo: +ctx.params.channelID
-	})
+	await queue.add(async () => {
+		ctx.body = await Quantel.createPlayPort({
+			serverID: ctx.params.serverID,
+			portName: ctx.params.portID,
+			channelNo: +ctx.params.channelID
+		})
+	}, { priority: 0 })
 })
 
 router.get('/default/server/:serverID/port/:portID', async (ctx) => {
-	ctx.body = await Quantel.getPlayPortStatus({
-		serverID: ctx.params.serverID,
-		portName: ctx.params.portID
-	})
+	await queue.add(async () => {
+		ctx.body = await Quantel.getPlayPortStatus({
+			serverID: ctx.params.serverID,
+			portName: ctx.params.portID
+		})
+	}, { priority: 0 })
 })
 
 router.post('/default/server/:serverID/port/:portID/reset', async (ctx) => {
-	ctx.body = await Quantel.releasePort({
-		serverID: ctx.params.serverID,
-		portName: ctx.params.portID,
-		resetOnly: true
-	})
+	await queue.add(async () => {
+		ctx.body = await Quantel.releasePort({
+			serverID: ctx.params.serverID,
+			portName: ctx.params.portID,
+			resetOnly: true
+		})
+	}, { priority: 1 })
 })
 
 router.get('/default/server/:serverID/port/:portID/properties', async (ctx) => {
-	ctx.body = await Quantel.getPortProperties({
-		serverID: ctx.params.serverID,
-		portName: ctx.params.portID
-	})
+	await queue.add(async () => {
+		ctx.body = await Quantel.getPortProperties({
+			serverID: ctx.params.serverID,
+			portName: ctx.params.portID
+		})
+	}, { priority: 0 })
 })
 
 router.delete('/default/server/:serverID/port/:portID', async (ctx) => {
-	ctx.body = await Quantel.releasePort({
-		serverID: ctx.params.serverID,
-		portName: ctx.params.portID
-	})
+	await queue.add(async () => {
+		ctx.body = await Quantel.releasePort({
+			serverID: ctx.params.serverID,
+			portName: ctx.params.portID
+		})
+	}, { priority: 0 })
 })
 
 router.get('/default/clip', async (ctx) => {
