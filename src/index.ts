@@ -23,9 +23,6 @@ import * as request from 'request-promise-native'
 
 const quantel = require('../build/Release/quantel_gateway')
 
-// import * as SegfaultHandler from 'segfault-handler'
-// SegfaultHandler.registerHandler('crash.log')
-
 export namespace Quantel {
 
 	let isaIOR: Promise<string> | null = null
@@ -422,48 +419,64 @@ export namespace Quantel {
 		} else {
 			connectAttempt = true
 		}
+
 		if (objectNotFoundCount > 5) {
 			resetConnection(false)
 			throw new ConnectError(`Five OBJECT_NOT_EXIST exceptions in a row. Preventing loop. System in a bad state.`)
 		}
-		if (typeof ref === 'string') ref = [ ref ]
+
+		if (typeof ref === 'string') {
+			ref = [ ref ]
+		}
+
 		let myCount: number = count ? count + 1 : 1
-		if (isaIOR === null || ref) isaIOR = Promise.reject()
-		if (ref) { stickyRef = ref }
+
+		if (isaIOR === null || ref) {
+			isaIOR = Promise.reject()
+		}
+		if (ref) {
+			stickyRef = ref
+		}
+
 		let index = robin % stickyRef.length
-		isaIOR = isaIOR.then(x => x, (): Promise<string> => new Promise((resolve, reject) => {
-			if (stickyRef[index].endsWith('/')) { stickyRef[index] = stickyRef[index].slice(0, -1) }
-			if (stickyRef[index].indexOf(':') < 0) { stickyRef[index] = stickyRef[index] + ':2096' }
-			request({
-				uri: stickyRef[index] + '/ZoneManager.ior',
-				resolveWithFullResponse: true,
-				timeout: 1000
-			}).then(res => {
-				if (res.statusCode === 200) {
-					resolve(res.body)
-				} else {
+		isaIOR = isaIOR
+		.then(
+			x => x,
+			(): Promise<string> => new Promise((resolve, reject) => {
+				if (stickyRef[index].endsWith('/')) { stickyRef[index] = stickyRef[index].slice(0, -1) }
+				if (stickyRef[index].indexOf(':') < 0) { stickyRef[index] = stickyRef[index] + ':2096' }
+
+				request({
+					uri: stickyRef[index] + '/ZoneManager.ior',
+					resolveWithFullResponse: true,
+					timeout: 1000
+				}).then(res => {
+					if (res.statusCode === 200) {
+						resolve(res.body)
+					} else {
+						if (myCount >= stickyRef.length) {
+							destroyOrb()
+							reject(new ConnectError(
+								`HTTP request for ISA IOR failed with status ${res.statusCode}: ${res.statusMessage}`,
+								res.statusCode))
+						} else {
+							resetConnection()
+							getISAReference(undefined, myCount).catch(reject)
+							resolve(isaIOR as Promise<string>)
+						}
+					}
+				}, err => {
 					if (myCount >= stickyRef.length) {
 						destroyOrb()
-						reject(new ConnectError(
-							`HTTP request for ISA IOR failed with status ${res.statusCode}: ${res.statusMessage}`,
-							res.statusCode))
+						reject(err)
 					} else {
 						resetConnection()
 						getISAReference(undefined, myCount).catch(reject)
 						resolve(isaIOR as Promise<string>)
 					}
-				}
-			}, err => {
-				if (myCount >= stickyRef.length) {
-					destroyOrb()
-					reject(err)
-				} else {
-					resetConnection()
-					getISAReference(undefined, myCount).catch(reject)
-					resolve(isaIOR as Promise<string>)
-				}
+				})
 			})
-		}))
+		)
 		return {
 			type: 'ConnectionDetails',
 			isaIOR: await isaIOR,
