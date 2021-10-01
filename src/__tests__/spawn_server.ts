@@ -20,7 +20,7 @@
 */
 
 import { fork, ChildProcess } from 'child_process'
-import * as http from 'http'
+import http from 'http'
 
 let mockServer: ChildProcess | null = null
 let app: http.Server | null = null

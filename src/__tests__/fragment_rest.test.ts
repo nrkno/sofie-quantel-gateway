@@ -23,7 +23,7 @@ import { Quantel } from '../index'
 import * as spawn from './spawn_server'
 import { app } from '../server'
 import { Server } from 'http'
-import * as request from 'request-promise-native'
+import request from 'request-promise-native'
 
 describe('Clip-fragments REST API tests', () => {
 

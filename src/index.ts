@@ -19,7 +19,7 @@
 	 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-import * as request from 'request-promise-native'
+import request from 'request-promise-native'
 
 const quantel = require('../build/Release/quantel_gateway')
 

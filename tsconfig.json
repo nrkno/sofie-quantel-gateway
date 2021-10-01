@@ -4,7 +4,8 @@
     "target": "es2017",
     "noImplicitAny": true,
     "outDir": "./dist",
-    "sourceMap": true
+    "sourceMap": true,
+    "esModuleInterop": true
   },
   "extends": "./config/tsconfig.base",
   "include": [
