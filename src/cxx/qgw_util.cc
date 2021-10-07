@@ -72,7 +72,7 @@ napi_status retrieveZonePortal(napi_env env, napi_callback_info info, CORBA::ORB
 
 	CORBA::ORB_var local_orb;
   if (*orb == nullptr) {
-		const char* options[][2] = { { "traceLevel", "1" }, { 0, 0 } };
+		const char* options[][2] = { { "traceLevel", "40" }, { 0, 0 } };
 		int orbc = 0;
 		local_orb = CORBA::ORB_init(orbc, nullptr, "omniORB4", options);
 	}
@@ -109,7 +109,7 @@ napi_status retrieveZonePortalShared(napi_env env, napi_callback_info info, CORB
 
   if (local_orb == nullptr) {
 		const char* options[][2] = { 
-			{ "traceLevel", "1" },
+			{ "traceLevel", "40" },
 			{ 0, 0 } 
 		};
 		int orbc = 0;
@@ -125,7 +125,7 @@ napi_status retrieveZonePortalShared(napi_env env, napi_callback_info info, CORB
 }
 
 napi_status resolveZonePortal(char* ior, CORBA::ORB_var *orb, Quentin::ZonePortal::_ptr_type *zp) {
-  const char* options[][2] = { { "traceLevel", "21" }, { 0, 0 } };
+  const char* options[][2] = { { "traceLevel", "40" }, { 0, 0 } };
   int orbc = 0;
   CORBA::ORB_var local_orb = CORBA::ORB_init(orbc, nullptr, "omniORB4", options);
 
@@ -147,7 +147,7 @@ napi_status resolveZonePortalShared(char* ior, Quentin::ZonePortal_ptr *zp) {
 
 	if (local_orb == nullptr) {
 		const char* options[][2] = { 
-			{ "traceLevel", "1" }, 
+			{ "traceLevel", "40" }, 
 			{ "clientCallTimeOutPeriod", "2000" },
 			{ "clientConnectTimeOutPeriod", "2000" }, 
 			{ 0, 0 } 

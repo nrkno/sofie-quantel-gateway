@@ -843,7 +843,8 @@ app.use(async (ctx, next) => {
 		debugLog(JSON.stringify({
 			type: 'request',
 			method: ctx.request.method,
-			path: `${ctx.URL.pathname}${ctx.request.querystring ? `?${ctx.request.querystring}` : ''}`
+			path: `${ctx.URL.pathname}${ctx.request.querystring ? `?${ctx.request.querystring}` : ''}`,
+			ip: ctx.ip
 		}))
 
 		await next()
