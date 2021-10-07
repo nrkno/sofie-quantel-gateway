@@ -866,7 +866,8 @@ app.use(async (ctx, next) => {
 		debugLog(JSON.stringify({
 			type: 'request',
 			method: ctx.request.method,
-			path: `${ctx.URL.pathname}${ctx.request.querystring ? `?${ctx.request.querystring}` : ''}`
+			path: `${ctx.URL.pathname}${ctx.request.querystring ? `?${ctx.request.querystring}` : ''}`,
+			ip: ctx.ip
 		}))
 
 		await next()
@@ -892,6 +893,7 @@ app.use(async (ctx, next) => {
 			stack: err.stack
 		} as JSONError
 	}
+
 	if (ctx.status >= 400) {
 		errorLog(JSON.stringify({
 			type: ctx.status >= 500 ? 'server_error' : 'client_error',
