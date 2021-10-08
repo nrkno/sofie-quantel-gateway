@@ -28,6 +28,12 @@ import * as yargs from 'yargs'
 import { Server, get } from 'http'
 
 let debug = false
+export function setDebug(d: boolean) {
+	debug = d
+}
+
+setDebug(process.env.DEBUG === '1')
+
 function debugLog (...args: any[]) {
 	if (debug) console.log(...args)
 }
@@ -153,7 +159,7 @@ router.post('/kill/me/if/you/are/sure', async (ctx) => {
 	setTimeout(shutdown, 5000)
 })
 router.post('/debug/:debug', async (ctx) => {
-	debug = ctx.params.debug === '1'
+	setDebug(ctx.params.debug === '1')
 	ctx.body = { status: `Debug logging set to ${debug}` }
 })
 
