@@ -938,7 +938,7 @@ function watchDog (interval: number, count: number = 0) {
 				}
 			} else {
 				res.resume()
-				infoLog('Watchdog test successful.')
+				debugLog('Watchdog test successful.')
 				watchDog(interval, 0)
 			}
 		})
