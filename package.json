@@ -41,7 +41,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nrkno/tv-automation-quantel-gateway.git"
+    "url": "git+https://github.com/nrkno/sofie-quantel-gateway.git"
   },
   "keywords": [
     "broadcast",
@@ -57,7 +57,7 @@
     {
       "name": "Johan Nyman",
       "email": "johan@superfly.tv",
-      "url": "http://superfly.tv"
+      "url": "https://superfly.tv"
     },
     {
       "name": "Richard Cartwright",
@@ -67,9 +67,9 @@
   ],
   "license": "GPL-2.0-or-later",
   "bugs": {
-    "url": "https://github.com/nrkno/tv-automation-quantel-gateway/issues"
+    "url": "https://github.com/nrkno/sofie-quantel-gateway/issues"
   },
-  "homepage": "https://github.com/nrkno/tv-automation-quantel-gateway#readme",
+  "homepage": "https://github.com/nrkno/sofie-quantel-gateway#readme",
   "scripts-info": {
     "info": "Display information about the scripts",
     "installclean": "Remove yarn.lock, cleare yarn cache, and reinstall",
