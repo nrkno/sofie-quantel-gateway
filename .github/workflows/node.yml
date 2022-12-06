@@ -1,43 +1,32 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Node Native CI
 
-# Controls when the action will run. 
 on:
-  # Triggers the workflow on push or pull request events
   push:
     branches:
       - '**'
     tags:
       - 'v**'
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build-and-test:
     name: Build and test
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install Omniorb 4
         run: sudo apt-get install libomniorb4-dev
 
       - name: Use Node.js 12.x
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: 12.x
 
       - name: Prepare environment
         run: yarn
-        
+
       - name: Build
         run: yarn build
 
@@ -51,17 +40,21 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+
       - name: Use Node.js 12.x
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: 12.x
+
       - name: Install Omniorb 4
         run: sudo apt-get install libomniorb4-dev
+
       - name: Prepare Environment
         run: yarn
         env:
           CI: true
+
       - name: Validate production dependencies
         run: |
           if ! git log --format=oneline -n 1 | grep -q "\[ignore-audit\]"; then
@@ -72,66 +65,115 @@ jobs:
         env:
           CI: true
 
-  dockerhub-release:
-    name: Make dockerhub release
+  docker-image-release:
+    name: Make docker image release
     runs-on: ubuntu-latest
     needs: [ build-and-test, validate-prod-dependencies ]
     timeout-minutes: 30
 
     steps:
-      - uses: actions/checkout@v2
-      - name: Get the Docker tag
-        id: docker-tag
-        uses: yuya-takeyama/docker-tag-from-github-ref-action@2b0614b1338c8f19dd9d3ea433ca9bc0cc7057ba
-        with:
-          remove-version-tag-prefix: false
-      - name: Determine images to publish
-        id: image-tags
-        # TODO - image needs changing...
+      - uses: actions/checkout@v3
+
+      - name: Determine if images should be published to DockerHub
+        id: dockerhub
         run: |
-          IMAGES=
-          DOCKER_TAG=${{ steps.docker-tag.outputs.tag }}
           # check if a release branch, or master, or a tag
-          if [[ $DOCKER_TAG =~ ^release([0-9]+)$ || $DOCKER_TAG == "latest" || "${{ github.ref }}" == refs/tags/* ]]
+          if [[ "${{ github.ref }}" =~ ^refs/heads/release([0-9]+)$ || "${{ github.ref }}" == "refs/heads/master" || "${{ github.ref }}" == "refs/tags/*" ]]
           then
-            # If we have a dockerhub image name, then setup to publish there
-            if [ -z "${{ secrets.DOCKERHUB_IMAGE }}" ]
-            then
-              DOCKERHUB_PUBLISH="0"
-            else
-              DOCKERHUB_PUBLISH="1"
-              IMAGES="${{ secrets.DOCKERHUB_IMAGE }}:$DOCKER_TAG"$'\n'$IMAGES
-            fi
-            # debug output
-            echo dockerhub-publish $DOCKERHUB_PUBLISH
-            echo images $IMAGES
-            echo ::set-output name=images::"$IMAGES"
-            echo ::set-output name=dockerhub-publish::"$DOCKERHUB_PUBLISH"
+            DOCKERHUB_PUBLISH="1"
           else
-            echo "Skipping docker build"
+            DOCKERHUB_PUBLISH="0"
           fi
+          # debug output
+          echo "dockerhub-publish $DOCKERHUB_PUBLISH"
+          echo "dockerhub-publish=$DOCKERHUB_PUBLISH" >> $GITHUB_OUTPUT
+
+      - name: Check if push to GHCR is enabled
+        id: check-ghcr
+        env:
+          GHCR_ENABLED: ${{ secrets.GHCR_ENABLED }}
+        run: |
+          echo "Enable push to GHCR: ${{ env.GHCR_ENABLED != '' }}"
+          echo "enable=${{ env.GHCR_ENABLED != '' }}" >> $GITHUB_OUTPUT
+
+      - name: Check if there is access to repo secrets (needed for build and push)
+        if: steps.dockerhub.outputs.dockerhub-publish == '1' || steps.check-ghcr.outputs.enable == 'true'
+        id: check-build-and-push
+        env:
+          SECRET_ACCESS: ${{ secrets.DOCKERHUB_IMAGE_PREFIX }}
+        run: |
+          echo "Enable build and push: ${{ env.SECRET_ACCESS != '' }}"
+          echo "enable=${{ env.SECRET_ACCESS != '' }}" >> $GITHUB_OUTPUT
+
+      - name: Get the Docker tag for GHCR
+        id: ghcr-tag
+        if: steps.check-build-and-push.outputs.enable == 'true'
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}/quantel-gateway
+          tags: |
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=tag
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Get the Docker tag for DockerHub
+        id: dockerhub-tag
+        if: steps.check-build-and-push.outputs.enable == 'true'
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ${{ secrets.DOCKERHUB_IMAGE_PREFIX }}
+          tags: |
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=tag
+            type=raw,value=latest,enable={{is_default_branch}}
+
       - name: Build
-        if: ${{ steps.image-tags.outputs.images }}
+        if: steps.check-build-and-push.outputs.enable == 'true'
         run: |
           sudo apt-get install libomniorb4-dev
           yarn install --check-files --frozen-lockfile
           yarn build
-          yarn install --check-files --frozen-lockfile --production --force 
+          yarn install --check-files --frozen-lockfile --production --force
+
       - name: Set up Docker Buildx
-        if: ${{ steps.image-tags.outputs.images }}
-        uses: docker/setup-buildx-action@v1
+        if: steps.check-build-and-push.outputs.enable == 'true'
+        uses: docker/setup-buildx-action@v2
+
       - name: Login to DockerHub
-        if: steps.image-tags.outputs.images && steps.image-tags.outputs.dockerhub-publish == '1'
-        uses: docker/login-action@v1
+        if: steps.check-build-and-push.outputs.enable == 'true' && steps.dockerhub.outputs.dockerhub-publish == '1'
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build and push
-        uses: docker/build-push-action@v2
-        if: ${{ steps.image-tags.outputs.images }}
+
+      - name: Login to GitHub Container Registry
+        if: steps.check-build-and-push.outputs.enable == 'true' && steps.check-ghcr.outputs.enable == 'true'
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push to GHCR
+        if: steps.check-build-and-push.outputs.enable == 'true' && steps.check-ghcr.outputs.enable == 'true'
+        uses: docker/build-push-action@v3
         with:
           context: .
           file: Dockerfile.circle
           push: true
-          tags: ${{ steps.image-tags.outputs.images }}
-   
+          labels: ${{ steps.ghcr-tag.outputs.labels }}
+          tags: "${{ steps.ghcr-tag.outputs.tags }}"
+
+      - name: Build and push to DockerHub
+        if: steps.check-build-and-push.outputs.enable == 'true' && steps.dockerhub.outputs.dockerhub-publish == '1'
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: Dockerfile.circle
+          push: true
+          labels: ${{ steps.dockerhub-tag.outputs.labels }}
+          tags: "${{ steps.dockerhub-tag.outputs.tags }}"
