@@ -32,10 +32,10 @@ jobs:
           context: .
           file: Dockerfile.test
           push: false
-          tags: "${{ steps.docker-tag.outputs.tags }}"
+          tags: "${{ steps.docker-tag.outputs.tag }}"
 
       - name: Build, lint and test
-        run: docker run --rm ${{ steps.docker-tag.outputs.tags }}
+        run: docker run --rm ${{ steps.docker-tag.outputs.tag }}
 
   validate-prod-dependencies:
     name: Validate production dependencies
