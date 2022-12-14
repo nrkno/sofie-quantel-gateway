@@ -111,7 +111,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            ghcr.io/${{ github.repository }}/quantel-gateway
+            ghcr.io/${{ github.repository }}
           tags: |
             type=schedule
             type=ref,event=branch
