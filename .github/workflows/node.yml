@@ -20,7 +20,7 @@ jobs:
       - name: Get test tag
         id: docker-tag
         run: |
-          TAG=$(echo "${{ github.repo }}-${{ github.ref_name }}-test" | sed -r 's/[^a-z0-9]+/-/gi')
+          TAG=$(echo "${{ github.repository }}-${{ github.ref_name }}-test" | sed -r 's/[^a-z0-9]+/-/gi')
           echo "tag=$TAG" >> $GITHUB_OUTPUT      
 
       - name: Set up Docker Buildx
