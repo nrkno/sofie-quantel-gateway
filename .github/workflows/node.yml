@@ -32,6 +32,7 @@ jobs:
           context: .
           file: Dockerfile.test
           push: false
+          load: true
           tags: "${{ steps.docker-tag.outputs.tag }}"
 
       - name: Build, lint and test
