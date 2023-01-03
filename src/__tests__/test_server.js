@@ -51,6 +51,7 @@ const closeDown = () => {
 }
 
 process.on('SIGINT', closeDown)
+process.on('SIGHUP', closeDown)
 process.on('message', m => {
 	if (typeof m === 'string' && m === 'close') {
 		closeDown();

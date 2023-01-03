@@ -12,26 +12,31 @@ jobs:
   build-and-test:
     name: Build and test
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Omniorb 4
-        run: sudo apt-get install libomniorb4-dev
+      - name: Get test tag
+        id: docker-tag
+        run: |
+          TAG=$(echo "${{ github.repository }}-${{ github.ref_name }}-test" | sed -r 's/[^a-z0-9]+/-/gi')
+          echo "tag=$TAG" >> $GITHUB_OUTPUT      
 
-      - name: Use Node.js 12.x
-        uses: actions/setup-node@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build test image
+        uses: docker/build-push-action@v3
         with:
-          node-version: 12.x
+          context: .
+          file: Dockerfile.test
+          push: false
+          load: true
+          tags: "${{ steps.docker-tag.outputs.tag }}"
 
-      - name: Prepare environment
-        run: yarn
-
-      - name: Build
-        run: yarn build
-
-      - name: Lint and test
-        run: yarn test
+      - name: Build, lint and test
+        run: docker run --rm ${{ steps.docker-tag.outputs.tag }}
 
   validate-prod-dependencies:
     name: Validate production dependencies
@@ -42,10 +47,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Use Node.js 12.x
+      - name: Use Node.js 18.x
         uses: actions/setup-node@v3
         with:
-          node-version: 12.x
+          node-version: 18.x
 
       - name: Install Omniorb 4
         run: sudo apt-get install libomniorb4-dev
@@ -131,14 +136,6 @@ jobs:
             type=ref,event=tag
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Build
-        if: steps.check-build-and-push.outputs.enable == 'true'
-        run: |
-          sudo apt-get install libomniorb4-dev
-          yarn install --check-files --frozen-lockfile
-          yarn build
-          yarn install --check-files --frozen-lockfile --production --force
-
       - name: Set up Docker Buildx
         if: steps.check-build-and-push.outputs.enable == 'true'
         uses: docker/setup-buildx-action@v2
@@ -163,7 +160,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: Dockerfile.circle
+          file: Dockerfile
           push: true
           labels: ${{ steps.ghcr-tag.outputs.labels }}
           tags: "${{ steps.ghcr-tag.outputs.tags }}"
@@ -173,7 +170,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: Dockerfile.circle
+          file: Dockerfile
           push: true
           labels: ${{ steps.dockerhub-tag.outputs.labels }}
           tags: "${{ steps.dockerhub-tag.outputs.tags }}"
