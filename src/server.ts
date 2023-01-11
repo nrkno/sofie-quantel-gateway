@@ -81,7 +81,6 @@ const router = new Router()
 const instanceId = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(16)
 let currentStatus: ExternalStatus = 'OK'
 
-
 app.use(async (ctx, next) => {
 	const start = performance.now()
 	await Promise.race([
@@ -293,7 +292,7 @@ router.post('/default/copy', async (ctx) => {
 	let clone: Quantel.CloneInfo = {} as Quantel.CloneInfo
 	try {
 		if (ctx.body && ctx.status === 400) return
-		clone = ctx.request.body as unknown as Quantel.CloneInfo
+		clone = ctx.request.body as Quantel.CloneInfo
 		if (clone.zoneID && (isNaN(+clone.zoneID) || +clone.zoneID < 0)) {
 			ctx.status = 400
 			ctx.body = {
@@ -702,7 +701,7 @@ router.post('/default/server/:serverID/port/:portID/fragments/', async (ctx) => 
 		if (ctx.body && ctx.status === 400) return
 		// Note: @types/koa-bodyparser has tried to included stricter typing .... but has forgotten arrays
 		//       See https://github.com/DefinitelyTyped/DefinitelyTyped/pull/53715 and related
-		let fragments: Quantel.ServerFragmentTypes[] = ctx.request.body as unknown as Quantel.ServerFragmentTypes[]
+		let fragments: Quantel.ServerFragmentTypes[] = ctx.request.body as Quantel.ServerFragmentTypes[]
 		if (!Array.isArray(fragments) || fragments.length === 0 || ctx.request.type !== 'application/json') {
 			ctx.status = 400
 			ctx.body = {
