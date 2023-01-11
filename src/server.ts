@@ -26,8 +26,10 @@ import { Quantel } from '.'
 import { StatusResponse, ExternalStatus } from './systemStatus'
 import * as yargs from 'yargs'
 import { Server, get } from 'http'
+import { performance } from 'perf_hooks'
 
 let debug = false
+let TIMEOUT_TIME = 3000 // 3 seconds
 function debugLog (...args: any[]) {
 	if (debug) console.log(...args)
 }
@@ -78,6 +80,25 @@ export const app = new Koa()
 const router = new Router()
 const instanceId = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(16)
 let currentStatus: ExternalStatus = 'OK'
+
+
+app.use(async (ctx, next) => {
+	const start = performance.now()
+	await Promise.race([
+		next(),
+		new Promise<void>((resolve) => {
+			setTimeout(() => {
+				ctx.status = 524 // "A Timeout Occurred"
+				ctx.body = {
+					status: 524,
+					message: `Quantel Gateway internal timeout after ${Math.floor(performance.now() - start)} ms.`
+				}
+				resolve()
+			}, TIMEOUT_TIME)
+			// Note: Quantel gw client will timeout in 5s
+		})
+	])
+})
 
 app.use(bodyParser({
 	onerror: (err, ctx) => {
@@ -155,6 +176,15 @@ router.post('/kill/me/if/you/are/sure', async (ctx) => {
 router.post('/debug/:debug', async (ctx) => {
 	debug = ctx.params.debug === '1'
 	ctx.body = { status: `Debug logging set to ${debug}` }
+})
+router.post('/timeout/:timeoutTime', async (ctx) => {
+	const newTimeoutTime = parseInt(ctx.params.timeoutTime, 10)
+	if (newTimeoutTime >= 0 && !Number.isNaN(newTimeoutTime)) {
+		TIMEOUT_TIME = newTimeoutTime
+		ctx.body = { status: `Timeout time set to ${debug}` }
+	} else {
+		ctx.body = { status: `Bad argument, /timeout/:timeoutTime timeoutTime must be a number!` }
+	}
 })
 
 router.get('/:zoneID.json', async (ctx) => {
