@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.6.0-0](https://github.com/nrkno/sofie-quantel-gateway/compare/1.5.1...1.6.0-0) (2023-01-11)
+
+
+### Features
+
+* Node 18 ([dcd61d2](https://github.com/nrkno/sofie-quantel-gateway/commit/dcd61d2a1176256d09a361eff6b8628ce1fcef19))
+* push images to github container registry ([f96ee51](https://github.com/nrkno/sofie-quantel-gateway/commit/f96ee51b5c526ac3a289eb109e970977e709b607))
+
+
+### Bug Fixes
+
+* add an internal timeout. ([9540f06](https://github.com/nrkno/sofie-quantel-gateway/commit/9540f06195464f49aa22621ad68d81a881fa9c48))
+* Updated URLs to match the renamed repo ([c8625ab](https://github.com/nrkno/sofie-quantel-gateway/commit/c8625abf3e41c2f5315d8aae93ba87885b9e3aed))
+
 ### [1.5.1](https://github.com/nrkno/tv-automation-quantel-gateway/compare/1.5.0...1.5.1) (2021-07-13)
 
 ## [1.5.0](https://github.com/nrkno/tv-automation-quantel-gateway/compare/1.5.0-release35.3...1.5.0) (2021-07-13)
