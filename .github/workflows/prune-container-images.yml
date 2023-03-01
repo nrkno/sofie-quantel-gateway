@@ -1,0 +1,19 @@
+name: "Prune container images"
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '24 11 * * *'
+
+jobs:
+  prune-container-images:
+    uses: nrkno/sofie-github-workflows/.github/workflows/prune-container-images.yml@main
+    with:
+      dry-run: false
+      prune-untagged: true
+      package-name: sofie-quantel-gateway
+      tags-to-keep-regex: |
+        ^release(\d+)
+        ^r(\d+)
+    secrets:
+      prune-token: ${{ secrets.GHCR_PRUNE_TOKEN }}
