@@ -32,6 +32,7 @@ jobs:
           context: .
           file: Dockerfile.test
           push: false
+          provenance: false
           load: true
           tags: "${{ steps.docker-tag.outputs.tag }}"
 
@@ -162,6 +163,7 @@ jobs:
           context: .
           file: Dockerfile
           push: true
+          provenance: false
           labels: ${{ steps.ghcr-tag.outputs.labels }}
           tags: "${{ steps.ghcr-tag.outputs.tags }}"
 
@@ -172,5 +174,6 @@ jobs:
           context: .
           file: Dockerfile
           push: true
+          provenance: false
           labels: ${{ steps.dockerhub-tag.outputs.labels }}
           tags: "${{ steps.dockerhub-tag.outputs.tags }}"
