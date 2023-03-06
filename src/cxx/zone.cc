@@ -21,33 +21,40 @@
 
 #include "zone.h"
 
-void testConnectionExecute(napi_env env, void* data) {
-	testConnectionCarrier* c = (testConnectionCarrier*) data;
+void testConnectionExecute(napi_env env, void *data)
+{
+	testConnectionCarrier *c = (testConnectionCarrier *)data;
 	Quentin::ZonePortal_ptr zpp;
 	Quentin::ZonePortal_var zpv;
 
-	try {
+	try
+	{
 		resolveZonePortalShared(c->isaIOR, &zpp);
 		zpv = zpp;
 
 		c->zoneNumber = zpv->getZoneNumber();
 	}
-	catch(CORBA::SystemException& ex) {
+	catch (CORBA::SystemException &ex)
+	{
 		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
 	}
-	catch(CORBA::Exception& ex) {
+	catch (CORBA::Exception &ex)
+	{
 		NAPI_REJECT_CORBA_EXCEPTION(ex);
 	}
-	catch(omniORB::fatalException& fe) {
+	catch (omniORB::fatalException &fe)
+	{
 		NAPI_REJECT_FATAL_EXCEPTION(fe);
 	}
 }
 
-void testConnectionComplete(napi_env env, napi_status asyncStatus, void* data) {
-  testConnectionCarrier* c = (testConnectionCarrier*) data;
+void testConnectionComplete(napi_env env, napi_status asyncStatus, void *data)
+{
+	testConnectionCarrier *c = (testConnectionCarrier *)data;
 	napi_value result;
 
-	if (asyncStatus != napi_ok) {
+	if (asyncStatus != napi_ok)
+	{
 		c->status = asyncStatus;
 		c->errorMsg = "Test connection failed to complete.";
 	}
@@ -63,85 +70,96 @@ void testConnectionComplete(napi_env env, napi_status asyncStatus, void* data) {
 	tidyCarrier(env, c);
 }
 
-napi_value testConnection(napi_env env, napi_callback_info info) {
-  testConnectionCarrier* c = new testConnectionCarrier;
-  napi_value promise, resourceName;
-	char* isaIOR = nullptr;
+napi_value testConnection(napi_env env, napi_callback_info info)
+{
+	testConnectionCarrier *c = new testConnectionCarrier;
+	napi_value promise, resourceName;
+	char *isaIOR = nullptr;
 	size_t iorLen = 0;
 
-  c->status = napi_create_promise(env, &c->_deferred, &promise);
-  REJECT_RETURN;
+	c->status = napi_create_promise(env, &c->_deferred, &promise);
+	REJECT_RETURN;
 
 	size_t argc = 1;
 	napi_value argv[1];
 	c->status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
 	REJECT_RETURN;
 
-	if (argc < 1) {
+	if (argc < 1)
+	{
 		REJECT_ERROR_RETURN("Connection test must be provided with a IOR reference to an ISA server.",
-	    QGW_INVALID_ARGS);
+							QGW_INVALID_ARGS);
 	}
 	c->status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &iorLen);
 	REJECT_RETURN;
-	isaIOR = (char*) malloc((iorLen + 1) * sizeof(char));
+	isaIOR = (char *)malloc((iorLen + 1) * sizeof(char));
 	c->status = napi_get_value_string_utf8(env, argv[0], isaIOR, iorLen + 1, &iorLen);
 	REJECT_RETURN;
 
 	c->isaIOR = isaIOR;
 
 	c->status = napi_create_string_utf8(env, "TestConnection", NAPI_AUTO_LENGTH, &resourceName);
-  REJECT_RETURN;
-  c->status = napi_create_async_work(env, nullptr, resourceName, testConnectionExecute,
-    testConnectionComplete, c, &c->_request);
-  REJECT_RETURN;
-  c->status = napi_queue_async_work(env, c->_request);
-  REJECT_RETURN;
+	REJECT_RETURN;
+	c->status = napi_create_async_work(env, nullptr, resourceName, testConnectionExecute,
+									   testConnectionComplete, c, &c->_request);
+	REJECT_RETURN;
+	c->status = napi_queue_async_work(env, c->_request);
+	REJECT_RETURN;
 
-  return promise;
+	return promise;
 }
 
-void listZonesExecute(napi_env env, void* data) {
-	listZonesCarrier* c = (listZonesCarrier*) data;
+void listZonesExecute(napi_env env, void *data)
+{
+	listZonesCarrier *c = (listZonesCarrier *)data;
 	Quentin::ZonePortal_ptr zpp;
 	Quentin::ZonePortal_var zpv;
 
-	try {
+	try
+	{
 		resolveZonePortalShared(c->isaIOR, &zpp);
 		zpv = zpp;
 
 		c->zoneIDs = zpv->getZones(false);
 		c->zoneIDs->length(c->zoneIDs->length() + 1);
-		for ( int x = c->zoneIDs->length() - 1 ; x > 0 ; x-- ) {
+		for (int x = c->zoneIDs->length() - 1; x > 0; x--)
+		{
 			c->zoneIDs[x] = c->zoneIDs[x - 1];
 		}
 		c->zoneIDs[0] = zpv->getZoneNumber(); // Always start with the local/default zone
 
-		c->zoneNames = (CORBA::WChar**) malloc(c->zoneIDs->length() * sizeof(CORBA::WChar*));
-		c->remotes = (CORBA::Boolean*) malloc(c->zoneIDs->length() * sizeof(CORBA::Boolean));
+		c->zoneNames = (CORBA::WChar **)malloc(c->zoneIDs->length() * sizeof(CORBA::WChar *));
+		c->remotes = (CORBA::Boolean *)malloc(c->zoneIDs->length() * sizeof(CORBA::Boolean));
 
-		for ( uint32_t x = 0 ; x < c->zoneIDs->length() ; x++ ) {
+		for (uint32_t x = 0; x < c->zoneIDs->length(); x++)
+		{
 			c->zoneNames[x] = zpv->getZoneName(c->zoneIDs[x]);
 			c->remotes[x] = zpv->zoneIsRemote(c->zoneIDs[x]);
 		}
 	}
-	catch(CORBA::SystemException& ex) {
+	catch (CORBA::SystemException &ex)
+	{
 		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
 	}
-	catch(CORBA::Exception& ex) {
+	catch (CORBA::Exception &ex)
+	{
 		NAPI_REJECT_CORBA_EXCEPTION(ex);
 	}
-	catch(omniORB::fatalException& fe) {
+	catch (omniORB::fatalException &fe)
+	{
 		NAPI_REJECT_FATAL_EXCEPTION(fe);
 	}
 }
 
-void listZonesComplete(napi_env env, napi_status asyncStatus, void* data) {
-	listZonesCarrier* c = (listZonesCarrier*) data;
+void listZonesComplete(napi_env env, napi_status asyncStatus, void *data)
+{
+	listZonesCarrier *c = (listZonesCarrier *)data;
 	napi_value result, item, prop;
-	CORBA::WChar* zoneName;
+	CORBA::WChar *zoneName;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
-	if (asyncStatus != napi_ok) {
+	if (asyncStatus != napi_ok)
+	{
 		c->status = asyncStatus;
 		c->errorMsg = "List zones failed to complete.";
 	}
@@ -150,7 +168,8 @@ void listZonesComplete(napi_env env, napi_status asyncStatus, void* data) {
 	c->status = napi_create_array(env, &result);
 	REJECT_STATUS;
 
-	for ( uint32_t x = 0 ; x < c->zoneIDs->length() ; x++ ) {
+	for (uint32_t x = 0; x < c->zoneIDs->length(); x++)
+	{
 		c->status = napi_create_object(env, &item);
 		REJECT_STATUS;
 
@@ -189,27 +208,29 @@ void listZonesComplete(napi_env env, napi_status asyncStatus, void* data) {
 	tidyCarrier(env, c);
 }
 
-napi_value listZones(napi_env env, napi_callback_info info) {
-	listZonesCarrier* c = new listZonesCarrier;
+napi_value listZones(napi_env env, napi_callback_info info)
+{
+	listZonesCarrier *c = new listZonesCarrier;
 	napi_value promise, resourceName;
-	char* isaIOR = nullptr;
+	char *isaIOR = nullptr;
 	size_t iorLen = 0;
 
 	c->status = napi_create_promise(env, &c->_deferred, &promise);
-  REJECT_RETURN;
+	REJECT_RETURN;
 
 	size_t argc = 1;
 	napi_value argv[1];
 	c->status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
 	REJECT_RETURN;
 
-	if (argc < 1) {
+	if (argc < 1)
+	{
 		REJECT_ERROR_RETURN("List zones must be provided with a IOR reference to an ISA server.",
-	    QGW_INVALID_ARGS);
+							QGW_INVALID_ARGS);
 	}
 	c->status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &iorLen);
 	REJECT_RETURN;
-	isaIOR = (char*) malloc((iorLen + 1) * sizeof(char));
+	isaIOR = (char *)malloc((iorLen + 1) * sizeof(char));
 	c->status = napi_get_value_string_utf8(env, argv[0], isaIOR, iorLen + 1, &iorLen);
 	REJECT_RETURN;
 
@@ -218,7 +239,7 @@ napi_value listZones(napi_env env, napi_callback_info info) {
 	c->status = napi_create_string_utf8(env, "ListZones", NAPI_AUTO_LENGTH, &resourceName);
 	REJECT_RETURN;
 	c->status = napi_create_async_work(env, nullptr, resourceName, listZonesExecute,
-		listZonesComplete, c, &c->_request);
+									   listZonesComplete, c, &c->_request);
 	REJECT_RETURN;
 	c->status = napi_queue_async_work(env, c->_request);
 	REJECT_RETURN;
@@ -226,130 +247,147 @@ napi_value listZones(napi_env env, napi_callback_info info) {
 	return promise;
 }
 
-void getServersExecute(napi_env env, void* data) {
-	getServersCarrier* c = (getServersCarrier*) data;
+void getServersExecute(napi_env env, void *data)
+{
+	getServersCarrier *c = (getServersCarrier *)data;
 	Quentin::ZonePortal_ptr zpp;
 	Quentin::ZonePortal_var zpv;
-	serverDetails* server;
+	serverDetails *server;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 	Quentin::Longs_var serverIDs;
 
-	try {
+	try
+	{
 		resolveZonePortalShared(c->isaIOR, &zpp);
 		zpv = zpp;
 
 		serverIDs = zpv->getServers(true);
-		for ( uint32_t x = 0 ; x < serverIDs->length() ; x++ ) {
+		for (uint32_t x = 0; x < serverIDs->length(); x++)
+		{
 			server = new serverDetails;
 			server->ident = serverIDs[x];
-			if (serverIDs[x] > 0) { // server is online
+			if (serverIDs[x] > 0)
+			{ // server is online
 				Quentin::WStrings_var portNames, chanPorts;
 				Quentin::Server_var qserver = zpv->getServer(serverIDs[x]);
 				Quentin::ServerInfo_var serverInfo = qserver->getServerInfo();
 				server->down = serverInfo->down;
 				server->name = utf8_conv.to_bytes(serverInfo->name);
 				server->numChannels = serverInfo->numChannels;
-				for ( uint32_t y = 0 ; y < serverInfo->pools.length() ; y++ ) {
+				for (uint32_t y = 0; y < serverInfo->pools.length(); y++)
+				{
 					server->pools.push_back(serverInfo->pools[y]);
 				}
 				portNames = qserver->getPortNames();
-				for ( uint32_t y = 0 ; y < portNames->length() ; y++ ) {
+				for (uint32_t y = 0; y < portNames->length(); y++)
+				{
 					server->portNames.push_back(utf8_conv.to_bytes(portNames[y]));
 				}
 				chanPorts = qserver->getChanPorts();
-				for ( uint32_t y = 0 ; y < chanPorts->length() ; y++ ) {
+				for (uint32_t y = 0; y < chanPorts->length(); y++)
+				{
 					server->chanPorts.push_back(utf8_conv.to_bytes(chanPorts[y]));
 				}
 			}
 			c->servers.push_back(server);
 		}
 	}
-	catch(CORBA::SystemException& ex) {
+	catch (CORBA::SystemException &ex)
+	{
 		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
 	}
-	catch(CORBA::Exception& ex) {
+	catch (CORBA::Exception &ex)
+	{
 		NAPI_REJECT_CORBA_EXCEPTION(ex);
 	}
-	catch(omniORB::fatalException& fe) {
+	catch (omniORB::fatalException &fe)
+	{
 		NAPI_REJECT_FATAL_EXCEPTION(fe);
 	}
 }
 
-void getServersComplete(napi_env env, napi_status asyncStatus, void* data) {
-	getServersCarrier* c = (getServersCarrier*) data;
+void getServersComplete(napi_env env, napi_status asyncStatus, void *data)
+{
+	getServersCarrier *c = (getServersCarrier *)data;
 	napi_value result, item, prop, subprop;
-	serverDetails* server;
+	serverDetails *server;
 
-	if (asyncStatus != napi_ok) {
+	if (asyncStatus != napi_ok)
+	{
 		c->status = asyncStatus;
 		c->errorMsg = "Get servers failed to complete.";
 	}
 	REJECT_STATUS;
 
-  c->status = napi_create_array(env, &result);
-  REJECT_STATUS;
+	c->status = napi_create_array(env, &result);
+	REJECT_STATUS;
 
-  for ( uint32_t x = 0 ; x < c->servers.size() ; x++ ) {
-    c->status = napi_create_object(env, &item);
-    REJECT_STATUS;
+	for (uint32_t x = 0; x < c->servers.size(); x++)
+	{
+		c->status = napi_create_object(env, &item);
+		REJECT_STATUS;
 
-    c->status = napi_create_string_utf8(env, "Server", NAPI_AUTO_LENGTH, &prop);
-    REJECT_STATUS;
-    c->status = napi_set_named_property(env, item, "type", prop);
-    REJECT_STATUS;
+		c->status = napi_create_string_utf8(env, "Server", NAPI_AUTO_LENGTH, &prop);
+		REJECT_STATUS;
+		c->status = napi_set_named_property(env, item, "type", prop);
+		REJECT_STATUS;
 
 		int64_t ident = c->servers.at(x)->ident >= 0 ? c->servers.at(x)->ident : -c->servers.at(x)->ident;
-    c->status = napi_create_int64(env, ident, &prop);
-    REJECT_STATUS;
-    c->status = napi_set_named_property(env, item, "ident", prop);
-    REJECT_STATUS;
+		c->status = napi_create_int64(env, ident, &prop);
+		REJECT_STATUS;
+		c->status = napi_set_named_property(env, item, "ident", prop);
+		REJECT_STATUS;
 
-    if (c->servers.at(x)->ident > 0) { // server is online
-      server = c->servers.at(x);
+		if (c->servers.at(x)->ident > 0)
+		{ // server is online
+			server = c->servers.at(x);
 
-      c->status = napi_get_boolean(env, server->down, &prop);
-      REJECT_STATUS;
-      c->status = napi_set_named_property(env, item, "down", prop);
-      REJECT_STATUS;
+			c->status = napi_get_boolean(env, server->down, &prop);
+			REJECT_STATUS;
+			c->status = napi_set_named_property(env, item, "down", prop);
+			REJECT_STATUS;
 
-      c->status = napi_create_string_utf8(env, server->name.c_str(), NAPI_AUTO_LENGTH, &prop);
-      REJECT_STATUS;
-      c->status = napi_set_named_property(env, item, "name", prop);
-      REJECT_STATUS;
+			c->status = napi_create_string_utf8(env, server->name.c_str(), NAPI_AUTO_LENGTH, &prop);
+			REJECT_STATUS;
+			c->status = napi_set_named_property(env, item, "name", prop);
+			REJECT_STATUS;
 
-      c->status = napi_create_int32(env, server->numChannels, &prop);
-      REJECT_STATUS;
-      c->status = napi_set_named_property(env, item, "numChannels", prop);
-      REJECT_STATUS;
-
-      c->status = napi_create_array(env, &prop);
-      REJECT_STATUS;
-			uint32_t elementCount = 0;
-      for ( auto it = server->pools.cbegin() ; it != server->pools.cend() ; it++ ) {
-        c->status = napi_create_int32(env, *it, &subprop);
-        REJECT_STATUS;
-        c->status = napi_set_element(env, prop, elementCount++, subprop);
-        REJECT_STATUS;
-      }
-      c->status = napi_set_named_property(env, item, "pools", prop);
-      REJECT_STATUS;
+			c->status = napi_create_int32(env, server->numChannels, &prop);
+			REJECT_STATUS;
+			c->status = napi_set_named_property(env, item, "numChannels", prop);
+			REJECT_STATUS;
 
 			c->status = napi_create_array(env, &prop);
-      REJECT_STATUS;
-			elementCount = 0;
-      for ( auto it = server->portNames.cbegin() ; it != server->portNames.cend() ; it++ ) {
-        c->status = napi_create_string_utf8(env, (*it).c_str(), NAPI_AUTO_LENGTH, &subprop);
-        REJECT_STATUS;
-        c->status = napi_set_element(env, prop, elementCount++, subprop);
-        REJECT_STATUS;
-      }
-      c->status = napi_set_named_property(env, item, "portNames", prop);
-      REJECT_STATUS;
+			REJECT_STATUS;
+			uint32_t elementCount = 0;
+			for (auto it = server->pools.cbegin(); it != server->pools.cend(); it++)
+			{
+				c->status = napi_create_int32(env, *it, &subprop);
+				REJECT_STATUS;
+				c->status = napi_set_element(env, prop, elementCount++, subprop);
+				REJECT_STATUS;
+			}
+			c->status = napi_set_named_property(env, item, "pools", prop);
+			REJECT_STATUS;
 
 			c->status = napi_create_array(env, &prop);
 			REJECT_STATUS;
 			elementCount = 0;
-			for ( auto it = server->chanPorts.cbegin() ; it != server->chanPorts.cend() ; it++ ) {
+			for (auto it = server->portNames.cbegin(); it != server->portNames.cend(); it++)
+			{
+				c->status = napi_create_string_utf8(env, (*it).c_str(), NAPI_AUTO_LENGTH, &subprop);
+				REJECT_STATUS;
+				c->status = napi_set_element(env, prop, elementCount++, subprop);
+				REJECT_STATUS;
+			}
+			c->status = napi_set_named_property(env, item, "portNames", prop);
+			REJECT_STATUS;
+
+			c->status = napi_create_array(env, &prop);
+			REJECT_STATUS;
+			elementCount = 0;
+			for (auto it = server->chanPorts.cbegin(); it != server->chanPorts.cend(); it++)
+			{
 				c->status = napi_create_string_utf8(env, (*it).c_str(), NAPI_AUTO_LENGTH, &subprop);
 				REJECT_STATUS;
 				c->status = napi_set_element(env, prop, elementCount++, subprop);
@@ -357,16 +395,18 @@ void getServersComplete(napi_env env, napi_status asyncStatus, void* data) {
 			}
 			c->status = napi_set_named_property(env, item, "chanPorts", prop);
 			REJECT_STATUS;
-    } else {
-      c->status = napi_get_boolean(env, true, &prop);
-      REJECT_STATUS;
-      c->status = napi_set_named_property(env, item, "down", prop);
-      REJECT_STATUS;
-    }
+		}
+		else
+		{
+			c->status = napi_get_boolean(env, true, &prop);
+			REJECT_STATUS;
+			c->status = napi_set_named_property(env, item, "down", prop);
+			REJECT_STATUS;
+		}
 
-    c->status = napi_set_element(env, result, x, item);
-    REJECT_STATUS;
-  }
+		c->status = napi_set_element(env, result, x, item);
+		REJECT_STATUS;
+	}
 
 	napi_status status;
 	status = napi_resolve_deferred(env, c->_deferred, result);
@@ -375,71 +415,80 @@ void getServersComplete(napi_env env, napi_status asyncStatus, void* data) {
 	tidyCarrier(env, c);
 }
 
-napi_value getServers(napi_env env, napi_callback_info info) {
-	getServersCarrier* c =  new getServersCarrier;
+napi_value getServers(napi_env env, napi_callback_info info)
+{
+	getServersCarrier *c = new getServersCarrier;
 	napi_value promise, resourceName;
-	char* isaIOR = nullptr;
+	char *isaIOR = nullptr;
 	size_t iorLen = 0;
 
-  c->status = napi_create_promise(env, &c->_deferred, &promise);
-  REJECT_RETURN;
+	c->status = napi_create_promise(env, &c->_deferred, &promise);
+	REJECT_RETURN;
 
 	size_t argc = 1;
 	napi_value argv[1];
 	c->status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
 	REJECT_RETURN;
 
-	if (argc < 1) {
+	if (argc < 1)
+	{
 		REJECT_ERROR_RETURN("Get server list must be provided with a IOR reference to an ISA server.",
-	    QGW_INVALID_ARGS);
+							QGW_INVALID_ARGS);
 	}
 	c->status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &iorLen);
 	REJECT_RETURN;
-	isaIOR = (char*) malloc((iorLen + 1) * sizeof(char));
+	isaIOR = (char *)malloc((iorLen + 1) * sizeof(char));
 	c->status = napi_get_value_string_utf8(env, argv[0], isaIOR, iorLen + 1, &iorLen);
 	REJECT_RETURN;
 
 	c->isaIOR = isaIOR;
 
 	c->status = napi_create_string_utf8(env, "GetServers", NAPI_AUTO_LENGTH, &resourceName);
-  REJECT_RETURN;
-  c->status = napi_create_async_work(env, nullptr, resourceName, getServersExecute,
-    getServersComplete, c, &c->_request);
-  REJECT_RETURN;
-  c->status = napi_queue_async_work(env, c->_request);
-  REJECT_RETURN;
+	REJECT_RETURN;
+	c->status = napi_create_async_work(env, nullptr, resourceName, getServersExecute,
+									   getServersComplete, c, &c->_request);
+	REJECT_RETURN;
+	c->status = napi_queue_async_work(env, c->_request);
+	REJECT_RETURN;
 
-  return promise;
+	return promise;
 }
 
-void getFormatInfoExecute(napi_env env, void* data) {
-	formatInfoCarrier* c = (formatInfoCarrier*) data;
+void getFormatInfoExecute(napi_env env, void *data)
+{
+	formatInfoCarrier *c = (formatInfoCarrier *)data;
 	Quentin::ZonePortal_ptr zpp;
 	Quentin::ZonePortal_var zpv;
 
-	try {
+	try
+	{
 		resolveZonePortalShared(c->isaIOR, &zpp);
 		zpv = zpp;
 
 		c->info = zpv->getFormatInfo(c->formatNumber);
 	}
-	catch(CORBA::SystemException& ex) {
+	catch (CORBA::SystemException &ex)
+	{
 		NAPI_REJECT_SYSTEM_EXCEPTION(ex);
 	}
-	catch(CORBA::Exception& ex) {
+	catch (CORBA::Exception &ex)
+	{
 		NAPI_REJECT_CORBA_EXCEPTION(ex);
 	}
-	catch(omniORB::fatalException& fe) {
+	catch (omniORB::fatalException &fe)
+	{
 		NAPI_REJECT_FATAL_EXCEPTION(fe);
 	}
 }
 
-void getFormatInfoComplete(napi_env env, napi_status asyncStatus, void* data) {
-	formatInfoCarrier* c = (formatInfoCarrier*) data;
+void getFormatInfoComplete(napi_env env, napi_status asyncStatus, void *data)
+{
+	formatInfoCarrier *c = (formatInfoCarrier *)data;
 	napi_value result, prop;
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 
-	if (asyncStatus != napi_ok) {
+	if (asyncStatus != napi_ok)
+	{
 		c->status = asyncStatus;
 		c->errorMsg = "Get format info failed to complete.";
 	}
@@ -458,46 +507,60 @@ void getFormatInfoComplete(napi_env env, napi_status asyncStatus, void* data) {
 	c->status = napi_set_named_property(env, result, "formatNumber", prop);
 	REJECT_STATUS;
 
-	switch (c->info->essenceType) {
+	switch (c->info->essenceType)
+	{
 	case Quentin::FragmentType::videoFragment:
 		c->status = napi_create_string_utf8(env, "VideoFragment", NAPI_AUTO_LENGTH, &prop);
-		REJECT_STATUS; break;
+		REJECT_STATUS;
+		break;
 	case Quentin::FragmentType::audioFragment:
 		c->status = napi_create_string_utf8(env, "AudioFragment", NAPI_AUTO_LENGTH, &prop);
-		REJECT_STATUS; break;
+		REJECT_STATUS;
+		break;
 	case Quentin::FragmentType::auxFragment:
 		c->status = napi_create_string_utf8(env, "AUXFragment", NAPI_AUTO_LENGTH, &prop);
-		REJECT_STATUS; break;
+		REJECT_STATUS;
+		break;
 	case Quentin::FragmentType::flagsFragment:
 		c->status = napi_create_string_utf8(env, "FlagsFragment", NAPI_AUTO_LENGTH, &prop);
-		REJECT_STATUS; break;
+		REJECT_STATUS;
+		break;
 	case Quentin::FragmentType::timecodeFragment:
 		c->status = napi_create_string_utf8(env, "TimecodeFragment", NAPI_AUTO_LENGTH, &prop);
-		REJECT_STATUS; break;
+		REJECT_STATUS;
+		break;
 	case Quentin::FragmentType::aspectFragment:
 		c->status = napi_create_string_utf8(env, "AspectFragment", NAPI_AUTO_LENGTH, &prop);
-		REJECT_STATUS; break;
+		REJECT_STATUS;
+		break;
 	case Quentin::FragmentType::cropFragment:
 		c->status = napi_create_string_utf8(env, "CropFragment", NAPI_AUTO_LENGTH, &prop);
-		REJECT_STATUS; break;
+		REJECT_STATUS;
+		break;
 	case Quentin::FragmentType::panZoomFragment:
 		c->status = napi_create_string_utf8(env, "PanZoomFragment", NAPI_AUTO_LENGTH, &prop);
-		REJECT_STATUS; break;
+		REJECT_STATUS;
+		break;
 	case Quentin::FragmentType::multiCamFragment:
 		c->status = napi_create_string_utf8(env, "MultiCamFragment", NAPI_AUTO_LENGTH, &prop);
-		REJECT_STATUS; break;
+		REJECT_STATUS;
+		break;
 	case Quentin::FragmentType::ccFragment:
 		c->status = napi_create_string_utf8(env, "CCFragment", NAPI_AUTO_LENGTH, &prop);
-		REJECT_STATUS; break;
+		REJECT_STATUS;
+		break;
 	case Quentin::FragmentType::noteFragment:
 		c->status = napi_create_string_utf8(env, "NoteFragment", NAPI_AUTO_LENGTH, &prop);
-		REJECT_STATUS; break;
+		REJECT_STATUS;
+		break;
 	case Quentin::FragmentType::effectFragment:
 		c->status = napi_create_string_utf8(env, "EffectFragment", NAPI_AUTO_LENGTH, &prop);
-		REJECT_STATUS; break;
+		REJECT_STATUS;
+		break;
 	default:
-	  c->status = napi_create_string_utf8(env, "Unknown", NAPI_AUTO_LENGTH, &prop);
-		REJECT_STATUS; break;
+		c->status = napi_create_string_utf8(env, "Unknown", NAPI_AUTO_LENGTH, &prop);
+		REJECT_STATUS;
+		break;
 	}
 	c->status = napi_set_named_property(env, result, "essenceType", prop);
 	REJECT_STATUS;
@@ -564,12 +627,13 @@ void getFormatInfoComplete(napi_env env, napi_status asyncStatus, void* data) {
 	tidyCarrier(env, c);
 }
 
-napi_value getFormatInfo(napi_env env, napi_callback_info info) {
-	formatInfoCarrier* c = new formatInfoCarrier;
+napi_value getFormatInfo(napi_env env, napi_callback_info info)
+{
+	formatInfoCarrier *c = new formatInfoCarrier;
 	napi_value promise, resourceName, prop, options;
 	napi_valuetype type;
 	bool isArray;
-	char* isaIOR = nullptr;
+	char *isaIOR = nullptr;
 	size_t iorLen = 0;
 
 	c->status = napi_create_promise(env, &c->_deferred, &promise);
@@ -580,41 +644,44 @@ napi_value getFormatInfo(napi_env env, napi_callback_info info) {
 	c->status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
 	REJECT_RETURN;
 
-	if (argc < 1) {
+	if (argc < 1)
+	{
 		REJECT_ERROR_RETURN("Get format info must be provided with a IOR reference to an ISA server.",
-			QGW_INVALID_ARGS);
+							QGW_INVALID_ARGS);
 	}
 	c->status = napi_get_value_string_utf8(env, argv[0], nullptr, 0, &iorLen);
 	REJECT_RETURN;
-	isaIOR = (char*) malloc((iorLen + 1) * sizeof(char));
+	isaIOR = (char *)malloc((iorLen + 1) * sizeof(char));
 	c->status = napi_get_value_string_utf8(env, argv[0], isaIOR, iorLen + 1, &iorLen);
 	REJECT_RETURN;
 
 	c->isaIOR = isaIOR;
 
-	if (argc < 2) {
+	if (argc < 2)
+	{
 		REJECT_ERROR_RETURN("Get format info must be provided with an options object containing a format number.",
-			QGW_INVALID_ARGS);
+							QGW_INVALID_ARGS);
 	}
 	c->status = napi_typeof(env, argv[1], &type);
 	REJECT_RETURN;
 	c->status = napi_is_array(env, argv[1], &isArray);
 	REJECT_RETURN;
-	if (isArray || type != napi_object) {
+	if (isArray || type != napi_object)
+	{
 		REJECT_ERROR_RETURN("Argument must be an options object with a foramt number.",
-			QGW_INVALID_ARGS);
+							QGW_INVALID_ARGS);
 	}
 
 	options = argv[1];
-  c->status = napi_get_named_property(env, options, "formatNumber", &prop);
-  REJECT_RETURN;
-  c->status = napi_get_value_int32(env, prop, (int32_t*) &c->formatNumber);
-  REJECT_RETURN;
+	c->status = napi_get_named_property(env, options, "formatNumber", &prop);
+	REJECT_RETURN;
+	c->status = napi_get_value_int32(env, prop, (int32_t *)&c->formatNumber);
+	REJECT_RETURN;
 
 	c->status = napi_create_string_utf8(env, "GetFormatInfo", NAPI_AUTO_LENGTH, &resourceName);
 	REJECT_RETURN;
 	c->status = napi_create_async_work(env, nullptr, resourceName, getFormatInfoExecute,
-		getFormatInfoComplete, c, &c->_request);
+									   getFormatInfoComplete, c, &c->_request);
 	REJECT_RETURN;
 	c->status = napi_queue_async_work(env, c->_request);
 	REJECT_RETURN;

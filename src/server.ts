@@ -33,6 +33,7 @@ const queue = new PQueue({
 	timeout: 10000,
 	throwOnTimeout: true
 })
+import { performance } from 'perf_hooks'
 
 let debug = false
 export function setDebug(d: boolean) {
@@ -41,6 +42,7 @@ export function setDebug(d: boolean) {
 
 setDebug(process.env.DEBUG === '1')
 
+let TIMEOUT_TIME = 3000 // 3 seconds
 function debugLog (...args: any[]) {
 	if (debug) console.log(...args)
 }
@@ -91,6 +93,24 @@ export const app = new Koa()
 const router = new Router()
 const instanceId = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(16)
 let currentStatus: ExternalStatus = 'OK'
+
+app.use(async (ctx, next) => {
+	const start = performance.now()
+	await Promise.race([
+		next(),
+		new Promise<void>((resolve) => {
+			setTimeout(() => {
+				ctx.status = 524 // "A Timeout Occurred"
+				ctx.body = {
+					status: 524,
+					message: `Quantel Gateway internal timeout after ${Math.floor(performance.now() - start)} ms.`
+				}
+				resolve()
+			}, TIMEOUT_TIME)
+			// Note: Quantel gw client will timeout in 5s
+		})
+	])
+})
 
 app.use(bodyParser({
 	onerror: (err, ctx) => {
@@ -168,6 +188,15 @@ router.post('/kill/me/if/you/are/sure', async (ctx) => {
 router.post('/debug/:debug', async (ctx) => {
 	setDebug(ctx.params.debug === '1')
 	ctx.body = { status: `Debug logging set to ${debug}` }
+})
+router.post('/timeout/:timeoutTime', async (ctx) => {
+	const newTimeoutTime = parseInt(ctx.params.timeoutTime, 10)
+	if (newTimeoutTime >= 0 && !Number.isNaN(newTimeoutTime)) {
+		TIMEOUT_TIME = newTimeoutTime
+		ctx.body = { status: `Timeout time set to ${debug}` }
+	} else {
+		ctx.body = { status: `Bad argument, /timeout/:timeoutTime timeoutTime must be a number!` }
+	}
 })
 
 router.get('/:zoneID.json', async (ctx) => {
@@ -276,7 +305,7 @@ router.post('/default/copy', async (ctx) => {
 	let clone: Quantel.CloneInfo = {} as Quantel.CloneInfo
 	try {
 		if (ctx.body && ctx.status === 400) return
-		clone = ctx.request.body as unknown as Quantel.CloneInfo
+		clone = ctx.request.body as Quantel.CloneInfo
 		if (clone.zoneID && (isNaN(+clone.zoneID) || +clone.zoneID < 0)) {
 			ctx.status = 400
 			ctx.body = {
@@ -695,7 +724,7 @@ router.post('/default/server/:serverID/port/:portID/fragments/', async (ctx) => 
 		if (ctx.body && ctx.status === 400) return
 		// Note: @types/koa-bodyparser has tried to included stricter typing .... but has forgotten arrays
 		//       See https://github.com/DefinitelyTyped/DefinitelyTyped/pull/53715 and related
-		let fragments: Quantel.ServerFragmentTypes[] = ctx.request.body as unknown as Quantel.ServerFragmentTypes[]
+		let fragments: Quantel.ServerFragmentTypes[] = ctx.request.body as Quantel.ServerFragmentTypes[]
 		if (!Array.isArray(fragments) || fragments.length === 0 || ctx.request.type !== 'application/json') {
 			ctx.status = 400
 			ctx.body = {
