@@ -36,7 +36,7 @@ const queue = new PQueue({
 import { performance } from 'perf_hooks'
 
 let debug = false
-export function setDebug(d: boolean) {
+export function setDebug (d: boolean) {
 	debug = d
 }
 
