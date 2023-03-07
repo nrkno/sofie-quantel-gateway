@@ -125,7 +125,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            ${{ secrets.DOCKERHUB_IMAGE_PREFIX }}
+            ${{ secrets.DOCKERHUB_IMAGE }}
           tags: |
             type=schedule
             type=ref,event=branch
