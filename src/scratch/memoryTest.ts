@@ -1,4 +1,4 @@
-import * as request from 'request-promise-native'
+import request from 'request-promise-native'
 
 const timer = (t: number) => new Promise((resolve, _reject) => {
 	setTimeout(resolve, t)

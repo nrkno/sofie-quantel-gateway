@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.7.0-0](https://github.com/nrkno/sofie-quantel-gateway/compare/1.6.0-0...1.7.0-0) (2023-03-07)
+
+
+### Bug Fixes
+
+* run the port create/release function in a queue, to avoid race conditions ([fa87183](https://github.com/nrkno/sofie-quantel-gateway/commit/fa87183cff934e4b97145f8df9d8141f3f639a22))
+
+## [1.6.0-release36.0](https://github.com/nrkno/sofie-quantel-gateway/compare/1.5.0-release35.3...1.6.0-release36.0) (2021-07-12)
+
 ## [1.6.0-0](https://github.com/nrkno/sofie-quantel-gateway/compare/1.5.1...1.6.0-0) (2023-01-11)
 
 
@@ -19,6 +28,8 @@ All notable changes to this project will be documented in this file. See [standa
 ### [1.5.1](https://github.com/nrkno/tv-automation-quantel-gateway/compare/1.5.0...1.5.1) (2021-07-13)
 
 ## [1.5.0](https://github.com/nrkno/tv-automation-quantel-gateway/compare/1.5.0-release35.3...1.5.0) (2021-07-13)
+
+## [1.6.0-release36.0](https://github.com/nrkno/tv-automation-quantel-gateway/compare/1.5.0-release35.3...1.6.0-release36.0) (2021-07-12)
 
 ## [1.5.0-release35.3](https://github.com/nrkno/tv-automation-quantel-gateway/compare/1.5.0-release35.2...1.5.0-release35.3) (2021-06-10)
 

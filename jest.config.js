@@ -32,5 +32,6 @@ module.exports = {
 		}
 	},
 	coverageDirectory: "./coverage/",
-	collectCoverage: true
+	collectCoverage: true,
+	setupFilesAfterEnv: ['<rootDir>/src/__tests__/globalSetup.ts']
 }

@@ -19,16 +19,29 @@
 	 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-import * as Koa from 'koa'
-import * as Router from 'koa-router'
-import * as bodyParser from 'koa-bodyparser'
+import Koa from 'koa'
+import Router from 'koa-router'
+import bodyParser from 'koa-bodyparser'
 import { Quantel } from '.'
 import { StatusResponse, ExternalStatus } from './systemStatus'
-import * as yargs from 'yargs'
+import yargs from 'yargs'
 import { Server, get } from 'http'
+import PQueue from 'p-queue'
+
+const queue = new PQueue({
+	concurrency: 1,
+	timeout: 10000,
+	throwOnTimeout: true
+})
 import { performance } from 'perf_hooks'
 
 let debug = false
+export function setDebug (d: boolean) {
+	debug = d
+}
+
+setDebug(process.env.DEBUG === '1')
+
 let TIMEOUT_TIME = 3000 // 3 seconds
 function debugLog (...args: any[]) {
 	if (debug) console.log(...args)
@@ -173,7 +186,7 @@ router.post('/kill/me/if/you/are/sure', async (ctx) => {
 	setTimeout(shutdown, 5000)
 })
 router.post('/debug/:debug', async (ctx) => {
-	debug = ctx.params.debug === '1'
+	setDebug(ctx.params.debug === '1')
 	ctx.body = { status: `Debug logging set to ${debug}` }
 })
 router.post('/timeout/:timeoutTime', async (ctx) => {
@@ -413,40 +426,50 @@ router.get('/default/server/:serverID/port/', async (ctx) => {
 })
 
 router.put('/default/server/:serverID/port/:portID/channel/:channelID', async (ctx) => {
-	ctx.body = await Quantel.createPlayPort({
-		serverID: ctx.params.serverID,
-		portName: ctx.params.portID,
-		channelNo: +ctx.params.channelID
-	})
+	await queue.add(async () => {
+		ctx.body = await Quantel.createPlayPort({
+			serverID: ctx.params.serverID,
+			portName: ctx.params.portID,
+			channelNo: +ctx.params.channelID
+		})
+	}, { priority: 0 })
 })
 
 router.get('/default/server/:serverID/port/:portID', async (ctx) => {
-	ctx.body = await Quantel.getPlayPortStatus({
-		serverID: ctx.params.serverID,
-		portName: ctx.params.portID
-	})
+	await queue.add(async () => {
+		ctx.body = await Quantel.getPlayPortStatus({
+			serverID: ctx.params.serverID,
+			portName: ctx.params.portID
+		})
+	}, { priority: 0 })
 })
 
 router.post('/default/server/:serverID/port/:portID/reset', async (ctx) => {
-	ctx.body = await Quantel.releasePort({
-		serverID: ctx.params.serverID,
-		portName: ctx.params.portID,
-		resetOnly: true
-	})
+	await queue.add(async () => {
+		ctx.body = await Quantel.releasePort({
+			serverID: ctx.params.serverID,
+			portName: ctx.params.portID,
+			resetOnly: true
+		})
+	}, { priority: 1 })
 })
 
 router.get('/default/server/:serverID/port/:portID/properties', async (ctx) => {
-	ctx.body = await Quantel.getPortProperties({
-		serverID: ctx.params.serverID,
-		portName: ctx.params.portID
-	})
+	await queue.add(async () => {
+		ctx.body = await Quantel.getPortProperties({
+			serverID: ctx.params.serverID,
+			portName: ctx.params.portID
+		})
+	}, { priority: 0 })
 })
 
 router.delete('/default/server/:serverID/port/:portID', async (ctx) => {
-	ctx.body = await Quantel.releasePort({
-		serverID: ctx.params.serverID,
-		portName: ctx.params.portID
-	})
+	await queue.add(async () => {
+		ctx.body = await Quantel.releasePort({
+			serverID: ctx.params.serverID,
+			portName: ctx.params.portID
+		})
+	}, { priority: 0 })
 })
 
 router.get('/default/clip', async (ctx) => {
@@ -944,7 +967,7 @@ function watchDog (interval: number, count: number = 0) {
 				}
 			} else {
 				res.resume()
-				infoLog('Watchdog test successful.')
+				debugLog('Watchdog test successful.')
 				watchDog(interval, 0)
 			}
 		})
