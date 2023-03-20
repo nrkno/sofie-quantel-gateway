@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.7.0](https://github.com/nrkno/sofie-quantel-gateway/compare/1.7.0-0...1.7.0) (2023-03-20)
+
 ## [1.7.0-0](https://github.com/nrkno/sofie-quantel-gateway/compare/1.6.0-0...1.7.0-0) (2023-03-07)
 
 
