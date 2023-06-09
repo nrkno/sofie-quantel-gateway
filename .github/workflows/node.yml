@@ -79,7 +79,7 @@ jobs:
         id: dockerhub
         run: |
           # check if a release branch, or master, or a tag
-          if [[ "${{ github.ref }}" =~ ^refs/heads/release([0-9]+)$ || "${{ github.ref }}" == "refs/heads/master" || "${{ github.ref }}" == "refs/tags/*" ]]
+          if [[ "${{ github.ref }}" =~ ^refs/heads/release([0-9]+)$ || "${{ github.ref }}" == "refs/heads/master" || "${{ github.ref }}" == refs/tags/* ]]
           then
             DOCKERHUB_PUBLISH="1"
           else
@@ -162,13 +162,13 @@ jobs:
           labels: ${{ steps.ghcr-tag.outputs.labels }}
           tags: "${{ steps.ghcr-tag.outputs.tags }}"
 
-      - name: Build and push to DockerHub
-        if: steps.check-build-and-push.outputs.enable == 'true' && steps.dockerhub.outputs.dockerhub-publish == '1'
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: Dockerfile
-          push: true
-          provenance: false
-          labels: ${{ steps.dockerhub-tag.outputs.labels }}
-          tags: "${{ steps.dockerhub-tag.outputs.tags }}"
+#      - name: Build and push to DockerHub
+#        if: steps.check-build-and-push.outputs.enable == 'true' && steps.dockerhub.outputs.dockerhub-publish == '1'
+#        uses: docker/build-push-action@v4
+#        with:
+#          context: .
+#          file: Dockerfile
+#          push: true
+#          provenance: false
+#          labels: ${{ steps.dockerhub-tag.outputs.labels }}
+#          tags: "${{ steps.dockerhub-tag.outputs.tags }}"
