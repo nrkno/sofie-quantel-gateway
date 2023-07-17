@@ -8,7 +8,7 @@
     "info": "npm-scripts-info",
     "installclean": "yarn unlink:all & yarn cleancache && yarn --check-files",
     "buildclean": "yarn installclean && yarn build",
-    "build": "rimraf dist && node-gyp build && yarn build:main",
+    "build": "rimraf dist && node-gyp configure && node-gyp build && yarn build:main",
     "buildtest": "yarn build && yarn unit",
     "build:main": "tsc -p tsconfig.json",
     "lint": "tslint --project tsconfig.jest.json --config tslint.json",
