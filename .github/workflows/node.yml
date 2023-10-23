@@ -15,7 +15,7 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Omniorb 4
         run: sudo apt-get install libomniorb4-dev
@@ -41,7 +41,7 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Use Node.js 18.x
         uses: actions/setup-node@v3
@@ -89,7 +89,7 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Determine if images should be published to DockerHub
         id: dockerhub
