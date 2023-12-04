@@ -90,7 +90,7 @@ Import into an external project with:
     import { Quantel } from 'tv-automation-quantel-gateway'
     const { Quantel } = require('tv-automation-quantel-gateway')
 
-See the [walkthrough for how to do playback](./doc/plyout_walkthrough.md) with this module as a Node.js API.
+See the [walkthrough for how to do playback](./doc/playout_walkthrough.md) with this module as a Node.js API.
 
 ## HTTP API
 
