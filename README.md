@@ -44,7 +44,7 @@ Build the typescript interface module:
 
     yarn build
 
-This package has automated tests that run with [jest](). Test with:
+This package has automated tests that run with _jest_. Test with:
 
     yarn test
 
