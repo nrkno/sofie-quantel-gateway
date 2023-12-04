@@ -10,7 +10,7 @@ This is the _Quantel Gateway_ library of the [**Sofie** TV Automation System](ht
 ---
 
 ## Supported Devices
-* [Grass Valley sQ series media servers](https://www.grassvalley.com/products/sq_1000_servers/) via ISA System.
+* Grass Valley _sQ Series_ media servers via ISA System.
 
 ## Installation
 
