@@ -6,6 +6,7 @@ Before contributing to this specific repository, please read the [Contribution G
 ## Branches
 This repository uses the following branches:
 
-* **_master_** is our main branch. We consider it stable and it is used in production.
+* The **_master_** is our main branch. We consider it stable and it is used in production.
+* The **_develop_** branch is our unstable branch, it is used for staging, testing and development.
 
-We encourage you to base your contributions on the latest **_master_** branch of this repository. The [_Sofie Releases_](https://nrkno.github.io/sofie-core/releases) page collects the status and timeline of the _Sofie_ releases.
+We encourage you to base your contributions on the latest **_master_** branch of this repository (alternatively the **_develop_** branch).
