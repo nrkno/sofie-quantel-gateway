@@ -1,5 +1,5 @@
 # Sofie Quantel Gateway
-This is the _Quantel Gateway_ library of the [**Sofie** TV Automation System](https://github.com/nrkno/Sofie-TV-automation/). This library uses native bindings to bridge the Quantel ISA System CORBA API and a Sofie-specific HTTP REST API, allowing discovery of clips and playback control of Quantel servers.
+This is the _Quantel Gateway_ application of the [**Sofie** TV Automation System](https://github.com/nrkno/Sofie-TV-automation/). This application uses native bindings to bridge the Quantel ISA System CORBA API and a Sofie-specific HTTP REST API, allowing discovery of clips and playback control of Quantel servers.
 
 ## General Sofie System Information
 * [_Sofie_ Documentation](https://nrkno.github.io/sofie-core/)
