@@ -1,11 +1,11 @@
-## Playout walkthrough - Node API
+# Playout Walkthrough – Node API
 
 Follow the steps in this document to run a Quantel playout using the Node.js API directly, rather than via the HTTP API. This document assumes that the Quantel gateway has been imported as module `Quantel`, e.g.:
 
       const { Quantel } = require('.')
 			import { Quantel } from 'tv-automation-quantel-gateway'
 
-### Server Connection
+## Server Connection
 
 If the ISA is running on the localhost on the default port, each of the calls will establish connection automatically. Otherwise, it is necessary to estabinsh the ISA IOR reference with a call to:
 
@@ -22,15 +22,15 @@ Quantel.testConnection().then(console.log)
 // 'PONG!' on success
 ```
 
-### Playout walkthrough
+## Playout Walkthrough
 
 The following example assumes you are using the Node.js REPL. As all methods return promises, in a project it is recommended that `async`/`await` are used.
 
-#### Record a clip
+### Record a Clip
 
 This following steps assume that you have already stored clips onto servers. With the dummy servers, the _Controller UI_ can be used to do this. Select the _System_ tab, click on a server (e.g. _1100_), double click on a channel (e.g. _S1100C2_), put the port into record mode, select number of frames to record (default _1000_), click _Initial Frames_ then click _Start_. Once recording is complete, click _Save_. Once finished, click _Release_ to release the port.
 
-#### Create a playout port
+### Create a Playout Port
 
 An single ISA software system controls a _zone_. To find out details of the current zone:
 
@@ -92,7 +92,7 @@ assigned: true }
 
 Note that the `assigned` flag is `true` only if the port is newly created, otherwise it is set to `false`. Also note that it is very easy to steal someone else's port!
 
-#### Find fragments
+### Find Fragments
 
 To be able to play a clip, the fragments that make up that clip must be loaded onto a port. The details of what fragments are required and where they are stored are available in the database attached to ISA. To query the fragments for a clip with ID `2`:
 
@@ -129,7 +129,7 @@ fragments:
 	 rushFrame: 0 } ] }
 ```
 
-#### Load fragments onto port
+### Load Fragments onto Port
 
 To load fragments onto a port, the server with the port must also have the disk storage `pool` where the fragments are stored attached. Otherwise a clone will need to be initiated (to follow). Loading the clips at offset 0 in the timeline of the port:
 
@@ -137,7 +137,7 @@ To load fragments onto a port, the server with the port must also have the disk 
 Quantel.loadPlayPort({ serverID: 1100, portName: 'nrk8', offset: 0, fragments: frags })
 ```
 
-#### Check port status
+### Check Port Status
 
 At any time after the creation of a port and before its release, it is possible to check its status:
 
@@ -159,7 +159,7 @@ framesUnused: 0 }
 
 The status message includes the current position of the play head (`offset`) measured in frames and the speed that the media is play at (float value, `0.5` for half speed, `-1.0` for reverse etc..). (To follow: setting speed?)
 
-#### Control playout
+#### Control Playout
 
 To start and stop playback, use triggers. For example:
 
@@ -185,7 +185,7 @@ Note that if the port is playing when asked to jump, it will jump and stop.
 
 To follow: get `setJump` to work.
 
-#### Release the port
+### Release the Port
 
 Once playout is finished, release the port and its resources with:
 

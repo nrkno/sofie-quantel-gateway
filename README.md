@@ -1,15 +1,18 @@
+# Sofie Quantel Gateway
+This is the _Quantel Gateway_ application of the [**Sofie** TV Automation System](https://github.com/nrkno/Sofie-TV-automation/). This application uses native bindings to bridge the Quantel ISA System CORBA API and a Sofie-specific HTTP REST API, allowing discovery of clips and playback control of Quantel servers.
 
-# Sofie: The Modern TV News Studio Automation System (Quantel gateway)
+## General Sofie System Information
+* [_Sofie_ Documentation](https://nrkno.github.io/sofie-core/)
+* [_Sofie_ Releases](https://nrkno.github.io/sofie-core/releases)
+* [Contribution Guidelines](CONTRIBUTING.md)
+* [License](LICENSE)
 
-This is a part of the [**Sofie** TV News Studio Automation System](https://github.com/nrkno/Sofie-TV-automation/).
+---
 
-## Abstract
-This library uses native bindings to bridge the Quantel ISA System CORBA API and a Sofie-specific HTTP REST API, allowing discovery of clips and playback control of Quantel servers.
+## Supported Devices
+* Grass Valley _sQ Series_ media servers via ISA System.
 
-## Supported devices
-* [Grass Valley sQ series media servers](https://www.grassvalley.com/products/sq_1000_servers/) via ISA System.
-
-## Install instructions
+## Installation
 
 This software can be built for Windows and Linux platforms:
 
@@ -17,7 +20,7 @@ This software can be built for Windows and Linux platforms:
 
 * On Windows, the required DLL and LIB files are included with this package. The included OmniORB was built with Visual Studio 2017 for x64 architecture. The native extension runs with the 64-bit version of Node.js.
 
-This addon has not been built for or tested on MacOS.
+This addon has not been built for or tested on macOS.
 
 ### Prerequisites
 
@@ -41,7 +44,7 @@ Build the typescript interface module:
 
     yarn build
 
-This package has automated tests that run with [jest](). Test with:
+This package has automated tests that run with _jest_. Test with:
 
     yarn test
 
@@ -70,13 +73,13 @@ For example:
 
     yarn server --port 9876 --isa qisa01:2099 --dummy true --watchdog 30
 
-### Run with docker
+### Run with Docker
 
 Available on the [Sofie TV docker hub](https://hub.docker.com/u/sofietv):
 
     docker pull sofietv/tv-automation-quantel-gateway:master
 
-### Experimenting and importing
+### Experimenting and Importing
 
 Experiment from the REPL with:
 
@@ -87,7 +90,7 @@ Import into an external project with:
     import { Quantel } from 'tv-automation-quantel-gateway'
     const { Quantel } = require('tv-automation-quantel-gateway')
 
-See the [walkthrough for how to do playback](./doc/plyout_walkthrough.md) with this module as a Node.js API.
+See the [walkthrough for how to do playback](./doc/playout_walkthrough.md) with this module as a Node.js API.
 
 ## HTTP API
 
@@ -105,7 +108,7 @@ ISA systems are normally deployed in _master_ and _slave_ pairs. The `:address` 
 
 A successful request produces a JSON response with the discovered IOR (`isaIOR`) and ISA endpoint address (`href`). Subsequently, the currently configured connection can be queried with a GET request to `/connect`.
 
-### Topology of a Quantel system
+### Topology of a Quantel System
 
 In general, paths are all of the form ...
 
@@ -169,7 +172,7 @@ A GET request to the zones name (`/:zoneID/server/`) retrieves details of all th
   } ]
 ```
 
-### Create a port
+### Creating a Port
 
 To assign a channel to a port, choose a suitable `:portID` and PUT an empty document to ...
 
@@ -226,7 +229,7 @@ Add `/properties` to the port to get name/value pair configuration properties fo
 
 		/:zoneID/server/:serverID/port/:portID/properties
 
-### Clip references
+### Clip References
 
 _Fragments_ of _clips_ are loaded onto _ports_. This means that an automation system is responsible of associating a specific video clip to appear on an output _channel_ (SDI ports). Clips are referenced by their integer identifier (`:clipID`) ...
 
@@ -306,7 +309,7 @@ This produces (a few fields omitted):
 }
 ```
 
-### Loading clips
+### Loading Clips
 
 Clips consist of _fragments_. To play a _clip_, or a sub-clip of a clip, it is necessary to load fragments onto a port. To query all fragments for a clip:
 
@@ -352,7 +355,7 @@ To load the fragments onto a port, POST the fragments to the port reference, add
 
 Information about the status of the port is returned.
 
-### Port fragment operations - query and wipe
+### Port Fragment Operations — Query and Wipe
 
 The fragments that are loaded onto a port can be queried with a GET request to:
 
@@ -370,7 +373,7 @@ The `:start` parameter is the first frame in the port's timeline to wipe from an
 
 To completely clear a port of all fragments, see port reset.
 
-### Cloning clips
+### Cloning Clips
 
 The Quantel systems have a mechanism to clone clips between servers, either within in the same zone or between servers in different zones (_inter-zone cloning_). Only the source essence material that is missing from a particular destination disk pool is copied. Where the material has already been duplicated, this means that a request to clone can be almost instantaneous. The Quantel gateway allows clones to be initiated and the subsequent copy progress of that or any other clone to be monitored.
 
@@ -424,7 +427,7 @@ A clip can be deleted by sending a DELETE request to its path:
 
 Note that the clip metadata will persist in the database but the essence will be removed, setting the `Frames` field to `0`.
 
-### Controlling the port
+### Controlling the Port
 
 To control the PORT, POST trigger messages:
 
@@ -432,7 +435,7 @@ To control the PORT, POST trigger messages:
 
 The `:trigger` is one of `START`, `STOP` or `JUMP`. Note that `STOP` is equivalent to CasparCG _pause_. To _resume_, use `START`. The optional `:offset` is a frame at which to trigger the action, for example `.../trigger/STOP?offset=345` signals that the playing of the clip should stop at frame 345 on the ports timeline.
 
-#### Hard jump
+#### Hard Jump
 
 To force a hard jump to specific point, ideally when stopped and not on air, POST to:
 
@@ -440,7 +443,7 @@ To force a hard jump to specific point, ideally when stopped and not on air, POS
 
 This will cause an immediate jump and - if the video is playing - it will pause on the jumped-to frame. If the video at the jump-to point is not currently loaded on the port, a short period of black may be played out.
 
-#### Triggered jump
+#### Triggered Jump
 
 For smoother jumping, each port can have a controlled jump point set and can cause a triggered jump. As long as the jump point is set with a second or more to spare, the material to jump to will be loaded onto the port. This enables smooth playing across the jump, e.g. to achieve a smooth loop. To set the triggered jump point:
 
@@ -461,7 +464,7 @@ All error responses are in JSON format and includes properties for a numerical `
 }
 ```
 
-### Shutting down
+### Shutting Down
 
 To request that the application shuts down, POST to
 
@@ -469,7 +472,7 @@ To request that the application shuts down, POST to
 
 This will wait 5 seconds and then initiate web server and Quantel connection shutdown. If the application is running in a docker container with automatic restart enabled, the server will restart.
 
-### Debug logging
+### Debug Logging
 
 The application can be told to activate debug-logging at runtime by POST:ing to
 
@@ -486,4 +489,7 @@ Unless otherwise called out in the header of a file, the files of this project a
 
 Please also note the specific terms of the [`Quentin.idl`](./include/quantel/Quentin.idl) file.
 
-Copyright (c) 2019 Norsk rikskringkasting AS (NRK)
+---
+
+_The NRK logo is a registered trademark of Norsk rikskringkasting AS. The license does not grant any right to use, in any way, any trademarks, service marks or logos of Norsk rikskringkasting AS._
+
