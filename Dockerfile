@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:experimental
 # BUILD IMAGE
-FROM node:18
+FROM node:22
 
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -14,7 +14,7 @@ RUN yarn build
 RUN yarn install --check-files --frozen-lockfile --production --force # purge dev-dependencies
 
 # DEPLOY IMAGE
-FROM node:18-slim
+FROM node:22-slim
 
 RUN apt-get update && apt-get install -y \
     libomniorb4-2 curl \
