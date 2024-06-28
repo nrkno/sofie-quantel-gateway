@@ -16,6 +16,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Install Omniorb 4
         run: sudo apt-get install libomniorb4-dev
@@ -42,6 +44,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Use Node.js 18.x
         uses: actions/setup-node@v3
@@ -90,6 +94,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Determine if images should be published to DockerHub
         id: dockerhub
