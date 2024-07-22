@@ -71,7 +71,7 @@ jobs:
           CI: true
 
   trivy-scanning:
-    uses: nrkno/github-workflow-docker-build-push/.github/workflows/workflow.yaml@v4.0.0
+    uses: nrkno/github-workflow-docker-build-push/.github/workflows/workflow.yaml@v4.1.0
     with:
       runs-on: "['ubuntu-latest']"
       registry-url: ghcr.io
