@@ -941,9 +941,27 @@ app.use(async (ctx, next) => {
 
 app.use(router.routes())
 
+let watchDogCalls = 0
+let watchDogReceives = 0
+if (cliOpts.watchdog > 0) {
+	// Just a check to watch the watch dog:
+	setInterval(() => {
+		if (watchDogCalls < 10 || watchDogReceives < 10) {
+			// that's weird, the watchdog should have been called by now
+			errorLog(`Watchdog calls: ${watchDogCalls}, receives: ${watchDogReceives}, that's no good, shutting down!`)
+			shutdown()
+		} else {
+			infoLog(`Watchdog calls: ${watchDogCalls}, receives: ${watchDogReceives}`)
+			watchDogCalls = 0
+			watchDogReceives = 0
+		}
+	}, 3600*1000) // called every hour
+}
 function watchDog (interval: number, count: number = 0) {
 	setTimeout(() => {
+		watchDogCalls++
 		let req = get(`http://localhost:${cliOpts.port}/`, res => {
+			watchDogReceives++
 			res.on('error', err => {
 				if (count === 2) {
 					errorLog(`Watchdog error on response: ${err.message}. Shutting down to trigger auto-restart in 5s.`)
