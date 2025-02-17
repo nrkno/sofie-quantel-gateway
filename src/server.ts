@@ -182,8 +182,8 @@ router.get('/health', async (ctx) => {
 })
 
 router.post('/kill/me/if/you/are/sure', async (ctx) => {
-	ctx.body = { status: 'Application shutting down in 5s' }
-	setTimeout(shutdown, 5000)
+	ctx.body = { status: 'Application shutting down in 1s!' }
+	setTimeout(shutdown, 1000)
 })
 router.post('/debug/:debug', async (ctx) => {
 	setDebug(ctx.params.debug === '1')
@@ -941,9 +941,27 @@ app.use(async (ctx, next) => {
 
 app.use(router.routes())
 
+let watchDogCalls = 0
+let watchDogReceives = 0
+if (cliOpts.watchdog > 0) {
+	// Just a check to watch the watch dog:
+	setInterval(() => {
+		if (watchDogCalls < 10 || watchDogReceives < 10) {
+			// that's weird, the watchdog should have been called by now
+			errorLog(`Watchdog calls: ${watchDogCalls}, receives: ${watchDogReceives}, that's no good, shutting down!`)
+			shutdown()
+		} else {
+			infoLog(`Watchdog calls: ${watchDogCalls}, receives: ${watchDogReceives}`)
+			watchDogCalls = 0
+			watchDogReceives = 0
+		}
+	}, 3600*1000) // called every hour
+}
 function watchDog (interval: number, count: number = 0) {
 	setTimeout(() => {
+		watchDogCalls++
 		let req = get(`http://localhost:${cliOpts.port}/`, res => {
+			watchDogReceives++
 			res.on('error', err => {
 				if (count === 2) {
 					errorLog(`Watchdog error on response: ${err.message}. Shutting down to trigger auto-restart in 5s.`)
@@ -1020,21 +1038,29 @@ if (require.main === module) {
 	})
 }
 
-async function shutdown () {
-	infoLog('Server shutdown starting.')
+function shutdown () {
+	infoLog('Server shutdown starting...')
+
 	try {
-		await new Promise<void>((resolve, reject) => {
-			server.close((err) => {
-				if (err) {
-					reject(err)
-				} else resolve()
-			})
+		// Try to close the server gracefully before shutting down:
+		server.close((err) => {
+			if (err) {
+				errorLog('Error closing server: ', err)
+				process.exit(42)
+			} else {
+				infoLog('Server shutdown completed.')
+				process.exit(0)
+			}
 		})
-		infoLog('Server shutdown completed.')
-		process.exit(0)
+		// Also add a timeout, in case the server has not closed within 3 seconds
+		const WAIT_KILL_DURATION = 3000
+		setTimeout(() => {
+			errorLog(`Timeout after ${WAIT_KILL_DURATION}ms when trying to close server. Forcing exit.`)
+			process.exit(43)
+		}, WAIT_KILL_DURATION);
 	} catch (err) {
-		errorLog('Error closing server: ', err)
-		process.exit(42)
+		errorLog('Unknown error during shutdown: ' + err)
+		process.exit(44)
 	}
 }
 
@@ -1045,4 +1071,11 @@ if (cliOpts.memory > 0) {
 	}, cliOpts.memory * 1000)
 }
 
-process.on('SIGINT', shutdown)
+process.on('SIGINT', () => {
+	infoLog('SIGINT received')
+	shutdown()
+})
+process.on('SIGTERM', () => {
+	infoLog('SIGTERM received')
+	shutdown()
+})
