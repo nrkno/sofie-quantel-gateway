@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.7.1-1](https://github.com/nrkno/sofie-quantel-gateway/compare/1.7.1-0...1.7.1-1) (2025-02-17)
+
+
+### Bug Fixes
+
+* add timeout on shutdown, to increase likelihood of being able to shut down ([c04c649](https://github.com/nrkno/sofie-quantel-gateway/commit/c04c64964df1c23809566432e4d0fdc93bbc05f0))
+
 ### [1.7.1-0](https://github.com/nrkno/sofie-quantel-gateway/compare/1.7.0...1.7.1-0) (2025-02-17)
 
 ## [1.7.0](https://github.com/nrkno/sofie-quantel-gateway/compare/1.7.0-0...1.7.0) (2023-03-20)
