@@ -25,6 +25,7 @@ This addon has not been built for or tested on macOS.
 ### Prerequisites
 
 * This addon has been developed with Node.js v8.1.15 LTS and makes use of the N-API which is not available in earlier versions than 8.
+* Use Node.js version 18. Later versions are not supported.
 * Install the `node-gyp` build tool globally with `npm install -g node-gyp`.
 * Ensure the build system has the [node-gyp prerequisites](https://github.com/nodejs/node-gyp#installation).
 * Either install the Quantel ISA dummy server installation or ensure you have access to an installed ISA and sQ servers.
