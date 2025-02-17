@@ -955,7 +955,7 @@ if (cliOpts.watchdog > 0) {
 			watchDogCalls = 0
 			watchDogReceives = 0
 		}
-	}, 3600*1000) // called every hour
+	}, 3600 * 1000) // called every hour
 }
 function watchDog (interval: number, count: number = 0) {
 	setTimeout(() => {
@@ -1057,7 +1057,7 @@ function shutdown () {
 		setTimeout(() => {
 			errorLog(`Timeout after ${WAIT_KILL_DURATION}ms when trying to close server. Forcing exit.`)
 			process.exit(43)
-		}, WAIT_KILL_DURATION);
+		}, WAIT_KILL_DURATION)
 	} catch (err) {
 		errorLog('Unknown error during shutdown: ' + err)
 		process.exit(44)
