@@ -11,7 +11,7 @@ on:
 jobs:
   build-and-test:
     name: Build and test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-jammy
     timeout-minutes: 15
 
     steps:
@@ -38,7 +38,7 @@ jobs:
 
   validate-prod-dependencies:
     name: Validate production dependencies
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-jammy
     continue-on-error: true
     timeout-minutes: 15
 
@@ -73,7 +73,7 @@ jobs:
   trivy-scanning:
     uses: nrkno/github-workflow-docker-build-push/.github/workflows/workflow.yaml@v4.1.1
     with:
-      runs-on: "['ubuntu-latest']"
+      runs-on: "['ubuntu-jammy']"
       registry-url: ghcr.io
       name: nrkno/sofie-quantel-gateway
       # Don't actually push any images, this is just for trivy scanning for now
@@ -88,7 +88,7 @@ jobs:
 
   docker-image-release:
     name: Make docker image release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-jammy
     needs: [build-and-test, validate-prod-dependencies]
     timeout-minutes: 30
 
