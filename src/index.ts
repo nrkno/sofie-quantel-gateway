@@ -20,6 +20,7 @@
 */
 
 import request from 'request-promise-native'
+import { errorLog } from './server'
 
 const quantel = require('../build/Release/quantel_gateway')
 
@@ -553,7 +554,13 @@ export namespace Quantel {
 	export async function getServers (): Promise<ServerInfo[]> {
 		try {
 			await getISAReference()
-			return await quantel.getServers(await isaIOR)
+			const resIsaIOR = await isaIOR
+			try {
+				return await quantel.getServers(resIsaIOR)
+			} catch (err) {
+				errorLog(`Thrown error in quantel.getServers(): ${err} (${typeof err === 'object' && err && err.stack}) Context: resIsaIOR="${resIsaIOR}"`)
+				throw err
+			}
 		} catch (err) {
 			if (
 				err.message.indexOf('TRANSIENT') >= 0 ||
