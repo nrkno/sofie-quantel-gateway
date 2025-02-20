@@ -43,13 +43,13 @@ export function setDebug (d: boolean) {
 setDebug(process.env.DEBUG === '1')
 
 let TIMEOUT_TIME = 3000 // 3 seconds
-function debugLog (...args: any[]) {
+export function debugLog (...args: any[]) {
 	if (debug) console.log(...args)
 }
-function infoLog (...args: any[]) {
+export function infoLog (...args: any[]) {
 	console.log(...args)
 }
-function errorLog (...args: any[]) {
+export function errorLog (...args: any[]) {
 	console.error(...args)
 }
 
